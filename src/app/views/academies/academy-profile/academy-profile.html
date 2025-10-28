@@ -36,12 +36,34 @@
     <p-card>
       <ng-template pTemplate="title">Overview</ng-template>
       <ng-template pTemplate="content">
-        <div *ngIf="academy as a" class="text-sm text-gray-700 space-y-2">
-          <div><span class="text-gray-500">Phone:</span> {{ a.phone || '-' }}</div>
-          <div><span class="text-gray-500">Address:</span> {{ a.address || '-' }}</div>
-          <div><span class="text-gray-500">Website:</span> {{ a.website || '-' }}</div>
-          <div><span class="text-gray-500">Created:</span> {{ a.createdAt | date:'medium' }}</div>
-        </div>
+        <form *ngIf="academy as a" class="text-sm text-gray-700 space-y-3" #overviewForm="ngForm" (ngSubmit)="saveOverview(overviewForm)">
+          <div>
+            <label class="text-xs text-gray-600">Phone</label>
+            <input name="phone" [(ngModel)]="a.phone" class="w-full p-inputtext" />
+          </div>
+          <div>
+            <label class="text-xs text-gray-600">Address</label>
+            <input name="address" [(ngModel)]="a.address" class="w-full p-inputtext" />
+          </div>
+          <div>
+            <label class="text-xs text-gray-600">Website</label>
+            <input name="website" [(ngModel)]="a.website" class="w-full p-inputtext" />
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-600">Monthly Fee</label>
+              <input type="number" step="0.01" name="monthlyFee" [(ngModel)]="a.monthlyFee" class="w-full p-inputtext" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-600">Individual Class Fee</label>
+              <input type="number" step="0.01" name="individualClassFee" [(ngModel)]="a.individualClassFee" class="w-full p-inputtext" />
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button class="p-button p-button-primary p-button-sm" type="submit"><i class="pi pi-check mr-2"></i>Save</button>
+          </div>
+          <div class="text-xs text-gray-400">Created: {{ a.createdAt | date:'medium' }}</div>
+        </form>
       </ng-template>
     </p-card>
 
@@ -72,6 +94,8 @@
           <div><span class="text-gray-500">Active Students:</span> {{ stats?.activeStudents ?? '-' }}</div>
           <div><span class="text-gray-500">Active Teachers:</span> {{ stats?.activeTeachers ?? '-' }}</div>
           <div><span class="text-gray-500">Active Classes:</span> {{ stats?.activeClasses ?? '-' }}</div>
+          <div><span class="text-gray-500">Monthly Fee:</span> {{ academy?.monthlyFee ?? '-' }}</div>
+          <div><span class="text-gray-500">Class Fee:</span> {{ academy?.individualClassFee ?? '-' }}</div>
         </div>
       </ng-template>
     </p-card>

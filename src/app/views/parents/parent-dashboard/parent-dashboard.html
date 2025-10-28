@@ -1,0 +1,20 @@
+<div class="space-y-6">
+  <p-card>
+    <ng-template pTemplate="title">Parent Dashboard</ng-template>
+    <ng-template pTemplate="content">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a routerLink="/parent/children" class="p-button w-full justify-center">
+          <i class="pi pi-users mr-2"></i> Manage Children
+        </a>
+        <a routerLink="/parent/enroll" class="p-button p-button-secondary w-full justify-center">
+          <i class="pi pi-book mr-2"></i> Enroll in Classes/Academy
+        </a>
+        <a routerLink="/parent/performance" class="p-button p-button-help w-full justify-center">
+          <i class="pi pi-chart-line mr-2"></i> View Performance
+        </a>
+      </div>
+    </ng-template>
+  </p-card>
+</div>
+
+

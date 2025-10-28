@@ -2,7 +2,8 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UserService } from '../../../shared/services/user.service';
-import { User, UserRole, EducationItem, EducationType, UpsertEducationDto, UpdateUserDetailsDto } from '../../../shared/models';
+import { AcademyService } from '../../../shared/services/academy.service';
+import { User, UserRole, EducationItem, EducationType, UpsertEducationDto, UpdateUserDetailsDto, Academy } from '../../../shared/models';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -50,6 +51,8 @@ export class UserProfile implements OnInit {
   availability: any[] = [];
   availabilityDialogVisible = false;
   availabilityForm: FormGroup | null = null;
+  // Academy (for Academy Owner)
+  ownerAcademy: Academy | null = null;
   educationTypes: { label: string; value: EducationType }[] = [
     { label: 'School', value: 'school' },
     { label: 'College', value: 'college' },
@@ -65,6 +68,7 @@ export class UserProfile implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private userService: UserService,
+    private academyService: AcademyService,
     private authService: AuthService,
     private fb: FormBuilder,
   ) {}
@@ -87,7 +91,7 @@ export class UserProfile implements OnInit {
   private fetchById(id: string): void {
     this.isLoading.set(true);
     this.userService.getUserById(id).subscribe({
-      next: (u) => { this.user = u; this.isLoading.set(false); this.loadEducation(); this.loadAvailability(); },
+      next: (u) => { this.user = u; this.isLoading.set(false); this.loadEducation(); this.loadAvailability(); this.loadOwnerAcademy(); },
       error: () => { this.isLoading.set(false); }
     });
   }
@@ -96,6 +100,27 @@ export class UserProfile implements OnInit {
     if (!this.user) return;
     this.userService.getEducation(this.user.id).subscribe({
       next: (items) => { this.educations = items || []; },
+      error: () => {}
+    });
+  }
+
+  private loadOwnerAcademy(): void {
+    if (!this.user || this.user.role !== 'Academy Owner') return;
+    // Fetch first 50 academies and find by ownerId
+    this.academyService.getAcademies(1, 50).subscribe({
+      next: (res) => {
+        const list = res.data || [];
+        this.ownerAcademy = list.find(a => a.ownerId === this.user!.id) || null;
+      },
+      error: () => {}
+    });
+  }
+
+  saveOwnerAcademy(): void {
+    if (!this.ownerAcademy) return;
+    const { id, phone, address, website, description, name } = this.ownerAcademy;
+    this.academyService.updateAcademy(id, { phone, address, website, description, name }).subscribe({
+      next: (updated) => { this.ownerAcademy = { ...this.ownerAcademy!, ...updated }; },
       error: () => {}
     });
   }

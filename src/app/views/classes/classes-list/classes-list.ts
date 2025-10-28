@@ -6,10 +6,14 @@ import { ClassService } from '../../../shared/services/class.service';
 import { AcademyService } from '../../../shared/services/academy.service';
 import { Class, Academy, PaginatedApiResponse } from '../../../shared/models';
 import { ApiHelper } from '../../../utils/api.helper';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
+import { Select } from 'primeng/select';
 
 @Component({
   selector: 'app-classes-list',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, TableModule, ButtonModule, TagModule, Select],
   templateUrl: './classes-list.html',
   styleUrl: './classes-list.css'
 })
@@ -29,6 +33,12 @@ export class ClassesList implements OnInit {
   searchTerm = signal('');
   selectedAcademy = signal('');
   selectedStatus = signal('');
+  academyOptions = signal<{ label: string; value: string }[]>([]);
+  statusOptions = [
+    { label: 'All Status', value: '' },
+    { label: 'Active', value: 'active' },
+    { label: 'Inactive', value: 'inactive' },
+  ];
   
   // Table state
   sortField = signal('');
@@ -50,6 +60,10 @@ export class ClassesList implements OnInit {
       next: (response: PaginatedApiResponse<Academy>) => {
         if (response.data) {
           this.academies.set(response.data);
+          this.academyOptions.set([
+            { label: 'All Academies', value: '' },
+            ...response.data.map(a => ({ label: a.name, value: a.id }))
+          ]);
         }
       },
       error: (error) => {
@@ -101,6 +115,15 @@ export class ClassesList implements OnInit {
       this.sortField.set(field);
       this.sortDirection.set('asc');
     }
+    this.loadClasses();
+  }
+
+  onTableLazyLoad(event: any): void {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? this.pageSize();
+    const page = Math.floor(first / rows) + 1;
+    this.pageSize.set(rows);
+    this.currentPage.set(page);
     this.loadClasses();
   }
 

@@ -129,6 +129,40 @@
             </ng-template>
           </p-card>
         </div>
+
+        <!-- Academy Owner: manage own academy inline -->
+        <p-card *ngIf="user?.role === 'Academy Owner' && ownerAcademy as ac">
+          <ng-template pTemplate="title">
+            <div class="flex items-center justify-between">
+              <span>My Academy</span>
+              <button class="p-button p-button-sm p-button-text" (click)="saveOwnerAcademy()"><i class="pi pi-check mr-2"></i>Save</button>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="content">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-gray-600">Name</label>
+                <input [(ngModel)]="ac.name" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
+              </div>
+              <div>
+                <label class="text-xs text-gray-600">Phone</label>
+                <input [(ngModel)]="ac.phone" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="text-xs text-gray-600">Address</label>
+                <input [(ngModel)]="ac.address" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
+              </div>
+              <div>
+                <label class="text-xs text-gray-600">Website</label>
+                <input [(ngModel)]="ac.website" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="text-xs text-gray-600">Description</label>
+                <textarea rows="3" [(ngModel)]="ac.description" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"></textarea>
+              </div>
+            </div>
+          </ng-template>
+        </p-card>
       </div>
     </div>
 

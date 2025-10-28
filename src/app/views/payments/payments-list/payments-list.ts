@@ -6,10 +6,14 @@ import { PaymentService } from '../../../shared/services/payment.service';
 import { StudentService } from '../../../shared/services/student.service';
 import { Payment, Student, PaginatedApiResponse } from '../../../shared/models';
 import { ApiHelper } from '../../../utils/api.helper';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
+import { Select } from 'primeng/select';
 
 @Component({
   selector: 'app-payments-list',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, TableModule, ButtonModule, TagModule, Select],
   templateUrl: './payments-list.html',
   styleUrl: './payments-list.css'
 })
@@ -29,6 +33,18 @@ export class PaymentsList implements OnInit {
   searchTerm = signal('');
   selectedStatus = signal('');
   selectedType = signal('');
+  statusOptions = [
+    { label: 'All Status', value: '' },
+    { label: 'Completed', value: 'completed' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'Failed', value: 'failed' },
+  ];
+  typeOptions = [
+    { label: 'All Types', value: '' },
+    { label: 'Tuition', value: 'tuition' },
+    { label: 'Exam', value: 'exam' },
+    { label: 'Library', value: 'library' },
+  ];
   
   // Table state
   sortField = signal('');
@@ -101,6 +117,15 @@ export class PaymentsList implements OnInit {
       this.sortField.set(field);
       this.sortDirection.set('asc');
     }
+    this.loadPayments();
+  }
+
+  onTableLazyLoad(event: any): void {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? this.pageSize();
+    const page = Math.floor(first / rows) + 1;
+    this.pageSize.set(rows);
+    this.currentPage.set(page);
     this.loadPayments();
   }
 

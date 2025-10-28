@@ -14,7 +14,7 @@ export const studentRoutes: Routes = [
     path: 'new',
     component: StudentForm,
     canActivate: [RoleGuard],
-    data: { roles: [UserRole.ADMIN, UserRole.ACADEMY_OWNER, UserRole.TEACHER] } // Admin, academy owner, and teachers can add students
+    data: { roles: [UserRole.ADMIN, UserRole.ACADEMY_OWNER, UserRole.TEACHER, UserRole.PARENT] } // Include parent to allow creating a student and auto-link
   },
   {
     path: ':id',

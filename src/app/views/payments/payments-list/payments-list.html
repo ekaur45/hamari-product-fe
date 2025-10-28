@@ -8,10 +8,8 @@
           <p class="mt-1 text-sm text-gray-500">Manage payment records and transactions</p>
         </div>
         <div class="flex items-center space-x-3">
-          <a routerLink="/payments/new" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
+          <a routerLink="/payments/new" class="p-button p-button-primary">
+            <i class="pi pi-plus mr-2"></i>
             Add Payment
           </a>
         </div>
@@ -30,9 +28,7 @@
             <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
             <div class="mt-1 relative rounded-md shadow-sm">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
+                <i class="pi pi-search text-gray-400"></i>
               </div>
               <input type="text" id="search" [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" placeholder="Search payments..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             </div>
@@ -41,23 +37,27 @@
           <!-- Status Filter -->
           <div>
             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-            <select id="status" [(ngModel)]="selectedStatus" (ngModelChange)="onFilterChange()" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-              <option value="">All Status</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-            </select>
+            <p-select
+              id="status"
+              [(ngModel)]="selectedStatus"
+              (ngModelChange)="onFilterChange()"
+              [options]="statusOptions"
+              placeholder="All Status"
+              class="w-full">
+            </p-select>
           </div>
 
           <!-- Type Filter -->
           <div>
             <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
-            <select id="type" [(ngModel)]="selectedType" (ngModelChange)="onFilterChange()" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-              <option value="">All Types</option>
-              <option value="tuition">Tuition</option>
-              <option value="exam">Exam</option>
-              <option value="library">Library</option>
-            </select>
+            <p-select
+              id="type"
+              [(ngModel)]="selectedType"
+              (ngModelChange)="onFilterChange()"
+              [options]="typeOptions"
+              placeholder="All Types"
+              class="w-full">
+            </p-select>
           </div>
 
           <!-- Results Count -->
@@ -72,9 +72,7 @@
     <div *ngIf="errorMessage()" class="rounded-md bg-red-50 p-4 mb-6">
       <div class="flex">
         <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-          </svg>
+          <i class="pi pi-exclamation-triangle text-red-400"></i>
         </div>
         <div class="ml-3">
           <h3 class="text-sm font-medium text-red-800">{{ errorMessage() }}</h3>
@@ -90,69 +88,87 @@
       </div>
 
       <!-- Loading State -->
-      <div *ngIf="isLoading()" class="flex justify-center items-center py-8">
-        <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span class="ml-2 text-gray-600">Loading payments...</span>
+      <div *ngIf="isLoading()" class="px-4 py-5 sm:px-6">
+        <div class="flex justify-center items-center py-8">
+          <i class="pi pi-spin pi-spinner text-blue-600 text-2xl"></i>
+          <span class="ml-2 text-gray-600">Loading payments...</span>
+        </div>
       </div>
 
       <!-- Table -->
       <div *ngIf="!isLoading()" class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <p-table
+          [value]="payments()"
+          [lazy]="true"
+          (onLazyLoad)="onTableLazyLoad($event)"
+          [totalRecords]="totalItems()"
+          [rows]="pageSize()"
+          [loading]="isLoading()"
+          [paginator]="true"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} payments"
+
+          styleClass="p-datatable-sm">
+          
+          <ng-template pTemplate="header">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+              <th>Student</th>
+              <th pSortableColumn="amount">
+                Amount
+                <p-sortIcon field="amount"></p-sortIcon>
+              </th>
+              <th>Type</th>
+              <th pSortableColumn="status">
+                Status
+                <p-sortIcon field="status"></p-sortIcon>
+              </th>
+              <th>Payment Method</th>
+              <th pSortableColumn="paidAt">
+                Date
+                <p-sortIcon field="paidAt"></p-sortIcon>
+              </th>
+              <th>Actions</th>
             </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr *ngFor="let payment of payments()" class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">{{ getStudentName(payment.studentId) }}</div>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-payment>
+            <tr>
+              <td class="text-sm font-medium text-gray-900">{{ getStudentName(payment.studentId) }}</td>
+              <td class="text-sm text-gray-900">${{ payment.amount }}</td>
+              <td>
+                <p-tag 
+                  [value]="payment.type || 'N/A'" 
+                  [severity]="payment.type === 'tuition' ? 'info' : payment.type === 'exam' ? 'warn' : 'info'">
+                </p-tag>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ payment.amount }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <!-- <span [class]="getTypeBadgeClass(payment.type)">{{ payment.type }}</span> -->
+              <td>
+                <p-tag 
+                  [value]="payment.status" 
+                  [severity]="payment.status === 'completed' ? 'success' : payment.status === 'pending' ? 'warn' : 'danger'">
+                </p-tag>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span [class]="getStatusBadgeClass(payment.status)">{{ payment.status }}</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ payment.method || 'N/A' }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ payment.paidAt | date:'short' }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="text-sm text-gray-900">{{ payment.method || 'N/A' }}</td>
+              <td class="text-sm text-gray-500">{{ payment.paidAt | date:'short' }}</td>
+              <td>
                 <div class="flex items-center space-x-2">
-                  <button (click)="onView(payment)" class="text-blue-600 hover:text-blue-900">View</button>
-                  <button (click)="onEdit(payment)" class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                  <button (click)="onDelete(payment)" class="text-red-600 hover:text-red-900">Delete</button>
+                  <button (click)="onView(payment)" class="p-button p-button-text p-button-sm">
+                    <i class="pi pi-eye mr-1"></i>
+                    View
+                  </button>
+                  <button (click)="onEdit(payment)" class="p-button p-button-text p-button-sm">
+                    <i class="pi pi-pencil mr-1"></i>
+                    Edit
+                  </button>
+                  <button (click)="onDelete(payment)" class="p-button p-button-text p-button-sm p-button-danger">
+                    <i class="pi pi-trash mr-1"></i>
+                    Delete
+                  </button>
                 </div>
               </td>
             </tr>
-          </tbody>
-        </table>
-
-        <!-- Empty State -->
-        <div *ngIf="payments().length === 0" class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No payments found</h3>
-          <p class="mt-1 text-sm text-gray-500">Get started by adding a new payment.</p>
-          <div class="mt-6">
-            <a routerLink="/payments/new" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              Add Payment
-            </a>
-          </div>
-        </div>
+          </ng-template>
+        </p-table>
       </div>
     </div>
   </div>

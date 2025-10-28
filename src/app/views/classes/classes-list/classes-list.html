@@ -8,10 +8,8 @@
           <p class="mt-1 text-sm text-gray-500">Manage class records and information</p>
         </div>
         <div class="flex items-center space-x-3">
-          <a routerLink="/classes/new" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
+          <a routerLink="/classes/new" class="p-button p-button-primary">
+            <i class="pi pi-plus mr-2"></i>
             Add Class
           </a>
         </div>
@@ -30,9 +28,7 @@
             <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
             <div class="mt-1 relative rounded-md shadow-sm">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
+                <i class="pi pi-search text-gray-400"></i>
               </div>
               <input type="text" id="search" [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" placeholder="Search classes..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             </div>
@@ -41,20 +37,27 @@
           <!-- Academy Filter -->
           <div>
             <label for="academy" class="block text-sm font-medium text-gray-700">Academy</label>
-            <select id="academy" [(ngModel)]="selectedAcademy" (ngModelChange)="onFilterChange()" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-              <option value="">All Academies</option>
-              <option *ngFor="let academy of academies()" [value]="academy.id">{{ academy.name }}</option>
-            </select>
+            <p-select
+              id="academy"
+              [(ngModel)]="selectedAcademy"
+              (ngModelChange)="onFilterChange()"
+              [options]="academyOptions()"
+              placeholder="All Academies"
+              class="w-full">
+            </p-select>
           </div>
 
           <!-- Status Filter -->
           <div>
             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-            <select id="status" [(ngModel)]="selectedStatus" (ngModelChange)="onFilterChange()" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            <p-select
+              id="status"
+              [(ngModel)]="selectedStatus"
+              (ngModelChange)="onFilterChange()"
+              [options]="statusOptions"
+              placeholder="All Status"
+              class="w-full">
+            </p-select>
           </div>
 
           <!-- Results Count -->
@@ -69,9 +72,7 @@
     <div *ngIf="errorMessage()" class="rounded-md bg-red-50 p-4 mb-6">
       <div class="flex">
         <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-          </svg>
+          <i class="pi pi-exclamation-triangle text-red-400"></i>
         </div>
         <div class="ml-3">
           <h3 class="text-sm font-medium text-red-800">{{ errorMessage() }}</h3>
@@ -79,81 +80,90 @@
       </div>
     </div>
 
-    <!-- Classes Grid -->
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <!-- Class Cards -->
-      <div *ngFor="let classItem of classes()" class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
-        <div class="p-6">
-          <div class="flex items-center justify-between">
-            <div class="flex-1 min-w-0">
-              <h3 class="text-lg font-medium text-gray-900 truncate">{{ classItem.name }}</h3>
-              <p class="text-sm text-gray-500 truncate">{{ classItem.description || 'No description' }}</p>
-            </div>
-            <div class="ml-2">
-              <span [class]="getStatusBadgeClass(classItem.isActive)">{{ getStatusText(classItem.isActive) }}</span>
-            </div>
-          </div>
-          
-          <div class="mt-4">
-            <div class="flex items-center text-sm text-gray-500">
-              <svg class="flex-shrink-0 mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-              {{ getAcademyName(classItem.academyId) }}
-            </div>
-            <div class="flex items-center text-sm text-gray-500 mt-1">
-              <svg class="flex-shrink-0 mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              {{ classItem.schedule || 'No schedule' }}
-            </div>
-            <div class="flex items-center text-sm text-gray-500 mt-1">
-              <svg class="flex-shrink-0 mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              <!-- {{ classItem.location || 'No location assigned' }} -->
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-gray-50 px-6 py-3">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-500">Created {{ classItem.createdAt | date:'short' }}</div>
-            <div class="flex space-x-2">
-              <button (click)="onView(classItem)" class="text-blue-600 hover:text-blue-900 text-sm font-medium">View</button>
-              <button (click)="onEdit(classItem)" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Edit</button>
-              <button (click)="onToggleStatus(classItem)" [class]="classItem.isActive ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'" class="text-sm font-medium">{{ classItem.isActive ? 'Deactivate' : 'Activate' }}</button>
-              <button (click)="onDelete(classItem)" class="text-red-600 hover:text-red-900 text-sm font-medium">Delete</button>
-            </div>
-          </div>
+    <!-- Classes Table -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Classes List</h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">A list of all classes in the system</p>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading()" class="px-4 py-5 sm:px-6">
+        <div class="flex justify-center items-center py-8">
+          <i class="pi pi-spin pi-spinner text-blue-600 text-2xl"></i>
+          <span class="ml-2 text-gray-600">Loading classes...</span>
         </div>
       </div>
-    </div>
 
-    <!-- Loading State -->
-    <div *ngIf="isLoading()" class="flex justify-center items-center py-12">
-      <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      <span class="ml-2 text-gray-600">Loading classes...</span>
-    </div>
+      <!-- Table -->
+      <div *ngIf="!isLoading()" class="overflow-x-auto">
+        <p-table
+          [value]="classes()"
+          [lazy]="true"
+          (onLazyLoad)="onTableLazyLoad($event)"
+          [totalRecords]="totalItems()"
+          [rows]="pageSize()"
+          [loading]="isLoading()"
+          [paginator]="true"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} classes"
+          styleClass="p-datatable-sm">
+          
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="name">
+                Name
+                <p-sortIcon field="name"></p-sortIcon>
+              </th>
+              <th>Description</th>
+              <th>Academy</th>
+              <th>Schedule</th>
+              <th pSortableColumn="isActive">
+                Status
+                <p-sortIcon field="isActive"></p-sortIcon>
+              </th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
 
-    <!-- Empty State -->
-    <div *ngIf="classes().length === 0 && !isLoading()" class="text-center py-12">
-      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-      </svg>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">No classes found</h3>
-      <p class="mt-1 text-sm text-gray-500">Get started by adding a new class.</p>
-      <div class="mt-6">
-        <a routerLink="/classes/new" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-          <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-          Add Class
-        </a>
+          <ng-template pTemplate="body" let-classItem>
+            <tr>
+              <td class="text-sm font-medium text-gray-900">{{ classItem.name }}</td>
+              <td class="text-sm text-gray-500">{{ classItem.description || 'No description' }}</td>
+              <td class="text-sm text-gray-900">{{ getAcademyName(classItem.academyId) }}</td>
+              <td class="text-sm text-gray-500">{{ classItem.schedule || 'No schedule' }}</td>
+              <td>
+                <p-tag 
+                  [value]="getStatusText(classItem.isActive)" 
+                  [severity]="classItem.isActive ? 'success' : 'danger'">
+                </p-tag>
+              </td>
+              <td class="text-sm text-gray-500">{{ classItem.createdAt | date:'short' }}</td>
+              <td>
+                <div class="flex items-center space-x-2">
+                  <button (click)="onView(classItem)" class="p-button p-button-text p-button-sm">
+                    <i class="pi pi-eye mr-1"></i>
+                    View
+                  </button>
+                  <button (click)="onEdit(classItem)" class="p-button p-button-text p-button-sm">
+                    <i class="pi pi-pencil mr-1"></i>
+                    Edit
+                  </button>
+                  <button (click)="onToggleStatus(classItem)" [class]="classItem.isActive ? 'p-button p-button-text p-button-sm p-button-danger' : 'p-button p-button-text p-button-sm p-button-success'">
+                    <i [class]="classItem.isActive ? 'pi pi-times mr-1' : 'pi pi-check mr-1'"></i>
+                    {{ classItem.isActive ? 'Deactivate' : 'Activate' }}
+                  </button>
+                  <button (click)="onDelete(classItem)" class="p-button p-button-text p-button-sm p-button-danger">
+                    <i class="pi pi-trash mr-1"></i>
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
     </div>
   </div>

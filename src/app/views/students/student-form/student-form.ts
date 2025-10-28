@@ -6,6 +6,8 @@ import { StudentService } from '../../../shared/services/student.service';
 import { AcademyService } from '../../../shared/services/academy.service';
 import { UserService } from '../../../shared/services/user.service';
 import { Student, Academy, User, CreateStudentDto, UpdateStudentDto, UserRole } from '../../../shared/models';
+import { ParentChildService } from '../../../shared/services/parent-child.service';
+import { AuthService } from '../../../shared/services/auth.service';
 import { ApiHelper } from '../../../utils/api.helper';
 
 @Component({
@@ -31,7 +33,9 @@ export class StudentForm implements OnInit {
     private academyService: AcademyService,
     private userService: UserService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private parentChildService: ParentChildService,
+    private auth: AuthService
   ) {
     this.studentForm = this.fb.group({
       userId: ['', [Validators.required]],
@@ -143,7 +147,11 @@ export class StudentForm implements OnInit {
         };
 
         this.studentService.createStudent(createData).subscribe({
-          next: () => {
+          next: (created) => {
+            const me = this.auth.getCurrentUser();
+            if (me && me.role === UserRole.PARENT) {
+              this.parentChildService.create({ parentId: me.id, childId: created.id, relationship: 'guardian' as any }).subscribe({ next: () => {}, error: () => {} });
+            }
             this.router.navigate(['/students']);
           },
           error: (error) => {

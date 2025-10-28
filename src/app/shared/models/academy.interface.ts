@@ -10,6 +10,8 @@ export interface Academy {
   email?: string;
   website?: string;
   logo?: string;
+  monthlyFee?: number;
+  individualClassFee?: number;
   isActive: boolean;
   ownerId: string;
   createdAt: Date;
@@ -73,6 +75,8 @@ export interface UpdateAcademyDto {
   website?: string;
   logo?: string;
   isActive?: boolean;
+  monthlyFee?: number;
+  individualClassFee?: number;
 }
 
 /**

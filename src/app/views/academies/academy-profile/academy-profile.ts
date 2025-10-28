@@ -7,11 +7,12 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
+import { FormsModule, NgForm } from '@angular/forms';
 
 @Component({
   selector: 'academy-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink, CardModule, ButtonModule, TagModule, SkeletonModule],
+  imports: [CommonModule, RouterLink, CardModule, ButtonModule, TagModule, SkeletonModule, FormsModule],
   templateUrl: './academy-profile.html',
   styleUrl: './academy-profile.css',
 })
@@ -54,6 +55,15 @@ export class AcademyProfile implements OnInit {
     if (!file) return;
     this.academyService.uploadAcademyLogo(this.academy.id, file).subscribe({
       next: (res) => { if (this.academy) this.academy.logoUrl = (res as any).logoUrl; },
+      error: () => {}
+    });
+  }
+
+  saveOverview(form: NgForm): void {
+    if (!this.academy) return;
+    const { phone, address, website, monthlyFee, individualClassFee } = this.academy;
+    this.academyService.updateAcademy(this.academy.id, { phone, address, website, monthlyFee, individualClassFee }).subscribe({
+      next: (updated) => { this.academy = { ...this.academy!, ...updated }; },
       error: () => {}
     });
   }

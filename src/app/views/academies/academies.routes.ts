@@ -15,11 +15,13 @@ export const academyRoutes: Routes = [
     path: 'new',
     component: AcademyForm,
     canActivate: [RoleGuard],
-    data: { roles: [UserRole.ADMIN] } // Only admin can create new academies
+    data: { roles: [UserRole.ADMIN, UserRole.ACADEMY_OWNER] } // Only admin and academy owner can create new academies
   },
   {
     path: ':id',
-    component: AcademyDetail
+    component: AcademyDetail,
+    canActivate: [RoleGuard],
+    data: { roles: [UserRole.ADMIN, UserRole.ACADEMY_OWNER] } // Only admin and academy owner can create new academies
   },
   {
     path: ':id/profile',

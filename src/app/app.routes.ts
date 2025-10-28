@@ -57,6 +57,13 @@ export const routes: Routes = [
                 canActivate: [RoleGuard],
                 data: { roles: [UserRole.ADMIN, UserRole.ACADEMY_OWNER] }
             },
+            // Parent Portal - Parent only
+            {
+                path: 'parent',
+                loadChildren: () => import('./views/parents/parents.routes').then(m => m.parentRoutes),
+                canActivate: [RoleGuard],
+                data: { roles: [UserRole.PARENT] }
+            },
             // Users Management (Admin only)
             {
                 path: 'users',

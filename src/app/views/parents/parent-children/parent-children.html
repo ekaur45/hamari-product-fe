@@ -1,0 +1,61 @@
+<div class="space-y-4">
+  <div class="flex items-end gap-3">
+    <span class="p-input-icon-left flex-1">
+      <i class="pi pi-search"></i>
+      <input pInputText type="text" [(ngModel)]="search" placeholder="Search children" class="w-full" />
+    </span>
+    <button class="p-button p-button-secondary" (click)="navigateToRegisterChild()">
+      <i class="pi pi-user-edit mr-2"></i>
+      Register New Child
+    </button>
+    <button class="p-button p-button-primary" (click)="openAddDialog()">
+      <i class="pi pi-user-plus mr-2"></i>
+      Add Child
+    </button>
+  </div>
+
+  <p-table [value]="children()" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-c>
+      <tr>
+        <td>{{ c.name }}</td>
+        <td>{{ c.email }}</td>
+        <td>
+          <button class="p-button p-button-text p-button-sm" (click)="removeChild(c.id)"><i class="pi pi-trash mr-1"></i>Remove</button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+
+<p-dialog [(visible)]="addDialogOpen" [modal]="true" [style]="{width:'480px'}" [dismissableMask]="true" [draggable]="false">
+  <ng-template pTemplate="header">Add Child</ng-template>
+  <div class="space-y-4">
+    <div>
+      <label class="text-xs text-gray-600">Student</label>
+      <p-select [options]="studentOptions" [(ngModel)]="selectedStudentId" placeholder="Select student" class="w-full"></p-select>
+    </div>
+    <div>
+      <label class="text-xs text-gray-600">Relationship</label>
+      <p-select [options]="[
+        {label:'Father', value:'father'},
+        {label:'Mother', value:'mother'},
+        {label:'Guardian', value:'guardian'},
+        {label:'Other', value:'other'}
+      ]" [(ngModel)]="relationship" class="w-full"></p-select>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button class="p-button p-button-text" (click)="addDialogOpen=false">Cancel</button>
+    <button class="p-button p-button-primary" (click)="addChild()"><i class="pi pi-check mr-2"></i>Add</button>
+  </ng-template>
+</p-dialog>
+
+
