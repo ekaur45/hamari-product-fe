@@ -124,7 +124,7 @@ export class TeachersList implements OnInit {
     const page = Math.floor(first / rows) + 1;
     this.pageSize.set(rows);
     this.currentPage.set(page);
-    this.loadTeachers();
+    //this.loadTeachers();
   }
 
   onEdit(teacher: Teacher): void {

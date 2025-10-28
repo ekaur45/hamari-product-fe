@@ -7,23 +7,33 @@ import { AcademyService } from '../../../shared/services/academy.service';
 import { UserService } from '../../../shared/services/user.service';
 import { Teacher, Academy, User, CreateTeacherDto, UpdateTeacherDto, UserRole } from '../../../shared/models';
 import { ApiHelper } from '../../../utils/api.helper';
+import { SelectModule } from 'primeng/select';
+import { PrimeIcons } from 'primeng/api';
 
 @Component({
   selector: 'app-teacher-form',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, SelectModule],
   templateUrl: './teacher-form.html',
   styleUrl: './teacher-form.css'
 })
 export class TeacherForm implements OnInit {
   teacherForm: FormGroup;
+  invitationForm: FormGroup;
   isEditMode = signal(false);
   isLoading = signal(false);
   isSubmitting = signal(false);
   errorMessage = signal('');
   
+  // Form modes
+  formMode = signal<'create' | 'invite'>('create');
+  
   academies = signal<Academy[]>([]);
-  users = signal<User[]>([]);
+  users : User[] = [];
   currentTeacher = signal<Teacher | null>(null);
+  selectedAcademyId = signal<string>('');
+  
+  // Expose PrimeIcons for template use
+  PrimeIcons = PrimeIcons;
 
   constructor(
     private fb: FormBuilder,
@@ -39,13 +49,31 @@ export class TeacherForm implements OnInit {
       employeeId: ['', [Validators.required]],
       department: [''],
       specialization: [''],
-      qualification: ['']
+      qualification: [''],
+      experience: [0, [Validators.min(0), Validators.max(50)]],
+      role: ['TEACHER'],
+      salary: [0, [Validators.min(0)]],
+      notes: ['']
+    });
+
+    this.invitationForm = this.fb.group({
+      academyId: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      message: ['']
     });
   }
 
   ngOnInit(): void {
     this.loadAcademies();
     this.loadUsers();
+    
+    // Check for academy ID from query params
+    const academyId = this.route.snapshot.queryParamMap.get('academyId');
+    if (academyId) {
+      this.selectedAcademyId.set(academyId);
+      this.teacherForm.patchValue({ academyId });
+      this.invitationForm.patchValue({ academyId });
+    }
     
     const teacherId = this.route.snapshot.paramMap.get('id');
     if (teacherId && teacherId !== 'new') {
@@ -72,7 +100,7 @@ export class TeacherForm implements OnInit {
     this.userService.getUsersByRole(UserRole.TEACHER, 1, 100).subscribe({
       next: (response) => {
         if (response.data) {
-          this.users.set(response.data);
+          this.users =response.data;
         }
       },
       error: (error) => {
@@ -106,6 +134,14 @@ export class TeacherForm implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.formMode() === 'invite') {
+      this.submitInvitation();
+    } else {
+      this.submitTeacher();
+    }
+  }
+
+  submitTeacher(): void {
     if (this.teacherForm.valid && !this.isSubmitting()) {
       this.isSubmitting.set(true);
       this.errorMessage.set('');
@@ -118,12 +154,16 @@ export class TeacherForm implements OnInit {
           const updateData: UpdateTeacherDto = {
             department: formData.department,
             specialization: formData.specialization,
-            qualification: formData.qualification
+            qualification: formData.qualification,
+            experience: formData.experience,
+            role: formData.role,
+            salary: formData.salary,
+            notes: formData.notes
           };
 
           this.teacherService.updateTeacher(teacherId, updateData).subscribe({
             next: () => {
-              this.router.navigate(['/teachers']);
+              this.navigateBack();
             },
             error: (error) => {
               console.error('Error updating teacher:', error);
@@ -139,12 +179,16 @@ export class TeacherForm implements OnInit {
           employeeId: formData.employeeId,
           department: formData.department,
           specialization: formData.specialization,
-          qualification: formData.qualification
+          qualification: formData.qualification,
+          experience: formData.experience,
+          role: formData.role,
+          salary: formData.salary,
+          notes: formData.notes
         };
 
-        this.teacherService.createTeacher(createData).subscribe({
+        this.teacherService.createTeacherForAcademy(createData).subscribe({
           next: () => {
-            this.router.navigate(['/teachers']);
+            this.navigateBack();
           },
           error: (error) => {
             console.error('Error creating teacher:', error);
@@ -158,22 +202,73 @@ export class TeacherForm implements OnInit {
     }
   }
 
+  submitInvitation(): void {
+    if (this.invitationForm.valid && !this.isSubmitting()) {
+      this.isSubmitting.set(true);
+      this.errorMessage.set('');
+
+      const formData = this.invitationForm.value;
+
+      this.teacherService.inviteTeacherToAcademy(
+        formData.academyId,
+        formData.email,
+        formData.message
+      ).subscribe({
+        next: () => {
+          this.navigateBack();
+        },
+        error: (error) => {
+          console.error('Error inviting teacher:', error);
+          this.errorMessage.set(ApiHelper.formatErrorMessage(error));
+          this.isSubmitting.set(false);
+        }
+      });
+    } else {
+      this.markFormGroupTouched();
+    }
+  }
+
   onCancel(): void {
-    this.router.navigate(['/teachers']);
+    this.navigateBack();
+  }
+
+  setFormMode(mode: 'create' | 'invite'): void {
+    this.formMode.set(mode);
+    this.errorMessage.set('');
+  }
+
+  navigateBack(): void {
+    const academyId = this.selectedAcademyId();
+    if (academyId) {
+      this.router.navigate(['/academies', academyId]);
+    } else {
+      this.router.navigate(['/teachers']);
+    }
   }
 
   private markFormGroupTouched(): void {
-    Object.keys(this.teacherForm.controls).forEach(key => {
-      const control = this.teacherForm.get(key);
+    const form = this.formMode() === 'invite' ? this.invitationForm : this.teacherForm;
+    Object.keys(form.controls).forEach(key => {
+      const control = form.get(key);
       control?.markAsTouched();
     });
   }
 
   getFieldError(fieldName: string): string {
-    const field = this.teacherForm.get(fieldName);
+    const form = this.formMode() === 'invite' ? this.invitationForm : this.teacherForm;
+    const field = form.get(fieldName);
     if (field?.errors && field.touched) {
       if (field.errors['required']) {
         return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
+      }
+      if (field.errors['email']) {
+        return 'Please enter a valid email address';
+      }
+      if (field.errors['min']) {
+        return `Value must be at least ${field.errors['min'].min}`;
+      }
+      if (field.errors['max']) {
+        return `Value must not exceed ${field.errors['max'].max}`;
       }
     }
     return '';

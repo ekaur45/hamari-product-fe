@@ -82,10 +82,10 @@
               <span class="mb-2 inline-flex items-center justify-center h-10 w-10 rounded-full"
                     [class.bg-blue-100]="isRoleSelected(role.value)"
                     [class.bg-gray-100]="!isRoleSelected(role.value)">
-                <i *ngIf="role.value === 'student'" class="fa-solid fa-user-graduate text-blue-600 text-lg"></i>
+                <!-- <i *ngIf="role.value === 'student'" class="fa-solid fa-user-graduate text-blue-600 text-lg"></i>
                 <i *ngIf="role.value === 'parent'" class="fa-solid fa-people-roof text-blue-600 text-lg"></i>
                 <i *ngIf="role.value === 'teacher'" class="fa-solid fa-chalkboard-user text-blue-600 text-lg"></i>
-                <i *ngIf="role.value === 'academy_owner'" class="fa-solid fa-school text-blue-600 text-lg"></i>
+                <i *ngIf="role.value === 'academy_owner'" class="fa-solid fa-school text-blue-600 text-lg"></i> -->
               </span>
               <span class="text-sm font-medium" [class.text-blue-700]="isRoleSelected(role.value)">{{ role.label }}</span>
               <span class="pointer-events-none absolute -inset-px rounded-lg border-2 border-transparent" [class.border-blue-600]="isRoleSelected(role.value)"></span>

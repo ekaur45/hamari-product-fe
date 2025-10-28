@@ -31,6 +31,9 @@ export interface CreateTeacherDto {
   specialization?: string;
   qualification?: string;
   experience?: number;
+  role?: string;
+  salary?: number;
+  notes?: string;
 }
 
 /**
@@ -42,6 +45,9 @@ export interface UpdateTeacherDto {
   qualification?: string;
   experience?: number;
   isActive?: boolean;
+  role?: string;
+  salary?: number;
+  notes?: string;
 }
 
 // Re-export related interfaces

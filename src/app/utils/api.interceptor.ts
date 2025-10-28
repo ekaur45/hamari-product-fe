@@ -13,7 +13,7 @@ import { ApiResponse, ApiErrorResponse, ApiStatusCodes } from '../shared/models'
  */
 export const ApiInterceptor: HttpInterceptorFn = (req, next) => {
   const timeoutDuration = 30000; // 30 seconds
-  const retryAttempts = 3;
+  const retryAttempts = 0;
 
   // Read token from localStorage
   const token = localStorage.getItem('auth_token');
@@ -35,7 +35,7 @@ export const ApiInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(modifiedReq).pipe(
     timeout(timeoutDuration),
-    retry(retryAttempts),
+    //retry(retryAttempts),
     catchError((error: HttpErrorResponse) => {
       return handleHttpError(error, req);
     })
