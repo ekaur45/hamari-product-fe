@@ -1,0 +1,175 @@
+/* Design System Specific Styles */
+
+/* Smooth scrolling for navigation links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for the design system page */
+.design-system-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.design-system-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.design-system-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.design-system-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Enhanced focus states for better accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Custom animations for interactive elements */
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover effects for navigation links */
+nav a {
+  transition: all 0.2s ease-in-out;
+}
+
+nav a:hover {
+  transform: translateY(-1px);
+}
+
+/* Enhanced card hover effects */
+.card-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Color palette swatch hover effects */
+.color-swatch {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.color-swatch:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Typography example hover effects */
+.typography-example {
+  transition: all 0.2s ease-in-out;
+}
+
+.typography-example:hover {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+/* Form element focus states */
+.form-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+/* Button press animation */
+button:active {
+  transform: translateY(1px);
+}
+
+/* Loading state for interactive elements */
+.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Responsive design improvements */
+@media (max-width: 640px) {
+  .color-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .spacing-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .color-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
+  .color-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break {
+    page-break-before: always;
+  }
+}
+
+/* Dark mode support (if needed in the future) */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-support {
+    background-color: #1f2937;
+    color: #f9fafb;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .high-contrast {
+    border-width: 2px;
+    border-color: #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

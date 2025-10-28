@@ -1,0 +1,277 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <!-- Header -->
+    <div>
+      <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
+        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+        </svg>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        Create your account
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Or
+        <a routerLink="/auth/login" class="font-medium text-blue-600 hover:text-blue-500">
+          sign in to your existing account
+        </a>
+      </p>
+    </div>
+
+    <!-- Registration Form -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="mt-8 space-y-6">
+      <!-- Success Message -->
+      <div *ngIf="successMessage()" class="rounded-md bg-green-50 p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-green-800">
+              {{ successMessage() }}
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage()" class="rounded-md bg-red-50 p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">
+              {{ errorMessage() }}
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step indicator -->
+      <div class="flex items-center justify-center space-x-4">
+        <div class="flex items-center">
+          <div class="h-2 w-2 rounded-full" [class.bg-blue-600]="step() === 1" [class.bg-gray-300]="step() !== 1"></div>
+          <span class="ml-2 text-sm" [class.font-semibold]="step() === 1">Select Role</span>
+        </div>
+        <div class="text-gray-400">/</div>
+        <div class="flex items-center">
+          <div class="h-2 w-2 rounded-full" [class.bg-blue-600]="step() === 2" [class.bg-gray-300]="step() !== 2"></div>
+          <span class="ml-2 text-sm" [class.font-semibold]="step() === 2">Your Details</span>
+        </div>
+      </div>
+
+      <!-- Step 1: Role Selection -->
+      <div class="space-y-4" *ngIf="step() === 1">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">
+            Choose your account type <span class="text-red-500">*</span>
+          </label>
+          <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button type="button"
+                    *ngFor="let role of roles"
+                    (click)="selectRole(role.value)"
+                    class="relative rounded-lg border p-4 flex flex-col items-center justify-center text-center focus:outline-none"
+                    [class.border-blue-600]="isRoleSelected(role.value)"
+                    [class.bg-blue-50]="isRoleSelected(role.value)"
+                    [class.border-gray-300]="!isRoleSelected(role.value)">
+              <span class="mb-2 inline-flex items-center justify-center h-10 w-10 rounded-full"
+                    [class.bg-blue-100]="isRoleSelected(role.value)"
+                    [class.bg-gray-100]="!isRoleSelected(role.value)">
+                <i *ngIf="role.value === 'student'" class="fa-solid fa-user-graduate text-blue-600 text-lg"></i>
+                <i *ngIf="role.value === 'parent'" class="fa-solid fa-people-roof text-blue-600 text-lg"></i>
+                <i *ngIf="role.value === 'teacher'" class="fa-solid fa-chalkboard-user text-blue-600 text-lg"></i>
+                <i *ngIf="role.value === 'academy_owner'" class="fa-solid fa-school text-blue-600 text-lg"></i>
+              </span>
+              <span class="text-sm font-medium" [class.text-blue-700]="isRoleSelected(role.value)">{{ role.label }}</span>
+              <span class="pointer-events-none absolute -inset-px rounded-lg border-2 border-transparent" [class.border-blue-600]="isRoleSelected(role.value)"></span>
+            </button>
+          </div>
+          <div *ngIf="getFieldError('role')" class="mt-2 text-sm text-red-600">
+            {{ getFieldError('role') }}
+          </div>
+        </div>
+        <div>
+          <button type="button" (click)="goToDetails()" class="w-full py-2 px-4 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Continue
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Details Form -->
+      <div class="space-y-4" *ngIf="step() === 2">
+        <!-- Selected role summary -->
+        <div class="flex items-center justify-between p-3 border rounded-md bg-gray-50">
+          <div class="flex items-center space-x-3">
+            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100">
+              <i [class]="getSelectedRoleIconClass()" class="text-blue-700"></i>
+            </span>
+            <div>
+              <div class="text-xs text-gray-500">Account type</div>
+              <div class="text-sm font-medium text-gray-900">{{ getSelectedRoleLabel() }}</div>
+            </div>
+          </div>
+          <button type="button" (click)="backToRole()" class="text-sm text-blue-700 hover:text-blue-800">Change</button>
+        </div>
+        <!-- Name Fields -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="firstName" class="block text-sm font-medium text-gray-700">
+              First Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="firstName"
+              type="text"
+              formControlName="firstName"
+              placeholder="Enter first name"
+              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              [class.border-red-500]="getFieldError('firstName')">
+            <div *ngIf="getFieldError('firstName')" class="mt-1 text-sm text-red-600">
+              {{ getFieldError('firstName') }}
+            </div>
+          </div>
+
+          <div>
+            <label for="lastName" class="block text-sm font-medium text-gray-700">
+              Last Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              placeholder="Enter last name"
+              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              [class.border-red-500]="getFieldError('lastName')">
+            <div *ngIf="getFieldError('lastName')" class="mt-1 text-sm text-red-600">
+              {{ getFieldError('lastName') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">
+            Email Address <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="Enter email address"
+            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+            [class.border-red-500]="getFieldError('email')">
+          <div *ngIf="getFieldError('email')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('email') }}
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700">
+            Username <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="username"
+            type="text"
+            formControlName="username"
+            placeholder="Choose a username"
+            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+            [class.border-red-500]="getFieldError('username')">
+          <div *ngIf="getFieldError('username')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('username') }}
+          </div>
+        </div>
+
+        <!-- Password Fields -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">
+              Password <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              placeholder="Enter password"
+              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              [class.border-red-500]="getFieldError('password')">
+            <div *ngIf="getFieldError('password')" class="mt-1 text-sm text-red-600">
+              {{ getFieldError('password') }}
+            </div>
+          </div>
+
+          <div>
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
+              Confirm Password <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="Confirm password"
+              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              [class.border-red-500]="getFieldError('confirmPassword')">
+            <div *ngIf="getFieldError('confirmPassword')" class="mt-1 text-sm text-red-600">
+              {{ getFieldError('confirmPassword') }}
+            </div>
+          </div>
+        </div>
+
+    
+
+        <!-- Terms and Conditions -->
+        <div class="flex items-center">
+          <input
+            id="agreeToTerms"
+            type="checkbox"
+            formControlName="agreeToTerms"
+            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            [class.border-red-500]="getFieldError('agreeToTerms')">
+          <label for="agreeToTerms" class="ml-2 block text-sm text-gray-900">
+            I agree to the
+            <a href="#" class="text-blue-600 hover:text-blue-500">Terms and Conditions</a>
+            and
+            <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+            <span class="text-red-500">*</span>
+          </label>
+        </div>
+        <div *ngIf="getFieldError('agreeToTerms')" class="text-sm text-red-600">
+          {{ getFieldError('agreeToTerms') }}
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div *ngIf="step() === 2">
+        <button
+          type="submit"
+          [disabled]="isLoading() || registerForm.invalid"
+          class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+          <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+            <svg *ngIf="isLoading()" class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg *ngIf="!isLoading()" class="h-5 w-5 text-blue-500 group-hover:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+            </svg>
+          </span>
+          {{ isLoading() ? 'Creating Account...' : 'Create Account' }}
+        </button>
+      </div>
+
+      <!-- Login Link -->
+      <div class="text-center">
+        <p class="text-sm text-gray-600">
+          Already have an account?
+          <a routerLink="/auth/login" class="font-medium text-blue-600 hover:text-blue-500">
+            Sign in here
+          </a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

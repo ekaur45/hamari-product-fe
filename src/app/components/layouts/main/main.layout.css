@@ -1,0 +1,223 @@
+/* Main Layout Specific Styles */
+
+/* Smooth transitions for sidebar */
+.sidebar-transition {
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Mobile menu overlay animation */
+.mobile-overlay {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* User menu dropdown animation */
+.user-menu-dropdown {
+  animation: fadeInDown 0.2s ease-out;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* User dropdown menu items */
+.user-menu-dropdown a {
+  position: relative;
+}
+
+.user-menu-dropdown a:hover {
+  background-color: rgb(249 250 251);
+}
+
+.user-menu-dropdown a:hover i {
+  color: rgb(59 130 246);
+  transition: color 0.2s ease-in-out;
+}
+
+/* User info header styling */
+.user-menu-dropdown .border-b {
+  background-color: rgb(249 250 251);
+}
+
+/* Font Awesome icon styling */
+.user-menu-dropdown i {
+  transition: color 0.2s ease-in-out;
+  font-size: 14px;
+}
+
+/* Active navigation item styling */
+.nav-item-active {
+  background-color: rgb(239 246 255);
+  border-left-color: rgb(59 130 246);
+  color: rgb(29 78 216);
+}
+
+/* Hover effects for navigation items */
+.nav-item:hover {
+  background-color: rgb(249 250 251);
+  color: rgb(17 24 39);
+}
+
+/* Search input focus styles */
+.search-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: rgb(59 130 246);
+}
+
+/* Notification badge pulse animation */
+.notification-badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.5);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 1023px) {
+  .sidebar-mobile {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar-mobile.open {
+    transform: translateX(0);
+  }
+}
+
+/* Desktop sidebar positioning */
+@media (min-width: 1024px) {
+  .sidebar-desktop {
+    position: static;
+    transform: none;
+  }
+}
+
+/* Content area adjustments */
+.content-area {
+  min-height: calc(100vh - 4rem);
+}
+
+/* Header sticky positioning */
+.header-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+/* User avatar hover effect */
+.user-avatar:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Notification button hover effect */
+.notification-btn:hover {
+  background-color: rgb(243 244 246);
+  color: rgb(75 85 99);
+}
+
+/* Search bar responsive behavior */
+@media (max-width: 640px) {
+  .search-bar {
+    display: none;
+  }
+}
+
+/* Logo animation */
+.logo-container:hover .logo-icon {
+  transform: rotate(5deg);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Navigation item icon animations */
+.nav-item:hover .nav-icon {
+  transform: translateX(2px);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Focus states for accessibility */
+.focus-visible:focus {
+  outline: 2px solid rgb(59 130 246);
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Dark mode support (if needed in the future) */
+@media (prefers-color-scheme: dark) {
+  .dark-mode {
+    background-color: rgb(17 24 39);
+    color: rgb(243 244 246);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .high-contrast {
+    border-width: 2px;
+    border-color: rgb(0 0 0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

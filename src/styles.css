@@ -1,1 +1,17 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+@import "primeicons/primeicons.css";
+/* src/app/layout/admin-layout.component.css */
+
+/* Ensure top offset for sidebar matches header height (header is 4rem = 64px) */
+:host {
+  display: block;
+}
+
+/* optional: smooth scrollbar styling */
+aside::-webkit-scrollbar {
+  width: 8px;
+}
+aside::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.2); /* gray-400/20 */
+  border-radius: 8px;
+}
