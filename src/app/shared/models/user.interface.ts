@@ -30,6 +30,54 @@ export interface UserDetails {
   updatedAt: Date;
 }
 
+export type EducationType = 'school' | 'college' | 'university' | 'course' | 'certification' | 'other';
+
+export interface EducationItem {
+  id: string;
+  userId: string;
+  type: EducationType;
+  institution: string;
+  title?: string; // degree/course/cert name
+  field?: string; // major/subject
+  startDate?: Date;
+  endDate?: Date;
+  stillStudying?: boolean;
+  credentialUrl?: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AvailabilitySlot {
+  dayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0=Sun
+  startTime: string; // HH:mm
+  endTime: string; // HH:mm
+  notes?: string;
+}
+
+export interface UpdateUserDetailsDto {
+  phone?: string;
+  address?: string;
+  dateOfBirth?: Date;
+  bio?: string;
+}
+
+export interface UpsertEducationDto {
+  type: EducationType;
+  institution: string;
+  title?: string;
+  field?: string;
+  startDate?: Date;
+  endDate?: Date;
+  stillStudying?: boolean;
+  credentialUrl?: string;
+  description?: string;
+}
+
+export interface UpdateAvailabilityDto {
+  slots: AvailabilitySlot[];
+}
+
 /**
  * User Role Enum
  */

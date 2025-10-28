@@ -64,6 +64,17 @@ export const routes: Routes = [
                 canActivate: [RoleGuard],
                 data: { roles: [UserRole.ADMIN] }
             },
+            // Self profile (any authenticated)
+            {
+                path: 'profile',
+                loadComponent: () => import('./views/users/user-profile/user-profile').then(m => m.UserProfile)
+            },
+            {
+                path: 'academy-profile',
+                loadComponent: () => import('./views/academies/academy-profile/academy-profile').then(m => m.AcademyProfile),
+                canActivate: [RoleGuard],
+                data: { roles: [UserRole.ADMIN, UserRole.ACADEMY_OWNER] }
+            },
             // Performance Management Routes - All authenticated users
             {
                 path: 'performance',

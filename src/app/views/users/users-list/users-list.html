@@ -126,6 +126,7 @@
           </td>
           <td class="flex items-center justify-center">
             <p-button (onClick)="openView(u)" text="true" severity="info" class="mr-2" title="View" icon="pi pi-eye"></p-button>
+            <p-button [routerLink]="['/users', u.id, 'profile']" text="true" severity="secondary" class="mr-2" title="Profile" icon="pi pi-id-card"></p-button>
             <p-button [routerLink]="['/users', u.id, 'edit']" text="true" severity="success" class="mr-2" title="Edit" icon="pi pi-pencil"></p-button>
             <p-button (onClick)="onDelete(u)" text="true" severity="danger" class="mr-2" title="Delete" icon="pi pi-trash"></p-button>
           </td>

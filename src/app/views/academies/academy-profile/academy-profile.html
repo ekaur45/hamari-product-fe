@@ -1,0 +1,81 @@
+<div class="mx-auto space-y-6">
+  <p-card>
+    <ng-template pTemplate="content">
+      <div *ngIf="isLoading(); else content" class="flex items-center gap-4">
+        <p-skeleton shape="circle" size="4rem" class="mr-2"></p-skeleton>
+        <div class="flex-1">
+          <p-skeleton width="12rem" height="1.25rem" class="mb-2"></p-skeleton>
+          <p-skeleton width="8rem" height="1rem"></p-skeleton>
+        </div>
+      </div>
+      <ng-template #content>
+        <div *ngIf="academy as a" class="flex items-center justify-between gap-4 flex-wrap">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-gray-200 rounded overflow-hidden flex items-center justify-center">
+              <img *ngIf="a.logoUrl" [src]="a.logoUrl" alt="logo" class="w-full h-full object-cover" />
+              <i *ngIf="!a.logoUrl" class="pi pi-building text-gray-400 text-2xl"></i>
+            </div>
+            <div>
+              <div class="text-xl font-semibold text-gray-900">{{ a.name }}</div>
+              <div class="text-sm text-gray-500">{{ a.email || '-' }}</div>
+              <div class="mt-2 flex items-center gap-2">
+                <p-tag [value]="a.isActive ? 'Active' : 'Inactive'" [severity]="a.isActive ? 'success' : 'secondary'" rounded="true"></p-tag>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="file" accept="image/*" (change)="onLogoSelected($event)" hidden id="logoInput">
+            <label for="logoInput" class="p-button p-button-sm"><i class="pi pi-image mr-2"></i>Update logo</label>
+          </div>
+        </div>
+      </ng-template>
+    </ng-template>
+  </p-card>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <p-card>
+      <ng-template pTemplate="title">Overview</ng-template>
+      <ng-template pTemplate="content">
+        <div *ngIf="academy as a" class="text-sm text-gray-700 space-y-2">
+          <div><span class="text-gray-500">Phone:</span> {{ a.phone || '-' }}</div>
+          <div><span class="text-gray-500">Address:</span> {{ a.address || '-' }}</div>
+          <div><span class="text-gray-500">Website:</span> {{ a.website || '-' }}</div>
+          <div><span class="text-gray-500">Created:</span> {{ a.createdAt | date:'medium' }}</div>
+        </div>
+      </ng-template>
+    </p-card>
+
+    <p-card>
+      <ng-template pTemplate="title">Stats</ng-template>
+      <ng-template pTemplate="content">
+        <div *ngIf="stats as s" class="grid grid-cols-3 gap-3 text-center">
+          <div>
+            <div class="text-2xl font-semibold">{{ s.totalStudents }}</div>
+            <div class="text-xs text-gray-500">Students</div>
+          </div>
+          <div>
+            <div class="text-2xl font-semibold">{{ s.totalTeachers }}</div>
+            <div class="text-xs text-gray-500">Teachers</div>
+          </div>
+          <div>
+            <div class="text-2xl font-semibold">{{ s.totalClasses }}</div>
+            <div class="text-xs text-gray-500">Classes</div>
+          </div>
+        </div>
+      </ng-template>
+    </p-card>
+
+    <p-card>
+      <ng-template pTemplate="title">Status</ng-template>
+      <ng-template pTemplate="content">
+        <div class="text-sm text-gray-700 space-y-2">
+          <div><span class="text-gray-500">Active Students:</span> {{ stats?.activeStudents ?? '-' }}</div>
+          <div><span class="text-gray-500">Active Teachers:</span> {{ stats?.activeTeachers ?? '-' }}</div>
+          <div><span class="text-gray-500">Active Classes:</span> {{ stats?.activeClasses ?? '-' }}</div>
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+</div>
+
+

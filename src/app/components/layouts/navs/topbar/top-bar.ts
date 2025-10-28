@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
 	selector: 'app-top-bar',
 	standalone: true,
-	imports: [CommonModule],
+	imports: [CommonModule,RouterModule],
 	templateUrl: './top-bar.html'
 })
 export class TopBar {

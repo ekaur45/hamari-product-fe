@@ -17,7 +17,13 @@ export const API_ENDPOINTS = {
   USERS: {
     BASE: '/users',
     BY_ID: (id: string) => `/users/${id}`,
-    SEARCH: '/users/search'
+    SEARCH: '/users/search',
+    EDUCATION: (userId: string) => `/users/${userId}/education`,
+    EDUCATION_BY_ID: (userId: string, eduId: string) => `/users/${userId}/education/${eduId}`,
+    AVAILABILITY: (userId: string) => `/users/${userId}/availability`,
+    DETAILS: (userId: string) => `/users/${userId}/details`,
+    ACADEMIES: (userId: string) => `/users/${userId}/academies`,
+    AVATAR: (userId: string) => `/users/${userId}/avatar`
   },
 
   // Academy

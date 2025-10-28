@@ -18,10 +18,12 @@ export const ApiInterceptor: HttpInterceptorFn = (req, next) => {
   // Read token from localStorage
   const token = localStorage.getItem('auth_token');
 
+  const isFormUpload = (req.body instanceof FormData);
   // Build headers while preserving any existing ones
   const headers: Record<string, string> = {
     'Accept': req.headers.get('Accept') || 'application/json',
-    'Content-Type': req.headers.get('Content-Type') || 'application/json',
+    // Only set Content-Type for non-FormData requests (browser sets it automatically for FormData)
+    ...(isFormUpload ? null : { 'Content-Type': req.headers.get('Content-Type') || 'application/json' }),
     'X-Requested-With': req.headers.get('X-Requested-With') || 'XMLHttpRequest'
   };
 

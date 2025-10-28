@@ -14,6 +14,7 @@ export interface Academy {
   ownerId: string;
   createdAt: Date;
   updatedAt: Date;
+  logoUrl?: string;
   owner?: User;
   teachers?: AcademyTeacher[];
   invitations?: AcademyInvitation[];

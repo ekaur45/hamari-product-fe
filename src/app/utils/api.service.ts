@@ -113,7 +113,6 @@ export class ApiService {
       }),
       params: options?.params
     };
-
     // Only add responseType and observe if they are specified
     if (options?.responseType) {
       httpOptions.responseType = options.responseType;
@@ -224,11 +223,11 @@ export class ApiService {
     const formData = new FormData();
     formData.append('file', file);
     
-    if (additionalData) {
-      Object.keys(additionalData).forEach(key => {
-        formData.append(key, additionalData[key]);
-      });
-    }
+    // if (additionalData) {
+    //   Object.keys(additionalData).forEach(key => {
+    //     formData.append(key, additionalData[key]);
+    //   });
+    // }
 
     return this.post<T>(endpoint, formData, {
       headers: new HttpHeaders({

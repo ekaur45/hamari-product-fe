@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse } from '../models';
+import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse, EducationItem, UpsertEducationDto, UpdateAvailabilityDto, UpdateUserDetailsDto } from '../models';
 
 /**
  * User Service
@@ -151,7 +151,7 @@ export class UserService {
    * Upload user avatar
    */
   uploadAvatar(id: string, file: File): Observable<{ avatarUrl: string }> {
-    return this.apiService.uploadFile<{ avatarUrl: string }>(`${API_ENDPOINTS.USERS.BASE}/${id}/avatar`, file)
+    return this.apiService.uploadFile<{ avatarUrl: string }>(API_ENDPOINTS.USERS.AVATAR(id), file)
       .pipe(
         map(response => {
           if (response.data) {
@@ -164,6 +164,66 @@ export class UserService {
           return throwError(() => error);
         })
       );
+  }
+
+  // Education
+  getEducation(userId: string): Observable<EducationItem[]> {
+    return this.apiService.get<EducationItem[]>(API_ENDPOINTS.USERS.EDUCATION(userId)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  addEducation(userId: string, dto: UpsertEducationDto): Observable<EducationItem> {
+    return this.apiService.post<EducationItem>(API_ENDPOINTS.USERS.EDUCATION(userId), dto).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  updateEducation(userId: string, eduId: string, dto: UpsertEducationDto): Observable<EducationItem> {
+    return this.apiService.put<EducationItem>(API_ENDPOINTS.USERS.EDUCATION_BY_ID(userId, eduId), dto).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  deleteEducation(userId: string, eduId: string): Observable<void> {
+    return this.apiService.delete<void>(API_ENDPOINTS.USERS.EDUCATION_BY_ID(userId, eduId)).pipe(
+      map(() => undefined),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  // Availability
+  getAvailability(userId: string): Observable<UpdateAvailabilityDto> {
+    return this.apiService.get<UpdateAvailabilityDto>(API_ENDPOINTS.USERS.AVAILABILITY(userId)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  updateAvailability(userId: string, dto: UpdateAvailabilityDto): Observable<UpdateAvailabilityDto> {
+    return this.apiService.put<UpdateAvailabilityDto>(API_ENDPOINTS.USERS.AVAILABILITY(userId), dto).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  // Details (bio, phone, address, dob)
+  updateDetails(userId: string, dto: UpdateUserDetailsDto): Observable<User> {
+    return this.apiService.put<User>(API_ENDPOINTS.USERS.DETAILS(userId), dto).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  // Academies linked
+  getUserAcademies(userId: string): Observable<any[]> {
+    return this.apiService.get<any[]>(API_ENDPOINTS.USERS.ACADEMIES(userId)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
   }
 
   /**
