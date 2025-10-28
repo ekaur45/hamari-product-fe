@@ -81,4 +81,44 @@ export class AcademyDetail implements OnInit {
   getStatusText(isActive: boolean): string {
     return isActive ? 'Active' : 'Inactive';
   }
+
+  getStudentCount(): number {
+    // This would typically come from the academy data or a separate API call
+    // For now, return a placeholder value
+    return 0;
+  }
+
+  getClassCount(): number {
+    // This would typically come from the academy data or a separate API call
+    // For now, return a placeholder value
+    return 0;
+  }
+
+  onAddTeacher(): void {
+    const academy = this.academy();
+    if (academy) {
+      this.router.navigate(['/teachers/new'], { queryParams: { academyId: academy.id } });
+    }
+  }
+
+  onCreateClass(): void {
+    const academy = this.academy();
+    if (academy) {
+      this.router.navigate(['/classes/new'], { queryParams: { academyId: academy.id } });
+    }
+  }
+
+  onViewReports(): void {
+    const academy = this.academy();
+    if (academy) {
+      this.router.navigate(['/academies', academy.id, 'reports']);
+    }
+  }
+
+  onSendInvite(): void {
+    const academy = this.academy();
+    if (academy) {
+      this.router.navigate(['/academies', academy.id, 'invitations']);
+    }
+  }
 }

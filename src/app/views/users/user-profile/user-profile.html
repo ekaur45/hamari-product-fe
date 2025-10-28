@@ -14,7 +14,7 @@
         <ng-template #headerContent>
           <div *ngIf="user as u" class="flex items-center justify-between gap-4 flex-wrap">
             <div class="flex items-center gap-4">
-              <p-avatar label="{{ u.firstName?.charAt(0) }}{{ u.lastName?.charAt(0) }}" shape="circle" size="xlarge" styleClass="bg-blue-600 text-white"></p-avatar>
+              <p-avatar label="{{ u.firstName.charAt(0) }}{{ u.lastName.charAt(0) }}" shape="circle" size="xlarge" styleClass="bg-blue-600 text-white"></p-avatar>
               <div>
                 <div class="text-xl font-semibold text-gray-900">{{ u.firstName }} {{ u.lastName }}</div>
                 <div class="text-sm text-gray-500">@{{ u.username }}</div>

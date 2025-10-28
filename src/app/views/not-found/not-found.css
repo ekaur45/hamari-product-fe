@@ -1,0 +1,51 @@
+.nf-container {
+  display: grid;
+  place-items: center;
+  min-height: 70vh;
+  position: relative;
+  padding: 24px;
+}
+
+.nf-card {
+  background: var(--surface-card, #fff);
+  border: 1px solid var(--surface-border, #e5e7eb);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+}
+
+.nf-code {
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--primary-color, #3b82f6);
+}
+
+.nf-title {
+  margin: 8px 0 8px;
+  font-size: 24px;
+}
+
+.nf-text {
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+.nf-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.nf-bg {
+  position: absolute;
+  font-size: 140px;
+  opacity: 0.06;
+  bottom: 12px;
+  right: 24px;
+  user-select: none;
+}
+
+

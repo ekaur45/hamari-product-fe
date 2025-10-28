@@ -9,8 +9,7 @@ import { ApiHelper } from '../../../utils/api.helper';
 @Component({
   selector: 'app-academy-form',
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './academy-form.html',
-  styleUrl: './academy-form.css'
+  templateUrl: './academy-form.html'
 })
 export class AcademyForm implements OnInit {
   academyForm: FormGroup;

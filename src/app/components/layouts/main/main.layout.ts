@@ -8,7 +8,7 @@ import { TopBar } from '../navs/topbar/top-bar';
 
 @Component({
   selector: 'main-layout',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, SideNav, TopBar],
+  imports: [CommonModule, RouterOutlet, SideNav, TopBar],
   templateUrl: './main.layout.html',
   styleUrls: ['./main.layout.css']
 })

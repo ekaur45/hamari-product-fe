@@ -1,30 +1,51 @@
 /* Academy Detail Styles */
-.detail-card {
+
+/* Hero Section */
+.hero-gradient {
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+}
+
+/* Card hover effects */
+.card-hover {
   transition: all 0.2s ease-in-out;
 }
 
-.detail-card:hover {
+.card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-/* Status badge */
+/* Statistics cards */
+.stat-card {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid #e5e7eb;
+}
+
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+/* Quick action buttons */
+.quick-action-btn {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Status badge improvements */
 .status-badge {
   transition: all 0.2s ease-in-out;
+  font-weight: 500;
 }
 
 .status-badge:hover {
   transform: scale(1.05);
-}
-
-/* Action buttons */
-.action-button {
-  transition: all 0.2s ease-in-out;
-}
-
-.action-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Loading spinner */
@@ -47,22 +68,117 @@
 }
 
 .back-button:hover {
-  background-color: #f3f4f6;
+  background-color: rgba(255, 255, 255, 0.2);
   transform: translateX(-2px);
 }
 
-/* Detail list items */
-.detail-item {
-  transition: background-color 0.2s ease-in-out;
+/* Information sections */
+.info-section {
+  transition: all 0.2s ease-in-out;
 }
 
-.detail-item:hover {
+.info-section:hover {
   background-color: #f9fafb;
 }
 
-/* Error message */
+/* Icon containers */
+.icon-container {
+  transition: all 0.2s ease-in-out;
+}
+
+.icon-container:hover {
+  transform: scale(1.05);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .hero-gradient {
+    padding: 1rem 0;
+  }
+  
+  .stat-card {
+    margin-bottom: 1rem;
+  }
+  
+  .quick-action-btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .hero-actions {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Animation for loading state */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Error message styling */
 .error-message {
   animation: slideDown 0.3s ease-out;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
 }
 
 @keyframes slideDown {
@@ -73,18 +189,5 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .detail-card {
-    margin: 0 -1rem;
-    border-radius: 0;
-  }
-  
-  .action-button {
-    width: 100%;
-    margin-bottom: 0.5rem;
   }
 }

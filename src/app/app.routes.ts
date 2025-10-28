@@ -86,6 +86,10 @@ export const routes: Routes = [
             {
                 path: 'performance',
                 loadChildren: () => import('./views/performance/performance.routes').then(m => m.performanceRoutes)
+            },
+            {
+                path: '**',
+                loadComponent: () => import('./views/not-found/not-found').then(m => m.NotFound)
             }
         ]
     },
@@ -110,6 +114,6 @@ export const routes: Routes = [
     },
     {
         path: '**',
-        redirectTo: '/'
+        loadComponent: () => import('./views/not-found/not-found').then(m => m.NotFound)
     }
 ];

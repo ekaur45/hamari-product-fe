@@ -12,7 +12,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 @Component({
   selector: 'academy-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink, CardModule, ButtonModule, TagModule, SkeletonModule, FormsModule],
+  imports: [CommonModule, CardModule, ButtonModule, TagModule, SkeletonModule, FormsModule],
   templateUrl: './academy-profile.html',
   styleUrl: './academy-profile.css',
 })
