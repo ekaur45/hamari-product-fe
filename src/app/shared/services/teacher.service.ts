@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { Teacher, CreateTeacherDto, UpdateTeacherDto, PaginatedApiResponse } from '../models';
+import { Teacher, CreateTeacherDto, UpdateTeacherDto, PaginatedApiResponse, CreateTeacherDirectDto, TeacherDirectResponse } from '../models';
 
 /**
  * Teacher Service
@@ -300,6 +300,25 @@ export class TeacherService {
         }),
         catchError(error => {
           console.error('Invite teacher to academy error:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Create teacher directly (Academy Owner only)
+   */
+  createTeacherDirect(teacherData: CreateTeacherDirectDto): Observable<TeacherDirectResponse> {
+    return this.apiService.post<TeacherDirectResponse>(API_ENDPOINTS.TEACHERS.DIRECT, teacherData)
+      .pipe(
+        map(response => {
+          if (response.data) {
+            return response.data;
+          }
+          throw new Error('Invalid response format');
+        }),
+        catchError(error => {
+          console.error('Create teacher direct error:', error);
           return throwError(() => error);
         })
       );

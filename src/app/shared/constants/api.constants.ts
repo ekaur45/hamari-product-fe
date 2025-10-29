@@ -48,7 +48,8 @@ export const API_ENDPOINTS = {
     BASE: '/teachers',
     BY_ID: (id: string) => `/teachers/${id}`,
     BY_ACADEMY: (academyId: string) => `/teachers/academy/${academyId}`,
-    SEARCH: '/teachers/search'
+    SEARCH: '/teachers/search',
+    DIRECT: '/teachers/direct'
   },
 
   // Classes
@@ -57,7 +58,8 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/classes/${id}`,
     BY_ACADEMY: (academyId: string) => `/classes/academy/${academyId}`,
     BY_TEACHER: (teacherId: string) => `/classes/teacher/${teacherId}`,
-    SEARCH: '/classes/search'
+    SEARCH: '/classes/search',
+    RECURRING: '/classes/recurring'
   },
 
   // Subjects

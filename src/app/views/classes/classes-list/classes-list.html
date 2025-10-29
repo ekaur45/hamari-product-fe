@@ -11,6 +11,10 @@
             <i class="pi pi-plus mr-2"></i>
             Add Class
           </a>
+          <a *ngIf="hasRole([UserRole.ACADEMY_OWNER])" routerLink="/classes/recurring" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <i class="pi pi-calendar-plus mr-2"></i>
+            Schedule Recurring Classes
+          </a>
         </div>
       </div>
     </div>

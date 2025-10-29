@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { TeachersList } from './teachers-list/teachers-list';
 import { TeacherDetail } from './teacher-detail/teacher-detail';
 import { TeacherForm } from './teacher-form/teacher-form';
+import { TeacherDirectForm } from './teacher-direct-form/teacher-direct-form';
 import { RoleGuard } from '../../shared/guards/auth.guard';
 import { UserRole } from '../../shared/models';
 
@@ -15,6 +16,12 @@ export const teacherRoutes: Routes = [
     component: TeacherForm,
     canActivate: [RoleGuard],
     data: { roles: [UserRole.ADMIN, UserRole.ACADEMY_OWNER] } // Only admin and academy owner can add teachers
+  },
+  {
+    path: 'create-direct',
+    component: TeacherDirectForm,
+    canActivate: [RoleGuard],
+    data: { roles: [UserRole.ACADEMY_OWNER] } // Only academy owner can create teachers directly
   },
   {
     path: ':id',

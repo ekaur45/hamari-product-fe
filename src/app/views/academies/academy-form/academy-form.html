@@ -132,6 +132,17 @@
                 placeholder="https://example.com"
                 class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
             </div>
+
+            <div>
+              <label for="logo" class="block text-sm font-medium text-gray-700">Logo URL</label>
+              <input 
+                type="url" 
+                id="logo" 
+                formControlName="logo" 
+                placeholder="https://example.com/logo.png or data:image/png;base64,..."
+                class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
+              <p class="mt-1 text-sm text-gray-500">Enter a URL to an image or a base64 encoded image string</p>
+            </div>
           </div>
         </div>
 

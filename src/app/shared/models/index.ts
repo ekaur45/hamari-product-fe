@@ -13,3 +13,5 @@ export * from './payment.interface';
 export * from './performance.interface';
 export * from './parent-child.interface';
 export * from './subject.interface';
+export * from './teacher-direct.interface';
+export * from './recurring-class.interface';

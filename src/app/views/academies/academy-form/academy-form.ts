@@ -31,7 +31,8 @@ export class AcademyForm implements OnInit {
       address: [''],
       phone: [''],
       email: ['', [Validators.email]],
-      website: ['']
+      website: [''],
+      logo: ['']
     });
   }
 

@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { Class, CreateClassDto, UpdateClassDto, ClassEnrollment, CreateClassEnrollmentDto, UpdateClassEnrollmentDto, PaginatedApiResponse } from '../models';
+import { Class, CreateClassDto, UpdateClassDto, ClassEnrollment, CreateClassEnrollmentDto, UpdateClassEnrollmentDto, PaginatedApiResponse, CreateRecurringClassDto, RecurringClassResponse } from '../models';
 
 /**
  * Class Service
@@ -246,6 +246,25 @@ export class ClassService {
         }),
         catchError(error => {
           console.error('Get class stats error:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Create recurring classes (Academy Owner only)
+   */
+  createRecurringClasses(classData: CreateRecurringClassDto): Observable<RecurringClassResponse> {
+    return this.apiService.post<RecurringClassResponse>(API_ENDPOINTS.CLASSES.RECURRING, classData)
+      .pipe(
+        map(response => {
+          if (response.data) {
+            return response.data;
+          }
+          throw new Error('Invalid response format');
+        }),
+        catchError(error => {
+          console.error('Create recurring classes error:', error);
           return throwError(() => error);
         })
       );
