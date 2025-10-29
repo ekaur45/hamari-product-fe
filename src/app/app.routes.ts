@@ -18,6 +18,13 @@ export const routes: Routes = [
                 path: '',
                 component: Dashboard
             },
+            // My Invitations - Teachers
+            {
+                path: 'invitations',
+                loadChildren: () => import('./views/invitations/invitations.routes').then(m => m.invitationsRoutes),
+                canActivate: [RoleGuard],
+                data: { roles: [UserRole.TEACHER] }
+            },
             {
                 path: 'design-system',
                 component: DesignSystem

@@ -14,6 +14,7 @@ export interface Class {
   startDate: Date;
   endDate: Date;
   schedule: ClassSchedule;
+  meetingLink?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

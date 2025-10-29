@@ -55,6 +55,13 @@
               <dt class="text-sm font-medium text-gray-500">Max Students</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ class()?.maxStudents || 'Not specified' }}</dd>
             </div>
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-gray-500">Meeting Link</dt>
+              <dd class="mt-1 text-sm text-blue-700 sm:mt-0 sm:col-span-2">
+                <a *ngIf="class()?.meetingLink" [href]="class()?.meetingLink" target="_blank" class="text-blue-600 hover:text-blue-500">Join Session</a>
+                <span *ngIf="!class()?.meetingLink">Not provided</span>
+              </dd>
+            </div>
             <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Status</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">

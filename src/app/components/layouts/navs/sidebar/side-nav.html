@@ -143,6 +143,12 @@
           </svg>
           Profile
         </a>
+        <a *ngIf="hasRole([UserRole.TEACHER])"
+           routerLink="/invitations" routerLinkActive="bg-blue-50 border-blue-500 text-blue-700"
+           class="group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <i class="pi pi-envelope mr-3"></i>
+          Invitations
+        </a>
       </div>
 
       <!-- Settings Section -->

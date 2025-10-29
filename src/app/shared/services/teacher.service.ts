@@ -4,6 +4,7 @@ import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
 import { Teacher, CreateTeacherDto, UpdateTeacherDto, PaginatedApiResponse, CreateTeacherDirectDto, TeacherDirectResponse } from '../models';
+import { API_ENDPOINTS as ENDPOINTS } from '../constants';
 
 /**
  * Teacher Service
@@ -200,6 +201,31 @@ export class TeacherService {
           return throwError(() => error);
         })
       );
+  }
+
+  // Teacher subjects (self-managed)
+  getMySubjects(): Observable<Array<{ id: string; subjectId: string; subjectName?: string; fee?: number }>> {
+    return this.apiService.get<any>(`${ENDPOINTS.TEACHERS.BASE}/my-subjects`).pipe(
+      map((res) => (res?.data ?? [])),
+    );
+  }
+
+  addMySubject(subjectId: string, fee?: number): Observable<any> {
+    return this.apiService.post<any>(`${ENDPOINTS.TEACHERS.BASE}/my-subjects`, { subjectId, fee }).pipe(
+      map((res) => res?.data ?? res),
+    );
+  }
+
+  updateMySubject(id: string, fee?: number): Observable<any> {
+    return this.apiService.put<any>(`${ENDPOINTS.TEACHERS.BASE}/my-subjects/${id}`, { fee }).pipe(
+      map((res) => res?.data ?? res),
+    );
+  }
+
+  removeMySubject(id: string): Observable<any> {
+    return this.apiService.delete<any>(`${ENDPOINTS.TEACHERS.BASE}/my-subjects/${id}`).pipe(
+      map((res) => res?.data ?? res),
+    );
   }
 
   /**
