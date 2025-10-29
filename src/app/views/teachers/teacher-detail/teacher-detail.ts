@@ -27,6 +27,7 @@ export class TeacherDetail implements OnInit {
 
   ngOnInit(): void {
     const teacherId = this.route.snapshot.paramMap.get('id');
+    debugger
     if (teacherId) {
       this.loadTeacher(teacherId);
     }

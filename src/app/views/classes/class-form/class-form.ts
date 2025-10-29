@@ -4,12 +4,14 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, ActivatedRoute } from '@angular/router';
 import { ClassService } from '../../../shared/services/class.service';
 import { AcademyService } from '../../../shared/services/academy.service';
-import { Class, Academy, CreateClassDto, UpdateClassDto } from '../../../shared/models';
+import { Class, Academy, CreateClassDto, UpdateClassDto, Teacher, AcademyTeacher, PaginatedApiResponse } from '../../../shared/models';
 import { ApiHelper } from '../../../utils/api.helper';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-class-form',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, SelectModule,DatePickerModule],
   templateUrl: './class-form.html',
   styleUrl: './class-form.css'
 })
@@ -22,6 +24,7 @@ export class ClassForm implements OnInit {
   
   academies = signal<Academy[]>([]);
   currentClass = signal<Class | null>(null);
+  academyTeachers = signal<AcademyTeacher[]>([]);
 
   constructor(
     private fb: FormBuilder,
@@ -36,7 +39,13 @@ export class ClassForm implements OnInit {
       academyId: ['', [Validators.required]],
       schedule: [''],
       room: [''],
-      maxStudents: [30, [Validators.min(1)]]
+      maxStudents: [30, [Validators.min(1)]],
+      // added fields required by backend
+      teacherId: [''],
+      type: ['academy', [Validators.required]],
+      fee: [0, [Validators.min(0)]],
+      startDate: [''],
+      endDate: [''],
     });
   }
 
@@ -86,7 +95,20 @@ export class ClassForm implements OnInit {
       }
     });
   }
-
+getAcademyTeachers(){
+  this.academyService.getAcademyTeachers(this.classForm.value.academyId, 1, 100).subscribe({
+    next: (response: PaginatedApiResponse<AcademyTeacher>) => {
+      if (response.data) {
+        console.log(response.data);
+        this.academyTeachers.set(response.data);
+      }
+    },
+    error: (error) => {
+      console.error('Error loading academy teachers:', error);
+      this.errorMessage.set(ApiHelper.formatErrorMessage(error));
+    }
+  });
+}
   onSubmit(): void {
     if (this.classForm.valid && !this.isSubmitting()) {
       this.isSubmitting.set(true);

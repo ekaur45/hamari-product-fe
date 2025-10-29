@@ -87,6 +87,12 @@
           </svg>
           Classes
         </a>
+        <a *ngIf="hasRole([UserRole.ADMIN, UserRole.ACADEMY_OWNER])"
+           routerLink="/subjects" routerLinkActive="bg-blue-50 border-blue-500 text-blue-700"
+           class="group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <i class="fa-solid fa-book mr-3 h-5 w-5"></i>
+          Subjects
+        </a>
         <a *ngIf="hasRole([UserRole.ADMIN])" 
            routerLink="/users" routerLinkActive="bg-blue-50 border-blue-500 text-blue-700"
            class="group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">

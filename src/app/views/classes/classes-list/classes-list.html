@@ -1,14 +1,13 @@
-<div class="min-h-screen bg-gray-50">
   <!-- Header -->
-  <div class="bg-white shadow">
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+  <div class="bg-white shadow rounded-md">
+    <div class="mx-auto py-6 px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">Classes</h1>
           <p class="mt-1 text-sm text-gray-500">Manage class records and information</p>
         </div>
         <div class="flex items-center space-x-3">
-          <a routerLink="/classes/new" class="p-button p-button-primary">
+          <a routerLink="/classes/new" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
             <i class="pi pi-plus mr-2"></i>
             Add Class
           </a>
@@ -18,7 +17,7 @@
   </div>
 
   <!-- Main Content -->
-  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+  <div class="mx-auto py-6">
     <!-- Filters and Search -->
     <div class="bg-white shadow rounded-lg mb-6">
       <div class="px-4 py-5 sm:p-6">
@@ -30,7 +29,7 @@
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <i class="pi pi-search text-gray-400"></i>
               </div>
-              <input type="text" id="search" [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" placeholder="Search classes..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <input type="text" id="search" [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" placeholder="Search classes..." class="appearance-none ps-10 rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
             </div>
           </div>
 
@@ -59,11 +58,6 @@
               class="w-full">
             </p-select>
           </div>
-
-          <!-- Results Count -->
-          <div class="flex items-end">
-            <div class="text-sm text-gray-500">Showing {{ classes().length }} of {{ totalItems() }} classes</div>
-          </div>
         </div>
       </div>
     </div>
@@ -82,21 +76,39 @@
 
     <!-- Classes Table -->
     <div class="bg-white shadow overflow-hidden sm:rounded-md">
-      <div class="px-4 py-5 sm:px-6">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">Classes List</h3>
-        <p class="mt-1 max-w-2xl text-sm text-gray-500">A list of all classes in the system</p>
-      </div>
 
       <!-- Loading State -->
-      <div *ngIf="isLoading()" class="px-4 py-5 sm:px-6">
-        <div class="flex justify-center items-center py-8">
-          <i class="pi pi-spin pi-spinner text-blue-600 text-2xl"></i>
+      @if(isLoading()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="flex items-center">
+          <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
           <span class="ml-2 text-gray-600">Loading classes...</span>
         </div>
       </div>
-
+}
+@if (!isLoading() && classes().length === 0) {
+  <div class="text-center py-12">
+    <div class="mx-auto h-12 w-12 text-gray-400">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+      </svg>
+    </div>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No classes</h3>
+    <p class="mt-1 text-sm text-gray-500">Get started by creating a new class.</p>
+    <div class="mt-6">
+      <a routerLink="/classes/new" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+        <i class="pi pi-plus mr-2"></i>
+        Add Class
+      </a>
+    </div>
+  </div>
+}
+@if (!isLoading() && classes().length > 0) {
       <!-- Table -->
-      <div *ngIf="!isLoading()" class="overflow-x-auto">
+      <div class="overflow-x-auto">
         <p-table
           [value]="classes()"
           [lazy]="true"
@@ -165,6 +177,6 @@
           </ng-template>
         </p-table>
       </div>
+}
     </div>
   </div>
-</div>

@@ -60,6 +60,13 @@ export const API_ENDPOINTS = {
     SEARCH: '/classes/search'
   },
 
+  // Subjects
+  SUBJECTS: {
+    BASE: '/subjects',
+    BY_ID: (id: string) => `/subjects/${id}`,
+    BY_ACADEMY: (academyId: string) => `/subjects/academy/${academyId}`,
+  },
+
   // Enrollments
   ENROLLMENTS: {
     BASE: '/enrollments',

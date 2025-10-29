@@ -50,6 +50,12 @@ export const routes: Routes = [
                 canActivate: [RoleGuard],
                 data: { roles: [UserRole.ADMIN, UserRole.ACADEMY_OWNER, UserRole.TEACHER] }
             },
+            {
+                path: 'subjects',
+                loadChildren: () => import('./views/subjects/subjects.routes').then(m => m.subjectRoutes),
+                canActivate: [RoleGuard],
+                data: { roles: [UserRole.ADMIN, UserRole.ACADEMY_OWNER, UserRole.TEACHER] }
+            },
             // Payment Management Routes - Admin and Academy Owner only
             {
                 path: 'payments',
@@ -87,10 +93,10 @@ export const routes: Routes = [
                 path: 'performance',
                 loadChildren: () => import('./views/performance/performance.routes').then(m => m.performanceRoutes)
             },
-            {
-                path: '**',
-                loadComponent: () => import('./views/not-found/not-found').then(m => m.NotFound)
-            }
+            // {
+            //     path: '**',
+            //     loadComponent: () => import('./views/not-found/not-found').then(m => m.NotFound)
+            // }
         ]
     },
     {
@@ -112,8 +118,8 @@ export const routes: Routes = [
             }
         ]
     },
-    {
-        path: '**',
-        loadComponent: () => import('./views/not-found/not-found').then(m => m.NotFound)
-    }
+    // {
+    //     path: '**',
+    //     loadComponent: () => import('./views/not-found/not-found').then(m => m.NotFound)
+    // }
 ];

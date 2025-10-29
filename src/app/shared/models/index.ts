@@ -12,3 +12,4 @@ export * from './class.interface';
 export * from './payment.interface';
 export * from './performance.interface';
 export * from './parent-child.interface';
+export * from './subject.interface';

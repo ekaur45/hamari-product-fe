@@ -86,9 +86,10 @@ export class ClassesList implements OnInit {
         this.isLoading.set(false);
       },
       error: (error) => {
+        debugger;
         console.error('Error loading classes:', error);
-        this.errorMessage.set(ApiHelper.formatErrorMessage(error));
         this.isLoading.set(false);
+        this.errorMessage.set(ApiHelper.formatErrorMessage(error));
       }
     });
   }
@@ -124,7 +125,7 @@ export class ClassesList implements OnInit {
     const page = Math.floor(first / rows) + 1;
     this.pageSize.set(rows);
     this.currentPage.set(page);
-    this.loadClasses();
+    //this.loadClasses();
   }
 
   onEdit(classItem: Class): void {

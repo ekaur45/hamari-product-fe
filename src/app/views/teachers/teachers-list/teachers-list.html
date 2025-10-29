@@ -111,7 +111,6 @@
               Name
               <p-sortIcon field="firstName"></p-sortIcon>
             </th>
-            <th>Employee ID</th>
             <th>Academy</th>
             <th>Department</th>
             <th>Specialization</th>
@@ -130,18 +129,17 @@
               <div class="flex items-center">
                 <div class="flex-shrink-0 h-10 w-10">
                   <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                    <span class="text-sm font-medium text-gray-700">{{ teacher.user?.firstName?.charAt(0) }}{{
-                      teacher.user?.lastName?.charAt(0) }}</span>
+                    <span class="text-sm font-medium text-gray-700">{{ teacher.teacher?.firstName?.charAt(0) }}{{
+                      teacher.teacher?.lastName?.charAt(0) }}</span>
                   </div>
                 </div>
                 <div class="ml-4">
-                  <div class="text-sm font-medium text-gray-900">{{ teacher.user?.firstName }} {{ teacher.user?.lastName
+                  <div class="text-sm font-medium text-gray-900">{{ teacher.teacher?.firstName }} {{ teacher.teacher?.lastName
                     }}</div>
-                  <div class="text-sm text-gray-500">{{ teacher.user?.email }}</div>
+                  <div class="text-sm text-gray-500">{{ teacher.teacher?.email }}</div>
                 </div>
               </div>
             </td>
-            <td class="text-sm text-gray-900">{{ teacher.employeeId }}</td>
             <td class="text-sm text-gray-900">{{ getAcademyName(teacher.academyId) }}</td>
             <td class="text-sm text-gray-900">{{ teacher.department || 'Not assigned' }}</td>
             <td class="text-sm text-gray-900">{{ teacher.specialization || 'Not specified' }}</td>
@@ -152,23 +150,15 @@
             <td class="text-sm text-gray-500">{{ teacher.joinedAt | date:'short' }}</td>
             <td>
               <div class="flex items-center space-x-2">
-                <button (click)="onView(teacher)" class="p-button p-button-text p-button-sm">
-                  <i class="pi pi-eye mr-1"></i>
-                  View
-                </button>
-                <button (click)="onEdit(teacher)" class="p-button p-button-text p-button-sm">
-                  <i class="pi pi-pencil mr-1"></i>
-                  Edit
-                </button>
-                <button (click)="onToggleStatus(teacher)"
-                  [class]="teacher.isActive ? 'p-button p-button-text p-button-sm p-button-danger' : 'p-button p-button-text p-button-sm p-button-success'">
-                  <i [class]="teacher.isActive ? 'pi pi-times mr-1' : 'pi pi-check mr-1'"></i>
-                  {{ teacher.isActive ? 'Deactivate' : 'Activate' }}
-                </button>
-                <button (click)="onDelete(teacher)" class="p-button p-button-text p-button-sm p-button-danger">
-                  <i class="pi pi-trash mr-1"></i>
-                  Delete
-                </button>
+                <p-button (click)="onView(teacher.teacher)" severity="info" icon="pi pi-eye" text="true">
+                </p-button>
+                <p-button (click)="onEdit(teacher)" severity="success" icon="pi pi-pencil" text="true">
+                </p-button>
+                <p-button (click)="onToggleStatus(teacher)"
+                  [severity]="teacher.isActive ? 'danger' : 'success'" icon="pi pi-ban" text="true">
+                </p-button>
+                <p-button (click)="onDelete(teacher)" severity="danger" icon="pi pi-trash" text="true">
+                </p-button>
               </div>
             </td>
           </tr>
