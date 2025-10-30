@@ -5,6 +5,8 @@ export interface Teacher {
   id: string;
   userId: string;
   academyId: string;
+  firstName: string;
+  lastName: string;
   employeeId: string; // Employee ID within the academy
   department?: string;
   specialization?: string;

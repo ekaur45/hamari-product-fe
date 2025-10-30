@@ -4,7 +4,8 @@ import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ClassService } from '../../../shared/services/class.service';
 import { AcademyService } from '../../../shared/services/academy.service';
-import { Class, Academy, PaginatedApiResponse } from '../../../shared/models';
+import { Class, Academy, PaginatedApiResponse, UserRole } from '../../../shared/models';
+import { AuthService } from '../../../shared/services/auth.service';
 import { ApiHelper } from '../../../utils/api.helper';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -44,10 +45,14 @@ export class ClassesList implements OnInit {
   sortField = signal('');
   sortDirection = signal<'asc' | 'desc'>('asc');
 
+  // Expose enum and role-check to the template
+  UserRole = UserRole;
+
   constructor(
     private classService: ClassService,
     private academyService: AcademyService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -175,5 +180,9 @@ export class ClassesList implements OnInit {
 
   getStatusText(isActive: boolean): string {
     return isActive ? 'Active' : 'Inactive';
+  }
+
+  hasRole(roles: UserRole[]): boolean {
+    return this.authService.hasAnyRole(roles as unknown as string[]);
   }
 }

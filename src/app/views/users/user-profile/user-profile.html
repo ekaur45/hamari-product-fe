@@ -1,272 +1,365 @@
+<div class="mx-auto space-y-6">
 
-  <div class="mx-auto space-y-6">
-    
-    <!-- Header Card -->
-    <p-card>
-      <ng-template pTemplate="content">
-        <div *ngIf="isLoading(); else headerContent" class="flex items-center gap-4">
-          <p-skeleton shape="circle" size="4rem" class="mr-2"></p-skeleton>
-          <div class="flex-1">
-            <p-skeleton width="12rem" height="1.25rem" class="mb-2"></p-skeleton>
-            <p-skeleton width="8rem" height="1rem"></p-skeleton>
+  <!-- Header Card -->
+  <p-card>
+    <ng-template pTemplate="content">
+      <!-- Skeleton Loader -->
+      @if (isLoading()) {
+      <div class="flex items-center gap-4">
+        <p-skeleton shape="circle" size="4rem" class="mr-2"></p-skeleton>
+        <div class="flex-1">
+          <p-skeleton width="12rem" height="1.25rem" class="mb-2"></p-skeleton>
+          <p-skeleton width="8rem" height="1rem"></p-skeleton>
+        </div>
+      </div>
+      } @else {
+      @if (user; as u) {
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div class="flex items-center gap-4">
+          <label for="updateAvatarInput" class="relative">
+            <div
+              class="rounded-full absolute opacity-0 top-0 right-0 bg-gray-500 p-2 transition-opacity duration-300 flex items-center justify-center h-full w-full hover:opacity-90 cursor-pointer">
+              <i class="pi pi-image text-white text-2xl"></i>
+            </div>
+            <input type="file" id="updateAvatarInput" accept="image/*" (change)="onAvatarSelected($event)" hidden>
+            <p-avatar label="{{ u.firstName.charAt(0) }}{{ u.lastName.charAt(0) }}" shape="circle" size="xlarge"
+              styleClass="bg-blue-600 text-white"></p-avatar>
+          </label>
+          <div>
+            <div class="text-xl font-semibold text-gray-900">{{ u.firstName }} {{ u.lastName }}</div>
+            <div class="text-sm text-gray-500">@{{ u.username }}</div>
+            <div class="mt-2 flex items-center gap-2">
+              <p-tag [value]="u.role"
+                [severity]="u.role === 'Admin' ? 'danger' : (u.role === 'Academy Owner' ? 'warn' : (u.role === 'Teacher' ? 'info' : (u.role === 'Student' ? 'success' : 'secondary')))"
+                rounded="true"></p-tag>
+              <p-tag [value]="u.isActive ? 'Active' : 'Inactive'" [severity]="u.isActive ? 'success' : 'secondary'"
+                rounded="true"></p-tag>
+            </div>
           </div>
         </div>
-        <ng-template #headerContent>
-          <div *ngIf="user as u" class="flex items-center justify-between gap-4 flex-wrap">
-            <div class="flex items-center gap-4">
-              <p-avatar label="{{ u.firstName.charAt(0) }}{{ u.lastName.charAt(0) }}" shape="circle" size="xlarge" styleClass="bg-blue-600 text-white"></p-avatar>
+        <div class="flex items-center gap-2">
+          <a routerLink="/users"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"><i
+              class="pi pi-arrow-left mr-2"></i>Back</a>
+          <a [routerLink]="['/users', u.id, 'edit']"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"><i
+              class="pi pi-pencil mr-2"></i>Edit</a>
+        </div>
+      </div>
+      }
+      }
+    </ng-template>
+  </p-card>
+
+  <!-- Two Column Content -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+    <!-- Left rail -->
+    <div class="lg:col-span-4 space-y-4">
+      <p-card>
+        <ng-template pTemplate="title">About</ng-template>
+        <ng-template pTemplate="content">
+          @if (user; as u) {
+          <div class="space-y-3 text-sm">
+            <div class="text-gray-700 whitespace-pre-line">{{ u.userDetails?.bio || 'Add something about yourself.' }}
+            </div>
+          </div>
+          }
+        </ng-template>
+      </p-card>
+      <p-card>
+        <ng-template pTemplate="title">Address</ng-template>
+        <ng-template pTemplate="content">
+          @if (user; as u) {
+          <div class="text-sm text-gray-700">{{ u.userDetails?.address || '-' }}</div>
+          }
+        </ng-template>
+      </p-card>
+    </div>
+
+    <!-- Main content -->
+    <div class="lg:col-span-8 space-y-4">
+      <p-card>
+        <ng-template pTemplate="title">
+          <div class="flex items-center justify-between">
+            <span>Education</span>
+            <button
+              class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              (click)="openAddEducation()"><i class="pi pi-plus mr-2"></i>Add</button>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="content">
+          <div class="space-y-3 text-sm text-gray-700">
+            @if (educations.length === 0) {
+            <div class="text-gray-500">No education added yet.</div>
+            } @else {
+            @for (e of educations; track e.id) {
+            <div class="flex items-start justify-between gap-3 border-b last:border-0 py-2">
               <div>
-                <div class="text-xl font-semibold text-gray-900">{{ u.firstName }} {{ u.lastName }}</div>
-                <div class="text-sm text-gray-500">@{{ u.username }}</div>
-                <div class="mt-2 flex items-center gap-2">
-                  <p-tag [value]="u.role" [severity]="u.role === 'Admin' ? 'danger' : (u.role === 'Academy Owner' ? 'warn' : (u.role === 'Teacher' ? 'info' : (u.role === 'Student' ? 'success' : 'secondary')))" rounded="true"></p-tag>
-                  <p-tag [value]="u.isActive ? 'Active' : 'Inactive'" [severity]="u.isActive ? 'success' : 'secondary'" rounded="true"></p-tag>
+                <div class="font-medium">{{ e.title || e.type | titlecase }}
+                  @if (e.field) {
+                  <span> • {{ e.field }}</span>
+                  }
                 </div>
+                <div class="text-gray-600">{{ e.institution }}</div>
+                <div class="text-gray-500 text-xs">{{ e.startDate | date:'MMM y' }} - {{ e.stillStudying ? 'Present' :
+                  (e.endDate | date:'MMM y') }}</div>
+                @if (e.description) {
+                <div class="text-gray-600">{{ e.description }}</div>
+                }
+              </div>
+              <div class="shrink-0 flex items-center gap-2">
+                <button
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  (click)="openEditEducation(e)"><i class="pi pi-pencil"></i></button>
+                <button
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  (click)="deleteEducation(e)"><i class="pi pi-trash"></i></button>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <a routerLink="/users" class="p-button p-button-text p-button-secondary"><i class="pi pi-arrow-left mr-2"></i>Back</a>
-              <a [routerLink]="['/users', u.id, 'edit']" class="p-button p-button-success"><i class="pi pi-pencil mr-2"></i>Edit</a>
+            }
+            }
+          </div>
+        </ng-template>
+      </p-card>
+
+      @if (user?.role === 'Teacher') {
+      <p-card>
+        <ng-template pTemplate="title">
+          <div class="flex items-center justify-between">
+            <span>Availability</span>
+            <button
+              class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              (click)="openAvailabilityDialog()"><i class="pi pi-pencil mr-2"></i>Edit</button>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="content">
+          <div class="space-y-3 text-sm text-gray-700">
+            @if (availability.length === 0) {
+            <div class="text-gray-500">No availability set yet.</div>
+            } @else {
+            @for (slot of availability; track slot.id) {
+            <div class="flex items-center justify-between gap-3 border-b last:border-0 py-2">
+              <div>
+                <div class="font-medium">{{ getDayName(slot.dayOfWeek) }}</div>
+                <div class="text-gray-600">{{ slot.startTime }} - {{ slot.endTime }}</div>
+                @if (slot.notes) {
+                <div class="text-gray-500 text-xs">{{ slot.notes }}</div>
+                }
+              </div>
+            </div>
+            }
+            }
+          </div>
+        </ng-template>
+      </p-card>
+      }
+
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <p-card>
+          <ng-template pTemplate="title">Activity</ng-template>
+          <ng-template pTemplate="content">
+            <div class="space-y-3 text-sm text-gray-700">
+              <div class="flex items-start gap-2"><i class="pi pi-clock mt-0.5 text-gray-400"></i>
+                <div>Last login: -</div>
+              </div>
+              <div class="flex items-start gap-2"><i class="pi pi-bell mt-0.5 text-gray-400"></i>
+                <div>No new notifications.</div>
+              </div>
+            </div>
+          </ng-template>
+        </p-card>
+        <p-card>
+          <ng-template pTemplate="title">Compensation</ng-template>
+          <ng-template pTemplate="content">
+            <div class="space-y-3 text-sm text-gray-700">
+              <div>862.00 USD per month</div>
+              <div class="text-gray-500">Effective date: -</div>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+
+      <!-- Academy Owner: manage own academy inline -->
+      @if (user?.role === 'Academy Owner' && ownerAcademy; as ac) {
+      <p-card>
+        <ng-template pTemplate="title">
+          <div class="flex items-center justify-between">
+            <span>My Academy</span>
+            <button
+              class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              (click)="saveOwnerAcademy()"><i class="pi pi-check mr-2"></i>Save</button>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="content">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-600">Name</label>
+              <input [(ngModel)]="ac.name"
+                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-600">Phone</label>
+              <input [(ngModel)]="ac.phone"
+                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs text-gray-600">Address</label>
+              <input [(ngModel)]="ac.address"
+                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-600">Website</label>
+              <input [(ngModel)]="ac.website"
+                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs text-gray-600">Description</label>
+              <textarea rows="3" [(ngModel)]="ac.description"
+                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"></textarea>
             </div>
           </div>
         </ng-template>
-      </ng-template>
-    </p-card>
-
-    <!-- Two Column Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-      <!-- Left rail -->
-      <div class="lg:col-span-4 space-y-4">
-        <p-card>
-          <ng-template pTemplate="title">About</ng-template>
-          <ng-template pTemplate="content">
-            <div class="space-y-3 text-sm" *ngIf="user as u">
-              <div class="text-gray-700 whitespace-pre-line">{{ u.userDetails?.bio || 'Add something about yourself.' }}</div>
-              <div class="flex items-center gap-2">
-                <input type="file" accept="image/*" (change)="onAvatarSelected($event)" hidden id="avatarInput">
-                <label for="avatarInput" class="p-button p-button-sm"><i class="pi pi-image mr-2"></i>Update profile picture</label>
-              </div>
-            </div>
-          </ng-template>
-        </p-card>
-        <p-card>
-          <ng-template pTemplate="title">Address</ng-template>
-          <ng-template pTemplate="content">
-            <div class="text-sm text-gray-700" *ngIf="user as u">{{ u.userDetails?.address || '-' }}</div>
-          </ng-template>
-        </p-card>
-      </div>
-
-      <!-- Main content -->
-      <div class="lg:col-span-8 space-y-4">
-        <p-card>
-          <ng-template pTemplate="title">
-            <div class="flex items-center justify-between">
-              <span>Education</span>
-              <button class="p-button p-button-sm p-button-text" (click)="openAddEducation()"><i class="pi pi-plus mr-2"></i>Add</button>
-            </div>
-          </ng-template>
-          <ng-template pTemplate="content">
-            <div class="space-y-3 text-sm text-gray-700">
-              <div *ngIf="educations.length === 0" class="text-gray-500">No education added yet.</div>
-              @for (e of educations; track e.id) {
-                <div class="flex items-start justify-between gap-3 border-b last:border-0 py-2">
-                  <div>
-                    <div class="font-medium">{{ e.title || e.type | titlecase }}<span *ngIf="e.field"> • {{ e.field }}</span></div>
-                    <div class="text-gray-600">{{ e.institution }}</div>
-                    <div class="text-gray-500 text-xs">{{ e.startDate | date:'MMM y' }} - {{ e.stillStudying ? 'Present' : (e.endDate | date:'MMM y') }}</div>
-                    <div class="text-gray-600" *ngIf="e.description">{{ e.description }}</div>
-                  </div>
-                  <div class="shrink-0 flex items-center gap-2">
-                    <button class="p-button p-button-text p-button-sm" (click)="openEditEducation(e)"><i class="pi pi-pencil"></i></button>
-                    <button class="p-button p-button-text p-button-danger p-button-sm" (click)="deleteEducation(e)"><i class="pi pi-trash"></i></button>
-                  </div>
-                </div>
-              }
-            </div>
-          </ng-template>
-        </p-card>
-
-        <p-card *ngIf="user?.role === 'Teacher'">
-          <ng-template pTemplate="title">
-            <div class="flex items-center justify-between">
-              <span>Availability</span>
-              <button class="p-button p-button-sm p-button-text" (click)="openAvailabilityDialog()"><i class="pi pi-pencil mr-2"></i>Edit</button>
-            </div>
-          </ng-template>
-          <ng-template pTemplate="content">
-            <div class="space-y-3 text-sm text-gray-700">
-              <div *ngIf="availability.length === 0" class="text-gray-500">No availability set yet.</div>
-              <div *ngFor="let slot of availability" class="flex items-center justify-between gap-3 border-b last:border-0 py-2">
-                <div>
-                  <div class="font-medium">{{ getDayName(slot.dayOfWeek) }}</div>
-                  <div class="text-gray-600">{{ slot.startTime }} - {{ slot.endTime }}</div>
-                  <div class="text-gray-500 text-xs" *ngIf="slot.notes">{{ slot.notes }}</div>
-                </div>
-              </div>
-            </div>
-          </ng-template>
-        </p-card>
-
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <p-card>
-            <ng-template pTemplate="title">Activity</ng-template>
-            <ng-template pTemplate="content">
-              <div class="space-y-3 text-sm text-gray-700">
-                <div class="flex items-start gap-2"><i class="pi pi-clock mt-0.5 text-gray-400"></i><div>Last login: -</div></div>
-                <div class="flex items-start gap-2"><i class="pi pi-bell mt-0.5 text-gray-400"></i><div>No new notifications.</div></div>
-              </div>
-            </ng-template>
-          </p-card>
-          <p-card>
-            <ng-template pTemplate="title">Compensation</ng-template>
-            <ng-template pTemplate="content">
-              <div class="space-y-3 text-sm text-gray-700">
-                <div>862.00 USD per month</div>
-                <div class="text-gray-500">Effective date: -</div>
-              </div>
-            </ng-template>
-          </p-card>
-        </div>
-
-        <!-- Academy Owner: manage own academy inline -->
-        <p-card *ngIf="user?.role === 'Academy Owner' && ownerAcademy as ac">
-          <ng-template pTemplate="title">
-            <div class="flex items-center justify-between">
-              <span>My Academy</span>
-              <button class="p-button p-button-sm p-button-text" (click)="saveOwnerAcademy()"><i class="pi pi-check mr-2"></i>Save</button>
-            </div>
-          </ng-template>
-          <ng-template pTemplate="content">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label class="text-xs text-gray-600">Name</label>
-                <input [(ngModel)]="ac.name" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
-              </div>
-              <div>
-                <label class="text-xs text-gray-600">Phone</label>
-                <input [(ngModel)]="ac.phone" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
-              </div>
-              <div class="md:col-span-2">
-                <label class="text-xs text-gray-600">Address</label>
-                <input [(ngModel)]="ac.address" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
-              </div>
-              <div>
-                <label class="text-xs text-gray-600">Website</label>
-                <input [(ngModel)]="ac.website" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
-              </div>
-              <div class="md:col-span-2">
-                <label class="text-xs text-gray-600">Description</label>
-                <textarea rows="3" [(ngModel)]="ac.description" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"></textarea>
-              </div>
-            </div>
-          </ng-template>
-        </p-card>
-      </div>
+      </p-card>
+      }
     </div>
+  </div>
 
-    <!-- Education Dialog -->
-    <p-dialog [(visible)]="educationDialogVisible" [modal]="true" [style]="{width: '520px'}" [dismissableMask]="true" [draggable]="false">
-      <ng-template pTemplate="header">{{ isEditingEducation ? 'Edit Education' : 'Add Education' }}</ng-template>
-      <form *ngIf="educationForm as f" [formGroup]="f" class="space-y-3">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs text-gray-600">Type</label>
-            <p-select [options]="educationTypes" 
-            optionLabel="label"
-            optionValue="value"
-            formControlName="type"
+  <!-- Education Dialog -->
+  <p-dialog [(visible)]="educationDialogVisible" [modal]="true" [style]="{width: '520px'}" [dismissableMask]="true"
+    [draggable]="false">
+    <ng-template pTemplate="header">{{ isEditingEducation ? 'Edit Education' : 'Add Education' }}</ng-template>
+    @if (educationForm; as f) {
+    <form [formGroup]="f" class="space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-600">Type</label>
+          <p-select [options]="educationTypes" optionLabel="label" optionValue="value" formControlName="type"
             class="w-full"></p-select>
-          </div>
-          <div>
-            <label class="text-xs text-gray-600">Institution</label>
-            <input type="text" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" formControlName="institution" />
-          </div>
-          <div>
-            <label class="text-xs text-gray-600">Title/Degree</label>
-            <input type="text" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" formControlName="title" />
-          </div>
-          <div>
-            <label class="text-xs text-gray-600">Field</label>
-            <input type="text" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" formControlName="field" />
-          </div>
-          <div>
-            <label class="text-xs text-gray-600">Start Date</label>
-            <input type="date" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" formControlName="startDate" />
-          </div>
-          <div>
-            <label class="text-xs text-gray-600">End Date</label>
-            <input type="date" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" formControlName="endDate" />
-          </div>
-          <div class="col-span-2 flex items-center gap-2">
-            <input id="still" type="checkbox" formControlName="stillStudying" />
-            <label for="still" class="text-sm">I still study here</label>
-          </div>
-          <div class="col-span-2">
-            <label class="text-xs text-gray-600">Credential URL</label>
-            <input type="url" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" formControlName="credentialUrl" />
-          </div>
-          <div class="col-span-2">
-            <label class="text-xs text-gray-600">Description</label>
-            <textarea rows="3" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" formControlName="description"></textarea>
-          </div>
         </div>
-      </form>
-      <ng-template pTemplate="footer">
-        <button class="p-button p-button-text" (click)="educationDialogVisible=false">Cancel</button>
-        <button class="p-button p-button-primary" [disabled]="isSavingEducation() || !educationForm" (click)="saveEducation()">
-          <i *ngIf="!isSavingEducation()" class="pi pi-check mr-2"></i>
-          <i *ngIf="isSavingEducation()" class="pi pi-spin pi-spinner mr-2"></i>
-          Save
-        </button>
-      </ng-template>
-    </p-dialog>
+        <div>
+          <label class="text-xs text-gray-600">Institution</label>
+          <input type="text"
+            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+            formControlName="institution" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">Title/Degree</label>
+          <input type="text"
+            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+            formControlName="title" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">Field</label>
+          <input type="text"
+            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+            formControlName="field" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">Start Date</label>
+          <input type="date"
+            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+            formControlName="startDate" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">End Date</label>
+          <input type="date"
+            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+            formControlName="endDate" />
+        </div>
+        <div class="col-span-2 flex items-center gap-2">
+          <input id="still" type="checkbox" formControlName="stillStudying" />
+          <label for="still" class="text-sm">I still study here</label>
+        </div>
+        <div class="col-span-2">
+          <label class="text-xs text-gray-600">Credential URL</label>
+          <input type="url"
+            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+            formControlName="credentialUrl" />
+        </div>
+        <div class="col-span-2">
+          <label class="text-xs text-gray-600">Description</label>
+          <textarea rows="3"
+            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+            formControlName="description"></textarea>
+        </div>
+      </div>
+    </form>
+    }
+    <ng-template pTemplate="footer">
+      <button
+        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        (click)="educationDialogVisible=false">Cancel</button>
+      <button
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        [disabled]="isSavingEducation() || !educationForm" (click)="saveEducation()">
+        @if (isSavingEducation()) {
+        <i class="pi pi-spin pi-spinner mr-2"></i>
+        } @else {
+        <i class="pi pi-check mr-2"></i>
+        }
+        Save
+      </button>
+    </ng-template>
+  </p-dialog>
 
-    <!-- Availability Dialog -->
-    <p-dialog [(visible)]="availabilityDialogVisible" [modal]="true" [style]="{width: '520px'}" [dismissableMask]="true" [draggable]="false">
-      <ng-template pTemplate="header">Edit Availability</ng-template>
-      <form *ngIf="availabilityForm as f" [formGroup]="f" class="space-y-3">
-        <div class="text-sm text-gray-600 mb-4">Set your weekly availability for classes.</div>
-        <div class="space-y-3" formArrayName="slots">
-          <div *ngFor="let slot of getAvailabilitySlots().controls; let i = index" [formGroupName]="i" class="flex items-center gap-3 p-3 border rounded">
-            <div class="flex-1">
-              <label class="text-xs text-gray-600">Day</label>
-              <select class="w-full p-inputtext" formControlName="dayOfWeek">
-                <option value="0">Sunday</option>
-                <option value="1">Monday</option>
-                <option value="2">Tuesday</option>
-                <option value="3">Wednesday</option>
-                <option value="4">Thursday</option>
-                <option value="5">Friday</option>
-                <option value="6">Saturday</option>
-              </select>
-            </div>
-            <div class="flex-1">
-              <label class="text-xs text-gray-600">Start Time</label>
-              <input type="time" class="w-full p-inputtext" formControlName="startTime" />
-            </div>
-            <div class="flex-1">
-              <label class="text-xs text-gray-600">End Time</label>
-              <input type="time" class="w-full p-inputtext" formControlName="endTime" />
-            </div>
-            <div class="flex-1">
-              <label class="text-xs text-gray-600">Notes</label>
-              <input type="text" class="w-full p-inputtext" formControlName="notes" placeholder="Optional" />
-            </div>
-            <button type="button" class="p-button p-button-danger p-button-sm" (click)="removeAvailabilitySlot(i)">
-              <i class="pi pi-trash"></i>
-            </button>
+  <!-- Availability Dialog -->
+  <p-dialog [(visible)]="availabilityDialogVisible" [modal]="true" [style]="{width: '520px'}" [dismissableMask]="true"
+    [draggable]="false">
+    <ng-template pTemplate="header">Edit Availability</ng-template>
+    @if (availabilityForm; as f) {
+    <form [formGroup]="f" class="space-y-3">
+      <div class="text-sm text-gray-600 mb-4">Set your weekly availability for classes.</div>
+      <div class="space-y-3" formArrayName="slots">
+        @for (slot of getAvailabilitySlots().controls; track slot.value.id; let i = $index) {
+        <div [formGroupName]="i" class="flex items-center gap-3 p-3 border rounded">
+          <div class="flex-1">
+            <label class="text-xs text-gray-600">Day</label>
+            <select class="w-full p-inputtext" formControlName="dayOfWeek">
+              <option value="0">Sunday</option>
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5">Friday</option>
+              <option value="6">Saturday</option>
+            </select>
           </div>
-          <button type="button" class="p-button p-button-text p-button-sm w-full" (click)="addAvailabilitySlot()">
-            <i class="pi pi-plus mr-2"></i>Add Time Slot
+          <div class="flex-1">
+            <label class="text-xs text-gray-600">Start Time</label>
+            <input type="time" class="w-full p-inputtext" formControlName="startTime" />
+          </div>
+          <div class="flex-1">
+            <label class="text-xs text-gray-600">End Time</label>
+            <input type="time" class="w-full p-inputtext" formControlName="endTime" />
+          </div>
+          <div class="flex-1">
+            <label class="text-xs text-gray-600">Notes</label>
+            <input type="text" class="w-full p-inputtext" formControlName="notes" placeholder="Optional" />
+          </div>
+          <button type="button"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            (click)="removeAvailabilitySlot(i)">
+            <i class="pi pi-trash"></i>
           </button>
         </div>
-      </form>
-      <ng-template pTemplate="footer">
-        <button class="p-button p-button-text" (click)="availabilityDialogVisible=false">Cancel</button>
-        <button class="p-button p-button-primary" (click)="saveAvailability()">
-          <i class="pi pi-check mr-2"></i>Save
+        }
+        <button type="button"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full"
+          (click)="addAvailabilitySlot()">
+          <i class="pi pi-plus mr-2"></i>Add Time Slot
         </button>
-      </ng-template>
-    </p-dialog>
+      </div>
+    </form>
+    }
+    <ng-template pTemplate="footer">
+      <button
+        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        (click)="availabilityDialogVisible=false">Cancel</button>
+      <button
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        (click)="saveAvailability()">
+        <i class="pi pi-check mr-2"></i>Save
+      </button>
+    </ng-template>
+  </p-dialog>

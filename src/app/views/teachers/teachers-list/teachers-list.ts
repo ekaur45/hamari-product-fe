@@ -4,18 +4,22 @@ import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TeacherService } from '../../../shared/services/teacher.service';
 import { AcademyService } from '../../../shared/services/academy.service';
-import { Teacher, Academy, PaginatedApiResponse } from '../../../shared/models';
+import { Teacher, Academy, PaginatedApiResponse, UserRole, AcademyTeacher } from '../../../shared/models';
+import { AuthService } from '../../../shared/services/auth.service';
 import { ApiHelper } from '../../../utils/api.helper';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { Select } from 'primeng/select';
+import { ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-teachers-list',
-  imports: [CommonModule, RouterLink, FormsModule, TableModule, ButtonModule, TagModule, Select],
+  imports: [CommonModule, RouterLink, FormsModule, TableModule, ButtonModule, TagModule, Select, ConfirmDialogModule],
   templateUrl: './teachers-list.html',
-  styleUrl: './teachers-list.css'
+  styleUrl: './teachers-list.css',
+  providers: [ConfirmationService]
 })
 export class TeachersList implements OnInit {
   teachers = signal<Teacher[]>([]);
@@ -44,10 +48,15 @@ export class TeachersList implements OnInit {
   sortField = signal('');
   sortDirection = signal<'asc' | 'desc'>('asc');
 
+  // Expose enum and role-check to the template
+  UserRole = UserRole;
+
   constructor(
     private teacherService: TeacherService,
     private academyService: AcademyService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -135,18 +144,31 @@ export class TeachersList implements OnInit {
     this.router.navigate(['/teachers', teacher.id]);
   }
 
-  onDelete(teacher: Teacher): void {
-    if (confirm(`Are you sure you want to delete ${teacher.user?.firstName} ${teacher.user?.lastName}?`)) {
-      this.teacherService.deleteTeacher(teacher.id).subscribe({
-        next: () => {
-          this.loadTeachers();
-        },
-        error: (error) => {
-          console.error('Error deleting teacher:', error);
-          this.errorMessage.set(ApiHelper.formatErrorMessage(error));
+  onDelete(teacher: AcademyTeacher): void {
+    debugger
+    this.confirmationService.confirm({
+      message: `Delete teacher ${teacher.teacher?.firstName} ${teacher.teacher?.lastName} ${this.hasRole([UserRole.ACADEMY_OWNER]) ? 'from academy '+ this.getAcademyName(teacher.academyId) : ''}?`,
+      header: 'Delete Teacher',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Yes, Delete',
+      rejectLabel: 'No, Cancel',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        if(this.hasRole([UserRole.ACADEMY_OWNER])) {
+          this.removeTeacherFromAcademy(teacher);
+        } else {
+          this.teacherService.deleteTeacher(teacher.id).subscribe({
+            next: () => {
+              this.loadTeachers();
+            },
+            error: (error) => {
+              console.error('Error deleting teacher:', error);
+              this.errorMessage.set(ApiHelper.formatErrorMessage(error));
+            }
+          });
         }
-      });
-    }
+      }
+    });
   }
 
   onToggleStatus(teacher: Teacher): void {
@@ -174,5 +196,20 @@ export class TeachersList implements OnInit {
 
   getStatusText(isActive: boolean): string {
     return isActive ? 'Active' : 'Inactive';
+  }
+
+  hasRole(roles: UserRole[]): boolean {
+    return this.authService.hasAnyRole(roles as unknown as string[]);
+  }
+  removeTeacherFromAcademy(teacher: AcademyTeacher): void {
+    this.teacherService.removeTeacherFromAcademy(teacher.academyId, teacher.teacherId).subscribe({
+      next: () => {
+        this.loadTeachers();
+      },
+      error: (error) => {
+        console.error('Error removing teacher from academy:', error);
+        this.errorMessage.set(ApiHelper.formatErrorMessage(error));
+      }
+    });
   }
 }
