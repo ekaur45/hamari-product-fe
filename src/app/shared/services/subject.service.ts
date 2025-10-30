@@ -9,6 +9,11 @@ import { Subject, CreateSubjectDto, UpdateSubjectDto, PaginatedApiResponse } fro
 export class SubjectService {
   constructor(private api: ApiService) {}
 
+  getSubjects(page: number = 1, limit: number = 50): Observable<PaginatedApiResponse<Subject>> {
+    return this.api.getPaginated<Subject>(API_ENDPOINTS.SUBJECTS.BASE, page, limit)
+      .pipe(catchError(error => throwError(() => error)));
+  }
+
   getByAcademy(academyId: string): Observable<PaginatedApiResponse<Subject>> {
     return this.api.getPaginated<Subject>(API_ENDPOINTS.SUBJECTS.BY_ACADEMY(academyId), 1, 100)
       .pipe(catchError(error => throwError(() => error)));

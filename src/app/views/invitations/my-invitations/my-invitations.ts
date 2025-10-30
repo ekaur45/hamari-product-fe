@@ -1,6 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -9,7 +8,7 @@ import { InvitationService, InvitationDto } from '../../../shared/services/invit
 @Component({
   selector: 'my-invitations',
   standalone: true,
-  imports: [CommonModule, RouterLink, ButtonModule, TableModule, TagModule],
+  imports: [CommonModule, ButtonModule, TableModule, TagModule],
   templateUrl: './my-invitations.html',
   styleUrl: './my-invitations.css',
 })
@@ -29,6 +28,7 @@ export class MyInvitations implements OnInit {
     this.error.set('');
     this.invitationService.getMyInvitations().subscribe({
       next: (items) => {
+        console.log(items);
         this.invitations.set(items);
         this.isLoading.set(false);
       },

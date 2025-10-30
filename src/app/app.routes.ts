@@ -25,6 +25,13 @@ export const routes: Routes = [
                 canActivate: [RoleGuard],
                 data: { roles: [UserRole.TEACHER] }
             },
+            // My Subjects - Teachers
+            {
+                path: 'my-subjects',
+                loadComponent: () => import('./views/teachers/my-subjects/my-subjects').then(m => m.MySubjects),
+                canActivate: [RoleGuard],
+                data: { roles: [UserRole.TEACHER] }
+            },
             {
                 path: 'design-system',
                 component: DesignSystem

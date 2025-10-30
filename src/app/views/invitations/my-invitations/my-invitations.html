@@ -27,13 +27,17 @@
             <td class="text-sm">{{ item.academy?.name || '—' }}</td>
             <td class="text-sm text-gray-600">{{ item.message || '—' }}</td>
             <td>
-              <p-tag [value]="item.status" [severity]="item.status === 'PENDING' ? 'warn' : (item.status === 'ACCEPTED' ? 'success' : 'danger')"></p-tag>
+              <p-tag [value]="item.status" [severity]="item.status === 'pending' ? 'warn' : (item.status === 'accepted' ? 'success' : 'danger')"></p-tag>
             </td>
             <td class="text-sm">{{ item.expiresAt | date:'short' }}</td>
             <td>
               <div class="flex items-center space-x-2">
-                <p-button *ngIf="item.status === 'PENDING'" (click)="accept(item)" severity="success" icon="pi pi-check" label="Accept"></p-button>
-                <p-button *ngIf="item.status === 'PENDING'" (click)="decline(item)" severity="danger" icon="pi pi-times" label="Decline"></p-button>
+                @if(item.status === 'pending') {
+                  <p-button (click)="accept(item)" severity="success" icon="pi pi-check" text="true" rounded="true"></p-button>
+                }
+                @if(item.status === 'pending') {
+                  <p-button (click)="decline(item)" severity="danger" icon="pi pi-times" text="true" rounded="true"></p-button>
+                }
               </div>
             </td>
           </tr>
