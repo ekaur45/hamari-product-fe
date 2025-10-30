@@ -1,0 +1,100 @@
+<div class="mx-auto py-6">
+  <div class="bg-white shadow rounded-md mb-4">
+    <div class="py-6 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Discover</h1>
+        <p class="mt-1 text-sm text-gray-500">Search teachers and subjects to book</p>
+      </div>
+      <div class="flex items-center space-x-2">
+        <input [ngModel]="query()" (ngModelChange)="onSearchChange($event)" placeholder="Search teachers or subjects..." class="appearance-none relative block w-80 px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" />
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white shadow rounded-md">
+    <div class="p-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div *ngFor="let item of items()" class="p-4 border rounded flex flex-col justify-between">
+          <ng-container [ngSwitch]="item.type">
+            <div *ngSwitchCase="'teacher'">
+              <div class="text-xs uppercase text-gray-500 mb-1">Teacher</div>
+              <div class="text-base font-semibold">{{ (item.data.user?.firstName || item.data.firstName) }} {{ (item.data.user?.lastName || item.data.lastName) }}</div>
+              <div class="text-sm text-gray-600 mb-4">{{ item.data.user?.email || item.data.email }}</div>
+              <div><p-button (click)="openBooking(item.data)" icon="pi pi-calendar" label="Book"></p-button></div>
+            </div>
+            <div *ngSwitchCase="'subject'">
+              <div class="text-xs uppercase text-gray-500 mb-1">Subject</div>
+              <div class="text-base font-semibold mb-4">{{ item.data.name }}</div>
+              <div><p-button (click)="findClassesForSubject(item.data.name)" icon="pi pi-search" label="Find Sessions"></p-button></div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p-dialog [(visible)]="bookingVisible" [modal]="true" [style]="{width: '520px'}" [dismissableMask]="true" [draggable]="false">
+    <ng-template pTemplate="header">Book {{ bookingTeacher?.user?.firstName || bookingTeacher?.firstName }}</ng-template>
+    <div class="text-sm text-gray-600 mb-3">Availability:</div>
+    <div class="text-xs text-gray-600 mb-4" *ngIf="availability.length === 0">No availability provided.</div>
+    <div class="mb-4 space-y-1" *ngIf="availability.length > 0">
+      <div *ngFor="let s of availability">Day {{ s.dayOfWeek }}: {{ s.startTime }} - {{ s.endTime }} <span *ngIf="s.notes">• {{ s.notes }}</span></div>
+    </div>
+    @if (bookingForm; as f) {
+    <form [formGroup]="f" class="space-y-3">
+      <div>
+        <label class="text-xs text-gray-600">Date</label>
+        <input type="date" class="w-full p-inputtext" formControlName="date" />
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-600">Start</label>
+          <input type="time" class="w-full p-inputtext" formControlName="startTime" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">End</label>
+          <input type="time" class="w-full p-inputtext" formControlName="endTime" />
+        </div>
+      </div>
+      <div>
+        <label class="text-xs text-gray-600">Subject (optional)</label>
+        <input type="text" class="w-full p-inputtext" formControlName="subject" />
+      </div>
+    </form>
+    }
+    <ng-template pTemplate="footer">
+      <button class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" (click)="bookingVisible=false">Cancel</button>
+      <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" (click)="submitBooking()">
+        <i class="pi pi-check mr-2"></i>Book
+      </button>
+    </ng-template>
+  </p-dialog>
+
+  <div class="bg-white shadow rounded-md mt-4" *ngIf="subjectClasses.length">
+    <div class="p-4">
+      <div class="text-sm font-semibold mb-3">Available Sessions</div>
+      <p-table [value]="subjectClasses" [loading]="cLoading()" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item>
+          <tr>
+            <td class="text-sm">{{ item.name || item.title }}</td>
+            <td class="text-sm">{{ (item.startDate || item.startTime) | date:'short' }}</td>
+            <td class="text-sm">{{ (item.endDate || item.endTime) | date:'short' }}</td>
+            <td>
+              <p-button (click)="enroll(item.id, item.name || item.title)" icon="pi pi-check" label="Enroll"></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+

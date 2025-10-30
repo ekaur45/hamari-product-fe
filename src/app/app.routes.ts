@@ -50,6 +50,13 @@ export const routes: Routes = [
                 canActivate: [RoleGuard],
                 data: { roles: [UserRole.ADMIN, UserRole.ACADEMY_OWNER, UserRole.TEACHER] }
             },
+            // Student: Discover teachers and subjects
+            {
+                path: 'student/discover',
+                loadComponent: () => import('./views/students/student-discover/student-discover').then(m => m.StudentDiscover),
+                canActivate: [RoleGuard],
+                data: { roles: [UserRole.STUDENT] }
+            },
             // Teacher Management Routes - Admin and Academy Owner only
             {
                 path: 'teachers',

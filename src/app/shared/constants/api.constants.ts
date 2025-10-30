@@ -112,6 +112,11 @@ export const API_ENDPOINTS = {
     BY_ACADEMY: (academyId: string) => `/invitations/academy/${academyId}`,
     SEARCH: '/invitations/search'
   }
+  ,
+  // Discover
+  DISCOVER: {
+    SEARCH: '/discover'
+  }
 } as const;
 
 /**

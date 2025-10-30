@@ -33,6 +33,24 @@ export class StudentService {
       );
   }
 
+  /** Enroll the current student in a class */
+  enrollInClass(classId: string) {
+    return this.apiService.post<any>(`${API_ENDPOINTS.STUDENTS.BASE}/enroll/${classId}`, {})
+      .pipe(
+        map(res => res?.data ?? res),
+        catchError(error => throwError(() => error))
+      );
+  }
+
+  /** Book a teacher within availability */
+  bookTeacher(payload: { teacherId: string; date: string; startTime: string; endTime: string; subject?: string }) {
+    return this.apiService.post<any>(`${API_ENDPOINTS.STUDENTS.BASE}/book-teacher`, payload)
+      .pipe(
+        map(res => res?.data ?? res),
+        catchError(error => throwError(() => error))
+      );
+  }
+
   /**
    * Get student by ID
    */

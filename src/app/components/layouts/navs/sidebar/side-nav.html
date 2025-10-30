@@ -144,10 +144,22 @@
           Profile
         </a>
         <a *ngIf="hasRole([UserRole.TEACHER])"
+           routerLink="/my-subjects" routerLinkActive="bg-blue-50 border-blue-500 text-blue-700"
+           class="group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <i class="pi pi-book mr-3"></i>
+          My Subjects
+        </a>
+        <a *ngIf="hasRole([UserRole.TEACHER])"
            routerLink="/invitations" routerLinkActive="bg-blue-50 border-blue-500 text-blue-700"
            class="group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
           <i class="pi pi-envelope mr-3"></i>
           Invitations
+        </a>
+        <a *ngIf="hasRole([UserRole.STUDENT])"
+           routerLink="/student/discover" routerLinkActive="bg-blue-50 border-blue-500 text-blue-700"
+           class="group flex items-center px-3 py-2 text-sm font-medium rounded-md border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+          <i class="pi pi-search mr-3"></i>
+          Discover
         </a>
       </div>
 
