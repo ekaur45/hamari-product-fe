@@ -52,8 +52,21 @@ export interface UpdateTeacherDto {
   notes?: string;
 }
 
+/**
+ * Teacher Subject Interface
+ */
+export interface TeacherSubject {
+  id: string;
+  teacherId: string;
+  subjectId: string;
+  fee?: number;
+  subject?: Subject;
+  createdAt: Date;
+  updatedAt: Date;
+}
 // Re-export related interfaces
 import { User } from './user.interface';
 import { Academy } from './academy.interface';
 import { Class } from './class.interface';
-import { Performance } from './performance.interface';
+import { Performance } from './performance.interface';import { Subject } from './subject.interface';
+

@@ -97,7 +97,6 @@ export class ApiUsageExampleComponent implements OnInit {
           if (ApiHelper.isSuccess(response)) {
             const newUser = ApiHelper.extractData(response);
             this.users.push(newUser);
-            console.log('User created:', newUser);
           } else {
             this.error = ApiHelper.getErrorMessage(response);
           }
@@ -121,7 +120,6 @@ export class ApiUsageExampleComponent implements OnInit {
             if (index !== -1) {
               this.users[index] = updatedUser;
             }
-            console.log('User updated:', updatedUser);
           } else {
             this.error = ApiHelper.getErrorMessage(response);
           }
@@ -141,7 +139,6 @@ export class ApiUsageExampleComponent implements OnInit {
         next: (response: ApiResponse<any>) => {
           if (ApiHelper.isSuccess(response)) {
             this.users = this.users.filter(u => u.id !== userId);
-            console.log('User deleted');
           } else {
             this.error = ApiHelper.getErrorMessage(response);
           }
@@ -165,7 +162,6 @@ export class ApiUsageExampleComponent implements OnInit {
             if (index !== -1) {
               this.users[index] = updatedUser;
             }
-            console.log('Avatar uploaded:', updatedUser);
           } else {
             this.error = ApiHelper.getErrorMessage(response);
           }

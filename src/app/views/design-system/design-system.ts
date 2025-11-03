@@ -166,14 +166,11 @@ export class DesignSystem {
   }
 
   onToggleChange() {
-    console.log('Toggle changed:', this.isChecked);
   }
 
   onSelectChange() {
-    console.log('Select changed:', this.selectedOption);
   }
 
   onInputChange() {
-    console.log('Input changed:', this.sampleInput);
   }
 }

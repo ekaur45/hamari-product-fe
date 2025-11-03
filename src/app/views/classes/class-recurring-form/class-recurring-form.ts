@@ -146,7 +146,6 @@ export class ClassRecurringForm implements OnInit {
 
       this.classService.createRecurringClasses(formData).subscribe({
         next: (response) => {
-          console.log('Recurring classes created successfully:', response);
           this.router.navigate(['/classes']);
         },
         error: (error) => {

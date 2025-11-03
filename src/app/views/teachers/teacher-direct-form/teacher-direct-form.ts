@@ -63,7 +63,6 @@ export class TeacherDirectForm implements OnInit {
 
       this.teacherService.createTeacherDirect(formData).subscribe({
         next: (response) => {
-          console.log('Teacher created successfully:', response);
           this.router.navigate(['/teachers']);
         },
         error: (error) => {

@@ -5,10 +5,11 @@ import { AuthService } from '../../../shared/services/auth.service';
 import { User } from '../../../shared/models';
 import { SideNav } from '../navs/sidebar/side-nav';
 import { TopBar } from '../navs/topbar/top-bar';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'main-layout',
-  imports: [CommonModule, RouterOutlet, SideNav, TopBar],
+  imports: [CommonModule, RouterOutlet, SideNav, TopBar, ToastModule],
   templateUrl: './main.layout.html',
   styleUrls: ['./main.layout.css']
 })
@@ -125,6 +126,5 @@ export class MainLayout implements AfterViewInit, OnInit {
     const target = event.target as HTMLInputElement;
     const searchTerm = target.value;
     // Add search logic here
-    console.log('Search term:', searchTerm);
   }
 }

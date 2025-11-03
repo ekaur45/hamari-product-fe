@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse, EducationItem, UpsertEducationDto, UpdateAvailabilityDto, UpdateUserDetailsDto } from '../models';
+import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse, EducationItem, UpsertEducationDto, UpdateAvailabilityDto, UpdateUserDetailsDto, TeacherSubject } from '../models';
 
 /**
  * User Service
@@ -251,5 +251,18 @@ export class UserService {
           return throwError(() => error);
         })
       );
+  }
+  addSubjectAndAssignToTeacher(userId: string, subjectName: string): Observable<void> {
+    alert(subjectName);
+    return this.apiService.post<void>(API_ENDPOINTS.USERS.ADD_SUBJECT_AND_ASSIGN_TO_TEACHER(userId), { subjectName }).pipe(
+      map(() => undefined),
+      catchError(e => throwError(() => e))
+    );
+  }
+  getSubjects(userId: string): Observable<TeacherSubject[]> {
+    return this.apiService.get<TeacherSubject[]>(API_ENDPOINTS.USERS.SUBJECTS(userId)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
   }
 }

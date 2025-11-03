@@ -28,7 +28,6 @@ export class MyInvitations implements OnInit {
     this.error.set('');
     this.invitationService.getMyInvitations().subscribe({
       next: (items) => {
-        console.log(items);
         this.invitations.set(items);
         this.isLoading.set(false);
       },

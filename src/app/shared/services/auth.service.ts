@@ -61,17 +61,16 @@ export class AuthService {
     return this.apiService.post<User>(API_ENDPOINTS.AUTH.LOGIN, credentials)
       .pipe(
         map(response => {
-          if (response.data) {
+          if (response.data && response.statusCode === 200) {
             const user = response.data;
             this.setToken(user.access_token);
             this.setCurrentUser(user);
             this.isAuthenticatedSubject.next(true);
             return user;
           }
-          throw new Error('Invalid response format');
+          throw new Error(response.message);
         }),
         catchError(error => {
-          console.error('Login error:', error);
           return throwError(() => error);
         })
       );

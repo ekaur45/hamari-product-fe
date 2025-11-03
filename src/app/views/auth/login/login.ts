@@ -5,12 +5,15 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../shared/services/auth.service';
 import { LoginDto } from '../../../shared/models';
 import { ApiHelper } from '../../../utils/api.helper';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule, RouterLink],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink, ToastModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
+  providers: [MessageService]
 })
 export class Login implements OnInit {
   loginForm: FormGroup;
@@ -30,7 +33,8 @@ export class Login implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private messageService: MessageService
   ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.email]],
@@ -52,11 +56,10 @@ export class Login implements OnInit {
 
       this.authService.login(loginData).subscribe({
         next: (user) => {
-          console.log('Login successful:', user);
           this.router.navigate([this.returnUrl]);
         },
         error: (error) => {
-          console.error('Login error:', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: ApiHelper.formatErrorMessage(error) });
           this.errorMessage.set(ApiHelper.formatErrorMessage(error));
           this.isLoading.set(false);
         }

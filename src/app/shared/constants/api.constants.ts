@@ -23,7 +23,9 @@ export const API_ENDPOINTS = {
     AVAILABILITY: (userId: string) => `/users/${userId}/availability`,
     DETAILS: (userId: string) => `/users/${userId}/details`,
     ACADEMIES: (userId: string) => `/users/${userId}/academies`,
-    AVATAR: (userId: string) => `/users/${userId}/avatar`
+    AVATAR: (userId: string) => `/users/${userId}/avatar`,
+    ADD_SUBJECT_AND_ASSIGN_TO_TEACHER: (userId: string) => `/users/${userId}/add-subject-and-assign-to-teacher`,
+    SUBJECTS: (userId: string) => `/users/${userId}/subjects`
   },
 
   // Academy

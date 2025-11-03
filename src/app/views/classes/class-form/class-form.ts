@@ -99,7 +99,6 @@ getAcademyTeachers(){
   this.academyService.getAcademyTeachers(this.classForm.value.academyId, 1, 100).subscribe({
     next: (response: PaginatedApiResponse<AcademyTeacher>) => {
       if (response.data) {
-        console.log(response.data);
         this.academyTeachers.set(response.data);
       }
     },

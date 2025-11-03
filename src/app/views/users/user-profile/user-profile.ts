@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UserService } from '../../../shared/services/user.service';
 import { AcademyService } from '../../../shared/services/academy.service';
-import { User, UserRole, EducationItem, EducationType, UpsertEducationDto, UpdateUserDetailsDto, Academy } from '../../../shared/models';
+import { User, UserRole, EducationItem, EducationType, UpsertEducationDto, UpdateUserDetailsDto, Academy, Subject, TeacherSubject } from '../../../shared/models';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -14,6 +14,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { SubjectService } from '../../../shared';
 
 @Component({
   selector: 'user-profile',
@@ -63,13 +64,17 @@ export class UserProfile implements OnInit {
   ];
   isSavingEducation = signal(false);
   isSavingDetails = signal(false);
-
+  subjectsDialogVisible = signal(false);
+  subjects = signal<Subject[]>([]);
+  searchSubjects = signal('');
+  teacherSubjects = signal<TeacherSubject[]>([]);
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private userService: UserService,
     private academyService: AcademyService,
     private authService: AuthService,
+    private subjectService: SubjectService,
     private fb: FormBuilder,
   ) {}
 
@@ -86,6 +91,10 @@ export class UserProfile implements OnInit {
       // No user found; navigate to dashboard
       this.router.navigate(['/']);
     }
+    if (this.user?.role === 'Teacher') {
+      this.loadTeacherSubjects();
+    }
+    this.loadSubjects();
   }
 
   private fetchById(id: string): void {
@@ -263,6 +272,33 @@ export class UserProfile implements OnInit {
 
   getAvailabilitySlots() {
     return this.availabilityForm?.get('slots') as any;
+  }
+  openSubjectsDialog(): void {
+    this.subjectsDialogVisible.set(true);
+  }
+  loadSubjects(): void {
+    this.isLoading.set(true);
+    this.subjectService.getSubjects(1, 100).subscribe({
+      next: (res) => { this.subjects.set(res.data || []); this.isLoading.set(false); },
+      error: () => { this.isLoading.set(false); }
+    });
+  }
+  addSubjectAndAssignToTeacher(subjectName: string): void {
+    if (!this.user) return;
+    this.userService.addSubjectAndAssignToTeacher(this.user.id, subjectName).subscribe({
+      next: () => { this.subjectsDialogVisible.set(false); this.loadSubjects(); },
+      error: () => {}
+    });
+  }
+  loadTeacherSubjects(): void {
+    if (!this.user) return;
+    this.userService.getSubjects(this.user.id).subscribe({
+      next: (res) => { this.teacherSubjects.set(res || []); },
+      error: () => {}
+    });
+  }
+  get filteredSubjects(): Subject[] {
+    return this.subjects().filter(s => s.name.toLowerCase().includes(this.searchSubjects().toLowerCase()));
   }
 }
 

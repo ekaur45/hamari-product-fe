@@ -23,7 +23,6 @@ export class App {
 
   onSubmit() {
     if (this.loginForm.valid) {
-      console.log('Form Data:', this.loginForm.value);
       // Handle login logic here
     }
   }

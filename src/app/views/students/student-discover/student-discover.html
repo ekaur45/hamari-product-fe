@@ -11,25 +11,22 @@
     </div>
   </div>
 
-  <div class="bg-white shadow rounded-md">
-    <div class="p-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div *ngFor="let item of items()" class="p-4 border rounded flex flex-col justify-between">
-          <ng-container [ngSwitch]="item.type">
-            <div *ngSwitchCase="'teacher'">
-              <div class="text-xs uppercase text-gray-500 mb-1">Teacher</div>
-              <div class="text-base font-semibold">{{ (item.data.user?.firstName || item.data.firstName) }} {{ (item.data.user?.lastName || item.data.lastName) }}</div>
-              <div class="text-sm text-gray-600 mb-4">{{ item.data.user?.email || item.data.email }}</div>
-              <div><p-button (click)="openBooking(item.data)" icon="pi pi-calendar" label="Book"></p-button></div>
-            </div>
-            <div *ngSwitchCase="'subject'">
-              <div class="text-xs uppercase text-gray-500 mb-1">Subject</div>
-              <div class="text-base font-semibold mb-4">{{ item.data.name }}</div>
-              <div><p-button (click)="findClassesForSubject(item.data.name)" icon="pi pi-search" label="Find Sessions"></p-button></div>
-            </div>
-          </ng-container>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div *ngFor="let item of items()" class="p-4 bg-white shadow rounded-md flex flex-col justify-between">
+      <ng-container [ngSwitch]="item.type">
+        <div *ngSwitchCase="'teacher'">
+          <div class="text-xs uppercase text-gray-500 mb-1">Teacher</div>
+          <div class="text-base font-semibold">{{ (item.data.user?.firstName || item.data.firstName) }} {{ (item.data.user?.lastName || item.data.lastName) }}</div>
+          <div class="text-sm text-gray-600 mb-4">{{ item.data.user?.email || item.data.email }}</div>
+          <div><p-button (click)="openBooking(item.data)" icon="pi pi-calendar" label="Book"></p-button></div>
         </div>
-      </div>
+        <div *ngSwitchCase="'subject'">
+          <div class="text-xs uppercase text-gray-500 mb-1">Subject</div>
+          <div class="text-base font-semibold mb-4">{{ item.data.name }}</div>
+          <div><p-button (click)="findClassesForSubject(item.data.name)" icon="pi pi-search" label="Find Sessions"></p-button></div>
+        </div>
+      </ng-container>
     </div>
   </div>
 
