@@ -6,12 +6,14 @@ import { User } from '../../../shared/models';
 import { SideNav } from '../navs/sidebar/side-nav';
 import { TopBar } from '../navs/topbar/top-bar';
 import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'main-layout',
   imports: [CommonModule, RouterOutlet, SideNav, TopBar, ToastModule],
   templateUrl: './main.layout.html',
-  styleUrls: ['./main.layout.css']
+  styleUrls: ['./main.layout.css'],
+  providers: [MessageService]
 })
 export class MainLayout implements AfterViewInit, OnInit {
   @ViewChild('userMenu') userMenu!: ElementRef;
