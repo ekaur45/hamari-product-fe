@@ -1,0 +1,204 @@
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-gray-600">Total Courses</p>
+                <i class="fas fa-book text-primary"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">1,234</p>
+            <p class="text-xs text-green-600 mt-1"><i class="fas fa-arrow-up mr-1"></i>45 this month</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-gray-600">Active</p>
+                <i class="fas fa-check-circle text-green-500"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">1,189</p>
+            <p class="text-xs text-gray-500 mt-1">96% of total</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-gray-600">Enrollments</p>
+                <i class="fas fa-user-check text-blue-500"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">12,456</p>
+            <p class="text-xs text-gray-500 mt-1">Total enrollments</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-gray-600">Categories</p>
+                <i class="fas fa-tags text-purple-500"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">18</p>
+            <p class="text-xs text-gray-500 mt-1">Subject categories</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow-md p-5 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center space-x-3 flex-1">
+                <div class="relative flex-1 max-w-xs">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" placeholder="Search courses..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="relative">
+                    <i class="fas fa-school absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <select class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                        <option value="all">All Academies</option>
+                        <option value="elite">Elite Academy</option>
+                        <option value="premier">Premier Academy</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                </div>
+                <div class="relative">
+                    <i class="fas fa-tags absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <select class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                        <option value="all">All Categories</option>
+                        <option value="math">Mathematics</option>
+                        <option value="science">Science</option>
+                        <option value="english">English</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fas fa-download mr-2"></i>Export
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses Table -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Course</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Category</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Academy</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Teacher</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Students</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Created</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Mathematics - Algebra Basics</p>
+                                <p class="text-xs text-gray-500">Grade 10</p>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs">Mathematics</span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Elite Academy</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">John Smith</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">45</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Jan 10, 2024</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="text-primary hover:text-blue-600 transition text-sm" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Science - Biology Fundamentals</p>
+                                <p class="text-xs text-gray-500">Grade 9</p>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs">Science</span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Elite Academy</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Sarah Anderson</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">38</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Jan 12, 2024</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="text-primary hover:text-blue-600 transition text-sm" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">English - Literature Analysis</p>
+                                <p class="text-xs text-gray-500">Grade 11</p>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs">English</span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Premier Academy</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Michael Brown</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">52</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Jan 15, 2024</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="text-primary hover:text-blue-600 transition text-sm" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+                Showing <span class="font-medium">1</span> to <span class="font-medium">3</span> of <span class="font-medium">1,234</span> results
+            </div>
+            <div class="flex items-center space-x-2">
+                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition" disabled="">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="px-3 py-1 bg-primary text-white rounded-lg text-sm">1</button>
+                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">2</button>
+                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">3</button>
+                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>

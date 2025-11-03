@@ -9,10 +9,10 @@
 }"> -->
   <div class="flex flex-col h-full">
     <!-- Logo -->
-    <div class="flex items-center justify-between px-6 py-5 border-b border-gray-200">
+    <div class="flex items-center justify-between px-6 py-6 border-b border-gray-200 hidden md:block">
         <div class="flex items-center">
             <i class="fas fa-graduation-cap text-primary text-2xl mr-2"></i>
-            <h1 class="text-xl font-bold text-primary">EduPortal</h1>
+            <h1 class="text-xl font-bold text-primary">Hamari Product</h1>
         </div>
         @if(isMobile()){
             <button (click)="close.emit()" class="text-gray-600 hover:text-gray-900">
@@ -24,66 +24,14 @@
     <!-- Navigation -->
     <nav class="flex-1 px-4 py-4 overflow-y-auto">
       <ul class="space-y-2">
-        <li>
-            <a routerLink="/" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                <i class="fas fa-home w-5 mr-3"></i>
-                <span>Dashboard</span>
-            </a>
-        </li>
-        <li>
-            <a routerLink="/admin-users" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                <i class="fas fa-users w-5 mr-3"></i>
-                <span>Users</span>
-            </a>
-        </li>
-        <li>
-            <a routerLink="/admin-teachers" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                <i class="fas fa-chalkboard-teacher w-5 mr-3"></i>
-                <span>Teachers</span>
-            </a>
-        </li>
-        <li>
-            <a routerLink="/admin-students" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                <i class="fas fa-user-graduate w-5 mr-3"></i>
-                <span>Students</span>
-            </a>
-        </li>
-        <li>
-            <a routerLink="/admin-parents" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                <i class="fas fa-user-friends w-5 mr-3"></i>
-                <span>Parents</span>
-            </a>
-        </li>
-        <li>
-            <a routerLink="/admin-academies" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                <i class="fas fa-building w-5 mr-3"></i>
-                <span>Academies</span>
-            </a>
-        </li>
-        <li>
-            <a routerLink="/admin-courses" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                <i class="fas fa-book w-5 mr-3"></i>
-                <span>Courses</span>
-            </a>
-        </li>
-        <li>
-            <a routerLink="/admin-reports" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                <i class="fas fa-file-alt w-5 mr-3"></i>
-                <span>Reports</span>
-            </a>
-        </li>
-        <li>
-            <a routerLink="/admin-activity" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                <i class="fas fa-history w-5 mr-3"></i>
-                <span>Activity Log</span>
-            </a>
-        </li>
-        <li>
-            <a routerLink="/admin-settings" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                <i class="fas fa-cog w-5 mr-3"></i>
-                <span>Settings</span>
-            </a>
-        </li>
+        @for(item of userNavigation(); track item.label){
+            <li>
+                <a [routerLink]="item.link" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
+                    <i [ngClass]="item.icon" class="w-5 mr-3 fa"></i>
+                    <span>{{ item.label }}</span>
+                </a>
+            </li>
+        }        
     </ul>
     </nav>
 

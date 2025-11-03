@@ -1,8 +1,9 @@
-import { Component, EventEmitter, HostListener, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { UserRole } from '../../../../shared/models';
+import { sidenavData, SidenavItem } from './sidenav-data';
 
 @Component({
 	selector: 'app-side-nav',
@@ -10,11 +11,11 @@ import { UserRole } from '../../../../shared/models';
 	imports: [CommonModule, RouterLink, RouterLinkActive],
 	templateUrl: './side-nav.html'
 })
-export class SideNav {
+export class SideNav implements OnInit {
 	isMobile = signal(window.innerWidth < 1024);
 	@Input() isOpen: boolean = false;
 	@Output() close = new EventEmitter<void>();
-
+	userNavigation = signal<SidenavItem[]>([]);
 	readonly UserRole = UserRole;
 
 	constructor(private authService: AuthService) {}
@@ -25,7 +26,9 @@ export class SideNav {
 		this.isMobile.set(event.target.innerWidth < 1024);
 	}
 
-
+ngOnInit(): void {
+	this.userNavigation.set(sidenavData[this.getCurrentUser()?.role || UserRole.ADMIN] || []);
+}
 
 	getCurrentUser() {
 		return this.authService.getCurrentUser();

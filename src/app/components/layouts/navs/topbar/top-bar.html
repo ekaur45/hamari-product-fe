@@ -1,18 +1,16 @@
 <header class="bg-white shadow-md flex-shrink-0 sticky top-0 z-40">
   <div class="px-4 py-4 flex items-center justify-between">
     <div class="flex items-center">
-      <button class="lg:hidden text-gray-600 hover:text-gray-900 mr-4" (click)="toggleMobileMenu.emit()">
+      <button class="lg:hidden text-gray-600 hover:text-gray-900 mr-4 hidden" (click)="toggleMobileMenu.emit()">
         <i class="fas fa-bars text-xl"></i>
       </button>
-      <h2 class="text-xl font-semibold text-gray-900">{{ title }}</h2>
+      <h2 class="text-xl font-semibold text-gray-900 lg:hidden sm:block">Hamari Product</h2>
+
     </div>
     <div class="flex items-center space-x-4">
       <button class="relative text-gray-600 hover:text-gray-900">
         <i class="fas fa-bell text-xl"></i>
         <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-lg"></span>
-      </button>
-      <button class="text-gray-600 hover:text-gray-900">
-        <i class="fas fa-search text-xl"></i>
       </button>
       <div class="relative pl-4 border-l border-gray-200">
         <button pButton type="button" class="flex items-center space-x-3 cursor-pointer"
@@ -66,3 +64,46 @@
     </div>
   </div>
 </header>
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-md z-50 md:hidden">
+  <ul class="flex justify-around items-center h-16 text-gray-600">
+    <!-- Home -->
+    <li class="flex flex-col items-center justify-center">
+      <a href="/" class="flex flex-col items-center">
+        <i class="fa-solid fa-house text-lg"></i>
+        <span class="text-xs mt-1">Home</span>
+      </a>
+    </li>
+
+    
+    <li class="flex flex-col items-center justify-center">
+      <a href="/search" class="flex flex-col items-center">
+        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+        <span class="text-xs mt-1">Search</span>
+      </a>
+    </li>
+
+    <!-- Add Button -->
+    <li class="relative flex flex-col items-center justify-center">
+      <a href="/add"
+         class="flex items-center justify-center w-12 h-12 bg-primary text-white rounded-full -mt-8 shadow-lg">
+        <i class="fa-solid fa-plus"></i>
+      </a>
+    </li>
+
+    <!-- Notifications -->
+    <li class="flex flex-col items-center justify-center">
+      <a href="/notifications" class="flex flex-col items-center relative">
+        <i class="fa-solid fa-bell text-lg"></i>
+        <span class="absolute top-0 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+        <span class="text-xs mt-1">Alerts</span>
+      </a>
+    </li>
+
+    <!-- Profile -->
+    <li class="flex flex-col items-center justify-center">
+      <button (click)="toggleMobileMenu.emit()" class="flex flex-col items-center">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+    </li>
+  </ul>
+</nav>

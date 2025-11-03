@@ -1,15 +1,15 @@
 <p-toast />
-<div class="flex h-screen overflow-hidden">
+<div class="flex h-screen overflow-hidden pb-[65px] lg:pb-0">
   <!-- Mobile Sidebar Overlay -->
    @if(isMobileMenuOpen()){
-     <div class="fixed inset-0 z-40 bg-black opacity-50 lg:hidden" (click)="closeMobileMenu()"></div>
+     <div class="fixed inset-0 z-100 bg-black opacity-50 lg:hidden" (click)="closeMobileMenu()"></div>
    }
 
   <!-- Sidebar -->
   @if(isMobile()){
-  <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md transform transition-transform duration-300 lg:hidden" 
+  <aside class="fixed inset-y-0 left-0 z-101 w-64 bg-white shadow-md transform transition-transform duration-300 lg:hidden" 
   [ngClass]="{
-    'translate-x-0': isMobileMenuOpen(),
+    'translate-x-0 right-0': isMobileMenuOpen(),
     '-translate-x-full': !isMobileMenuOpen()
   }"
   >

@@ -24,4 +24,6 @@ aside::-webkit-scrollbar-thumb {
   .to-secondary { background: linear-gradient(135deg, #8b5cf6 0%, #a572d9 50%, #c28cd9 100%); }
   .bg-secondary { background-color: #8b5cf6; }
   .border-primary { border-color: #f5530d; }
+
+  
 }

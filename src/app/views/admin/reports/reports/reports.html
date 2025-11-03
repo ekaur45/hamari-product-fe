@@ -1,0 +1,230 @@
+
+    <!-- Date Range Filter -->
+    <div class="bg-white rounded-lg shadow-md p-5 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <label class="text-sm font-medium text-gray-700">Date Range:</label>
+                <div class="relative">
+                    <i class="fas fa-calendar absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <select class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                        <option value="last-7-days">Last 7 Days</option>
+                        <option value="last-30-days" selected="">Last 30 Days</option>
+                        <option value="last-90-days">Last 90 Days</option>
+                        <option value="last-year">Last Year</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fas fa-download mr-2"></i>Export Report
+                </button>
+                <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                    <i class="fas fa-file-pdf mr-2"></i>Generate PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-gray-600">Total Users Growth</p>
+                <i class="fas fa-users text-primary"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">+12.5%</p>
+            <p class="text-xs text-green-600 mt-1">vs last month</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-gray-600">Active Sessions</p>
+                <i class="fas fa-users text-green-500"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">1,234</p>
+            <p class="text-xs text-gray-500 mt-1">Currently online</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-gray-600">Course Enrollments</p>
+                <i class="fas fa-book text-orange-500"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">12,456</p>
+            <p class="text-xs text-green-600 mt-1">+8.2% this month</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-gray-600">Completion Rate</p>
+                <i class="fas fa-check-circle text-purple-500"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">87.5%</p>
+            <p class="text-xs text-green-600 mt-1">+2.1% improvement</p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- User Growth Chart -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">User Growth</h3>
+            <div class="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+                <div class="text-center">
+                    <i class="fas fa-chart-line text-4xl text-gray-400 mb-2"></i>
+                    <p class="text-sm text-gray-500">Chart visualization would appear here</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academy Distribution -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Academy Distribution</h3>
+            <div class="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+                <div class="text-center">
+                    <i class="fas fa-chart-pie text-4xl text-gray-400 mb-2"></i>
+                    <p class="text-sm text-gray-500">Chart visualization would appear here</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Categories -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Available Reports</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow transition">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-users text-primary text-xl mr-3"></i>
+                    <h4 class="font-medium text-gray-900">User Reports</h4>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Detailed reports on user registrations, activity, and demographics.</p>
+                <button class="text-primary text-sm font-medium hover:underline">
+                    Generate Report <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow transition">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-graduation-cap text-green-500 text-xl mr-3"></i>
+                    <h4 class="font-medium text-gray-900">Academic Reports</h4>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Performance metrics, grades, and academic analytics.</p>
+                <button class="text-primary text-sm font-medium hover:underline">
+                    Generate Report <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow transition">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-building text-blue-500 text-xl mr-3"></i>
+                    <h4 class="font-medium text-gray-900">Academy Reports</h4>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Academy performance, teacher statistics, and enrollment data.</p>
+                <button class="text-primary text-sm font-medium hover:underline">
+                    Generate Report <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow transition">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-dollar-sign text-yellow-500 text-xl mr-3"></i>
+                    <h4 class="font-medium text-gray-900">Financial Reports</h4>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Revenue, payments, and financial analytics across all academies.</p>
+                <button class="text-primary text-sm font-medium hover:underline">
+                    Generate Report <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow transition">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-book text-purple-500 text-xl mr-3"></i>
+                    <h4 class="font-medium text-gray-900">Course Reports</h4>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Course enrollment, completion rates, and subject analytics.</p>
+                <button class="text-primary text-sm font-medium hover:underline">
+                    Generate Report <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow transition">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-chart-bar text-red-500 text-xl mr-3"></i>
+                    <h4 class="font-medium text-gray-900">System Reports</h4>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">System health, usage statistics, and performance metrics.</p>
+                <button class="text-primary text-sm font-medium hover:underline">
+                    Generate Report <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Reports -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Reports</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Report Name</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Type</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Generated On</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4 text-sm font-medium text-gray-900">User Registration Report</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">User Reports</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Jan 22, 2024</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Completed</span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="text-primary hover:text-blue-600 transition text-sm" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4 text-sm font-medium text-gray-900">Academic Performance Report</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Academic Reports</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Jan 21, 2024</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Completed</span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="text-primary hover:text-blue-600 transition text-sm" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4 text-sm font-medium text-gray-900">Financial Summary Report</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Financial Reports</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">Jan 20, 2024</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-medium">Generating</span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="text-gray-400 cursor-not-allowed text-sm" title="Download" disabled="">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="text-gray-400 cursor-not-allowed text-sm" title="View" disabled="">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
