@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-not-found',
+  selector: 'app-admin-dashboard',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './admin-dashboard.html'

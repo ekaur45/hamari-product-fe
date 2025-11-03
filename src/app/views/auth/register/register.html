@@ -1,28 +1,74 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8">
-    <!-- Header -->
-    <div>
-      <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
-        <em class="fa-solid fa-user-plus text-blue-600 text-2xl"></em>
+<div class="min-h-screen flex bg-gray-50">
+  <!-- Left Side: Background/Image Section -->
+  <div class="signup-left-bg hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 text-white relative bg-primary">
+    <!-- Floating Shapes -->
+    <div class="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl floating-shape"></div>
+    <div class="absolute bottom-32 right-20 w-40 h-40 bg-white/10 rounded-full blur-xl floating-shape" style="animation-delay: -2s;"></div>
+    <div class="absolute top-1/2 right-10 w-24 h-24 bg-white/10 rounded-full blur-xl floating-shape" style="animation-delay: -4s;"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-md text-center">
+      <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
+        <i class="fas fa-user-plus text-white text-5xl"></i>
       </div>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        Create your account
-      </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
-        Or
-        <a routerLink="/auth/login" class="font-medium text-blue-600 hover:text-blue-500">
-          sign in to your existing account
-        </a>
-      </p>
+      <h1 class="text-4xl font-bold mb-4">Join EduPortal</h1>
+      <p class="text-xl mb-6 text-white/90">Start your journey in transforming education today</p>
+      
+      <!-- Features List -->
+      <div class="space-y-4 mt-8 text-left">
+        <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-rocket text-white"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white">Quick Setup</h3>
+            <p class="text-sm text-white/80">Get started in minutes with easy registration</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-shield-alt text-white"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white">Secure & Safe</h3>
+            <p class="text-sm text-white/80">Your data is protected with enterprise security</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-headset text-white"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white">24/7 Support</h3>
+            <p class="text-sm text-white/80">Always here to help you succeed</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Registration Form -->
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="mt-8 space-y-6">
+    <!-- Bottom Decoration -->
+    <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/10 to-transparent"></div>
+  </div>
+
+  <!-- Right Side: Signup Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-12">
+    <div class="w-full max-w-md">
+      <!-- Mobile Logo (only visible on mobile) -->
+      <div class="lg:hidden text-center mb-8">
+        <div class="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <i class="fas fa-graduation-cap text-white text-3xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Create Account</h1>
+        <p class="text-gray-600">Join EduPortal today</p>
+      </div>
+
       <!-- Success Message -->
-      <div *ngIf="successMessage()" class="rounded-md bg-green-50 p-4">
+      <div *ngIf="successMessage()" class="rounded-md bg-green-50 p-4 mb-6">
         <div class="flex">
           <div class="flex-shrink-0">
-            <em class="fa-solid fa-circle-check"></em>
+            <i class="fa-solid fa-circle-check text-green-400"></i>
           </div>
           <div class="ml-3">
             <h3 class="text-sm font-medium text-green-800">
@@ -33,10 +79,10 @@
       </div>
 
       <!-- Error Message -->
-      <div *ngIf="errorMessage()" class="rounded-md bg-red-50 p-4">
+      <div *ngIf="errorMessage()" class="rounded-md bg-red-50 p-4 mb-6">
         <div class="flex">
           <div class="flex-shrink-0">
-            <em class="fa-solid fa-circle-xmark"></em>
+            <i class="fa-solid fa-circle-xmark text-red-400"></i>
           </div>
           <div class="ml-3">
             <h3 class="text-sm font-medium text-red-800">
@@ -46,231 +92,251 @@
         </div>
       </div>
 
-      <!-- Step indicator -->
-      <div class="flex items-center justify-center space-x-4">
+      <!-- Step Indicator -->
+      <div class="flex items-center justify-center mb-8">
         <div class="flex items-center">
-          <div class="h-2 w-2 rounded-full" [class.bg-blue-600]="step() === 1" [class.bg-gray-300]="step() !== 1"></div>
-          <span class="ml-2 text-sm" [class.font-semibold]="step() === 1">Select Role</span>
-        </div>
-        <div class="text-gray-400">/</div>
-        <div class="flex items-center">
-          <div class="h-2 w-2 rounded-full" [class.bg-blue-600]="step() === 2" [class.bg-gray-300]="step() !== 2"></div>
-          <span class="ml-2 text-sm" [class.font-semibold]="step() === 2">Your Details</span>
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center font-semibold" [ngClass]="step() === 1 ? 'bg-primary text-white shadow-lg' : 'bg-gray-200 text-gray-600'">1</div>
+            <span class="ml-2 text-sm font-medium hidden sm:inline" [ngClass]="step() === 1 ? 'text-primary' : 'text-gray-500'">Select Role</span>
+          </div>
+          <div class="w-12 h-0.5 bg-gray-300 mx-4"></div>
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center font-semibold" [ngClass]="step() === 2 ? 'bg-primary text-white shadow-lg' : 'bg-gray-200 text-gray-600'">2</div>
+            <span class="ml-2 text-sm font-medium hidden sm:inline" [ngClass]="step() === 2 ? 'text-primary' : 'text-gray-500'">Details</span>
+          </div>
         </div>
       </div>
 
       <!-- Step 1: Role Selection -->
-      <div class="space-y-4" *ngIf="step() === 1">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">
-            Choose your account type <span class="text-red-500">*</span>
-          </label>
-          <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <button type="button"
-                    *ngFor="let role of roles"
-                    (click)="selectRole(role.value)"
-                    class="relative rounded-lg border p-4 flex flex-col items-center justify-center text-center focus:outline-none"
-                    [class.border-blue-600]="isRoleSelected(role.value)"
-                    [class.bg-blue-50]="isRoleSelected(role.value)"
-                    [class.border-gray-300]="!isRoleSelected(role.value)">
-              <span class="mb-2 inline-flex items-center justify-center h-10 w-10 rounded-full"
-                    [class.bg-blue-100]="isRoleSelected(role.value)"
-                    [class.bg-gray-100]="!isRoleSelected(role.value)">
-                    @if(role.value === 'Student') {
-                      <i class="fa-solid fa-user-graduate text-blue-600 text-lg"></i>
-                    } @else if(role.value === 'Parent') {
-                      <i class="fa-solid fa-people-roof text-blue-600 text-lg"></i>
-                    } @else if(role.value === 'Teacher') {
-                      <i class="fa-solid fa-chalkboard-user text-blue-600 text-lg"></i>
-                    } @else if(role.value === 'Academy Owner') {
-                      <i class="fa-solid fa-school text-blue-600 text-lg"></i>
-                    }
-              </span>
-              <span class="text-sm font-medium" [class.text-blue-700]="isRoleSelected(role.value)">{{ role.label }}</span>
-              <span class="pointer-events-none absolute -inset-px rounded-lg border-2 border-transparent" [class.border-blue-600]="isRoleSelected(role.value)"></span>
-            </button>
-          </div>
-          <div *ngIf="getFieldError('role')" class="mt-2 text-sm text-red-600">
-            {{ getFieldError('role') }}
-          </div>
+      <div id="step1" class="step-content" *ngIf="step() === 1">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Select Your Role</h2>
+          <p class="text-gray-600">Choose the account type that best describes you</p>
         </div>
-        <div>
-          <button type="button" (click)="goToDetails()" class="w-full py-2 px-4 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            Continue
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          <!-- Teacher -->
+          <button type="button" (click)="selectRole(UserRole.TEACHER)" 
+                  class="role-card bg-white border-2 rounded-xl p-4 text-left hover:shadow-md transition"
+                  [class.selected]="isRoleSelected(UserRole.TEACHER)"
+                  [class.border-gray-200]="!isRoleSelected(UserRole.TEACHER)"
+                  [style.border-color]="isRoleSelected(UserRole.TEACHER) ? '#f5530d' : ''">
+            <div class="flex items-center mb-2">
+              <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="fas fa-chalkboard-teacher text-white text-lg"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900">Teacher</h3>
+            </div>
+            <p class="text-sm text-gray-600">Create lessons and manage classes</p>
+          </button>
+
+          <!-- Student -->
+          <button type="button" (click)="selectRole(UserRole.STUDENT)" 
+                  class="role-card bg-white border-2 rounded-xl p-4 text-left hover:shadow-md transition"
+                  [class.selected]="isRoleSelected(UserRole.STUDENT)"
+                  [class.border-gray-200]="!isRoleSelected(UserRole.STUDENT)"
+                  [style.border-color]="isRoleSelected(UserRole.STUDENT) ? '#f5530d' : ''">
+            <div class="flex items-center mb-2">
+              <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="fas fa-user-graduate text-white text-lg"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900">Student</h3>
+            </div>
+            <p class="text-sm text-gray-600">Access courses and track learning</p>
+          </button>
+
+          <!-- Parent -->
+          <button type="button" (click)="selectRole(UserRole.PARENT)" 
+                  class="role-card bg-white border-2 rounded-xl p-4 text-left hover:shadow-md transition"
+                  [class.selected]="isRoleSelected(UserRole.PARENT)"
+                  [class.border-gray-200]="!isRoleSelected(UserRole.PARENT)"
+                  [style.border-color]="isRoleSelected(UserRole.PARENT) ? '#f5530d' : ''">
+            <div class="flex items-center mb-2">
+              <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="fas fa-users text-white text-lg"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900">Parent</h3>
+            </div>
+            <p class="text-sm text-gray-600">Monitor child's progress</p>
+          </button>
+
+          <!-- Academy Owner -->
+          <button type="button" (click)="selectRole(UserRole.ACADEMY_OWNER)" 
+                  class="role-card bg-white border-2 rounded-xl p-4 text-left hover:shadow-md transition"
+                  [class.selected]="isRoleSelected(UserRole.ACADEMY_OWNER)"
+                  [class.border-gray-200]="!isRoleSelected(UserRole.ACADEMY_OWNER)"
+                  [style.border-color]="isRoleSelected(UserRole.ACADEMY_OWNER) ? '#f5530d' : ''">
+            <div class="flex items-center mb-2">
+              <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="fas fa-building text-white text-lg"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900">Academy Owner</h3>
+            </div>
+            <p class="text-sm text-gray-600">Manage your institution</p>
           </button>
         </div>
+
+        <div class="text-center">
+          <p class="text-gray-600 text-sm">
+            Already have an account? 
+            <a routerLink="/auth/login" class="text-primary hover:underline font-medium">
+              Login
+            </a>
+          </p>
+        </div>
       </div>
 
-      <!-- Step 2: Details Form -->
-      <div class="space-y-4" *ngIf="step() === 2">
-        <!-- Selected role summary -->
-        <div class="flex items-center justify-between p-3 border rounded-md bg-gray-50">
-          <div class="flex items-center space-x-3">
-            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100">
-              <i [class]="getSelectedRoleIconClass()" class="text-blue-700"></i>
-            </span>
+      <!-- Step 2: Signup Form -->
+      <div id="step2" class="step-content" *ngIf="step() === 2">
+        <!-- Role Header -->
+        <div class="mb-6">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg flex items-center justify-center flex-shrink-0" [ngClass]="getRoleBgColorClass()">
+                <i class="text-white text-xl sm:text-2xl" [class]="getSelectedRoleIconClass()"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h2 class="text-xl sm:text-2xl font-bold mb-1" [ngClass]="getRoleTextColorClass()">{{ getSelectedRoleLabel() }}</h2>
+                <p class="text-base sm:text-lg font-semibold text-gray-900">Creating account</p>
+              </div>
+            </div>
+            <button type="button" (click)="backToRole()" class="flex items-center gap-2 px-4 py-2 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition font-medium whitespace-nowrap">
+              <i class="fas fa-edit"></i>
+              <span class="hidden sm:inline">Change Role</span>
+              <span class="sm:hidden">Change</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Signup Form -->
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
+          <!-- Name Fields -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <div class="text-xs text-gray-500">Account type</div>
-              <div class="text-sm font-medium text-gray-900">{{ getSelectedRoleLabel() }}</div>
+              <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user mr-2 text-primary"></i>First Name
+              </label>
+              <div class="relative">
+                <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="firstName" formControlName="firstName" required
+                       class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+                       placeholder="First name"
+                       [class.border-red-500]="getFieldError('firstName')">
+              </div>
+              <div *ngIf="getFieldError('firstName')" class="mt-1 text-sm text-red-600">{{ getFieldError('firstName') }}</div>
+            </div>
+
+            <div>
+              <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user mr-2 text-primary"></i>Last Name
+              </label>
+              <div class="relative">
+                <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="lastName" formControlName="lastName" required
+                       class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+                       placeholder="Last name"
+                       [class.border-red-500]="getFieldError('lastName')">
+              </div>
+              <div *ngIf="getFieldError('lastName')" class="mt-1 text-sm text-red-600">{{ getFieldError('lastName') }}</div>
             </div>
           </div>
-          <button type="button" (click)="backToRole()" class="text-sm text-blue-700 hover:text-blue-800">Change</button>
-        </div>
-        <!-- Name Fields -->
-        <div class="grid grid-cols-2 gap-4">
+
+          <!-- Email -->
           <div>
-            <label for="firstName" class="block text-sm font-medium text-gray-700">
-              First Name <span class="text-red-500">*</span>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-envelope mr-2 text-primary"></i>Email Address
             </label>
-            <input
-              id="firstName"
-              type="text"
-              formControlName="firstName"
-              placeholder="Enter first name"
-              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              [class.border-red-500]="getFieldError('firstName')">
-            <div *ngIf="getFieldError('firstName')" class="mt-1 text-sm text-red-600">
-              {{ getFieldError('firstName') }}
+            <div class="relative">
+              <i class="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <input type="email" id="email" formControlName="email" required
+                     class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+                     placeholder="Enter your email"
+                     [class.border-red-500]="getFieldError('email')">
             </div>
+            <div *ngIf="getFieldError('email')" class="mt-1 text-sm text-red-600">{{ getFieldError('email') }}</div>
           </div>
 
+          <!-- Phone -->
           <div>
-            <label for="lastName" class="block text-sm font-medium text-gray-700">
-              Last Name <span class="text-red-500">*</span>
+            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-phone mr-2 text-primary"></i>Phone Number
             </label>
-            <input
-              id="lastName"
-              type="text"
-              formControlName="lastName"
-              placeholder="Enter last name"
-              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              [class.border-red-500]="getFieldError('lastName')">
-            <div *ngIf="getFieldError('lastName')" class="mt-1 text-sm text-red-600">
-              {{ getFieldError('lastName') }}
+            <div class="relative">
+              <i class="fas fa-phone absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <input type="tel" id="phone" formControlName="phone" required
+                     class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+                     placeholder="Enter phone number"
+                     [class.border-red-500]="getFieldError('phone')">
             </div>
+            <div *ngIf="getFieldError('phone')" class="mt-1 text-sm text-red-600">{{ getFieldError('phone') }}</div>
           </div>
-        </div>
 
-        <!-- Email -->
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">
-            Email Address <span class="text-red-500">*</span>
-          </label>
-          <input
-            id="email"
-            type="email"
-            formControlName="email"
-            placeholder="Enter email address"
-            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-            [class.border-red-500]="getFieldError('email')">
-          <div *ngIf="getFieldError('email')" class="mt-1 text-sm text-red-600">
-            {{ getFieldError('email') }}
-          </div>
-        </div>
+          <!-- Password Fields -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-lock mr-2 text-primary"></i>Password
+              </label>
+              <div class="relative">
+                <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="password" id="password" formControlName="password" required
+                       class="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+                       placeholder="Create password"
+                       [type]="showPassword() ? 'text' : 'password'"
+                       [class.border-red-500]="getFieldError('password')">
+                <button type="button" (click)="togglePasswordVisibility()" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                  <i class="fas" [ngClass]="showPassword() ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+              </div>
+              <div *ngIf="getFieldError('password')" class="mt-1 text-sm text-red-600">{{ getFieldError('password') }}</div>
+            </div>
 
-        <!-- Username -->
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-700">
-            Username <span class="text-red-500">*</span>
-          </label>
-          <input
-            id="username"
-            type="text"
-            formControlName="username"
-            placeholder="Choose a username"
-            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-            [class.border-red-500]="getFieldError('username')">
-          <div *ngIf="getFieldError('username')" class="mt-1 text-sm text-red-600">
-            {{ getFieldError('username') }}
-          </div>
-        </div>
-
-        <!-- Password Fields -->
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">
-              Password <span class="text-red-500">*</span>
-            </label>
-            <input
-              id="password"
-              type="password"
-              formControlName="password"
-              placeholder="Enter password"
-              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              [class.border-red-500]="getFieldError('password')">
-            <div *ngIf="getFieldError('password')" class="mt-1 text-sm text-red-600">
-              {{ getFieldError('password') }}
+            <div>
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-lock mr-2 text-primary"></i>Confirm Password
+              </label>
+              <div class="relative">
+                <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="password" id="confirmPassword" formControlName="confirmPassword" required
+                       class="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+                       placeholder="Confirm password"
+                       [type]="showConfirmPassword() ? 'text' : 'password'"
+                       [class.border-red-500]="getFieldError('confirmPassword')">
+                <button type="button" (click)="toggleConfirmPasswordVisibility()" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                  <i class="fas" [ngClass]="showConfirmPassword() ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+              </div>
+              <div *ngIf="getFieldError('confirmPassword')" class="mt-1 text-sm text-red-600">{{ getFieldError('confirmPassword') }}</div>
             </div>
           </div>
 
-          <div>
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
-              Confirm Password <span class="text-red-500">*</span>
+          <!-- Terms -->
+          <div class="flex items-start">
+            <input type="checkbox" id="terms" formControlName="agreeToTerms" required class="mt-1 rounded border-gray-300 text-primary focus:ring-primary">
+            <label for="terms" class="ml-2 text-sm text-gray-600">
+              I agree to the <a href="#" class="text-primary hover:underline">Terms and Conditions</a> and <a href="#" class="text-primary hover:underline">Privacy Policy</a>
             </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              formControlName="confirmPassword"
-              placeholder="Confirm password"
-              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              [class.border-red-500]="getFieldError('confirmPassword')">
-            <div *ngIf="getFieldError('confirmPassword')" class="mt-1 text-sm text-red-600">
-              {{ getFieldError('confirmPassword') }}
-            </div>
           </div>
-        </div>
+          <div *ngIf="getFieldError('agreeToTerms')" class="text-sm text-red-600">{{ getFieldError('agreeToTerms') }}</div>
 
-    
+          <!-- Submit Button -->
+          <button type="submit" 
+                  [disabled]="isLoading() || registerForm.invalid"
+                  class="w-full bg-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center hover:bg-orange-600 transition shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-user-plus mr-2"></i>
+            {{ isLoading() ? 'Creating Account...' : 'Create Account' }}
+          </button>
+        </form>
 
-        <!-- Terms and Conditions -->
-        <div class="flex items-center">
-          <input
-            id="agreeToTerms"
-            type="checkbox"
-            formControlName="agreeToTerms"
-            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            [class.border-red-500]="getFieldError('agreeToTerms')">
-          <label for="agreeToTerms" class="ml-2 block text-sm text-gray-900">
-            I agree to the
-            <a href="#" class="text-blue-600 hover:text-blue-500">Terms and Conditions</a>
-            and
-            <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
-            <span class="text-red-500">*</span>
-          </label>
-        </div>
-        <div *ngIf="getFieldError('agreeToTerms')" class="text-sm text-red-600">
-          {{ getFieldError('agreeToTerms') }}
+        <div class="mt-6 text-center">
+          <p class="text-gray-600 text-sm">
+            Already have an account? 
+            <a routerLink="/auth/login" class="text-primary hover:underline font-medium">
+              Login
+            </a>
+          </p>
         </div>
       </div>
-
-      <!-- Submit Button -->
-      <div *ngIf="step() === 2">
-        <button
-          type="submit"
-          [disabled]="isLoading() || registerForm.invalid"
-          class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
-          <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-            <svg *ngIf="isLoading()" class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <svg *ngIf="!isLoading()" class="h-5 w-5 text-blue-500 group-hover:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-            </svg>
-          </span>
-          {{ isLoading() ? 'Creating Account...' : 'Create Account' }}
-        </button>
-      </div>
-
-      <!-- Login Link -->
-      <div class="text-center">
-        <p class="text-sm text-gray-600">
-          Already have an account?
-          <a routerLink="/auth/login" class="font-medium text-blue-600 hover:text-blue-500">
-            Sign in here
-          </a>
-        </p>
-      </div>
-    </form>
+    </div>
   </div>
 </div>

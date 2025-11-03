@@ -152,7 +152,7 @@ export class AuthService {
   /**
    * Set authentication token
    */
-  private setToken(token: string): void {
+  setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
@@ -166,7 +166,7 @@ export class AuthService {
   /**
    * Set current user
    */
-  private setCurrentUser(user: User): void {
+  setCurrentUser(user: User): void {
     this.currentUserSubject.next(user);
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
   }
@@ -257,5 +257,15 @@ export class AuthService {
         return throwError(() => error);
       })
     );
+  }
+
+  /**
+   * Dummy login for testing purposes
+   * Logs in a user without API call
+   */
+  dummyLogin(user: User, token: string): void {
+    this.setToken(token);
+    this.setCurrentUser(user);
+    this.isAuthenticatedSubject.next(true);
   }
 }

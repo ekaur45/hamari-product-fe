@@ -16,6 +16,7 @@ import { ToastModule } from 'primeng/toast';
   providers: [MessageService]
 })
 export class Login implements OnInit {
+  showPassword = signal(false);
   loginForm: FormGroup;
   isLoading = signal(false);
   errorMessage = signal('');
@@ -95,5 +96,8 @@ export class Login implements OnInit {
   fillSample(email: string): void {
     this.loginForm.patchValue({ username: email, password: this.commonPassword });
     this.errorMessage.set('');
+  }
+  togglePasswordVisibility(){
+    this.showPassword.set(!this.showPassword());
   }
 }

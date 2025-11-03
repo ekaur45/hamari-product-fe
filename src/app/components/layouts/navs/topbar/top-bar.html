@@ -23,8 +23,12 @@
           </div>
 
           <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
-            <img *ngIf="userAvatar" class="w-10 h-10 rounded-full object-cover" [src]="userAvatar" alt="avatar" />
-            <span *ngIf="!userAvatar">{{ (userDisplayName || 'U') | slice:0:2 | uppercase }}</span>
+            @if(userAvatar){
+              <img class="w-10 h-10 rounded-full object-cover" [src]="userAvatar" alt="avatar" />
+            }
+            @else{
+              <span>{{ (userDisplayName || 'U') | slice:0:2 | uppercase }}</span>
+            }
           </div>
           <i class="fas fa-chevron-down text-gray-600 text-sm hidden sm:block"></i>
         </button>

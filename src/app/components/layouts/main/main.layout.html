@@ -1,7 +1,9 @@
 <p-toast />
 <div class="flex h-screen overflow-hidden">
   <!-- Mobile Sidebar Overlay -->
-  <div *ngIf="isMobileMenuOpen()" class="fixed inset-0 z-40 bg-black opacity-50 lg:hidden" (click)="closeMobileMenu()"></div>
+   @if(isMobileMenuOpen()){
+     <div class="fixed inset-0 z-40 bg-black opacity-50 lg:hidden" (click)="closeMobileMenu()"></div>
+   }
 
   <!-- Sidebar -->
   @if(isMobile()){

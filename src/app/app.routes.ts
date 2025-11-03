@@ -4,9 +4,10 @@ import { AuthLayout } from './components/layouts/auth/auth.layout';
 
 import { Login } from './views/auth/login/login';
 import { Register } from './views/auth/register/register';
+import { DummyLogin } from './views/auth/dummy-login/dummy-login';
 import { AuthGuard, RoleGuard } from './shared/guards/auth.guard';
 import { UserRole } from './shared/models';
-import { AdminDashboard } from './views/admin-dashboard/admin-dashboard';
+import { Dashboard } from './views/dashboard/dashboard';
 
 export const routes: Routes = [
     {
@@ -15,7 +16,7 @@ export const routes: Routes = [
         children: [
             {
                 path: '',
-                component: AdminDashboard
+                component: Dashboard
             }
         ]   
     
@@ -36,6 +37,10 @@ export const routes: Routes = [
             {
                 path: 'register',
                 component: Register
+            },
+            {
+                path: 'dummy-login',
+                component: DummyLogin
             }
         ]
     },

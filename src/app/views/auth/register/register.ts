@@ -18,6 +18,11 @@ export class Register implements OnInit {
   errorMessage = signal('');
   successMessage = signal('');
   step = signal(1);
+  showPassword = signal(false);
+  showConfirmPassword = signal(false);
+
+  // Expose UserRole for template
+  UserRole = UserRole;
 
   // Available roles for registration
   roles = [
@@ -36,7 +41,9 @@ export class Register implements OnInit {
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
+      // Keep username for backend, but we won't show it in UI; we'll set it from email on submit
       username: ['', [Validators.required, Validators.minLength(3)]],
+      phone: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
       role: [null, [Validators.required]],
@@ -55,6 +62,11 @@ export class Register implements OnInit {
       this.isLoading.set(true);
       this.errorMessage.set('');
       this.successMessage.set('');
+
+      // Ensure username is set (mirror email if empty to satisfy backend)
+      if (!this.registerForm.value.username) {
+        this.registerForm.patchValue({ username: this.registerForm.value.email });
+      }
 
       const registerData: RegisterDto = {
         firstName: this.registerForm.value.firstName,
@@ -102,6 +114,8 @@ export class Register implements OnInit {
     const roleControl = this.registerForm.get('role');
     roleControl?.setValue(role);
     roleControl?.markAsTouched();
+    // Automatically go to step 2 when role is selected
+    this.step.set(2);
   }
 
   isRoleSelected(role: UserRole): boolean {
@@ -118,18 +132,63 @@ export class Register implements OnInit {
     const value = this.registerForm.get('role')?.value as UserRole | null;
     switch (value) {
       case UserRole.STUDENT:
-        return 'fa-solid fa-user-graduate';
+        return 'fas fa-user-graduate';
       case UserRole.PARENT:
-        return 'fa-solid fa-people-roof';
+        return 'fas fa-users';
       case UserRole.TEACHER:
-        return 'fa-solid fa-chalkboard-user';
+        return 'fas fa-chalkboard-teacher';
       case UserRole.ACADEMY_OWNER:
-        return 'fa-solid fa-school';
+        return 'fas fa-building';
       default:
-        return 'fa-solid fa-user';
+        return 'fas fa-user-tag';
     }
   }
 
+  getRoleIconClass(role: UserRole): string {
+    switch (role) {
+      case UserRole.STUDENT:
+        return 'fas fa-user-graduate';
+      case UserRole.PARENT:
+        return 'fas fa-users';
+      case UserRole.TEACHER:
+        return 'fas fa-chalkboard-teacher';
+      case UserRole.ACADEMY_OWNER:
+        return 'fas fa-building';
+      default:
+        return 'fas fa-user-tag';
+    }
+  }
+  getRoleBgColorClass(): string {
+    const value = this.registerForm.get('role')?.value as UserRole | null;
+    switch (value) {
+      case UserRole.STUDENT:
+        return 'bg-orange-500';
+      case UserRole.PARENT:
+        return 'bg-pink-500';
+      case UserRole.TEACHER:
+        return 'bg-green-500';
+      case UserRole.ACADEMY_OWNER:
+        return 'bg-purple-500';
+      default:
+        return 'bg-gray-500';
+    }
+  }
+
+  getRoleTextColorClass(): string {
+    const value = this.registerForm.get('role')?.value as UserRole | null;
+    switch (value) {
+      case UserRole.STUDENT:
+        return 'text-orange-500';
+      case UserRole.PARENT:
+        return 'text-pink-500';
+      case UserRole.TEACHER:
+        return 'text-green-500';
+      case UserRole.ACADEMY_OWNER:
+        return 'text-purple-500';
+      default:
+        return 'text-primary';
+    }
+  }
   private passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
@@ -177,6 +236,7 @@ export class Register implements OnInit {
       lastName: 'Last Name',
       email: 'Email',
       username: 'Username',
+      phone: 'Phone Number',
       password: 'Password',
       confirmPassword: 'Confirm Password',
       role: 'Role'
@@ -186,5 +246,13 @@ export class Register implements OnInit {
 
   onLoginClick(): void {
     this.router.navigate(['/auth/login']);
+  }
+
+  togglePasswordVisibility(){
+    this.showPassword.set(!this.showPassword());
+  }
+
+  toggleConfirmPasswordVisibility(){
+    this.showConfirmPassword.set(!this.showConfirmPassword());
   }
 }

@@ -1,0 +1,12 @@
+@if(currentUser()?.role === UserRole.ADMIN){
+    <app-admin-dashboard></app-admin-dashboard>
+}
+@else if(currentUser()?.role === UserRole.STUDENT){
+    <app-student-dashboard></app-student-dashboard>
+}
+@else if(currentUser()?.role === UserRole.TEACHER){
+    <app-teacher-dashboard></app-teacher-dashboard>
+}
+@else if(currentUser()?.role === UserRole.PARENT){
+    <app-parent-dashboard></app-parent-dashboard>
+}
