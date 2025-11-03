@@ -15,3 +15,13 @@ aside::-webkit-scrollbar-thumb {
   background-color: rgba(100, 116, 139, 0.2); /* gray-400/20 */
   border-radius: 8px;
 }
+
+/* Design tokens to mirror html-design Tailwind config */
+@layer utilities {
+  .text-primary { color: #f5530d; }
+  .bg-primary { background-color: #f5530d; }
+  .from-primary { background: linear-gradient(135deg, #f5530d 0%, #ff6b35 50%, #f9844a 100%); }
+  .to-secondary { background: linear-gradient(135deg, #8b5cf6 0%, #a572d9 50%, #c28cd9 100%); }
+  .bg-secondary { background-color: #8b5cf6; }
+  .border-primary { border-color: #f5530d; }
+}

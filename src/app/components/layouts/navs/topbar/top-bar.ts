@@ -1,27 +1,50 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-
+import { MenuModule } from 'primeng/menu';
 @Component({
 	selector: 'app-top-bar',
 	standalone: true,
-	imports: [CommonModule,RouterModule],
+	imports: [CommonModule,RouterModule,MenuModule],
 	templateUrl: './top-bar.html'
 })
 export class TopBar {
 	@Input() isUserMenuOpen: boolean = false;
+	@Input() title: string = '';
 	@Input() userDisplayName: string = '';
 	@Input() userEmail: string = '';
 	@Input() userAvatar?: string;
-	defaultUserAvatar = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
 
 	@Output() toggleMobileMenu = new EventEmitter<void>();
 	@Output() toggleUserMenu = new EventEmitter<void>();
 	@Output() profile = new EventEmitter<void>();
 	@Output() settings = new EventEmitter<void>();
 	@Output() signOut = new EventEmitter<void>();
-
-	onSearch(event: Event) {
-		// Bubble up search changes if needed later
-	}
+	items = [
+		{
+			label:'profile_details'
+		},
+		{
+			divider: true
+		},
+		{
+			label: 'My Profile',
+			icon: 'pi pi-user',
+			command: () => this.profile.emit()
+		},
+		{
+			label: 'Settings',
+			icon: 'pi pi-cog',
+			command: () => this.settings.emit()
+		},
+		{
+			divider: true
+		},
+		{
+			label: 'Logout',
+			icon: 'pi pi-sign-out',
+			styleClass: 'text-red-600 hover:bg-red-50 transition',
+			command: () => this.signOut.emit()
+		}
+	];
 }

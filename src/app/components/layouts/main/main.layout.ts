@@ -1,8 +1,8 @@
-import { Component, HostListener, signal, ElementRef, ViewChild, AfterViewInit, OnInit } from '@angular/core';
+import { Component, HostListener, signal, ElementRef, ViewChild, AfterViewInit, OnInit, Input } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../shared/services/auth.service';
-import { User } from '../../../shared/models';
+import { User, UserRole } from '../../../shared/models';
 import { SideNav } from '../navs/sidebar/side-nav';
 import { TopBar } from '../navs/topbar/top-bar';
 import { ToastModule } from 'primeng/toast';
@@ -16,7 +16,12 @@ import { MessageService } from 'primeng/api';
   providers: [MessageService]
 })
 export class MainLayout implements AfterViewInit, OnInit {
+
+  isSidebarOpen: boolean = false;
+  isMobile = signal(window.innerWidth < 1024);
+
   @ViewChild('userMenu') userMenu!: ElementRef;
+  readonly UserRole = UserRole;
 
   // Mobile menu state
   isMobileMenuOpen = signal(false);
@@ -24,8 +29,10 @@ export class MainLayout implements AfterViewInit, OnInit {
   // User menu state
   isUserMenuOpen = signal(false);
 
+
+
   // Screen size tracking
-  isMobile = signal(false);
+  
 
   // User state
   currentUser = signal<User | null>(null);
@@ -110,6 +117,11 @@ export class MainLayout implements AfterViewInit, OnInit {
     this.isUserMenuOpen.set(false);
     this.authService.logout();
     this.router.navigate(['/auth/login']);
+  }
+
+  hasRole(roles: UserRole[]): boolean {
+    const user = this.currentUser();
+    return user ? roles.includes(user.role) : false;
   }
 
   getUserDisplayName(): string {
