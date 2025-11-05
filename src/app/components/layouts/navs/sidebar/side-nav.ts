@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostListener, Input, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { UserRole } from '../../../../shared/models';
 import { sidenavData, SidenavItem } from './sidenav-data';
@@ -18,7 +18,7 @@ export class SideNav implements OnInit {
 	userNavigation = signal<SidenavItem[]>([]);
 	readonly UserRole = UserRole;
 
-	constructor(private authService: AuthService) {}
+	constructor(private authService: AuthService, private router: Router) {}
 
 	@HostListener('window:resize', ['$event'])
 	onResize(event: any) {
@@ -40,6 +40,8 @@ ngOnInit(): void {
 	}
 
 	logout() {
-		this.authService.logout();
+		this.authService.logout().subscribe(() => {
+			this.router.navigate(['/auth/login']);
+		});
 	}
 }

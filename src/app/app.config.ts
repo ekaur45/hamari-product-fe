@@ -11,7 +11,7 @@ const MyPreset = definePreset(Aura, {
           none: "0",
           xs: "2px",
           sm: "4px",
-          md: "6px",
+          md: "0.75rem",
           lg: "8px",
           xl: "12px"
       },
@@ -307,16 +307,16 @@ const MyPreset = definePreset(Aura, {
       focusRing: {
           width: "1px",
           style: "solid",
-          color: "{primary.color}",
+          color: "{primary.100}",
           offset: "2px",
-          shadow: "none"
+          shadow: "{primary.100}"
       },
       disabledOpacity: "0.6",
       iconSize: "1rem",
       anchorGutter: "2px",
       primary: {
           50: "#f6faff",
-          100: "#d2e8ff",
+          100: "#f5530d",
           200: "#aed5ff",
           300: "#8ac3ff",
           400: "#66b0ff",
@@ -446,9 +446,9 @@ const MyPreset = definePreset(Aura, {
                   filledBackground: "{surface.50}",
                   filledHoverBackground: "{surface.50}",
                   filledFocusBackground: "{surface.50}",
-                  borderColor: "{surface.300}",
-                  hoverBorderColor: "{surface.400}",
-                  focusBorderColor: "{primary.color}",
+                  borderColor: "{gray.200}",
+                  hoverBorderColor: "{gray.200}",
+                  focusBorderColor: "{primary.100}",
                   invalidBorderColor: "{red.400}",
                   color: "{surface.700}",
                   disabledColor: "{surface.500}",
@@ -494,12 +494,12 @@ const MyPreset = definePreset(Aura, {
               list: {
                   option: {
                       focusBackground: "{surface.100}",
-                      selectedBackground: "{highlight.background}",
+                      selectedBackground: "{primary.100}",
                       selectedFocusBackground: "{highlight.focus.background}",
                       color: "{text.color}",
                       focusColor: "{text.hover.color}",
-                      selectedColor: "{highlight.color}",
-                      selectedFocusColor: "{highlight.focus.color}",
+                      selectedColor: "{surface.100}",
+                      selectedFocusColor: "{surface.100}",
                       icon: {
                           color: "{surface.400}",
                           focusColor: "{surface.500}"

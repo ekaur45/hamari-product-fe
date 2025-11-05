@@ -7,6 +7,7 @@ import { LoginDto } from '../../../shared/models';
 import { ApiHelper } from '../../../utils/api.helper';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ROUTES_MAP } from '../../../shared/constants/routes-map';
 
 @Component({
   selector: 'app-login',
@@ -45,7 +46,7 @@ export class Login implements OnInit {
 
   ngOnInit(): void {
     // Get return URL from route parameters or default to dashboard
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '';
   }
 
   onSubmit(): void {
@@ -57,7 +58,11 @@ export class Login implements OnInit {
 
       this.authService.login(loginData).subscribe({
         next: (user) => {
-          this.router.navigate([this.returnUrl]);
+          if (this.returnUrl) {
+            this.router.navigate([this.returnUrl]);
+          } else {
+            this.router.navigate([ROUTES_MAP[user.role]['DASHBOARD']]);
+          }
         },
         error: (error) => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: ApiHelper.formatErrorMessage(error) });

@@ -6,6 +6,14 @@
  * API Endpoints
  */
 export const API_ENDPOINTS = {
+
+  // Admin
+  ADMIN: {
+    USERS: '/admin/users',
+    TEACHERS: '/admin/teachers',
+    STUDENTS: '/admin/students'
+  },
+
   // Authentication
   AUTH: {
     LOGIN: '/auth/login',

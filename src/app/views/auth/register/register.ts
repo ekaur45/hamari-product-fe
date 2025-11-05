@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../shared/services/auth.service';
@@ -13,7 +13,23 @@ import { ApiHelper } from '../../../utils/api.helper';
   styleUrl: './register.css',
 })
 export class Register implements OnInit {
-  registerForm: FormGroup;
+  passwordMatchValidator: ValidatorFn = (group) => {
+    const password = group.get('password')?.value;
+    const confirm = group.get('confirmPassword')?.value;
+    return password === confirm ? null : { passwordMismatch: true } as ValidationErrors;
+  };
+  registerForm: FormGroup = new FormGroup({
+    firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
+    lastName: new FormControl('', [Validators.required, Validators.minLength(2)]),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    username: new FormControl('', []),
+    phone: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    confirmPassword: new FormControl('', [Validators.required]),
+    role: new FormControl('', [Validators.required]),
+    agreeToTerms: new FormControl(false, [Validators.requiredTrue]),
+  }, { validators: this.passwordMatchValidator });
+
   isLoading = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
@@ -37,18 +53,6 @@ export class Register implements OnInit {
     private authService: AuthService,
     private router: Router
   ) {
-    this.registerForm = this.fb.group({
-      firstName: ['', [Validators.required, Validators.minLength(2)]],
-      lastName: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      // Keep username for backend, but we won't show it in UI; we'll set it from email on submit
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      phone: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]],
-      role: [null, [Validators.required]],
-      agreeToTerms: [false, [Validators.requiredTrue]]
-    }, { validators: this.passwordMatchValidator });
   }
 
   ngOnInit(): void {
@@ -74,7 +78,9 @@ export class Register implements OnInit {
         email: this.registerForm.value.email,
         username: this.registerForm.value.username,
         password: this.registerForm.value.password,
-        role: this.registerForm.value.role
+        role: this.registerForm.value.role,
+        phone: this.registerForm.value.phone,
+        agreeToTerms: this.registerForm.value.agreeToTerms,
       };
 
       this.authService.register(registerData).subscribe({
@@ -114,7 +120,6 @@ export class Register implements OnInit {
     const roleControl = this.registerForm.get('role');
     roleControl?.setValue(role);
     roleControl?.markAsTouched();
-    // Automatically go to step 2 when role is selected
     this.step.set(2);
   }
 
@@ -189,17 +194,7 @@ export class Register implements OnInit {
         return 'text-primary';
     }
   }
-  private passwordMatchValidator(form: FormGroup) {
-    const password = form.get('password');
-    const confirmPassword = form.get('confirmPassword');
-    
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
-    }
-    
-    return null;
-  }
+ 
 
   private markFormGroupTouched(): void {
     Object.keys(this.registerForm.controls).forEach(key => {

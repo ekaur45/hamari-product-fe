@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse, EducationItem, UpsertEducationDto, UpdateAvailabilityDto, UpdateUserDetailsDto, TeacherSubject } from '../models';
+import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse, EducationItem, UpsertEducationDto, UpdateAvailabilityDto, UpdateUserDetailsDto, TeacherSubject, AdminUsersListDto } from '../models';
 
 /**
  * User Service
@@ -14,6 +14,19 @@ import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse, EducationItem
 })
 export class UserService {
   constructor(private apiService: ApiService) {}
+
+
+  getAdminUsers(page: number = 1, limit: number = 10, search?: string, role?: string, isActive?: boolean): Observable<AdminUsersListDto> {
+    return this.apiService.get<AdminUsersListDto>(API_ENDPOINTS.ADMIN.USERS, { params: { page, limit } }).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+
+
+
+
 
   /**
    * Get all users with pagination
@@ -62,13 +75,13 @@ export class UserService {
    * Create new user
    */
   createUser(userData: CreateUserDto): Observable<User> {
-    return this.apiService.post<User>(API_ENDPOINTS.USERS.BASE, userData)
+    return this.apiService.post<User>(API_ENDPOINTS.ADMIN.USERS, userData)
       .pipe(
         map(response => {
           if (response.data) {
             return response.data;
           }
-          throw new Error('Invalid response format');
+          throw new Error(response.message);
         }),
         catchError(error => {
           console.error('Create user error:', error);

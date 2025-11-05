@@ -7,7 +7,7 @@
                 <p class="text-sm text-gray-600">Total Students</p>
                 <i class="fas fa-user-graduate text-primary"></i>
             </div>
-            <p class="text-2xl font-bold text-gray-900">4,890</p>
+            <p class="text-2xl font-bold text-gray-900">{{totalStudents()}}</p>
             <p class="text-xs text-green-600 mt-1"><i class="fas fa-arrow-up mr-1"></i>245 this month</p>
         </div>
         <div class="bg-white rounded-lg shadow-md p-5">
@@ -15,7 +15,7 @@
                 <p class="text-sm text-gray-600">Active</p>
                 <i class="fas fa-check-circle text-green-500"></i>
             </div>
-            <p class="text-2xl font-bold text-gray-900">4,723</p>
+            <p class="text-2xl font-bold text-gray-900">{{totalActiveStudents()}}</p>
             <p class="text-xs text-gray-500 mt-1">97% of total</p>
         </div>
         <div class="bg-white rounded-lg shadow-md p-5">
@@ -23,7 +23,7 @@
                 <p class="text-sm text-gray-600">New Enrollments</p>
                 <i class="fas fa-user-plus text-blue-500"></i>
             </div>
-            <p class="text-2xl font-bold text-gray-900">167</p>
+            <p class="text-2xl font-bold text-gray-900">{{newEnrollments()}}</p>
             <p class="text-xs text-gray-500 mt-1">This month</p>
         </div>
         <div class="bg-white rounded-lg shadow-md p-5">
@@ -31,7 +31,7 @@
                 <p class="text-sm text-gray-600">Suspended</p>
                 <i class="fas fa-ban text-red-500"></i>
             </div>
-            <p class="text-2xl font-bold text-gray-900">0</p>
+            <p class="text-2xl font-bold text-gray-900">{{suspendedStudents()}}</p>
             <p class="text-xs text-gray-500 mt-1">0% of total</p>
         </div>
     </div>
@@ -83,7 +83,7 @@
                     <tr>
                         <th class="text-left py-3 px-4 font-medium text-gray-700">Student</th>
                         <th class="text-left py-3 px-4 font-medium text-gray-700">Student ID</th>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">Academy</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Parent</th>
                         <th class="text-left py-3 px-4 font-medium text-gray-700">Grade/Class</th>
                         <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
                         <th class="text-left py-3 px-4 font-medium text-gray-700">Enrolled</th>
@@ -91,23 +91,28 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
+                    @for (student of students(); track student.id) {
                     <tr class="hover:bg-gray-50 transition">
                         <td class="py-3 px-4">
                             <div class="flex items-center">
                                 <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">EJ</div>
                                 <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">Emily Johnson</p>
-                                    <p class="text-xs text-gray-500">emily.johnson@eduportal.com</p>
+                                    <p class="text-sm font-medium text-gray-900">{{student.user?.firstName}} {{student.user?.lastName}}</p>
+                                    <p class="text-xs text-gray-500">{{student.user?.email}}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">STU001</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Elite Academy</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Grade 10</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">{{student.id}}</td>
+                        @if (student.parent) {
+                            <td class="py-3 px-4 text-sm text-gray-700">{{student.parent.user?.firstName}} {{student.parent.user?.lastName}}</td>
+                        } @else {
+                            <td class="py-3 px-4 text-sm text-gray-700">N/A</td>
+                        }
+                        <td class="py-3 px-4 text-sm text-gray-700">{{student.grade ?? 'N/A'}}</td>
                         <td class="py-3 px-4">
                             <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
                         </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Jan 10, 2024</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">{{student.createdAt | date:'dd/MM/yyyy'}}</td>
                         <td class="py-3 px-4">
                             <div class="flex items-center space-x-2">
                                 <a href="profile-student-view.html" class="text-primary hover:text-blue-600 transition text-sm" title="View">
@@ -122,87 +127,16 @@
                             </div>
                         </td>
                     </tr>
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold">MW</div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">Michael Williams</p>
-                                    <p class="text-xs text-gray-500">michael.williams@eduportal.com</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">STU002</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Elite Academy</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Grade 9</td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Jan 12, 2024</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center space-x-2">
-                                <a href="profile-student-view.html" class="text-primary hover:text-blue-600 transition text-sm" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Suspend">
-                                    <i class="fas fa-ban"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold">SB</div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">Sarah Brown</p>
-                                    <p class="text-xs text-gray-500">sarah.brown@eduportal.com</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">STU003</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Premier Academy</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Grade 8</td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Jan 15, 2024</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center space-x-2">
-                                <a href="profile-student-view.html" class="text-primary hover:text-blue-600 transition text-sm" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Suspend">
-                                    <i class="fas fa-ban"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    }
                 </tbody>
             </table>
         </div>
 
         <!-- Pagination -->
-        <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-            <div class="text-sm text-gray-700">
-                Showing <span class="font-medium">1</span> to <span class="font-medium">3</span> of <span class="font-medium">4,890</span> results
-            </div>
-            <div class="flex items-center space-x-2">
-                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition" disabled="">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="px-3 py-1 bg-primary text-white rounded-lg text-sm">1</button>
-                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">2</button>
-                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">3</button>
-                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
+        <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+            <p-paginator [totalRecords]="totalStudents()" [rows]="rows()" [first]="first()" 
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} students"
+            [rowsPerPageOptions]="[5,10, 20, 50]" (onPageChange)="onPageChange($event)"></p-paginator>
         </div>
     </div>

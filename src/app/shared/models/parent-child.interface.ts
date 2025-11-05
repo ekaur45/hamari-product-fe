@@ -44,6 +44,16 @@ export interface UpdateParentChildDto {
   isActive?: boolean;
 }
 
+export interface Parent{
+  id: string;
+  userId: string;
+  user?: User;
+  children?: Student[];
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
+}
+
 // Re-export related interfaces
 import { User } from './user.interface';
 import { Student } from './student.interface';

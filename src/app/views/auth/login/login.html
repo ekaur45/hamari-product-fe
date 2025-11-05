@@ -72,7 +72,7 @@
           </label>
           <div class="relative">
             <i class="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            <input id="email" name="username" type="email" autocomplete="email" formControlName="username" class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="Enter your email" [class.border-red-500]="getFieldError('username')" />
+            <input id="email" name="username" type="email" autocomplete="email" formControlName="username" class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition" placeholder="Enter your email" [class.border-red-500]="getFieldError('username')" />
           </div>
           <div *ngIf="getFieldError('username')" class="mt-1 text-sm text-red-600">{{ getFieldError('username') }}</div>
         </div>
@@ -83,7 +83,7 @@
           </label>
           <div class="relative">
             <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            <input id="password" name="password" [type]="showPassword() ? 'text' : 'password'" autocomplete="current-password" formControlName="password" class="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="Enter your password" [class.border-red-500]="getFieldError('password')" />
+            <input id="password" name="password" [type]="showPassword() ? 'text' : 'password'" autocomplete="current-password" formControlName="password" class="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition" placeholder="Enter your password" [class.border-red-500]="getFieldError('password')" />
             <button type="button" (click)="togglePasswordVisibility()" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
               <i class="fas" [ngClass]="showPassword() ? 'fa-eye-slash' : 'fa-eye'"></i>
             </button>

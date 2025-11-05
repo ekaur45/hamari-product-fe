@@ -1,301 +1,289 @@
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
-        <div class="bg-white rounded-lg shadow-md p-5">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-sm text-gray-600">Total Users</p>
-                <i class="fas fa-users text-primary"></i>
-            </div>
-            <p class="text-2xl font-bold text-gray-900">5,432</p>
+@if(!isMobile()) {
+<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+    <div class="bg-white rounded-lg shadow-md p-5">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-600">Total Users</p>
+            <i class="fas fa-users text-primary"></i>
         </div>
-        <div class="bg-white rounded-lg shadow-md p-5">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-sm text-gray-600">Teachers</p>
-                <i class="fas fa-chalkboard-teacher text-green-500"></i>
-            </div>
-            <p class="text-2xl font-bold text-gray-900">342</p>
+        <p class="text-2xl font-bold text-gray-900">{{totalUsers()}}</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-5">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-600">Teachers</p>
+            <i class="fas fa-chalkboard-teacher text-green-500"></i>
         </div>
-        <div class="bg-white rounded-lg shadow-md p-5">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-sm text-gray-600">Students</p>
-                <i class="fas fa-user-graduate text-orange-500"></i>
-            </div>
-            <p class="text-2xl font-bold text-gray-900">4,890</p>
+        <p class="text-2xl font-bold text-gray-900">{{totalTeachers()}}</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-5">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-600">Students</p>
+            <i class="fas fa-user-graduate text-orange-500"></i>
         </div>
-        <div class="bg-white rounded-lg shadow-md p-5">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-sm text-gray-600">Parents</p>
-                <i class="fas fa-user-friends text-purple-500"></i>
-            </div>
-            <p class="text-2xl font-bold text-gray-900">1,245</p>
+        <p class="text-2xl font-bold text-gray-900">{{totalStudents()}}</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-5">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-600">Parents</p>
+            <i class="fas fa-user-friends text-purple-500"></i>
         </div>
-        <div class="bg-white rounded-lg shadow-md p-5">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-sm text-gray-600">Academy Owners</p>
-                <i class="fas fa-building text-blue-500"></i>
+        <p class="text-2xl font-bold text-gray-900">{{totalParents()}}</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-5">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-600">Academy Owners</p>
+            <i class="fas fa-building text-blue-500"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-900">{{totalAcademyOwners()}}</p>
+    </div>
+</div>
+}
+
+<!-- Filters and Actions -->
+<div class="bg-white rounded-lg shadow-md p-3 sm:p-5 mb-6">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+        <!-- Filters Section -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-3 flex-1 w-full lg:w-auto">
+            <!-- Search Input -->
+            <div class="relative flex-1 w-full sm:max-w-xs">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" placeholder="Search users..."
+                    class="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
-            <p class="text-2xl font-bold text-gray-900">127</p>
+            <!-- Role Filter -->
+            <div class="relative w-full sm:w-auto sm:min-w-[140px]">
+                <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                <select
+                    class="w-full sm:w-auto pl-10 pr-8 py-2 text-sm sm:text-base border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                    <option value="all">All Roles</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                    <option value="parent">Parent</option>
+                    <option value="academy-owner">Academy Owner</option>
+                </select>
+                <i
+                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-sm"></i>
+            </div>
+            <!-- Status Filter -->
+            <div class="relative w-full sm:w-auto sm:min-w-[140px]">
+                <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                <select
+                    class="w-full sm:w-auto pl-10 pr-8 py-2 text-sm sm:text-base border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="pending">Pending</option>
+                    <option value="suspended">Suspended</option>
+                </select>
+                <i
+                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-sm"></i>
+            </div>
+        </div>
+        <!-- Actions Section -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 w-full sm:w-auto">
+            <button class="w-full sm:w-auto px-4 py-2 text-sm sm:text-base border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition flex items-center justify-center sm:justify-start">
+                <i class="fas fa-download mr-2"></i>Export
+            </button>
+            <button class="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-primary text-white rounded-lg hover:bg-primary/80 transition flex items-center justify-center sm:justify-start" (click)="showAddUserDialog.set(true)">
+                <i class="fas fa-user-plus mr-2"></i>Add User
+            </button>
         </div>
     </div>
+</div>
 
-    <!-- Filters and Actions -->
-    <div class="bg-white rounded-lg shadow-md p-5 mb-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div class="flex items-center space-x-3 flex-1">
-                <div class="relative flex-1 max-w-xs">
-                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" placeholder="Search users..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div class="relative">
-                    <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <select class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
-                        <option value="all">All Roles</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="student">Student</option>
-                        <option value="parent">Parent</option>
-                        <option value="academy-owner">Academy Owner</option>
-                    </select>
-                    <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-                </div>
-                <div class="relative">
-                    <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <select class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
-                        <option value="all">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="pending">Pending</option>
-                        <option value="suspended">Suspended</option>
-                    </select>
-                    <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-                </div>
-            </div>
-            <div class="flex items-center space-x-2">
-                <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
-                    <i class="fas fa-download mr-2"></i>Export
-                </button>
-                <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
-                    <i class="fas fa-user-plus mr-2"></i>Add User
-                </button>
-            </div>
-        </div>
+<!-- Users Table -->
+@if(!isMobile()) {
+<div class="bg-white rounded-lg shadow-md">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <!-- <th class="text-left py-3 px-4 font-medium text-gray-700">
+                        <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
+                    </th> -->
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">User</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Role</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Email</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Joined Date</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Last Active</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @for(user of users(); track user.id) {
+                <tr class="hover:bg-gray-50 transition">
+                    <!-- <td class="py-3 px-4">
+                        <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
+                    </td> -->
+                    <td class="py-3 px-4">
+                        <div class="flex items-center">
+                            <div
+                                class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold uppercase">
+                                {{user.firstName.charAt(0)}}{{user.lastName.charAt(0)}}</div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">{{user.firstName}} {{user.lastName}}</p>
+                                <p class="text-xs text-gray-500">ID: {{user.id}}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span
+                            class="px-2 py-1 {{getUserRoleBgColorClass(user.role)}} rounded-lg text-xs font-medium">
+                            {{user.role}}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-700">{{user.email}}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">{{user.isActive ? 'Active' : 'Inactive'}}</span>
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-700">{{user.createdAt | date:'dd/MM/yyyy'}}</td>
+                    <td class="py-3 px-4 text-sm text-gray-700">2 hours ago</td>
+                    <td class="py-3 px-4">
+                        <div class="flex items-center space-x-2">
+                            <button class="text-primary hover:text-blue-600 transition text-sm" title="View">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-700 transition text-sm" title="Suspend" (click)="onUserDeleted(user)">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                }
+                
+            </tbody>
+        </table>
+
     </div>
 
-    <!-- Users Table -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">
-                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
-                        </th>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">User</th>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">Role</th>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">Email</th>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">Joined Date</th>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">Last Active</th>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-3 px-4">
-                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
-                        </td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">JS</div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">John Smith</p>
-                                    <p class="text-xs text-gray-500">ID: TEA001</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Teacher</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">john.smith@eduportal.com</td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Jan 15, 2024</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">2 hours ago</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center space-x-2">
-                                <button class="text-primary hover:text-blue-600 transition text-sm" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Suspend">
-                                    <i class="fas fa-ban"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-3 px-4">
-                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
-                        </td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-semibold">EJ</div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">Emily Johnson</p>
-                                    <p class="text-xs text-gray-500">ID: STU001</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-medium">Student</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">emily.johnson@eduportal.com</td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Jan 10, 2024</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">1 day ago</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center space-x-2">
-                                <button class="text-primary hover:text-blue-600 transition text-sm" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Suspend">
-                                    <i class="fas fa-ban"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-3 px-4">
-                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
-                        </td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold">SB</div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">Sarah Brown</p>
-                                    <p class="text-xs text-gray-500">ID: PAR001</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium">Parent</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">sarah.brown@eduportal.com</td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Jan 12, 2024</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">3 hours ago</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center space-x-2">
-                                <button class="text-primary hover:text-blue-600 transition text-sm" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Suspend">
-                                    <i class="fas fa-ban"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-3 px-4">
-                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
-                        </td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">MW</div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">Michael Williams</p>
-                                    <p class="text-xs text-gray-500">ID: AO001</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium">Academy Owner</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">michael.williams@eduportal.com</td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-medium">Pending</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Jan 20, 2024</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Never</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center space-x-2">
-                                <button class="text-primary hover:text-blue-600 transition text-sm" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="text-green-600 hover:text-green-700 transition text-sm" title="Approve">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Reject">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-3 px-4">
-                            <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
-                        </td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold">LG</div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">Lisa Garcia</p>
-                                    <p class="text-xs text-gray-500">ID: TEA002</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Teacher</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">lisa.garcia@eduportal.com</td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-medium">Suspended</span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">Dec 20, 2023</td>
-                        <td class="py-3 px-4 text-sm text-gray-700">5 days ago</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center space-x-2">
-                                <button class="text-primary hover:text-blue-600 transition text-sm" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="text-green-600 hover:text-green-700 transition text-sm" title="Activate">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+        <p-paginator [totalRecords]="totalUsers()" [rows]="rows()" [first]="first()" 
+        [rows]="pagination().limit"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+        [rowsPerPageOptions]="[5,10, 20, 50]" (onPageChange)="onPageChange($event)"></p-paginator>
+    </div>    
+    <!-- <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+        <div class="text-sm text-gray-700">
+            Showing <span class="font-medium">{{pagination().page}}</span> to <span class="font-medium">{{pagination().page + pagination().limit>=pagination().totalPages ? pagination().totalPages : pagination().page + pagination().limit}}</span> of <span
+                class="font-medium">{{pagination().total}}</span> results
         </div>
-
-        <!-- Pagination -->
-        <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-            <div class="text-sm text-gray-700">
-                Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">5,432</span> results
+        <div class="flex items-center space-x-2">
+            <p-select
+            [options]="[{label: '5', value: 5}, {label: '10', value: 10}, {label: '20', value: 20}, {label: '50', value: 50}, {label: '100', value: 100}]"
+            [(ngModel)]="pagination().limit"
+            (ngModelChange)="getAdminUsers()"
+            >
+            </p-select>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button
+                class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition"
+                [disabled]="pagination().page === 1"
+                (click)="previousPage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            @for (page of pages(); track page; let i = $index) {
+                @if(page === pagination().page) {
+                    <button class="px-3 py-1 bg-primary text-white rounded-lg text-sm">{{i + 1}}</button>
+                } @else {
+                    <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition" (click)="onPageChange(i + 1)">{{i + 1}}</button>
+                }   
+            }
+            <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition"
+            [disabled]="pagination().page === pagination().totalPages"
+            (click)="nextPage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div> -->
+</div>
+} @else {
+    <!-- Mobile View -->
+    <!-- Show Users Cards -->
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        @for(user of users(); track user.id) {
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
+            <!-- Card Header with Avatar -->
+            <div class="bg-gradient-to-r from-primary to-primary/80 p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-semibold text-lg uppercase border-2 border-white/30">
+                        {{user.firstName.charAt(0)}}{{user.lastName.charAt(0)}}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-white font-semibold text-sm truncate">{{user.firstName}} {{user.lastName}}</p>
+                        <p class="text-white/80 text-xs truncate">{{user.email}}</p>
+                    </div>
+                </div>
             </div>
-            <div class="flex items-center space-x-2">
-                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition" disabled="">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="px-3 py-1 bg-primary text-white rounded-lg text-sm">1</button>
-                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">2</button>
-                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">3</button>
-                <button class="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition">
-                    <i class="fas fa-chevron-right"></i>
+            
+            <!-- Card Body -->
+            <div class="p-4 space-y-3">
+                <!-- Role Badge -->
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500 font-medium">Role</span>
+                    <span class="px-2 py-1 {{getUserRoleBgColorClass(user.role)}} rounded-lg text-xs font-medium">
+                        {{user.role}}
+                    </span>
+                </div>
+                
+                <!-- Status -->
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500 font-medium">Status</span>
+                    <span class="px-2 py-1 {{user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}} rounded-lg text-xs font-medium">
+                        {{user.isActive ? 'Active' : 'Inactive'}}
+                    </span>
+                </div>
+                
+                <!-- Phone Number (if available) -->
+                @if(user.userDetails?.phone) {
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500 font-medium">Phone</span>
+                    <span class="text-xs text-gray-700 font-medium">{{user.userDetails?.phone}}</span>
+                </div>
+                }
+                
+                <!-- Joined Date -->
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500 font-medium">Joined</span>
+                    <span class="text-xs text-gray-700 font-medium">{{user.createdAt | date:'dd/MM/yyyy'}}</span>
+                </div>
+                
+                <!-- User ID -->
+                <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <span class="text-xs text-gray-400">ID: {{user.id}}</span>
+                </div>
+            </div>
+            
+            <!-- Card Footer with Actions -->
+            <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition" title="View">
+                        <i class="fas fa-eye text-sm"></i>
+                    </button>
+                    <button class="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition" title="Edit">
+                        <i class="fas fa-edit text-sm"></i>
+                    </button>
+                </div>
+                <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Suspend" (click)="onUserDeleted(user)">
+                    <i class="fas fa-ban text-sm"></i>
                 </button>
             </div>
         </div>
-    </div>
+        }
+     </div>
+}
+@if (showAddUserDialog()) {
+    <p-dialog [(visible)]="showAddUserDialog" [modal]="true" styleClass="w-1/4">
+        <ng-template pTemplate="header" #header>
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold">Add User</h1>
+                <button type="button" pButton icon="pi pi-times" (click)="showAddUserDialog.set(false)"></button>
+            </div>
+        </ng-template>
+        <app-add-user (onUserAdded)="onUserAdded($event)" (onCancel)="showAddUserDialog.set(false)"></app-add-user>
+    </p-dialog>
+}

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
@@ -122,10 +122,11 @@ export class AuthService {
   /**
    * Logout user
    */
-  logout(): void {
+  logout(): Observable<void> {
     this.clearToken();
     this.clearCurrentUser();
     this.isAuthenticatedSubject.next(false);
+    return of(void 0);
   }
 
   /**

@@ -6,14 +6,15 @@ import { User, UserRole } from '../../../shared/models';
 import { SideNav } from '../navs/sidebar/side-nav';
 import { TopBar } from '../navs/topbar/top-bar';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'main-layout',
-  imports: [CommonModule, RouterOutlet, SideNav, TopBar, ToastModule],
+  imports: [CommonModule, RouterOutlet, SideNav, TopBar, ToastModule, ConfirmDialogModule],
   templateUrl: './main.layout.html',
   styleUrls: ['./main.layout.css'],
-  providers: [MessageService]
+  providers: [MessageService, ConfirmationService]
 })
 export class MainLayout implements AfterViewInit, OnInit {
 

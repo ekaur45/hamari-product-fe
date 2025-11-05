@@ -1,0 +1,95 @@
+<div class="flex flex-col gap-4">
+    <form [formGroup]="addUserForm" (ngSubmit)="onSubmit()">
+        @if(isLoading()) {
+            <div class="flex justify-center items-center">
+                <p-progressBar mode="indeterminate" [style]="{ height: '6px' }" />
+            </div>
+        }
+        <div class="flex flex-col gap-2">
+            <label for="firstName">First Name <span class="text-red-500">*</span></label>
+            <input type="text" id="firstName" formControlName="firstName" class="app-input-field" 
+            [ngClass]="{'border-red-500': addUserForm.get('firstName')?.errors?.['required']}"
+            />
+            @if(addUserForm.get('firstName')?.errors?.['required']) {
+                <small class="text-red-500">{{ getFieldError('firstName') }}</small>
+            }
+            @if(addUserForm.get('firstName')?.errors?.['minlength']) {
+                <small class="text-red-500">{{ getFieldError('firstName') }}</small>
+            }
+            @if(addUserForm.get('firstName')?.errors?.['maxlength']) {
+                <small class="text-red-500">{{ getFieldError('firstName') }}</small>
+            }
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="lastName">Last Name <span class="text-red-500">*</span></label>
+            <input type="text" id="lastName" formControlName="lastName" class="app-input-field" 
+            [ngClass]="{'border-red-500': addUserForm.get('lastName')?.errors?.['required']}"
+            />
+            @if(addUserForm.get('lastName')?.errors?.['required']) {
+                <small class="text-red-500">{{ getFieldError('lastName') }}</small>
+            }
+            @if(addUserForm.get('lastName')?.errors?.['minlength']) {
+                <small class="text-red-500">{{ getFieldError('lastName') }}</small>
+            }
+            @if(addUserForm.get('lastName')?.errors?.['maxlength']) {
+                <small class="text-red-500">{{ getFieldError('lastName') }}</small>
+            }
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="email">Email <span class="text-red-500">*</span></label>
+            <input type="email" id="email" formControlName="email" class="app-input-field" />
+            @if(addUserForm.get('email')?.errors?.['required']) {
+                <small class="text-red-500">{{ getFieldError('email') }}</small>
+            }
+            @if(addUserForm.get('email')?.errors?.['email']) {
+                <small class="text-red-500">{{ getFieldError('email') }}</small>
+            }
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="password">Password <span class="text-red-500">*</span></label>
+            <input type="password" id="password" formControlName="password" class="app-input-field" />
+            @if(addUserForm.get('password')?.errors?.['required']) {
+                <small class="text-red-500">{{ getFieldError('password') }}</small>
+            }
+            @if(addUserForm.get('password')?.errors?.['minlength']) {
+                <small class="text-red-500">{{ getFieldError('password') }}</small>
+            }
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="confirmPassword">Confirm Password <span class="text-red-500">*</span></label>
+            <input type="password" id="confirmPassword" formControlName="confirmPassword" class="app-input-field" />
+            @if(addUserForm.get('confirmPassword')?.errors?.['required']) {
+                <small class="text-red-500">{{ getFieldError('confirmPassword') }}</small>
+            }
+            @if(addUserForm.get('confirmPassword')?.errors?.['minlength']) {
+                <small class="text-red-500">{{ getFieldError('confirmPassword') }}</small>
+            }
+            @if(addUserForm.get('confirmPassword')?.errors?.['passwordMismatch']) {
+                <small class="text-red-500">{{ getFieldError('confirmPassword') }}</small>
+            }
+            @if(addUserForm.get('confirmPassword')?.errors?.['passwordMismatch']) {
+                <small class="text-red-500">Passwords do not match</small>
+            }
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="role">Role <span class="text-red-500">*</span></label>
+            <p-select id="role" formControlName="role"
+            size="large"
+            [options]="[{label: 'Admin', value: UserRole.ADMIN},{label: 'Student', value: UserRole.STUDENT}, {label: 'Teacher', value: UserRole.TEACHER}, {label: 'Parent', value: UserRole.PARENT}, {label: 'Academy Owner', value: UserRole.ACADEMY_OWNER}]"
+            [ngClass]="{'border-red-500': addUserForm.get('role')?.errors?.['required']}"
+            >
+            </p-select>
+            @if(addUserForm.get('role')?.errors?.['required']) {
+                <small class="text-red-500">{{ getFieldError('role') }}</small>
+            }
+            @if(addUserForm.get('role')?.errors?.['pattern']) {
+                <small class="text-red-500">{{ getFieldError('role') }}</small>
+            }
+        </div>
+        <hr class="my-4 w-full border-gray-200">
+        <div class="flex justify-end gap-2">
+            <button type="button" class="app-secondary-button" (click)="onCancel.emit()">Cancel</button>
+            <button type="submit" class="app-primary-button">Add User</button>
+        </div>
+    </form>
+</div>

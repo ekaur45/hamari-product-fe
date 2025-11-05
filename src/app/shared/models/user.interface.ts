@@ -1,3 +1,5 @@
+import { Student, Teacher } from ".";
+
 /**
  * User Entity Interface
  */
@@ -138,4 +140,46 @@ export interface RegisterDto {
   phone?: string;
   address?: string;
   dateOfBirth?: Date;
+  agreeToTerms: boolean;
+}
+
+
+
+
+
+export interface PaginationDto {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+export interface AdminUsersListDto {
+  users: User[];
+  totalUsers: number;
+  totalTeachers: number;
+  totalStudents: number;
+  totalParents: number;
+  totalAcademyOwners: number;
+  pagination: PaginationDto;
+}
+
+
+export interface TeacherListDto {
+  teachers: Teacher[];
+  totalTeachers: number;
+  activeTeachers: number;
+  pendingVerificationTeachers: number;
+  rejectedTeachers: number;
+  pagination: PaginationDto;
+}
+
+export interface StudentListDto {
+  students: Student[];
+  totalStudents: number;
+  totalActiveStudents: number;
+  newEnrollments: number;
+  suspendedStudents: number;
+  pagination: PaginationDto;
 }

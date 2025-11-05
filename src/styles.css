@@ -16,14 +16,22 @@ aside::-webkit-scrollbar-thumb {
   border-radius: 8px;
 }
 
-/* Design tokens to mirror html-design Tailwind config */
-@layer utilities {
-  .text-primary { color: #f5530d; }
-  .bg-primary { background-color: #f5530d; }
-  .from-primary { background: linear-gradient(135deg, #f5530d 0%, #ff6b35 50%, #f9844a 100%); }
-  .to-secondary { background: linear-gradient(135deg, #8b5cf6 0%, #a572d9 50%, #c28cd9 100%); }
-  .bg-secondary { background-color: #8b5cf6; }
-  .border-primary { border-color: #f5530d; }
+@theme {
+  --color-primary: #f5530d;
+  --color-secondary: #8b5cf6;
 
-  
+}
+
+.app-input-field {
+  @apply w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition;
+}
+
+.p-dialog-content{
+  overflow-y: unset !important;
+}
+.app-primary-button {
+  @apply px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition;
+}
+.app-secondary-button {
+  @apply px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition;
 }

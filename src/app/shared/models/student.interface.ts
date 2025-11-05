@@ -15,6 +15,7 @@ export interface Student {
   updatedAt: Date;
   user?: User;
   academy?: Academy;
+  parent?: Parent;
   enrollments?: ClassEnrollment[];
   performances?: Performance[];
   parentChildRelations?: ParentChild[];
@@ -47,4 +48,4 @@ import { User } from './user.interface';
 import { Academy } from './academy.interface';
 import { ClassEnrollment } from './class.interface';
 import { Performance } from './performance.interface';
-import { ParentChild } from './parent-child.interface';
+import { Parent, ParentChild } from './parent-child.interface';
