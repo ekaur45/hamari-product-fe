@@ -1,0 +1,239 @@
+@if(profile() && !isLoading()) {
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- First Column: Profile Info -->
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Profile Picture & Basic Info -->
+        <div class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex flex-col items-center mb-4">
+                <div class="w-28 h-28 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-semibold mb-3">
+                    {{profile()?.firstName?.charAt(0) ?? "" + profile()?.lastName?.charAt(0) ?? ""}}
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-1">{{profile()?.firstName ?? ""}} {{profile()?.lastName ?? ""}}</h3>
+                <p class="text-sm text-gray-600 mb-4">{{profile()?.role ?? ""}}</p>
+            </div>
+            
+            <a [routerLink]="['/profile/edit',1]" class="w-full py-3 rounded-xl font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm bg-primary text-white hover:bg-orange-600 shadow-lg hover:shadow-xl">
+                <i class="fas fa-edit mr-2"></i>
+                <span>Edit Profile</span>
+            </a>
+            
+            <div class="border-t border-gray-200 pt-4 space-y-3">
+                <div class="flex items-start group hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
+                        <i class="fas fa-envelope text-primary text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500 mb-0.5">Email</p>
+                        <p class="text-sm text-gray-900 break-all font-medium">{{profile()?.email ?? ""}}</p>
+                    </div>
+                </div>
+                <div class="flex items-start group hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
+                        <i class="fas fa-phone text-primary text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500 mb-0.5">Phone</p>
+                        <p class="text-sm text-gray-900 font-medium">{{profile()?.details?.phone ?? "-"}}</p>
+                    </div>
+                </div>
+                <div class="flex items-start group hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
+                        <i class="fas fa-id-card text-primary text-sm"></i>
+                    </div>
+                    @if(profile()?.role === UserRole.STUDENT) {
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500 mb-0.5">Student ID</p>
+                        <p class="text-sm text-gray-900 font-medium">{{profile()?.student?.id ?? "-"}}</p>
+                    </div>
+                    }
+                    @else if(profile()?.role === UserRole.TEACHER) {
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500 mb-0.5">Teacher ID</p>
+                        <p class="text-sm text-gray-900 font-medium">{{profile()?.teacher?.id ?? "-"}}</p>
+                    </div>
+                    }
+                    @else if(profile()?.role === UserRole.PARENT) {
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500 mb-0.5">Parent ID</p>
+                        <p class="text-sm text-gray-900 font-medium">{{profile()?.parent?.id ?? "-"}}</p>
+                    </div>
+                    }
+                    @else if(profile()?.role === UserRole.ACADEMY_OWNER) {
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500 mb-0.5">Academy Owner ID</p>
+                        <p class="text-sm text-gray-900 font-medium">{{profile()?.academy?.id ?? "-"}}</p>
+                    </div>
+                    }
+                    @else {
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500 mb-0.5">User ID</p>
+                        <p class="text-sm text-gray-900 font-medium">{{profile()?.id ?? "-"}}</p>
+                    </div>
+                    }
+                </div>
+                <div class="flex items-start group hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
+                        <i class="fas fa-calendar text-primary text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500 mb-0.5">Date of Joining</p>
+                        <p class="text-sm text-gray-900 font-medium">{{profile()?.createdAt | date:'dd/MM/yyyy' }}</p>
+                    </div>
+                </div>
+                @if(profile()?.role === UserRole.STUDENT) {
+                <div class="flex items-start group hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
+                        <i class="fas fa-graduation-cap text-primary text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500 mb-0.5">Grade/Class</p>
+                        <p class="text-sm text-gray-900 font-medium">{{profile()?.student?.grade ?? ""}} - {{profile()?.student?.section ?? ""}}</p>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-user-circle text-primary"></i>
+                </div>
+                <h4 class="text-base font-semibold text-gray-900">About</h4>
+            </div>
+            <div class="pl-14">
+                @if(profile()?.role === UserRole.TEACHER) {
+                <p class="text-sm text-gray-700 leading-relaxed">{{profile()?.teacher?.tagline ?? "-"}}</p>
+                }
+                @else if(profile()?.role === UserRole.STUDENT) {
+                <p class="text-sm text-gray-700 leading-relaxed">{{profile()?.student?.tagline ?? "-"}}</p>
+                }
+                @else {
+                <p class="text-sm text-gray-700 leading-relaxed">{{profile()?.details?.bio ?? "-"}}</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Column: Additional Info -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- First Row: Academy & Academic Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Academy -->
+            <div class="bg-white rounded-lg shadow-md p-5">
+                <div class="flex items-center mb-3">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-school text-primary"></i>
+                    </div>
+                    <h4 class="text-base font-semibold text-gray-900">Academy</h4>
+                </div>
+                <div class="pl-14">
+                    <p class="text-sm font-medium text-gray-900">Elite Academy</p>
+                    <p class="text-xs text-gray-500 mt-1">Registration #: AC-2024-001</p>
+                </div>
+            </div>
+
+            <!-- Academic Performance -->
+            <div class="bg-white rounded-lg shadow-md p-5">
+                <div class="flex items-center mb-3">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-chart-line text-primary"></i>
+                    </div>
+                    <h4 class="text-base font-semibold text-gray-900">Academic Performance</h4>
+                </div>
+                <div class="pl-14 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-600">Average Grade</span>
+                        <span class="text-sm font-semibold text-green-600">A-</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-600">Attendance</span>
+                        <span class="text-sm font-semibold text-gray-900">96%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enrolled Courses -->
+        <div class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-book text-primary"></i>
+                </div>
+                <h4 class="text-base font-semibold text-gray-900">Enrolled Courses</h4>
+            </div>
+            <div class="pl-14 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <p class="font-semibold text-gray-900 text-sm">Mathematics</p>
+                        <span class="px-2 py-0.5 bg-green-500 text-white text-xs font-medium rounded">A</span>
+                    </div>
+                    <p class="text-xs text-gray-600">Mr. John Smith</p>
+                </div>
+                <div class="p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <p class="font-semibold text-gray-900 text-sm">Science</p>
+                        <span class="px-2 py-0.5 bg-blue-500 text-white text-xs font-medium rounded">A-</span>
+                    </div>
+                    <p class="text-xs text-gray-600">Ms. Emily Davis</p>
+                </div>
+                <div class="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <p class="font-semibold text-gray-900 text-sm">English</p>
+                        <span class="px-2 py-0.5 bg-yellow-500 text-white text-xs font-medium rounded">B+</span>
+                    </div>
+                    <p class="text-xs text-gray-600">Mrs. Lisa Anderson</p>
+                </div>
+                <div class="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <p class="font-semibold text-gray-900 text-sm">History</p>
+                        <span class="px-2 py-0.5 bg-green-500 text-white text-xs font-medium rounded">A</span>
+                    </div>
+                    <p class="text-xs text-gray-600">Mr. Robert Brown</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Grades -->
+        <div class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-star text-primary"></i>
+                </div>
+                <h4 class="text-base font-semibold text-gray-900">Recent Grades</h4>
+            </div>
+            <div class="pl-14 space-y-2">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border-l-4 border-green-500">
+                    <div>
+                        <p class="font-semibold text-gray-900 text-sm mb-0.5">Mathematics Quiz #5</p>
+                        <p class="text-xs text-gray-500">October 15, 2024</p>
+                    </div>
+                    <span class="text-lg font-bold text-green-600">95%</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border-l-4 border-blue-500">
+                    <div>
+                        <p class="font-semibold text-gray-900 text-sm mb-0.5">Science Lab Report</p>
+                        <p class="text-xs text-gray-500">October 12, 2024</p>
+                    </div>
+                    <span class="text-lg font-bold text-blue-600">88%</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border-l-4 border-yellow-500">
+                    <div>
+                        <p class="font-semibold text-gray-900 text-sm mb-0.5">English Essay</p>
+                        <p class="text-xs text-gray-500">October 10, 2024</p>
+                    </div>
+                    <span class="text-lg font-bold text-yellow-600">85%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+} @else if(isLoading()) {
+    <!-- generate skeleton loader -->
+       Loader
+} @else {
+    <div class="flex justify-center items-center h-full">
+        <p class="text-gray-500">No profile found</p>
+    </div>
+}

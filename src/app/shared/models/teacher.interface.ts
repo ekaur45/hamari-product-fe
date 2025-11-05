@@ -4,22 +4,13 @@
 export interface Teacher {
   id: string;
   userId: string;
-  academyId: string;
-  firstName: string;
-  lastName: string;
-  employeeId: string; // Employee ID within the academy
-  department?: string;
-  specialization?: string;
-  qualification?: string;
-  experience?: number;
-  isActive: boolean;
-  joinedAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  user?: User;
-  academy?: Academy;
-  classes?: Class[];
-  performances?: Performance[];
+  tagline: string;
+  yearsOfExperience: number;
+  preferredSubject: string;
+  specialization: string;
+  hourlyRate: number;
+  teacherSubjects: TeacherSubject[];
+  availabilities: any[];
 }
 
 /**

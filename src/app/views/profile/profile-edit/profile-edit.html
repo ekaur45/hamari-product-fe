@@ -1,0 +1,148 @@
+<p-toast />
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col md:flex-row items-start md:items-center md:justify-between mb-6">
+        <div class="flex items-center mb-4 md:mb-0">
+            <div class="relative">
+                <div
+                    class="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-semibold">
+                    TE
+                </div>
+                <button id="uploadPhotoBtn"
+                    class="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition">
+                    <i class="fas fa-camera text-sm"></i>
+                </button>
+                <input type="file" id="profilePhoto" accept="image/*" class="hidden">
+            </div>
+            <div class="ml-6">
+                <h3 class="text-2xl font-bold text-gray-900">John Smith</h3>
+                <p class="text-gray-600">Mathematics Teacher</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <a routerLink="/profile"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center">
+                <i class="fas fa-eye mr-2"></i>
+                <span>View Profile</span>
+            </a>
+        </div>
+    </div>
+</div>
+@if(profile()?.role !== UserRole.PARENT) {
+<div class="bg-white rounded-lg shadow-md p-5 mb-6">
+    <div class="flex items-center justify-between overflow-x-auto">
+        <div class="flex items-center flex-1 min-w-0">
+            <a routerLink="/profile/edit/1" class="step-item active flex items-center flex-shrink-0 mr-4 cursor-pointer" >
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-semibold text-sm mr-2"
+                    [ngClass]="{'bg-primary': step() >= 1}">1</div>
+                <span class="text-sm font-medium text-gray-900 whitespace-nowrap">Personal</span>
+            </a>
+            @if(profile()?.role !== UserRole.PARENT) {
+            <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
+            <a routerLink="/profile/edit/2" class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer" >
+                <div class="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 font-semibold text-sm mr-2"
+                    [ngClass]="{'bg-primary text-white': step() >= 2}">2</div>
+                <span class="text-sm font-medium text-gray-600 whitespace-nowrap">About</span>
+            </a>
+            }
+            @if(profile()?.role === UserRole.TEACHER) {
+            <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
+            <a routerLink="/profile/edit/3" class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer" >
+                <div class="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 font-semibold text-sm mr-2"
+                    [ngClass]="{'bg-primary text-white': step() >= 3}">3</div>
+                <span class="text-sm font-medium text-gray-600 whitespace-nowrap">Education</span>
+            </a>
+            <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
+            <a routerLink="/profile/edit/4" class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer" >
+                <div class="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 font-semibold text-sm mr-2"
+                    [ngClass]="{'bg-primary text-white': step() >= 4}">4</div>
+                <span class="text-sm font-medium text-gray-600 whitespace-nowrap">Subjects</span>
+            </a>
+            <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
+            <a routerLink="/profile/edit/5" class="step-item flex items-center flex-shrink-0 cursor-pointer" >
+                <div class="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 font-semibold text-sm mr-2"
+                    [ngClass]="{'bg-primary text-white': step() >= 5}">5</div>
+                <span class="text-sm font-medium text-gray-600 whitespace-nowrap">Availability</span>
+            </a>
+            }
+        </div>
+    </div>
+</div>
+}
+<!-- Content Here -->
+@if(step() === 1) {
+<app-userinfo [user]="profile()" (nextStep)="handleNextStep()"></app-userinfo>
+}
+@if(step() === 2) {
+@if(profile()?.role === UserRole.TEACHER) {
+<app-professional-info [profile]="profile()" (nextStep)="handleNextStep()"></app-professional-info>
+}
+@if(profile()?.role === UserRole.STUDENT) {
+<form class="form-section" [formGroup]="bioForm">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h4 class="text-lg font-semibold text-gray-900 mb-4">Professional Information</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div class="col-span-2">
+                <h4 class="text-lg font-semibold text-gray-900 mb-4">Bio / Tagline</h4>
+                <div class="relative">
+                    <textarea rows="3"
+                        class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition"
+                        placeholder="Enter your bio or tagline..." name="bio" formControlName="bio">
+                            </textarea>
+                </div>
+            </div>
+            <div>
+                <button type="button"
+                    [ngClass]="{'bg-gray-400': !hasBioChanged,'bg-primary hover:bg-orange-600':hasBioChanged}"
+                    class="px-5 py-3 rounded-xl font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm  text-white  shadow-lg hover:shadow-xl"
+                    [disabled]="!hasBioChanged" (click)="onSaveBioChanges()">
+                    <i class="fas mr-2"
+                        [ngClass]="{'fa-spinner fa-spin animate-spin': isSavingBio(),'fa-save': !isSavingBio()}"></i>
+                    @if(isSavingBio()) {
+                    Saving...
+                    } @else {
+                    Save Changes
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+}
+}
+@if(step() === 3) {
+<app-education [profile]="profile()" (reloadProfile)="refreshProfile()"></app-education>
+}
+@if(step() === 4) {
+<app-subjects [profile]="profile()" (reloadProfile)="refreshProfile()"></app-subjects>
+}
+@if(step() === 5) {
+<app-availability [profile]="profile()" (reloadProfile)="refreshProfile()"></app-availability>
+}
+@if(profile()?.role !== UserRole.PARENT) {
+<div class="bg-white rounded-lg shadow-md p-5 mt-6">
+    <div class="flex flex-wrap items-center justify-center sm:justify-between gap-2 sm:gap-3 md:gap-4">
+        <a routerLink="/profile" type="button" id="cancelBtn"
+            class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition w-full sm:w-auto">
+            <i class="fas fa-times mr-2"></i>Cancel
+        </a>
+        <div class="flex items-center space-x-4 ml-auto w-full sm:w-auto">
+            @if(step() > 1) {
+            <button type="button" id="prevBtn"
+                class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center w-full sm:w-auto"
+                (click)="handlePrevious()">
+                <i class="fas fa-arrow-left mr-2"></i>Previous
+            </button>
+            }
+
+            <button type="button" id="nextBtn"
+                class="px-6 py-2 bg-primary text-white text-center rounded-lg hover:bg-blue-600 transition flex items-center w-full sm:w-auto"
+                (click)="!isLastStep&&handleNext()">
+                Next<i class="fas fa-arrow-right ml-2"></i>
+            </button>
+
+        </div>
+    </div>
+</div>
+
+}

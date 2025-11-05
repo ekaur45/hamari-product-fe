@@ -1,24 +1,26 @@
+export interface TeacherBooking {
+}
+export interface ClassBooking {
+}
+export interface StudentClassAttendance {
+}
 /**
  * Student Entity Interface
  */
 export interface Student {
-  id: string;
+  id: number;
   userId: string;
-  academyId: string;
-  studentId: string; // Student ID within the academy
-  grade?: string;
-  section?: string;
-  rollNumber?: string;
-  isActive: boolean;
-  enrolledAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  user?: User;
-  academy?: Academy;
+  tagline: string;
+  parentId?: string;
   parent?: Parent;
-  enrollments?: ClassEnrollment[];
-  performances?: Performance[];
-  parentChildRelations?: ParentChild[];
+  teacherBookings: TeacherBooking[];
+
+  grade: string;
+  section: string;
+  rollNumber: string;
+
+  classBookings: ClassBooking[];
+  studentClassAttendances: StudentClassAttendance[];
 }
 
 /**

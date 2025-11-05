@@ -12,7 +12,7 @@ export const ROUTES_MAP: Record<UserRole, Record<string, string>> = {
         LOGS: '/admin/logs',
     },
     [UserRole.TEACHER]: {
-        DASHBOARD: '/teacher/dashboard',
+        DASHBOARD: '/',
         CLASSES: '/teacher/classes',
         STUDENTS: '/teacher/students',
         SETTINGS: '/teacher/settings',
@@ -30,7 +30,7 @@ export const ROUTES_MAP: Record<UserRole, Record<string, string>> = {
         LOGS: '/student/logs',
     },
     [UserRole.PARENT]: {
-        DASHBOARD: '/parent/dashboard',
+        DASHBOARD: '/',
         CHILDREN: '/parent/children',
         CLASSES: '/parent/classes',
         SETTINGS: '/parent/settings',
@@ -38,7 +38,7 @@ export const ROUTES_MAP: Record<UserRole, Record<string, string>> = {
         LOGS: '/parent/logs',
     },
     [UserRole.ACADEMY_OWNER]: {
-        DASHBOARD: '/academy-owner/dashboard',
+        DASHBOARD: '/',
         ACADEMIES: '/academy-owner/academies',
         COURSES: '/academy-owner/courses',
         STUDENTS: '/academy-owner/students',

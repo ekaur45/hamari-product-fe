@@ -2,9 +2,7 @@ export interface Subject {
   id: string;
   name: string;
   description?: string;
-  academyId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  academyId?: string;
 }
 
 export interface CreateSubjectDto {

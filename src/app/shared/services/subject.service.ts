@@ -9,36 +9,11 @@ import { Subject, CreateSubjectDto, UpdateSubjectDto, PaginatedApiResponse } fro
 export class SubjectService {
   constructor(private api: ApiService) {}
 
-  getSubjects(page: number = 1, limit: number = 50): Observable<PaginatedApiResponse<Subject>> {
-    return this.api.getPaginated<Subject>(API_ENDPOINTS.SUBJECTS.BASE, page, limit)
-      .pipe(catchError(error => throwError(() => error)));
-  }
-
-  getByAcademy(academyId: string): Observable<PaginatedApiResponse<Subject>> {
-    return this.api.getPaginated<Subject>(API_ENDPOINTS.SUBJECTS.BY_ACADEMY(academyId), 1, 100)
-      .pipe(catchError(error => throwError(() => error)));
-  }
-
-  create(payload: CreateSubjectDto): Observable<Subject> {
-    return this.api.post<Subject>(API_ENDPOINTS.SUBJECTS.BASE, payload)
-      .pipe(
-        map(res => res.data as any),
-        catchError(error => throwError(() => error))
+  searchSubjects(searchValue: string): Observable<Subject[]> {
+      return this.api.get<Subject[]>(API_ENDPOINTS.SUBJECTS.BASE, { params: { search: searchValue } }).pipe(
+        map(r => r.data),
+        catchError(e => throwError(() => e))
       );
-  }
-
-  update(id: string, payload: UpdateSubjectDto): Observable<Subject> {
-    return this.api.put<Subject>(API_ENDPOINTS.SUBJECTS.BY_ID(id), payload)
-      .pipe(
-        map(res => res.data as any),
-        catchError(error => throwError(() => error))
-      );
-  }
-
-  delete(id: string): Observable<void> {
-    return this.api.delete<void>(API_ENDPOINTS.SUBJECTS.BY_ID(id)).pipe(
-      map(() => void 0)
-    );
   }
 }
 

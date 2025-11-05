@@ -2,12 +2,16 @@ import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,FormsModule,ReactiveFormsModule,CommonModule],
+  imports: [RouterOutlet,FormsModule,ReactiveFormsModule,CommonModule,ToastModule,ConfirmDialogModule],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
+  providers: [MessageService, ConfirmationService]
 })
 export class App {
   protected readonly title = signal('hamari-product-fe');

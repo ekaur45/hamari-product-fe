@@ -13,7 +13,13 @@ export interface User {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
-  userDetails?: UserDetails;
+  details?: UserDetails;
+  student?: Student;
+  teacher?: Teacher;
+  educations?: EducationItem[];
+  // Change it later please
+  parent?: any;
+  academy?: any;
   access_token: string;
 }
 
@@ -37,21 +43,17 @@ export type EducationType = 'school' | 'college' | 'university' | 'course' | 'ce
 export interface EducationItem {
   id: string;
   userId: string;
-  type: EducationType;
-  institution: string;
-  title?: string; // degree/course/cert name
-  field?: string; // major/subject
-  startDate?: Date;
-  endDate?: Date;
-  stillStudying?: boolean;
-  credentialUrl?: string;
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  user?: User;
+  instituteName: string;
+  degreeName: string;
+  startedYear: number;
+  endedYear?: number;
+  isStillStudying?: boolean;
+  remarks?: string;
 }
 
 export interface AvailabilitySlot {
-  dayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0=Sun
+  dayOfWeek: string; // 0=Sun
   startTime: string; // HH:mm
   endTime: string; // HH:mm
   notes?: string;

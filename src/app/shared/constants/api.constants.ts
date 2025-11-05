@@ -7,6 +7,11 @@
  */
 export const API_ENDPOINTS = {
 
+  // Profile
+  PROFILE: {
+    BASE: '/profile'
+  },
+
   // Admin
   ADMIN: {
     USERS: '/admin/users',

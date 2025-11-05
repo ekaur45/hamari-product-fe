@@ -23,6 +23,17 @@ export const routes: Routes = [
                 canActivate: [ AuthGuard, RoleGuard],
                 data: { roles: [UserRole.ADMIN] },
                 loadChildren: () => import('./views/admin/admin.routes').then(m => m.adminRoutes)
+            },
+            {
+                path: 'profile',
+                canActivate: [ AuthGuard ],
+                loadChildren: () => import('./views/profile/profile.routes').then(m => m.profileRoutes)
+            },
+            {
+                path:'student/dashboard',
+                canActivate: [ AuthGuard, RoleGuard],
+                data: { roles: [UserRole.STUDENT] },
+                component: Dashboard
             }
         ]   
     

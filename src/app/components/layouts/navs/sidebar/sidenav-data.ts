@@ -16,7 +16,7 @@ export const sidenavData: Record<UserRole, SidenavItem[]> = {
         {label: 'Courses', icon: 'fa-book', link: '/admin/courses/list'},
         {label: 'Reports', icon: 'fa-file-alt', link: '/admin/reports'},
         {label: 'Activity Logs', icon: 'fa-history', link: '/admin/logs/list'},
-        {label: 'Profile', icon: 'fa-user', link: '/teacher/profile'},
+        {label: 'Profile', icon: 'fa-user', link: '/profile'},
         {label: 'Settings', icon: 'fa-cog', link: '/admin/settings'},
     ],
     [UserRole.ACADEMY_OWNER]: [
@@ -27,6 +27,7 @@ export const sidenavData: Record<UserRole, SidenavItem[]> = {
         {label: 'Teachers', icon: 'fa-chalkboard-teacher', link: '/academy-owner/teachers'},
         {label: 'Parents', icon: 'fa-user-friends', link: '/academy-owner/parents'},
         {label: 'Logs', icon: 'fa-history', link: '/academy-owner/logs'},
+        {label: 'Profile', icon: 'fa-user', link: '/profile'},
     ],
     [UserRole.TEACHER]: [
         {label: 'Dashboard', icon: 'fa-home', link: '/teacher'},
@@ -35,7 +36,7 @@ export const sidenavData: Record<UserRole, SidenavItem[]> = {
         {label: 'Assignments', icon: 'fa-tasks', link: '/teacher/assignments'},
         {label: 'Schedule', icon: 'fa-calendar-alt', link: '/teacher/schedule'},
         {label: 'Logs', icon: 'fa-history', link: '/teacher/logs'},
-        {label: 'Profile', icon: 'fa-user', link: '/teacher/profile'},
+        {label: 'Profile', icon: 'fa-user', link: '/profile'},
         {label: 'Settings', icon: 'fa-cog', link: '/teacher/settings'},
     ],
     [UserRole.STUDENT]: [
@@ -47,7 +48,7 @@ export const sidenavData: Record<UserRole, SidenavItem[]> = {
         {label: 'Schedule', icon: 'fa-calendar-alt', link: '/student/schedule'},
         {label: 'Grades', icon: 'fa-chart-bar', link: '/student/grades'},
         {label: 'Resources', icon: 'fa-file-alt', link: '/student/resources'},
-        {label: 'Profile', icon: 'fa-user', link: '/student/profile'},
+        {label: 'Profile', icon: 'fa-user', link: '/profile'},
         {label: 'Settings', icon: 'fa-cog', link: '/student/settings'},
     ],
     [UserRole.PARENT]: [
@@ -55,5 +56,6 @@ export const sidenavData: Record<UserRole, SidenavItem[]> = {
         {label: 'Children', icon: 'fa-user-friends', link: '/parent/children'},
         {label: 'Classes', icon: 'fa-chalkboard-teacher', link: '/parent/classes'},
         {label: 'Logs', icon: 'fa-history', link: '/parent/logs'},
+        {label: 'Profile', icon: 'fa-user', link: '/profile'},
     ]
 }
