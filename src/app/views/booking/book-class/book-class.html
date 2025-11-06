@@ -1,0 +1,141 @@
+<!-- Loading State -->
+@if(isLoading()) {
+<div class="flex items-center justify-center min-h-screen">
+    <div class="text-center">
+        <i class="fas fa-spinner fa-spin text-4xl text-primary mb-4"></i>
+        <p class="text-gray-600">Loading subject details...</p>
+    </div>
+</div>
+} @else {
+    
+@if(subject()) {
+<!-- Two Column Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-[30%_70%] px-2">
+    <!-- First Column: Subject & Teachers (30%) -->
+    <div class="flex flex-col lg:pr-2">
+        <!-- Subject Details Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200 flex-shrink-0">
+            <div class="flex items-start justify-between">
+                <button [routerLink]="['/booking']" class="px-4 py-2 pl-0 text-gray-600 hover:text-gray-900 transition">
+                    <i class="fas fa-arrow-left mr-2 text-2xl"></i>
+                </button>
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{subject()?.name}}</h1>
+                    @if(subject()?.description) {
+                    <p class="text-gray-600 leading-relaxed">{{subject()?.description}}</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Teachers Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 flex-1">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-chalkboard-teacher text-primary"></i>
+                <span>Available Teachers</span>
+                <span class="text-sm font-normal text-gray-500">({{availableTeachers().length}})</span>
+            </h2>
+
+            @if(availableTeachers().length > 0) {
+            <div class="space-y-4">
+                @for(teacherSubject of availableTeachers(); track teacherSubject.id) {
+                <div 
+                    class="border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+                    [class.border-primary]="selectedTeacher()?.id === teacherSubject.id"
+                    [class.border-gray-200]="selectedTeacher()?.id !== teacherSubject.id"
+                    [class.bg-primary/5]="selectedTeacher()?.id === teacherSubject.id"
+                    (click)="selectTeacher(teacherSubject)">
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
+                            {{teacherSubject.teacher?.user?.firstName?.charAt(0) || ''}}{{teacherSubject.teacher?.user?.lastName?.charAt(0) || ''}}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-gray-900 truncate">
+                                {{teacherSubject.teacher?.user?.firstName || ''}} {{teacherSubject.teacher?.user?.lastName || ''}}
+                            </h3>
+                            @if(teacherSubject.teacher?.yearsOfExperience) {
+                            <p class="text-sm text-gray-600">{{teacherSubject.teacher?.yearsOfExperience}} years experience</p>
+                            }
+                        </div>
+                        @if(selectedTeacher()?.id === teacherSubject.id) {
+                        <i class="fas fa-check-circle text-primary text-xl"></i>
+                        }
+                    </div>
+                    
+                    <div class="space-y-2 text-sm">
+                        @if(teacherSubject.fee) {
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-dollar-sign text-gray-400 mr-2 w-4"></i>
+                            <span class="font-medium">${{teacherSubject.fee}}/session</span>
+                        </div>
+                        }
+                        @if(teacherSubject.teacher?.tagline) {
+                        <div class="flex items-start text-gray-600">
+                            <i class="fas fa-quote-left text-gray-400 mr-2 mt-1"></i>
+                            <p class="text-xs line-clamp-2">{{teacherSubject.teacher?.tagline}}</p>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="text-center py-12 border border-gray-200 border-dashed rounded-lg">
+                <i class="fas fa-user-slash text-gray-300 text-4xl mb-4"></i>
+                <p class="text-gray-500 text-lg font-medium mb-2">No teachers available</p>
+                <p class="text-gray-400 text-sm">There are currently no teachers teaching this subject</p>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Second Column: Calendar/Availability (70%) -->
+    <div class="flex flex-col lg:pl-2">
+        @if(selectedTeacher()) {
+        <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200 h-full flex flex-col">
+            <!-- Calendar Header -->
+            <div class="flex items-center justify-between mb-3 flex-shrink-0">
+                <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-calendar-check text-primary text-sm"></i>
+                    <span>Select Date & Time</span>
+                </h2>
+                <div class="text-xs text-gray-600">
+                    <span class="font-medium">{{selectedTeacher()?.teacher?.user?.firstName || ''}} {{selectedTeacher()?.teacher?.user?.lastName || ''}}</span>
+                </div>
+            </div>
+
+            @if(selectedTeacher()?.teacher?.availabilities && selectedTeacher()!.teacher!.availabilities.length > 0) {
+            <!-- View Toggle & Navigation -->
+            <app-booking-calendar [availabilities]="selectedTeacher()!.teacher!.availabilities"></app-booking-calendar>
+            } @else {
+            <div class="text-center py-12 border border-gray-200 border-dashed rounded-lg flex-1 flex items-center justify-center flex-col">
+                <i class="fas fa-calendar-times text-gray-300 text-4xl mb-4"></i>
+                <p class="text-gray-500 text-lg font-medium mb-2">No availability slots</p>
+                <p class="text-gray-400 text-sm">This teacher hasn't set their availability yet</p>
+            </div>
+            }
+        </div>
+        } @else {
+        <!-- No Teacher Selected -->
+        <div class="bg-white rounded-lg shadow-md p-12 border border-gray-200 text-center h-full flex items-center justify-center flex-col">
+            <i class="fas fa-hand-pointer text-gray-300 text-5xl mb-4"></i>
+            <p class="text-gray-500 text-lg font-medium mb-2">Select a teacher to view availability</p>
+            <p class="text-gray-400 text-sm">Choose a teacher from the list to see their available time slots</p>
+        </div>
+        }
+    </div>
+</div>
+} @else {
+<!-- Subject Not Found -->
+<div class="flex items-center justify-center min-h-screen">
+    <div class="bg-white rounded-lg shadow-md p-12 border border-gray-200 text-center">
+        <i class="fas fa-exclamation-triangle text-gray-300 text-5xl mb-4"></i>
+        <p class="text-gray-500 text-lg font-medium mb-2">Subject not found</p>
+        <p class="text-gray-400 text-sm mb-4">The subject you're looking for doesn't exist or has been removed</p>
+        <button [routerLink]="['/booking']" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Browse
+        </button>
+    </div>
+</div>
+}
+}

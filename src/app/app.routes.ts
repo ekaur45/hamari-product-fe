@@ -30,10 +30,22 @@ export const routes: Routes = [
                 loadChildren: () => import('./views/profile/profile.routes').then(m => m.profileRoutes)
             },
             {
-                path:'student/dashboard',
+                path: 'student',
                 canActivate: [ AuthGuard, RoleGuard],
                 data: { roles: [UserRole.STUDENT] },
-                component: Dashboard
+                loadChildren: () => import('./views/student/student.routes').then(m => m.studentRoutes)
+            },
+            {
+                path: 'booking',
+                canActivate: [ AuthGuard, RoleGuard],
+                data: { roles: [UserRole.STUDENT] },
+                loadChildren: () => import('./views/booking/booking.routes').then(m => m.bookingRoutes)
+            },
+            {
+                path: 'teacher',
+                canActivate: [ AuthGuard, RoleGuard],
+                data: { roles: [UserRole.TEACHER] },
+                loadChildren: () => import('./views/teacher/teacher.routes').then(m => m.teacherRoutes)
             }
         ]   
     

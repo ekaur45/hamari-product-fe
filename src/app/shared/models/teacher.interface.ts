@@ -5,12 +5,13 @@ export interface Teacher {
   id: string;
   userId: string;
   tagline: string;
-  yearsOfExperience: number;
-  preferredSubject: string;
+  yearsOfExperience?: number;
+  preferredSubject?: string;
   specialization: string;
   hourlyRate: number;
   teacherSubjects: TeacherSubject[];
-  availabilities: any[];
+  availabilities: AvailabilitySlot[];
+  user?: User;
 }
 
 /**
@@ -52,11 +53,12 @@ export interface TeacherSubject {
   subjectId: string;
   fee?: number;
   subject?: Subject;
+  teacher?: Teacher;
   createdAt: Date;
   updatedAt: Date;
 }
 // Re-export related interfaces
-import { User } from './user.interface';
+import { AvailabilitySlot, User } from './user.interface';
 import { Academy } from './academy.interface';
 import { Class } from './class.interface';
 import { Performance } from './performance.interface';import { Subject } from './subject.interface';

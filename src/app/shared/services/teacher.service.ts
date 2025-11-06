@@ -34,4 +34,18 @@ export class TeacherService {
     );
   }
 
+  getTeachersWithPagination(page: number = 1, limit: number = 10, search?: string): Observable<PaginatedApiResponse<Teacher>> {
+    const params: any = { page, limit };
+    if (search) {
+      params.search = search;
+    }
+    params.page = page;
+    params.limit = limit;
+    return this.apiService.getPaginated<Teacher>(API_ENDPOINTS.TEACHERS.BASE+'/search', page, limit, { params }).pipe(
+      map(r => r),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+
 }

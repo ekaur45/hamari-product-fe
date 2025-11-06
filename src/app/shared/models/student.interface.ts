@@ -14,13 +14,16 @@ export interface Student {
   parentId?: string;
   parent?: Parent;
   teacherBookings: TeacherBooking[];
-
-  grade: string;
-  section: string;
-  rollNumber: string;
-
+  user: User;
+  grade?: string;
+  section?: string;
+  rollNumber?: string;
   classBookings: ClassBooking[];
   studentClassAttendances: StudentClassAttendance[];
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
+  isActive: boolean;
 }
 
 /**

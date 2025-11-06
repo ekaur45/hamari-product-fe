@@ -15,6 +15,22 @@ export class SubjectService {
         catchError(e => throwError(() => e))
       );
   }
+  getSubjects(page: number = 1, limit: number = 10, search?: string): Observable<PaginatedApiResponse<Subject>> {
+    const params: any = { page, limit };
+    if (search) {
+      params.search = search;
+    }
+    return this.api.getPaginated<Subject>(API_ENDPOINTS.SUBJECTS.SEARCH, page, limit, { params }).pipe(
+      map(r => r),
+      catchError(e => throwError(() => e))
+    );
+  }
+  getSubjectById(id: string): Observable<Subject> {
+    return this.api.get<Subject>(API_ENDPOINTS.SUBJECTS.BY_ID(id)+'/details').pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
 }
 
 

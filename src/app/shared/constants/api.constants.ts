@@ -80,6 +80,7 @@ export const API_ENDPOINTS = {
   // Subjects
   SUBJECTS: {
     BASE: '/subjects',
+    SEARCH: '/subjects/search',
     BY_ID: (id: string) => `/subjects/${id}`,
     BY_ACADEMY: (academyId: string) => `/subjects/academy/${academyId}`,
   },

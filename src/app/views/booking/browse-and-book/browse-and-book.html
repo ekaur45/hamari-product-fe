@@ -1,0 +1,184 @@
+<!-- Featured Classes Preview -->
+<div class="mb-8">
+    <h4 class="text-xl font-semibold text-gray-900 mb-4 flex items-center justify-between">
+        <span>
+            <i class="fas fa-calendar-day text-primary mr-2"></i>
+            <span>Featured Classes</span>
+        </span>
+        <a href="javascript:void(0)" class="text-primary text-sm flex items-center">
+            <span>View All Classes</span>
+            <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+    </h4>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Featured Class 1 -->
+        @for (subject of subjects(); track subject.id) {
+        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition" [routerLink]="['/booking', subject.id, 'class']">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white mr-3">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="flex-1">
+                    <h5 class="font-medium text-gray-900">{{subject.name}}</h5>
+                    <p class="text-xs text-gray-500">-</p>
+                </div>
+            </div>
+            <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-user mr-2 text-gray-400"></i>
+                @if(subject.teacherSubjects && subject.teacherSubjects.length > 0) {
+                <span>{{subject.teacherSubjects[0]?.teacher?.user?.firstName}} {{subject.teacherSubjects[0]?.teacher?.user?.lastName}}</span>
+                } @else {
+                <span>-</span>
+                }
+            </div>
+            <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-clock mr-2 text-gray-400"></i>
+                @if(subject.teacherSubjects && subject.teacherSubjects.length > 0 && subject.teacherSubjects[0]?.teacher?.availabilities) {
+                    <span>{{formatAvailabilityDays(subject.teacherSubjects[0]?.teacher?.availabilities)}}</span>
+                } @else {
+                    <span>-</span>
+                }
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-gray-300">
+                <span class="text-sm font-medium text-gray-900">$150/month</span>
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs">Available</span>
+            </div>
+        </div>
+        }
+        @empty {
+        <div class="text-center text-gray-500">No subjects found</div>
+        }
+
+    </div>
+</div>
+
+<!-- Featured Teachers Preview -->
+<div class="mb-8">
+    <h4 class="text-xl font-semibold text-gray-900 mb-4 flex items-center justify-between">
+        <span>
+            <i class="fas fa-chalkboard-teacher text-green-500 mr-2"></i>
+            <span>Featured Teachers</span>
+        </span>
+        <a href="#" class="text-primary text-sm flex items-center">
+            <span>View All Teachers</span>
+            <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+    </h4>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Featured Teacher 1 -->
+        @for (teacher of teachers(); track teacher.id) {
+        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition" [routerLink]="['/booking', teacher.id, 'teacher']">
+            <div class="flex items-center mb-3">
+                <div
+                    class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-lg mr-3">
+                    {{teacher.user?.firstName?.charAt(0)}}{{teacher.user?.lastName?.charAt(0)}}</div>
+                <div class="flex-1">
+                    <h5 class="font-medium text-gray-900">{{teacher.user?.firstName}} {{teacher.user?.lastName}}</h5>
+                    <p class="text-xs text-gray-500">{{teacher.preferredSubject ?? "-"}}</p>
+                </div>
+            </div>
+            <!-- <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-school mr-2 text-gray-400"></i>
+                <span>Elite Academy</span>
+            </div> -->
+            <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-star text-yellow-400 mr-2"></i>
+                <span>4.8 (125 reviews)</span>
+            </div>
+            <div class="flex items-center text-sm text-gray-600 mb-3">
+                <i class="fas fa-briefcase mr-2 text-gray-400"></i>
+                <span>{{teacher.yearsOfExperience ?? "0"}} years experience</span>
+            </div>
+            <div class="pt-2 border-t border-gray-300">
+                <span class="text-xs text-gray-500">{{teacher.teacherSubjects.length}} active classes</span>
+            </div>
+        </div>
+        } @empty {
+            <div class="text-center text-gray-500">No teachers found</div>
+        }
+
+ 
+    </div>
+</div>
+
+<!-- Featured Courses Preview -->
+<div class="mb-8">
+    <h4 class="text-xl font-semibold text-gray-900 mb-4 flex items-center justify-between">
+        <span>
+            <i class="fas fa-book text-purple-500 mr-2"></i>
+            <span>Featured Courses</span>
+        </span>
+        <a href="javascript:void(0)" class="text-primary text-sm flex items-center">
+            <span>View All Courses</span>
+            <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+    </h4>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Featured Course 1 -->
+        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white mr-3">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="flex-1">
+                    <h5 class="font-medium text-gray-900">Advanced Mathematics</h5>
+                    <p class="text-xs text-gray-500">Elite Academy</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Comprehensive mathematics course covering algebra, calculus, and
+                geometry.</p>
+            <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
+                <span>6 months duration</span>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t">
+                <span class="text-sm text-gray-600">5 classes available</span>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs">Popular</span>
+            </div>
+        </div>
+
+        <!-- Featured Course 2 -->
+        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-white mr-3">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <div class="flex-1">
+                    <h5 class="font-medium text-gray-900">Science &amp; Technology</h5>
+                    <p class="text-xs text-gray-500">Elite Academy</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Explore physics, chemistry, and biology with hands-on experiments.</p>
+            <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
+                <span>4 months duration</span>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t">
+                <span class="text-sm text-gray-600">3 classes available</span>
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs">New</span>
+            </div>
+        </div>
+
+        <!-- Featured Course 3 -->
+        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center text-white mr-3">
+                    <i class="fas fa-language"></i>
+                </div>
+                <div class="flex-1">
+                    <h5 class="font-medium text-gray-900">English Literature</h5>
+                    <p class="text-xs text-gray-500">Premier Academy</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Study classic and modern literature with expert guidance.</p>
+            <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
+                <span>5 months duration</span>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t">
+                <span class="text-sm text-gray-600">4 classes available</span>
+                <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs">Featured</span>
+            </div>
+        </div>
+    </div>
+</div>

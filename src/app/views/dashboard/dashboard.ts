@@ -2,9 +2,9 @@ import { Component, signal } from "@angular/core";
 import { AdminDashboard } from "../admin-dashboard/admin-dashboard";
 import { User, UserRole } from "../../shared/models";
 import { AuthService } from "../../shared/services/auth.service";
-import { StudentDashboard } from "../student-dashboard/student-dashboard";
-import { ParentDashboard } from "../parent-dashboard/parent-dashboard";
-import { TeacherDashboard } from "../teacher-dashboard/teacher-dashboard";
+import { StudentDashboard } from "../student/student-dashboard/student-dashboard";
+import { ParentDashboard } from "../parent/parent-dashboard/parent-dashboard";
+import { TeacherDashboard } from "../teacher/teacher-dashboard/teacher-dashboard";
 
 @Component({
   standalone: true,

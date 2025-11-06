@@ -1,8 +1,11 @@
+import { TeacherSubject } from "./teacher.interface";
+
 export interface Subject {
   id: string;
   name: string;
   description?: string;
   academyId?: string;
+  teacherSubjects?: TeacherSubject[];
 }
 
 export interface CreateSubjectDto {

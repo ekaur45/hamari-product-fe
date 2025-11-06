@@ -1,8 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { User } from '../../shared/models';
-import { AuthService } from '../../shared/services/auth.service';
+import { User } from '../../../shared/models';
+import { AuthService } from '../../../shared/services/auth.service';
 
 @Component({
   selector: 'app-parent-dashboard',
