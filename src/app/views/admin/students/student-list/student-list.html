@@ -97,10 +97,10 @@
                             <div class="flex items-center">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold"
                                 [ngClass]="{'bg-primary text-white': student.isActive, 'bg-gray-200 text-gray-500': !student.isActive}"
-                                >{{student.user?.firstName?.charAt(0)}}{{student.user?.lastName?.charAt(0)}}</div>
+                                >{{student.user.firstName.charAt(0)}}{{student.user.lastName.charAt(0)}}</div>
                                 <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">{{student.user?.firstName}} {{student.user?.lastName}}</p>
-                                    <p class="text-xs text-gray-500">{{student.user?.email}}</p>
+                                    <p class="text-sm font-medium text-gray-900">{{student.user.firstName}} {{student.user.lastName}}</p>
+                                    <p class="text-xs text-gray-500">{{student.user.email}}</p>
                                 </div>
                             </div>
                         </td>

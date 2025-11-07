@@ -2,7 +2,7 @@ import { CommonModule } from "@angular/common";
 import { Component, OnInit, signal } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { SubjectService } from "../../../shared/services/subject.service";
-import { Subject, Teacher, TeacherService } from "../../../shared";
+import { Subject, Teacher, TeacherService, TeacherSubject } from "../../../shared";
 import { ProfilePhoto } from "../../../components/misc/profile-photo/profile-photo";
 @Component({
     selector: 'app-browse-and-book',
@@ -50,5 +50,13 @@ export default class BrowseAndBook implements OnInit{
         const days = availabilities.map(a => a.dayOfWeek);
         const uniqueDays = [...new Set(days)];
         return uniqueDays.join(', ') || '-';
+    }
+    // find min non zero monthly rate
+    findMinRate(teacherSubjects: TeacherSubject[]): number {
+        const nonZeroMonthlyRates = teacherSubjects.filter(ts => Number(ts.monthlyRate) > 0);
+        if (nonZeroMonthlyRates.length === 0) {
+            return 0;
+        }
+        return Math.min(...nonZeroMonthlyRates.map(ts => Number(ts.monthlyRate)));
     }
 }
