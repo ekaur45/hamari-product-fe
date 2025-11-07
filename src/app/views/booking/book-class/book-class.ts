@@ -1,8 +1,8 @@
 import { CommonModule } from "@angular/common";
 import { Component, computed, HostListener, signal } from "@angular/core";
-import { ActivatedRoute, RouterModule } from "@angular/router";
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { SubjectService } from "../../../shared";
-import { Subject, TeacherSubject } from "../../../shared/models";
+import { AvailabilitySlot, Subject, TeacherSubject } from "../../../shared/models";
 import BookingCalendar from "../../../components/misc/booking-calendar/booking-calendar";
 
 
@@ -19,27 +19,15 @@ export default class BookClass {
     selectedTeacher = signal<TeacherSubject | null>(null);
     isLoading = signal(false);
     
-    
-    
-    
-    
-    
-   
-
-    
-    
     availableTeachers = computed(() => {
         const subj = this.subject();
         return subj?.teacherSubjects?.filter(ts => ts.teacher) || [];
     });
 
- 
-
-    
-
     constructor(
         private route: ActivatedRoute,
-        private subjectService: SubjectService
+        private subjectService: SubjectService,
+        private router: Router
     ) {
         this.route.params.subscribe(params => {
             this.subjectId.set(params['id']);
@@ -106,26 +94,8 @@ export default class BookClass {
         };
         return dayMap[day.toLowerCase()] || day;
     }
-
     
-
-    
-
-    
-
-    
-
-   
-
-    
-
-    
-
-    
-
-   
-
-    
-
-    
+    bookSlot(data: {slot: AvailabilitySlot,selectedDate:Date | null}): void {
+        this.router.navigate([ '/booking', this.subjectId(), 'teacher', this.selectedTeacher()?.teacherId, 'checkout'],{queryParams: {slot: JSON.stringify(data.slot),selectedDate: data.selectedDate?.toISOString()} });
+    }
 }

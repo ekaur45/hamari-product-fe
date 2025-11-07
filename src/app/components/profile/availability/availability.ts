@@ -54,6 +54,24 @@ export class AvailabilityComponent implements OnInit {
     ngOnInit(): void {
     }
     addAvailability() {
+        // check if the availability slot already exists
+        const existingSlot = this.availabilitySlots().find(slot => slot.dayOfWeek === this.availabilityForm.value.dayOfWeek && slot.startTime === this.availabilityForm.value.startTime && slot.endTime === this.availabilityForm.value.endTime);
+        if (existingSlot) {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Availability slot already exists' });
+            return;
+        }
+        // // check if the start time is before the end time
+        // if (this.availabilityForm.value.startTime >= this.availabilityForm.value.endTime) {
+        //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Start time must be before end time' });
+        //     return;
+        // }
+
+        // check if the slot minutes are less than 15
+        const duration = this.calculateDuration(this.availabilityForm.value.startTime as string, this.availabilityForm.value.endTime as string,false) as number;
+        if (duration < 15) {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Slot duration must be at least 15 minutes' });
+            return;
+        }
         this.availabilitySlots.update(slots => [this.availabilityForm.value as AvailabilitySlot,...slots]);
         this.availabilityForm.reset();
     }
@@ -104,7 +122,7 @@ export class AvailabilityComponent implements OnInit {
         });
     }
 
-    calculateDuration(startTime: string, endTime: string): string {
+    calculateDuration(startTime: string, endTime: string,isFormatted: boolean = true): string | number {
         if (!startTime || !endTime) return '';
         const [startHours, startMinutes] = startTime.split(':').map(Number);
         const [endHours, endMinutes] = endTime.split(':').map(Number);
@@ -118,6 +136,7 @@ export class AvailabilityComponent implements OnInit {
         const hours = Math.floor(durationMinutes / 60);
         const minutes = durationMinutes % 60;
         
+        if (isFormatted) {
         if (hours === 0) {
             return `${minutes} min${minutes !== 1 ? 's' : ''}`;
         } else if (minutes === 0) {
@@ -126,12 +145,20 @@ export class AvailabilityComponent implements OnInit {
             return `${hours} hr${hours !== 1 ? 's' : ''} ${minutes} min${minutes !== 1 ? 's' : ''}`;
         }
     }
+    else{
+        // all in minutes
+        return durationMinutes;
+    }
+    }
     updateAvailability() {
+        this.isAddingAvailability.set(true);
         this.profileService.updateUserAvailability(this.profile()?.id as string, this.availabilitySlots()).subscribe({
             next: () => {
+                this.isAddingAvailability.set(false);
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Availability updated successfully' });
             },
             error: (error: any) => {
+                this.isAddingAvailability.set(false);
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message });
             }
         });

@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, computed, HostListener, input, signal } from "@angular/core";
+import { Component, computed, HostListener, input, output, signal } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import CalendarDay from "../../../shared/models/calendar.interface";
 import { AvailabilitySlot } from "../../../shared";
@@ -16,7 +16,7 @@ export default class BookingCalendar {
     currentMonth = signal(new Date());
     selectedDate = signal<Date | null>(null);
     currentWeek = signal(new Date());
-    
+    onBookSlot = output<{slot: AvailabilitySlot,selectedDate:Date | null}>();
     constructor(){}
 
     availableMonths = computed(() => {
@@ -293,5 +293,9 @@ export default class BookingCalendar {
         if (!target.closest('.month-picker-container')) {
             this.showMonthPicker.set(false);
         }
+    }
+
+    bookSlot(slot: AvailabilitySlot): void {
+        this.onBookSlot.emit({slot:slot,selectedDate:this.selectedDate()});
     }
 }

@@ -3,6 +3,7 @@ import { HttpClient, HttpParams, HttpHeaders, HttpErrorResponse } from '@angular
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { ApiResponse, ApiErrorResponse, PaginatedApiResponse, ApiStatusCodes } from '../shared/models';
+import { environment } from '../../environments/environment';
 
 /**
  * API Configuration
@@ -32,7 +33,7 @@ export interface RequestOptions {
 })
 export class ApiService {
   private readonly config: ApiConfig = {
-    baseUrl: 'http://localhost:8080/api', // Update with your API base URL
+    baseUrl: environment.apiUrl, // Update with your API base URL
     timeout: 30000, // 30 seconds
     retryAttempts: 3
   };

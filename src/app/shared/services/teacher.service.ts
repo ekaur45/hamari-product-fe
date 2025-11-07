@@ -47,5 +47,10 @@ export class TeacherService {
     );
   }
 
-
+  getTeacherById(id: string): Observable<Teacher> {
+    return this.apiService.get<Teacher>(API_ENDPOINTS.TEACHERS.BASE+'/'+id).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
 }
