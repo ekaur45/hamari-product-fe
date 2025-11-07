@@ -9,6 +9,7 @@ export interface Teacher {
   preferredSubject?: string;
   specialization: string;
   hourlyRate: number;
+  monthlyRate?: number;
   teacherSubjects: TeacherSubject[];
   availabilities: AvailabilitySlot[];
   user?: User;
@@ -52,6 +53,8 @@ export interface TeacherSubject {
   teacherId: string;
   subjectId: string;
   fee?: number;
+  hourlyRate?: number;
+  monthlyRate?: number;
   subject?: Subject;
   teacher?: Teacher;
   createdAt: Date;

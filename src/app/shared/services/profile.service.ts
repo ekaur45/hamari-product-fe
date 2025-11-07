@@ -36,12 +36,40 @@ export class ProfileService {
   }
 
   updateProfessionalInfo( userId: string, professionalInfo: Teacher): Observable<Teacher> {
-    return this.apiService.put<Teacher>(API_ENDPOINTS.PROFILE.BASE+'/'+userId+'/professional-info', professionalInfo).pipe(
+    return this.apiService.put<Teacher>(API_ENDPOINTS.TEACHERS.BASE+'/'+userId+'/professional-info', professionalInfo).pipe(
       map(response => {
         if (response.statusCode === 200) {
           return response.data;
         }
         throw new Error('Failed to update professional info');
+      }),
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+
+
+  updateOverallRates( userId: string, {hourlyRate, monthlyRate}: {hourlyRate: number, monthlyRate: number}): Observable<Teacher> {
+    return this.apiService.put<Teacher>(API_ENDPOINTS.TEACHERS.BASE+'/'+userId+'/rates', {hourlyRate, monthlyRate}).pipe(
+      map(response => {
+        if (response.statusCode === 200) {
+          return response.data;
+        }
+        throw new Error('Failed to update professional info');
+      }),
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+  updateSubjectRates( userId: string, subjectRates: Array<{ id: string, hourlyRate: number, monthlyRate: number}>): Observable<Teacher> {
+    return this.apiService.put<Teacher>(API_ENDPOINTS.SUBJECTS.BASE+'/rates', subjectRates).pipe(
+      map(response => {
+        if (response.statusCode === 200) {
+          return response.data;
+        }
+        throw new Error('Failed to update subject rates');
       }),
       catchError(error => {
         return throwError(() => error);
