@@ -5,8 +5,20 @@
         <!-- Profile Picture & Basic Info -->
         <div class="bg-white rounded-lg shadow-md p-5">
             <div class="flex flex-col items-center mb-4">
-                <div class="w-28 h-28 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-semibold mb-3">
-                    {{profile()?.firstName?.charAt(0) ?? "" + profile()?.lastName?.charAt(0) ?? ""}}
+                <div class="relative">
+                    @if(profile()?.details?.profileImage) {
+                    <img [src]="'http://localhost:8080'+ profile()?.details?.profileImage" alt="Profile Image" class="w-24 h-24 rounded-full object-cover">
+                    } @else {
+                    <div
+                        class="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-semibold">
+                        {{profile()!.firstName!.charAt(0) + profile()!.lastName!.charAt(0)}}
+                    </div>
+                    }
+                    <label id="uploadPhotoBtn"
+                        class="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition">
+                        <i class="fas fa-camera text-sm"></i>
+                        <input type="file" id="profilePhoto" accept="image/*" class="hidden" (change)="onProfilePhotoChange($event)">
+                    </label>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-1">{{profile()?.firstName ?? ""}} {{profile()?.lastName ?? ""}}</h3>
                 <p class="text-sm text-gray-600 mb-4">{{profile()?.role ?? ""}}</p>

@@ -54,7 +54,6 @@ export class AvailabilityComponent implements OnInit {
     ngOnInit(): void {
     }
     addAvailability() {
-        console.log(this.availabilityForm.value);
         this.availabilitySlots.update(slots => [this.availabilityForm.value as AvailabilitySlot,...slots]);
         this.availabilityForm.reset();
     }

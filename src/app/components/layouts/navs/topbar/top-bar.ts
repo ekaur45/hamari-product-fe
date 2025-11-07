@@ -1,11 +1,13 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
+import { ProfilePhoto } from '../../../misc/profile-photo/profile-photo';
+import { User } from '../../../../shared';
 @Component({
 	selector: 'app-top-bar',
 	standalone: true,
-	imports: [CommonModule,RouterModule,MenuModule],
+	imports: [CommonModule,RouterModule,MenuModule,ProfilePhoto],
 	templateUrl: './top-bar.html'
 })
 export class TopBar {
@@ -14,7 +16,7 @@ export class TopBar {
 	@Input() userDisplayName: string = '';
 	@Input() userEmail: string = '';
 	@Input() userAvatar?: string;
-
+	@Input() user: User | null = null;
 	@Output() toggleMobileMenu = new EventEmitter<void>();
 	@Output() toggleUserMenu = new EventEmitter<void>();
 	@Output() profile = new EventEmitter<void>();

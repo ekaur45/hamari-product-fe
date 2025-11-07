@@ -69,7 +69,6 @@ export default class Subjects implements OnInit {
     }
 
     addSubject(): void {
-        console.log('addSubject');
     }
     suggestSubject(): void {
         this.subjects.update(subjects => [{

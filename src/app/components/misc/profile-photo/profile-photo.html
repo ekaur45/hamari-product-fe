@@ -1,0 +1,8 @@
+<div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
+    @if(profileImage()){
+        <img class="w-10 h-10 rounded-full object-cover" [src]="profileImage()" alt="avatar" />
+    }
+    @else{
+        <span>{{ userDisplayName() | uppercase }}</span>
+    }
+</div>

@@ -69,9 +69,11 @@
         @for (teacher of teachers(); track teacher.id) {
         <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition" [routerLink]="['/booking', teacher.id, 'teacher']">
             <div class="flex items-center mb-3">
-                <div
+                <profile-photo [user]="teacher.user ?? null" class="mr-3"></profile-photo>
+                <!-- <div
                     class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-lg mr-3">
-                    {{teacher.user?.firstName?.charAt(0)}}{{teacher.user?.lastName?.charAt(0)}}</div>
+                    {{teacher.user?.firstName?.charAt(0)}}{{teacher.user?.lastName?.charAt(0)}}
+                </div> -->
                 <div class="flex-1">
                     <h5 class="font-medium text-gray-900">{{teacher.user?.firstName}} {{teacher.user?.lastName}}</h5>
                     <p class="text-xs text-gray-500">{{teacher.preferredSubject ?? "-"}}</p>

@@ -3,12 +3,13 @@ import { ApiService } from "../../utils/api.service";
 import { catchError, map, Observable, throwError } from "rxjs";
 import { AvailabilitySlot, EducationItem, Subject, Teacher, User } from "../models";
 import { API_ENDPOINTS } from "../constants";
+import { AuthService } from "./auth.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
-  constructor(private apiService: ApiService) {
+  constructor(private apiService: ApiService, private authService: AuthService) {
   }
 
   getProfile(): Observable<User> {
@@ -93,6 +94,20 @@ export class ProfileService {
           return response.data;
         }
         throw new Error('Failed to update user availability');
+      }),
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+  updateProfilePhoto(file: File): Observable<User> {
+    return this.apiService.uploadFile<User>(API_ENDPOINTS.PROFILE.BASE+'/profile-photo', file).pipe(
+      map(response => {
+        if (response.statusCode === 200) {          
+          this.authService.setCurrentUser(response.data);
+          return response.data;
+        }
+        throw new Error('Failed to update profile photo');
       }),
       catchError(error => {
         return throwError(() => error);

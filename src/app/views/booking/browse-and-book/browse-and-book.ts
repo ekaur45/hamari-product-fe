@@ -3,12 +3,12 @@ import { Component, OnInit, signal } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { SubjectService } from "../../../shared/services/subject.service";
 import { Subject, Teacher, TeacherService } from "../../../shared";
-
+import { ProfilePhoto } from "../../../components/misc/profile-photo/profile-photo";
 @Component({
     selector: 'app-browse-and-book',
     templateUrl: './browse-and-book.html',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, ProfilePhoto],
     providers: [SubjectService]
 })
 export default class BrowseAndBook implements OnInit{

@@ -30,4 +30,13 @@ export class ProfileView implements OnInit {
         });
     }
 
+    onProfilePhotoChange(event: Event) {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (file) {
+            this.profileService.updateProfilePhoto(file).subscribe((profile) => {
+                this.profile.set(profile);
+            });
+        }
+    }
+
 }

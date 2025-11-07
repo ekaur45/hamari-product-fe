@@ -97,7 +97,6 @@ export class ProfileEdit implements OnInit {
         });
     }   
     get isLastStep() {
-        console.log(this.step(), this.roleSteps[this.profile()?.role as UserRole]?.length,this.profile()?.role);
         return this.step() === (this.roleSteps[this.profile()?.role as UserRole]?.length ?? 0);
     }
 }

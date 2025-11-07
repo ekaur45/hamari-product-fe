@@ -22,7 +22,6 @@ export class SideNav implements OnInit {
 
 	@HostListener('window:resize', ['$event'])
 	onResize(event: any) {
-		console.log(event.target.innerWidth);
 		this.isMobile.set(event.target.innerWidth < 1024);
 	}
 

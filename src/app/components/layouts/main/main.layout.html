@@ -25,7 +25,7 @@
   <!-- Main Content Area -->
   <div class="flex-1 flex flex-col overflow-hidden">
     <!-- Top Header -->
-    <app-top-bar [title]="'Dashboard'" [isUserMenuOpen]="isUserMenuOpen()" [userDisplayName]="getUserDisplayName()" [userEmail]="getUserEmail()" [userAvatar]="currentUser()?.details?.profileImage" (toggleMobileMenu)="toggleMobileMenu()" (toggleUserMenu)="toggleUserMenu()" (profile)="onProfileClick()" (settings)="onSettingsClick()" (signOut)="onSignOutClick()"></app-top-bar>
+    <app-top-bar [title]="'Dashboard'" [isUserMenuOpen]="isUserMenuOpen()" [user]="currentUser() ?? null" [userDisplayName]="getUserDisplayName()" [userEmail]="getUserEmail()" [userAvatar]="currentUser()?.details?.profileImage" (toggleMobileMenu)="toggleMobileMenu()" (toggleUserMenu)="toggleUserMenu()" (profile)="onProfileClick()" (settings)="onSettingsClick()" (signOut)="onSignOutClick()"></app-top-bar>
 
     <!-- Main Content -->
     <main class="flex-1 overflow-y-auto p-6">
