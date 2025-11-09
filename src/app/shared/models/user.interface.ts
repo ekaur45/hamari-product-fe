@@ -53,6 +53,7 @@ export interface EducationItem {
 }
 
 export interface AvailabilitySlot {
+  id: string;
   dayOfWeek: string; // 0=Sun
   startTime: string; // HH:mm
   endTime: string; // HH:mm

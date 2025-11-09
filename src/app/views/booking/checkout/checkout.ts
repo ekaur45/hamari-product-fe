@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from "@angular/core";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { AvailabilitySlot, Subject, Teacher } from "../../../shared/models";
-import { SubjectService, TeacherService } from "../../../shared";
+import { PaymentService, SubjectService, TeacherService } from "../../../shared";
 import { CommonModule, DatePipe } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
@@ -27,7 +27,8 @@ export default class Checkout implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private teacherService: TeacherService,
-        private subjectService: SubjectService
+        private subjectService: SubjectService,
+        private paymentService: PaymentService
     ) {
         this.route.params.subscribe(params => {
             this.subjectId.set(params['subjectId']);
@@ -102,7 +103,20 @@ export default class Checkout implements OnInit {
         if (!this.selectedPaymentMethod()) {
             return;
         }
-        
+        this.paymentService.createPaymentIntent({
+            subjectId: this.subjectId(),
+            teacherId: this.teacherId(),
+            slotId: this.slot()!.id,
+            selectedDate: this.selectedDate(),
+            paymentMethod: this.selectedPaymentMethod()
+        }).subscribe({
+            next: (paymentIntent) => {
+                console.log('Payment intent created:', paymentIntent);
+            },
+            error: (error) => {
+                console.error('Error creating payment intent:', error);
+            }
+        });
         console.log('Processing payment with method:', this.selectedPaymentMethod(), {
             subjectId: this.subjectId(),
             teacherId: this.teacherId(),

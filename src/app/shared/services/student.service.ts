@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { Student, CreateStudentDto, UpdateStudentDto, PaginatedApiResponse, StudentListDto } from '../models';
+import { Student, CreateStudentDto, UpdateStudentDto, PaginatedApiResponse, StudentListDto, StudentScheduleDto } from '../models';
 
 /**
  * Student Service
@@ -25,6 +25,13 @@ export class StudentService {
     }
 
     return this.apiService.get<StudentListDto>(API_ENDPOINTS.ADMIN.STUDENTS, { params }).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  getStudentSchedule(studentId: string): Observable<StudentScheduleDto[]> {
+    return this.apiService.get<StudentScheduleDto[]>(API_ENDPOINTS.STUDENTS.SCHEDULE(studentId)).pipe(
       map(r => r.data),
       catchError(e => throwError(() => e))
     );

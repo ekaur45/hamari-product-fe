@@ -48,9 +48,32 @@ export interface UpdateStudentDto {
   isActive?: boolean;
 }
 
+export interface StudentScheduleDto {
+  id: string;
+  teacherId: string;
+  teacher: Teacher;
+  studentId: string;
+  teacherSubjectId: string;
+  teacherSubject: TeacherSubject;
+  availabilityId: string;
+  availability: AvailabilitySlot;
+  status: string;
+  bookingDate: Date;
+  totalAmount: number;
+  paidAmount: number;
+}
+
+
+
+
+
+
 // Re-export related interfaces
-import { User } from './user.interface';
+import { AvailabilitySlot, User } from './user.interface';
 import { Academy } from './academy.interface';
 import { ClassEnrollment } from './class.interface';
 import { Performance } from './performance.interface';
 import { Parent, ParentChild } from './parent-child.interface';
+import { Teacher, TeacherSubject } from './teacher.interface';
+
+

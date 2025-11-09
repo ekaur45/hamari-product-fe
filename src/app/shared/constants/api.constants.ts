@@ -55,7 +55,8 @@ export const API_ENDPOINTS = {
     BASE: '/students',
     BY_ID: (id: string) => `/students/${id}`,
     BY_ACADEMY: (academyId: string) => `/students/academy/${academyId}`,
-    SEARCH: '/students/search'
+    SEARCH: '/students/search',
+    SCHEDULE: (studentId: string) => `/students/${studentId}/schedule`
   },
 
   // Teachers
@@ -96,11 +97,7 @@ export const API_ENDPOINTS = {
 
   // Payments
   PAYMENTS: {
-    BASE: '/payments',
-    BY_ID: (id: string) => `/payments/${id}`,
-    BY_STUDENT: (studentId: string) => `/payments/student/${studentId}`,
-    BY_ACADEMY: (academyId: string) => `/payments/academy/${academyId}`,
-    SEARCH: '/payments/search'
+    CREATE_PAYMENT_INTENT: '/payments/create-payment-intent'
   },
 
   // Performance
