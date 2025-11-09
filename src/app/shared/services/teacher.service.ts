@@ -4,7 +4,7 @@ import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
 import { Teacher, CreateTeacherDto, UpdateTeacherDto, PaginatedApiResponse, CreateTeacherDirectDto, TeacherDirectResponse, TeacherListDto } from '../models';
-import { API_ENDPOINTS as ENDPOINTS } from '../constants';
+import TeacherBooking from '../models/teacher.interface';
 
 /**
  * Teacher Service
@@ -49,6 +49,12 @@ export class TeacherService {
 
   getTeacherById(id: string): Observable<Teacher> {
     return this.apiService.get<Teacher>(API_ENDPOINTS.TEACHERS.BASE+'/'+id).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+  getTeacherBookings(teacherId: string): Observable<TeacherBooking[]> {
+    return this.apiService.get<TeacherBooking[]>(API_ENDPOINTS.TEACHERS.BOOKINGS(teacherId)).pipe(
       map(r => r.data),
       catchError(e => throwError(() => e))
     );

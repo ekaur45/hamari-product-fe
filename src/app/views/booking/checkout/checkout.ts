@@ -112,17 +112,11 @@ export default class Checkout implements OnInit {
         }).subscribe({
             next: (paymentIntent) => {
                 console.log('Payment intent created:', paymentIntent);
+                this.router.navigate(['/booking', paymentIntent.id, 'test-payment']);
             },
             error: (error) => {
                 console.error('Error creating payment intent:', error);
             }
-        });
-        console.log('Processing payment with method:', this.selectedPaymentMethod(), {
-            subjectId: this.subjectId(),
-            teacherId: this.teacherId(),
-            slot: this.slot(),
-            selectedDate: this.selectedDate(),
-            paymentMethod: this.selectedPaymentMethod()
         });
         
         // Close dialog and process payment

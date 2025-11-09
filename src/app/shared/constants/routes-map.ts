@@ -12,8 +12,9 @@ export const ROUTES_MAP: Record<UserRole, Record<string, string>> = {
         LOGS: '/admin/logs',
     },
     [UserRole.TEACHER]: {
-        DASHBOARD: '/',
+        DASHBOARD: '/teacher/dashboard',
         CLASSES: '/teacher/classes',
+        SCHEDULE: '/teacher/schedule',
         STUDENTS: '/teacher/students',
         SETTINGS: '/teacher/settings',
         REPORTS: '/teacher/reports',
@@ -24,6 +25,7 @@ export const ROUTES_MAP: Record<UserRole, Record<string, string>> = {
         DASHBOARD: '/student/dashboard',
         CLASSES: '/student/classes',
         STUDENTS: '/student/students',
+        SCHEDULE: '/student/schedule',
         SETTINGS: '/student/settings',
         REPORTS: '/student/reports',
         PARENTS: '/student/parents',

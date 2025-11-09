@@ -60,9 +60,36 @@ export interface TeacherSubject {
   createdAt: Date;
   updatedAt: Date;
 }
+
+
+
+export default interface TeacherBooking {
+  id: string;
+  teacherId: string;
+  teacher: Teacher;
+  studentId: string;
+  student: Student;
+  teacherSubjectId: string;
+  teacherSubject: TeacherSubject;
+  availabilityId: string;
+  availability: AvailabilitySlot;
+  status: BookingStatus;
+  bookingDate: Date;
+  totalAmount: number | null;
+  paidAmount: number | null;
+  dueAmount: number | null;
+  discountAmount: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
+
+}
+
 // Re-export related interfaces
 import { AvailabilitySlot, User } from './user.interface';
 import { Academy } from './academy.interface';
 import { Class } from './class.interface';
 import { Performance } from './performance.interface';import { Subject } from './subject.interface';
+import { Student } from './student.interface';
+import { BookingStatus } from '../enums';
 

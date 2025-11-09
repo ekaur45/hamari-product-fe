@@ -1,5 +1,3 @@
-export interface TeacherBooking {
-}
 export interface ClassBooking {
 }
 export interface StudentClassAttendance {
@@ -74,6 +72,6 @@ import { Academy } from './academy.interface';
 import { ClassEnrollment } from './class.interface';
 import { Performance } from './performance.interface';
 import { Parent, ParentChild } from './parent-child.interface';
-import { Teacher, TeacherSubject } from './teacher.interface';
+import TeacherBooking, { Teacher, TeacherSubject } from './teacher.interface';
 
 

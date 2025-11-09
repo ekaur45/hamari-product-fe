@@ -8,4 +8,14 @@ export interface CreatePaymentIntentDto {
 
 
 export interface PaymentIntentResponseDto {
+  id: string;
+  paymentIntentId: string;
+  paymentIntentClientSecret: string;
+  paymentIntentStatus: string;
+  paymentIntentAmount: number;
+  paymentIntentCurrency: string;
+  paymentIntentCreatedAt: Date;
+  paymentIntentUpdatedAt: Date;
+  paymentIntentIsDeleted: boolean;
+  paymentIntentIsActive: boolean;
 }

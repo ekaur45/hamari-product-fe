@@ -1,6 +1,7 @@
 import { Routes } from "@angular/router";
 import { TeacherDashboard } from "./teacher-dashboard/teacher-dashboard";
 import TeacherSettings from "./teacher-settings/teacher-settings";
+import TeacherSchedule from "./teacher-schedule/teacher-schedule";
 
 export const teacherRoutes: Routes = [
     {
@@ -15,5 +16,9 @@ export const teacherRoutes: Routes = [
     {
         path:'settings',
         component: TeacherSettings
+    },
+    {
+        path: 'schedule',
+        component: TeacherSchedule
     }
 ];

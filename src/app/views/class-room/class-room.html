@@ -1,0 +1,754 @@
+<div class="bg-gray-900">
+    <header class="bg-gray-800 text-white px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+            <a (click)="leaveSession()" class="flex items-center text-primary hover:text-blue-400 transition flex-shrink-0 cursor-pointer">
+                <i class="fas fa-arrow-left mr-1 sm:mr-2"></i>
+                <span class="hidden sm:inline">Back to Dashboard</span>
+            </a>
+            <div class="h-6 w-px bg-gray-600 hidden sm:block"></div>
+            <div class="min-w-0 flex-1">
+                <h2 class="text-sm sm:text-lg font-semibold truncate">Mathematics - Algebra</h2>
+                <p class="text-xs sm:text-sm text-gray-400 truncate hidden sm:block">Elite Academy  Session ID: #12345</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+            <div class="flex items-center space-x-1 sm:space-x-2 bg-green-600 px-2 sm:px-3 py-1 rounded-lg">
+                <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                <span class="text-xs sm:text-sm font-medium">LIVE</span>
+            </div>
+            <div class="text-xs sm:text-sm text-gray-300">
+                <i class="far fa-clock mr-1"></i>
+                <span id="sessionTime">00:00:44</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-col md:flex-row h-[calc(100vh-64px)] overflow-hidden">
+        <!-- Main Video Area -->
+        <div class="flex-1 flex flex-col p-2 sm:p-4 space-y-2 sm:space-y-4">
+            <!-- Teacher/Shared Screen Area (Main) -->
+            <div class="flex-1 video-container">
+                <!-- Video View -->
+                <div id="videoView" class="w-full h-full flex items-center justify-center bg-gray-950">
+                    <!-- Video or Screen Share -->
+                    <div id="mainVideo" class="w-full h-full flex items-center justify-center">
+                        <div class="text-center text-gray-500">
+                            <i class="fas fa-video text-4xl mb-2 opacity-50"></i>
+                            <p class="text-sm">Teacher Video</p>
+                        </div>
+                    </div>
+                    <!-- Video Overlay Info -->
+                    <div class="video-overlay">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">JS</div>
+                                <div>
+                                    <p class="text-white font-medium text-sm">John Smith</p>
+                                    <p class="text-gray-300 text-xs">Teacher</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 bg-red-500 text-white rounded text-xs">
+                                    <i class="fas fa-microphone-slash"></i>
+                                </span>
+                                <span class="px-2 py-1 bg-green-500 text-white rounded text-xs">
+                                    <i class="fas fa-video"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students Video Grid -->
+            <div class="bg-gray-800 rounded-lg p-3">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-white font-medium text-sm">
+                        <i class="fas fa-users mr-2"></i>
+                        Participants (<span id="participantCount">3</span>)
+                    </h3>
+                    <button id="toggleGrid" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-th"></i>
+                    </button>
+                </div>
+                <div id="studentsGrid" class="video-grid grid-4">
+                    <!-- Student 1 -->
+                    <div class="video-container aspect-video">
+                        <div class="w-full h-full flex items-center justify-center bg-gray-950">
+                            <div class="text-center text-gray-500">
+                                <i class="fas fa-user text-2xl mb-1 opacity-50"></i>
+                                <p class="text-xs">Student 1</p>
+                            </div>
+                        </div>
+                        <div class="video-overlay">
+                            <div class="flex items-center justify-between">
+                                <p class="text-white text-xs font-medium">Alice Johnson</p>
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                    <i class="fas fa-microphone text-green-500 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Student 2 -->
+                    <div class="video-container aspect-video">
+                        <div class="w-full h-full flex items-center justify-center bg-gray-950">
+                            <div class="text-center text-gray-500">
+                                <i class="fas fa-user text-2xl mb-1 opacity-50"></i>
+                                <p class="text-xs">Student 2</p>
+                            </div>
+                        </div>
+                        <div class="video-overlay">
+                            <div class="flex items-center justify-between">
+                                <p class="text-white text-xs font-medium">Bob Williams</p>
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                                    <i class="fas fa-microphone-slash text-red-500 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Student 3 -->
+                    <div class="video-container aspect-video">
+                        <div class="w-full h-full flex items-center justify-center bg-gray-950">
+                            <div class="text-center text-gray-500">
+                                <i class="fas fa-user text-2xl mb-1 opacity-50"></i>
+                                <p class="text-xs">You</p>
+                            </div>
+                        </div>
+                        <div class="video-overlay">
+                            <div class="flex items-center justify-between">
+                                <p class="text-white text-xs font-medium">You</p>
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                    <i class="fas fa-microphone text-green-500 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Empty slot for grid alignment -->
+                    <div class="video-container aspect-video border-2 border-dashed border-gray-600">
+                        <div class="w-full h-full flex items-center justify-center">
+                            <i class="fas fa-user-plus text-gray-500 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div id="sidebarPanel" class="hidden md:flex md:w-80 bg-gray-800 border-l border-gray-700 flex flex-col">
+            <!-- Mobile Toggle Button -->
+            <button id="sidebarToggle" class="md:hidden fixed top-16 right-4 z-50 bg-gray-800 text-white p-2 rounded-lg shadow-lg">
+                <i class="fas fa-comments"></i>
+            </button>
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-700">
+                <button id="chatTab" class="flex-1 px-2 sm:px-4 py-2 sm:py-3 text-white font-medium border-b-2 border-primary bg-gray-750 text-sm sm:text-base">
+                    <i class="fas fa-comments sm:mr-2"></i><span class="hidden sm:inline">Chat</span>
+                </button>
+                <button id="participantsTab" class="flex-1 px-2 sm:px-4 py-2 sm:py-3 text-gray-400 hover:text-white transition text-sm sm:text-base">
+                    <i class="fas fa-users sm:mr-2"></i><span class="hidden sm:inline">People</span>
+                </button>
+                <button id="mobileSidebarClose" class="md:hidden px-4 py-2 text-white hover:bg-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Chat Panel -->
+            <div id="chatPanel" class="flex-1 flex flex-col overflow-hidden">
+                <!-- Chat Messages -->
+                <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                    <!-- Message 1 -->
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">JS</div>
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-white text-sm font-medium">John Smith</span>
+                                <span class="text-gray-500 text-xs">10:30 AM</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">Welcome everyone! Let's start today's lesson on algebraic equations.</p>
+                        </div>
+                    </div>
+
+                    <!-- Message 2 -->
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">AJ</div>
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-white text-sm font-medium">Alice Johnson</span>
+                                <span class="text-gray-500 text-xs">10:32 AM</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">Good morning! Ready to learn.</p>
+                        </div>
+                    </div>
+
+                    <!-- Message 3 -->
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">ST</div>
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-white text-sm font-medium">You</span>
+                                <span class="text-gray-500 text-xs">10:33 AM</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">Excited for today's lesson!</p>
+                        </div>
+                    </div>
+
+                    <!-- Message 4 -->
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">JS</div>
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-white text-sm font-medium">John Smith</span>
+                                <span class="text-gray-500 text-xs">10:35 AM</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">Great! Let's begin with linear equations. I'll share my screen now.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="border-t border-gray-700 p-3">
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="chatInput" placeholder="Type a message..." class="flex-1 bg-gray-700 text-white placeholder-gray-400 px-2 sm:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                        <button id="sendMessage" class="px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition flex-shrink-0">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-2 mt-2">
+                        <button class="text-gray-400 hover:text-white transition">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button class="text-gray-400 hover:text-white transition">
+                            <i class="far fa-smile"></i>
+                        </button>
+                        <button class="text-gray-400 hover:text-white transition">
+                            <i class="fas fa-image"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Participants Panel -->
+            <div id="participantsPanel" class="flex-1 flex flex-col overflow-hidden hidden">
+                <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                    <!-- Teacher -->
+                    <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">JS</div>
+                            <div>
+                                <p class="text-white font-medium text-sm">John Smith</p>
+                                <p class="text-gray-400 text-xs">Teacher</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <i class="fas fa-video text-green-500 text-sm"></i>
+                            <i class="fas fa-microphone-slash text-red-500 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <!-- Student 1 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold">AJ</div>
+                            <div>
+                                <p class="text-white font-medium text-sm">Alice Johnson</p>
+                                <p class="text-gray-400 text-xs">Student</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <i class="fas fa-video text-green-500 text-sm"></i>
+                            <i class="fas fa-microphone text-green-500 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <!-- Student 2 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold">BW</div>
+                            <div>
+                                <p class="text-white font-medium text-sm">Bob Williams</p>
+                                <p class="text-gray-400 text-xs">Student</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <i class="fas fa-video text-green-500 text-sm"></i>
+                            <i class="fas fa-microphone-slash text-red-500 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <!-- You -->
+                    <div class="flex items-center justify-between p-3 bg-blue-600 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">ST</div>
+                            <div>
+                                <p class="text-white font-medium text-sm">You</p>
+                                <p class="text-blue-200 text-xs">Student</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <i class="fas fa-video text-white text-sm"></i>
+                            <i class="fas fa-microphone text-white text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="whiteboardView" class="fixed inset-0 bg-white hidden flex flex-col z-50">
+        <!-- Whiteboard Toolbar -->
+        <div class="bg-gray-100 border-b border-gray-300 relative z-10">
+            <!-- Desktop/Tablet Layout -->
+            <div class="hidden sm:block">
+                <!-- Main Toolbar Row -->
+                <div class="px-2 sm:px-4 py-2 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2">
+                    <!-- Left Group: Drawing Tools -->
+                    <div class="flex items-center flex-wrap gap-2 flex-1 min-w-0">
+                        <!-- Drawing Tools Group -->
+                        <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
+                            <button id="penTool" class="p-2 hover:bg-gray-100 rounded tool-btn active" title="Pen">
+                                <i class="fas fa-pen text-gray-700 text-sm"></i>
+                            </button>
+                            <button id="highlighterTool" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Highlighter">
+                                <i class="fas fa-highlighter text-gray-700 text-sm"></i>
+                            </button>
+                            <button id="eraserTool" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Eraser">
+                                <i class="fas fa-eraser text-gray-700 text-sm"></i>
+                            </button>
+                            <div class="w-px h-6 bg-gray-300 mx-1"></div>
+                            <button id="shapeTool" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Rectangle">
+                                <i class="fas fa-square text-gray-700 text-sm"></i>
+                            </button>
+                            <button id="circleTool" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Circle">
+                                <i class="far fa-circle text-gray-700 text-sm"></i>
+                            </button>
+                            <button id="arrowTool" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Arrow">
+                                <i class="fas fa-arrow-right text-gray-700 text-sm"></i>
+                            </button>
+                            <button id="lineTool" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Line">
+                                <i class="fas fa-minus text-gray-700 text-sm"></i>
+                            </button>
+                            <button id="textTool" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Text">
+                                <i class="fas fa-font text-gray-700 text-sm"></i>
+                            </button>
+                            <button id="imageTool" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Upload Image">
+                                <i class="fas fa-image text-gray-700 text-sm"></i>
+                            </button>
+                            <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                        </div>
+
+                        <!-- Style Options Group -->
+                        <div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
+                            <button id="fillToggle" class="px-2 py-1 hover:bg-gray-100 rounded text-xs text-gray-700 flex items-center" title="Fill Shapes">
+                                <i class="fas fa-fill-drip mr-1"></i>Fill: <span id="fillStatus">Off</span>
+                            </button>
+                            <div class="w-px h-4 bg-gray-300"></div>
+                            <div class="flex items-center gap-0.5">
+                                <button id="lineStyleSolid" class="px-1.5 py-1 hover:bg-gray-100 rounded line-style-btn active" data-style="solid" title="Solid">
+                                    <div class="w-6 h-0.5 bg-gray-700"></div>
+                                </button>
+                                <button id="lineStyleDashed" class="px-1.5 py-1 hover:bg-gray-100 rounded line-style-btn" data-style="dashed" title="Dashed">
+                                    <div class="w-6 h-0.5 border-t border-dashed border-gray-700"></div>
+                                </button>
+                                <button id="lineStyleDotted" class="px-1.5 py-1 hover:bg-gray-100 rounded line-style-btn" data-style="dotted" title="Dotted">
+                                    <div class="w-6 h-1 flex space-x-0.5 justify-center">
+                                        <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
+                                        <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
+                                        <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Color & Size Group -->
+                        <div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
+                            <div class="flex items-center gap-1.5">
+                                <label class="text-xs text-gray-700">Color:</label>
+                                <input type="color" id="colorPicker" value="#000000" class="w-8 h-8 rounded border border-gray-300 cursor-pointer">
+                                <div class="flex space-x-0.5">
+                                    <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-black" data-color="#000000" title="Black"></button>
+                                    <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-red-500" data-color="#ef4444" title="Red"></button>
+                                    <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-blue-500" data-color="#3b82f6" title="Blue"></button>
+                                    <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-green-500" data-color="#10b981" title="Green"></button>
+                                </div>
+                                <button class="px-1.5 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded" id="moreColorsBtn" title="More Colors">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                            <div id="additionalColors" class="hidden flex items-center gap-0.5 ml-1">
+                                <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-yellow-500" data-color="#eab308" title="Yellow"></button>
+                                <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-purple-500" data-color="#a855f7" title="Purple"></button>
+                                <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-pink-500" data-color="#ec4899" title="Pink"></button>
+                            </div>
+                            <div class="w-px h-4 bg-gray-300"></div>
+                            <div class="flex items-center gap-1.5">
+                                <label class="text-xs text-gray-700">Size:</label>
+                                <input type="range" id="lineWidth" min="1" max="30" value="3" class="w-20">
+                                <span id="lineWidthValue" class="text-xs text-gray-700 w-6">3</span>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Options Group -->
+                        <div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
+                            <div class="flex items-center gap-1.5 hidden md:flex">
+                                <label class="text-xs text-gray-700">BG:</label>
+                                <select id="backgroundColor" class="px-1.5 py-1 bg-white border border-gray-300 rounded text-xs">
+                                    <option value="#ffffff">White</option>
+                                    <option value="#f9fafb">Gray</option>
+                                    <option value="#fef3c7">Yellow</option>
+                                    <option value="#dbeafe">Blue</option>
+                                    <option value="#fce7f3">Pink</option>
+                                    <option value="#e0e7ff">Purple</option>
+                                    <option value="#d1fae5">Green</option>
+                                </select>
+                            </div>
+                            <button id="gridToggle" class="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-xs text-gray-700 flex items-center" title="Toggle Grid">
+                                <i class="fas fa-th mr-1"></i>Grid: <span id="gridStatus">Off</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Group: Actions & Zoom -->
+                    <div class="flex items-center gap-2 flex-wrap justify-end w-full lg:w-auto">
+                        <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-0.5">
+                            <button id="undoBtn" class="p-1.5 hover:bg-gray-100 rounded" title="Undo">
+                                <i class="fas fa-undo text-gray-700 text-sm"></i>
+                            </button>
+                            <button id="redoBtn" class="p-1.5 hover:bg-gray-100 rounded" title="Redo">
+                                <i class="fas fa-redo text-gray-700 text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
+                            <button id="zoomOut" class="px-2 py-1 hover:bg-gray-100 rounded" title="Zoom Out">
+                                <i class="fas fa-search-minus text-gray-700 text-xs"></i>
+                            </button>
+                            <span id="zoomLevel" class="px-2 text-xs text-gray-700 min-w-[3rem] text-center">100%</span>
+                            <button id="zoomIn" class="px-2 py-1 hover:bg-gray-100 rounded" title="Zoom In">
+                                <i class="fas fa-search-plus text-gray-700 text-xs"></i>
+                            </button>
+                            <button id="zoomReset" class="px-1.5 py-1 hover:bg-gray-100 rounded text-xs text-gray-700" title="Reset">
+                                Reset
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
+                            <button id="clearBtn" class="px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-xs flex items-center" title="Clear">
+                                <i class="fas fa-trash mr-1"></i>Clear
+                            </button>
+                            <button id="saveWhiteboardBtn" class="px-2 py-1 bg-primary hover:bg-blue-600 text-white rounded text-xs flex items-center" title="Save">
+                                <i class="fas fa-download mr-1"></i>Save
+                            </button>
+                            <button id="exportPDFBtn" class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs flex items-center" title="Export PDF">
+                                <i class="fas fa-file-pdf mr-1"></i>PDF
+                            </button>
+                        </div>
+                        <button id="exitWhiteboardFullscreen" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm flex items-center flex-shrink-0">
+                            <i class="fas fa-times mr-1.5"></i>Exit
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Layout -->
+            <div class="sm:hidden">
+                <!-- Top Row: Essential Tools & Exit -->
+                <div class="px-3 py-2 flex items-center justify-between gap-2 border-b border-gray-300">
+                    <!-- Tools Scroll -->
+                    <div class="flex-1 overflow-x-auto mobile-toolbar-scroll">
+                        <div class="flex items-center gap-2 min-w-max">
+                            <button id="penToolMobile" class="mobile-tool-btn p-2.5 bg-white rounded-lg border-2 border-blue-500 tool-btn active flex items-center justify-center" title="Pen">
+                                <i class="fas fa-pen text-blue-600"></i>
+                            </button>
+                            <button id="highlighterToolMobile" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Highlighter">
+                                <i class="fas fa-highlighter text-gray-700"></i>
+                            </button>
+                            <button id="eraserToolMobile" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Eraser">
+                                <i class="fas fa-eraser text-gray-700"></i>
+                            </button>
+                            <button id="shapeToolMobile" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Rectangle">
+                                <i class="fas fa-square text-gray-700"></i>
+                            </button>
+                            <button id="circleToolMobile" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Circle">
+                                <i class="far fa-circle text-gray-700"></i>
+                            </button>
+                            <button id="arrowToolMobile" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Arrow">
+                                <i class="fas fa-arrow-right text-gray-700"></i>
+                            </button>
+                            <button id="lineToolMobile" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Line">
+                                <i class="fas fa-minus text-gray-700"></i>
+                            </button>
+                            <button id="textToolMobile" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Text">
+                                <i class="fas fa-font text-gray-700"></i>
+                            </button>
+                            <button id="imageToolMobile" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Image">
+                                <i class="fas fa-image text-gray-700"></i>
+                            </button>
+                            <input type="file" id="imageUploadMobile" accept="image/*" class="hidden">
+                        </div>
+                    </div>
+                    <button id="exitWhiteboardFullscreenMobile" class="p-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Collapsible Sections -->
+                <!-- Color & Size Section -->
+                <div class="border-b border-gray-300">
+                    <button id="toggleColorSizeMobile" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-palette text-gray-700"></i>
+                            <span class="text-sm font-medium text-gray-700">Color &amp; Size</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="colorSizeChevron"></i>
+                    </button>
+                    <div id="colorSizePanelMobile" class="hidden px-3 py-2 border-t border-gray-200">
+                        <div class="flex items-center gap-3">
+                            <!-- Color Picker -->
+                            <div class="flex items-center gap-2 bg-white rounded-lg px-2 py-2 border border-gray-300">
+                                <input type="color" id="colorPickerMobile" value="#000000" class="w-10 h-10 rounded border-0 cursor-pointer p-0" style="appearance: none; -webkit-appearance: none;">
+                                <div class="flex space-x-1.5">
+                                    <button class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-black" data-color="#000000" title="Black"></button>
+                                    <button class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-red-500" data-color="#ef4444" title="Red"></button>
+                                    <button class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-blue-500" data-color="#3b82f6" title="Blue"></button>
+                                    <button class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-green-500" data-color="#10b981" title="Green"></button>
+                                </div>
+                                <button class="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded" id="moreColorsBtnMobile" title="More Colors">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                            <!-- Additional Colors (Hidden by default) -->
+                            <div id="additionalColorsMobile" class="hidden flex items-center gap-1.5">
+                                <button class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-yellow-500" data-color="#eab308" title="Yellow"></button>
+                                <button class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-purple-500" data-color="#a855f7" title="Purple"></button>
+                                <button class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-pink-500" data-color="#ec4899" title="Pink"></button>
+                            </div>
+                            <!-- Line Width -->
+                            <div class="flex-1 bg-white rounded-lg px-3 py-2 border border-gray-300 flex items-center gap-2">
+                                <label class="text-xs text-gray-700 font-medium">Size:</label>
+                                <input type="range" id="lineWidthMobile" min="1" max="30" value="3" class="flex-1">
+                                <span id="lineWidthValueMobile" class="text-xs text-gray-700 font-semibold w-8 text-center">3</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Style Options Section -->
+                <div class="border-b border-gray-300">
+                    <button id="toggleStyleOptionsMobile" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-sliders-h text-gray-700"></i>
+                            <span class="text-sm font-medium text-gray-700">Style Options</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="styleOptionsChevron"></i>
+                    </button>
+                    <div id="styleOptionsPanelMobile" class="hidden px-3 py-2 border-t border-gray-200 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <!-- Fill Toggle -->
+                            <button id="fillToggleMobile" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Fill Shapes">
+                                <i class="fas fa-fill-drip text-gray-700"></i>
+                                <span class="text-xs text-gray-700 font-medium">Fill: </span>
+                                <span id="fillStatusMobile" class="text-xs text-gray-700 font-semibold">Off</span>
+                            </button>
+                            <!-- Line Style -->
+                            <div class="flex-1 bg-white rounded-lg px-2 py-2 border border-gray-300 flex items-center justify-center gap-2">
+                                <span class="text-xs text-gray-700 font-medium">Style:</span>
+                                <div class="flex items-center gap-1">
+                                    <button id="lineStyleSolidMobile" class="px-2 py-1 hover:bg-gray-100 rounded line-style-btn active" data-style="solid" title="Solid">
+                                        <div class="w-6 h-0.5 bg-gray-700"></div>
+                                    </button>
+                                    <button id="lineStyleDashedMobile" class="px-2 py-1 hover:bg-gray-100 rounded line-style-btn" data-style="dashed" title="Dashed">
+                                        <div class="w-6 h-0.5 border-t border-dashed border-gray-700"></div>
+                                    </button>
+                                    <button id="lineStyleDottedMobile" class="px-2 py-1 hover:bg-gray-100 rounded line-style-btn" data-style="dotted" title="Dotted">
+                                        <div class="w-6 h-1 flex space-x-0.5 justify-center">
+                                            <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
+                                            <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
+                                            <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <!-- Background Color -->
+                            <select id="backgroundColorMobile" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs">
+                                <option value="#ffffff">White BG</option>
+                                <option value="#f9fafb">Gray BG</option>
+                                <option value="#fef3c7">Yellow BG</option>
+                                <option value="#dbeafe">Blue BG</option>
+                                <option value="#fce7f3">Pink BG</option>
+                                <option value="#e0e7ff">Purple BG</option>
+                                <option value="#d1fae5">Green BG</option>
+                            </select>
+                            <!-- Grid Toggle -->
+                            <button id="gridToggleMobile" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Toggle Grid">
+                                <i class="fas fa-th text-gray-700"></i>
+                                <span class="text-xs text-gray-700 font-medium">Grid: </span>
+                                <span id="gridStatusMobile" class="text-xs text-gray-700 font-semibold">Off</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zoom Controls Section -->
+                <div class="border-b border-gray-300">
+                    <button id="toggleZoomMobile" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-search-plus text-gray-700"></i>
+                            <span class="text-sm font-medium text-gray-700">Zoom</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="zoomChevron"></i>
+                    </button>
+                    <div id="zoomPanelMobile" class="hidden px-3 py-2 border-t border-gray-200">
+                        <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-gray-300">
+                            <button id="zoomOutMobile" class="p-2 hover:bg-gray-100 rounded" title="Zoom Out">
+                                <i class="fas fa-search-minus text-gray-700"></i>
+                            </button>
+                            <span id="zoomLevelMobile" class="flex-1 text-center text-xs text-gray-700 font-semibold">100%</span>
+                            <button id="zoomInMobile" class="p-2 hover:bg-gray-100 rounded" title="Zoom In">
+                                <i class="fas fa-search-plus text-gray-700"></i>
+                            </button>
+                            <button id="zoomResetMobile" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-xs text-gray-700 font-medium" title="Reset">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Section -->
+                <div class="border-b border-gray-300">
+                    <button id="toggleActionsMobile" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-history text-gray-700"></i>
+                            <span class="text-sm font-medium text-gray-700">History &amp; Actions</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="actionsChevron"></i>
+                    </button>
+                    <div id="actionsPanelMobile" class="hidden px-3 py-2 border-t border-gray-200 flex items-center gap-2">
+                        <button id="undoBtnMobile" class="flex-1 px-3 py-2.5 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Undo">
+                            <i class="fas fa-undo text-gray-700"></i>
+                            <span class="text-xs text-gray-700 font-medium">Undo</span>
+                        </button>
+                        <button id="redoBtnMobile" class="flex-1 px-3 py-2.5 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Redo">
+                            <i class="fas fa-redo text-gray-700"></i>
+                            <span class="text-xs text-gray-700 font-medium">Redo</span>
+                        </button>
+                        <button id="clearBtnMobile" class="flex-1 px-3 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center justify-center gap-2" title="Clear">
+                            <i class="fas fa-trash"></i>
+                            <span class="text-xs font-medium">Clear</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Save & Export Section -->
+                <div class="border-b border-gray-300">
+                    <button id="toggleSaveExportMobile" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-download text-gray-700"></i>
+                            <span class="text-sm font-medium text-gray-700">Save &amp; Export</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="saveExportChevron"></i>
+                    </button>
+                    <div id="saveExportPanelMobile" class="hidden px-3 py-2 border-t border-gray-200 flex items-center gap-2">
+                        <button id="saveWhiteboardBtnMobile" class="flex-1 px-3 py-2.5 bg-primary hover:bg-blue-600 text-white rounded-lg flex items-center justify-center gap-2" title="Save">
+                            <i class="fas fa-download"></i>
+                            <span class="text-xs font-medium">Save</span>
+                        </button>
+                        <button id="exportPDFBtnMobile" class="flex-1 px-3 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-2" title="Export PDF">
+                            <i class="fas fa-file-pdf"></i>
+                            <span class="text-xs font-medium">Export PDF</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div id="canvasContainer" class="flex-1 overflow-hidden bg-gray-100" style="position: relative;">
+            <div id="canvasWrapper" style="position: relative; width: 0px; height: 0px; transform-origin: center center; transform: scale(1);">
+                <canvas id="whiteboardCanvas" class="bg-white cursor-crosshair" style="width: 100%; height: 100%; display: block; background-color: rgb(255, 255, 255);" width="0" height="0"></canvas>
+                <!-- Grid Overlay -->
+                <canvas id="gridCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.3;" width="0" height="0"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 px-2 sm:px-4 md:px-6 py-2 sm:py-4 pb-safe z-40" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
+        <div class="flex items-center justify-between max-w-7xl mx-auto flex-wrap gap-2">
+            <!-- Left Controls -->
+            <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center sm:justify-start">
+                <button id="toggleMic" class="w-10 h-10 sm:w-12 sm:h-12 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
+                    <i class="fas fa-microphone text-sm sm:text-base"></i>
+                </button>
+                <button id="toggleVideo" class="w-10 h-10 sm:w-12 sm:h-12 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
+                    <i class="fas fa-video text-sm sm:text-base"></i>
+                </button>
+                <button id="toggleScreenShare" class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-700 hover:bg-gray-600 text-white rounded-full flex items-center justify-center transition flex-shrink-0 hidden sm:flex">
+                    <i class="fas fa-desktop text-sm sm:text-base"></i>
+                </button>
+                <button id="toggleWhiteboard" class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-700 hover:bg-gray-600 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
+                    <i class="fas fa-pencil-alt text-sm sm:text-base"></i>
+                </button>
+                <span id="whiteboardActive" class="px-2 py-1 bg-green-600 text-white rounded text-xs hidden">
+                    <i class="fas fa-check mr-1"></i><span class="hidden sm:inline">Whiteboard Active</span>
+                </span>
+            </div>
+
+            <!-- Center Controls -->
+            <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center">
+                <button class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm hidden sm:flex items-center">
+                    <i class="fas fa-cog sm:mr-2"></i><span class="hidden md:inline">Settings</span>
+                </button>
+                <button id="mobileChatToggle" class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm flex items-center md:hidden">
+                    <i class="fas fa-comments"></i>
+                </button>
+                <button class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm hidden md:flex items-center">
+                    <i class="fas fa-comments sm:mr-2"></i><span class="hidden md:inline">Chat</span>
+                </button>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center sm:justify-end">
+                <button id="toggleParticipants" class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm hidden md:flex items-center">
+                    <i class="fas fa-users sm:mr-2"></i><span class="hidden md:inline">People</span>
+                </button>
+                <button id="leaveSession" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-xs sm:text-sm flex items-center flex-shrink-0">
+                    <i class="fas fa-phone-slash sm:mr-2"></i><span class="hidden sm:inline">Leave</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>

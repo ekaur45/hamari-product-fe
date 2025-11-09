@@ -1,56 +1,56 @@
 import { CommonModule } from "@angular/common";
-import { Component, computed, HostListener, OnInit, signal } from "@angular/core";
-import { AuthService, StudentScheduleDto, StudentService } from "../../../shared";
-import CalendarDay from "../../../shared/models/calendar.interface";
+import { Component, computed, effect, HostListener, OnInit, signal } from "@angular/core";
+import { ReactiveFormsModule } from "@angular/forms";
+import { ToastModule } from "primeng/toast";
+import { AuthService, TeacherService, User } from "../../../shared";
 import { DialogModule } from "primeng/dialog";
-import { Router } from "@angular/router";
-
+import TeacherBooking from "../../../shared/models/teacher.interface";
+import CalendarDay from "../../../shared/models/calendar.interface";
+import { Router, RouterModule } from "@angular/router";
+import { ROUTES_MAP } from "../../../shared/constants/routes-map";
 interface ScheduleCalendarDay extends CalendarDay {
     hasBooking: boolean;
-    bookings: StudentScheduleDto[];
+    bookings: TeacherBooking[];
 }
-
 @Component({
-    selector: 'app-student-schedule',
-    templateUrl: './student-schedule.html',
+    selector: 'app-teacher-schedule',
     standalone: true,
-    imports: [CommonModule, DialogModule]
+    templateUrl: './teacher-schedule.html',
+    imports: [CommonModule, ReactiveFormsModule, ToastModule, DialogModule, RouterModule]
 })
-export class StudentSchedule implements OnInit {
-    studentSchedule = signal<StudentScheduleDto[]>([]);
+export default class TeacherSchedule implements OnInit {
+    currentUser = signal<User | null>(null);
+    bookings = signal<TeacherBooking[]>([]);
     isLoading = signal(false);
     showMonthPicker = signal(false);
     currentMonth = signal(new Date());
     selectedDate = signal<Date | null>(null);
     showBookingDialog = signal(false);
-    selectedDateBookings = signal<StudentScheduleDto[]>([]);
-
+    selectedDateBookings = signal<TeacherBooking[]>([]);
     constructor(
         private authService: AuthService,
-        private studentService: StudentService,
+        private teacherService: TeacherService,
         private router: Router
-    ) { }
-
-    ngOnInit(): void {
-        this.getStudentSchedule();
+    ) {
     }
-
-    getStudentSchedule(): void {
+    ngOnInit(): void {
+            this.currentUser.set(this.authService.getCurrentUser());
+            this.getBookings();
+    }
+    getBookings(): void {
         this.isLoading.set(true);
-        this.studentService.getStudentSchedule(this.authService.getCurrentUser()!.id).subscribe({
+        this.teacherService.getTeacherBookings(this.currentUser()!.id).subscribe({
             complete: () => {
                 this.isLoading.set(false);
             },
-            next: (schedule) => {
-                this.studentSchedule.set(schedule);
+            next: (bookings) => {
+                this.bookings.set(bookings);
             },
             error: (error) => {
                 console.error(error);
-                this.isLoading.set(false);
             }
         });
     }
-
     availableMonths = computed(() => {
         const months = [];
         const current = new Date();
@@ -66,7 +66,7 @@ export class StudentSchedule implements OnInit {
 
     calendarDays = computed(() => {
         const month = this.currentMonth();
-        const bookings = this.studentSchedule();
+        const bookings = this.bookings();
         
         const year = month.getFullYear();
         const monthIndex = month.getMonth();
@@ -81,7 +81,7 @@ export class StudentSchedule implements OnInit {
         const mondayBasedDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
         
         // Create date to bookings mapping
-        const bookingMap: Record<string, StudentScheduleDto[]> = {};
+        const bookingMap: Record<string, TeacherBooking[]> = {};
         bookings.forEach(booking => {
             if (booking.bookingDate) {
                 const bookingDate = new Date(booking.bookingDate);
@@ -215,7 +215,7 @@ export class StudentSchedule implements OnInit {
         this.selectedDateBookings.set([]);
     }
 
-    isDateSelected(day: ScheduleCalendarDay): boolean {
+    isDateSelected(day: CalendarDay): boolean {
         const selected = this.selectedDate();
         if (!selected) return false;
         return this.isSameDay(day.date, selected);
@@ -262,7 +262,7 @@ export class StudentSchedule implements OnInit {
                date1.getDate() === date2.getDate();
     }
 
-    getTimeRemaining(booking: StudentScheduleDto): string {
+    getTimeRemaining(booking: TeacherBooking): string {
         if (!booking.bookingDate || !booking.availability.startTime) {
             return '';
         }
@@ -304,7 +304,7 @@ export class StudentSchedule implements OnInit {
         }
     }
 
-    getBookingStartDateTime(booking: StudentScheduleDto): Date | null {
+    getBookingStartDateTime(booking: TeacherBooking): Date | null {
         if (!booking.bookingDate || !booking.availability.startTime) {
             return null;
         }
@@ -314,7 +314,7 @@ export class StudentSchedule implements OnInit {
         return bookingDate;
     }
 
-    getBookingEndDateTime(booking: StudentScheduleDto): Date | null {
+    getBookingEndDateTime(booking: TeacherBooking): Date | null {
         if (!booking.bookingDate || !booking.availability.endTime) {
             return null;
         }
