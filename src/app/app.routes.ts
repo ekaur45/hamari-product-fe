@@ -9,6 +9,7 @@ import { AuthGuard, RoleGuard } from './shared/guards/auth.guard';
 import { UserRole } from './shared/models';
 import { Dashboard } from './views/dashboard/dashboard';
 import ClassRoom from './views/class-room/class-room';
+import { TestCall } from './views/test-call/test-call';
 
 export const routes: Routes = [
     {
@@ -48,6 +49,10 @@ export const routes: Routes = [
                 data: { roles: [UserRole.TEACHER] },
                 loadChildren: () => import('./views/teacher/teacher.routes').then(m => m.teacherRoutes)
             },
+            {
+                path: 'chat',
+                component: TestCall
+            }
             
         ]   
     

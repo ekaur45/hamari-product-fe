@@ -1,0 +1,124 @@
+<div class="p-4">
+    <!-- Connection Status -->
+    <div class="mb-4 p-3 bg-gray-100 rounded">
+        <p class="text-sm"><strong>Connected:</strong> {{ isConnected() ? 'Yes' : 'No' }}</p>
+        <p class="text-sm"><strong>Your ID:</strong> {{ myId() }}</p>
+        <p class="text-sm"><strong>Role:</strong> 
+            <span *ngIf="role() === 'teacher'" class="text-green-600 font-semibold">👨‍🏫 Teacher</span>
+            <span *ngIf="role() === 'student'" class="text-blue-600 font-semibold">👨‍🎓 Student</span>
+            <span *ngIf="!role()" class="text-gray-500">Not set</span>
+        </p>
+        <p class="text-sm"><strong>Room ID:</strong> {{ roomId() || 'Not set' }}</p>
+        <p class="text-sm"><strong>Session Status:</strong> 
+            <span *ngIf="sessionStarted()" class="text-green-600 font-semibold">✅ Started</span>
+            <span *ngIf="!sessionStarted()" class="text-yellow-600 font-semibold">⏳ Waiting</span>
+        </p>
+        <p class="text-sm"><strong>Participants:</strong> {{ participants().size + (isInCall() ? 1 : 0) }}</p>
+    </div>
+
+    <!-- Room Controls -->
+    <div class="mb-4 flex gap-2 items-center">
+        <input 
+            type="text" 
+            [(ngModel)]="roomId" 
+            placeholder="Enter Room ID" 
+            class="px-4 py-2 border rounded flex-1"
+            [disabled]="isInCall()"
+        />
+        
+        <!-- Teacher Controls -->
+        <ng-container *ngIf="role() === 'teacher'">
+            <button 
+                *ngIf="!isInCall()" 
+                (click)="startSession()" 
+                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+                🎬 Start Session
+            </button>
+            <button 
+                *ngIf="isInCall()" 
+                (click)="endSession()" 
+                class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+                🛑 End Session
+            </button>
+        </ng-container>
+
+        <!-- Student Controls -->
+        <ng-container *ngIf="role() === 'student'">
+            <button 
+                *ngIf="!isInCall() && sessionStarted()" 
+                (click)="joinMeeting()" 
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+                Join Meeting
+            </button>
+            <button 
+                *ngIf="!isInCall() && !sessionStarted()" 
+                disabled
+                class="px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed"
+            >
+                ⏳ Waiting for Teacher
+            </button>
+            <button 
+                *ngIf="isInCall()" 
+                (click)="leaveMeeting()" 
+                class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+                Leave Meeting
+            </button>
+        </ng-container>
+
+        <!-- No Role Set -->
+        <ng-container *ngIf="!role()">
+            <p class="text-sm text-gray-500">Set role in URL: ?role=teacher or ?role=student</p>
+        </ng-container>
+    </div>
+
+    <!-- Waiting Message for Students -->
+    <div *ngIf="role() === 'student' && !sessionStarted() && !isInCall()" class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
+        <p class="text-yellow-800 font-semibold">⏳ Waiting for teacher to start the session...</p>
+        <p class="text-yellow-600 text-sm mt-1">You will be able to join once the teacher starts the session.</p>
+    </div>
+
+    <!-- Media Controls -->
+    <div *ngIf="isInCall()" class="mb-4 flex gap-2 justify-center">
+        <button 
+            (click)="toggleMic()" 
+            class="px-4 py-2 rounded"
+            [class.bg-green-600]="micEnabled()"
+            [class.bg-red-600]="!micEnabled()"
+            [class.text-white]="true"
+        >
+            {{ micEnabled() ? '🎤 Mic On' : '🔇 Mic Off' }}
+        </button>
+        <button 
+            (click)="toggleVideo()" 
+            class="px-4 py-2 rounded"
+            [class.bg-green-600]="videoEnabled()"
+            [class.bg-red-600]="!videoEnabled()"
+            [class.text-white]="true"
+        >
+            {{ videoEnabled() ? '📹 Video On' : '📵 Video Off' }}
+        </button>
+    </div>
+
+    <!-- Video Grid -->
+    <div 
+        id="videoGrid" 
+        class="grid gap-4"
+        [style.grid-template-columns]="'repeat(auto-fit, minmax(300px, 1fr))'"
+    >
+        <!-- Videos will be dynamically added here -->
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isInCall()" class="text-center py-12 text-gray-500">
+        <p class="text-lg mb-2" *ngIf="role() === 'teacher'">Ready to start session</p>
+        <p class="text-lg mb-2" *ngIf="role() === 'student'">Waiting to join</p>
+        <p class="text-lg mb-2" *ngIf="!role()">No role set</p>
+        <p class="text-sm" *ngIf="role() === 'teacher'">Enter a room ID and click "Start Session" to begin</p>
+        <p class="text-sm" *ngIf="role() === 'student'">Enter a room ID and wait for the teacher to start</p>
+        <p class="text-sm" *ngIf="!role()">Add ?role=teacher or ?role=student to the URL</p>
+    </div>
+</div>
