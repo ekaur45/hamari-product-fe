@@ -66,7 +66,8 @@ export const API_ENDPOINTS = {
     BY_ACADEMY: (academyId: string) => `/teachers/academy/${academyId}`,
     SEARCH: '/teachers/search',
     DIRECT: '/teachers/direct',
-    BOOKINGS: (teacherId: string) => `/teachers/${teacherId}/bookings`
+    BOOKINGS: (teacherId: string) => `/teachers/${teacherId}/bookings`,
+    BY_BOOKING: (bookingId: string) => `/teachers/booking/${bookingId}`
   },
 
   // Classes

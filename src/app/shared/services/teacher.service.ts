@@ -59,4 +59,10 @@ export class TeacherService {
       catchError(e => throwError(() => e))
     );
   }
+  getTeacherBookingById(bookingId: string): Observable<TeacherBooking> {
+    return this.apiService.get<TeacherBooking>(API_ENDPOINTS.TEACHERS.BY_BOOKING(bookingId)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
 }

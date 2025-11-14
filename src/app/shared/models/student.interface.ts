@@ -6,7 +6,7 @@ export interface StudentClassAttendance {
  * Student Entity Interface
  */
 export interface Student {
-  id: number;
+  id: string;
   userId: string;
   tagline: string;
   parentId?: string;

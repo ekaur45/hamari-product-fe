@@ -7,16 +7,16 @@
             </a>
             <div class="h-6 w-px bg-gray-600 hidden sm:block"></div>
             <div class="min-w-0 flex-1">
-                <h2 class="text-sm sm:text-lg font-semibold truncate">Mathematics - Algebra</h2>
-                <p class="text-xs sm:text-sm text-gray-400 truncate hidden sm:block">Elite Academy  Session ID: #12345</p>
+                <h2 class="text-sm sm:text-lg font-semibold truncate">{{booking()?.teacherSubject?.subject?.name}}</h2>
+                <p class="text-xs sm:text-sm text-gray-400 truncate hidden sm:block">Session ID: {{booking()?.id}}</p>
             </div>
         </div>
         <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
             <div class="flex items-center space-x-1 sm:space-x-2 bg-green-600 px-2 sm:px-3 py-1 rounded-lg">
                 <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                <span class="text-xs sm:text-sm font-medium">LIVE</span>
+                <span class="text-xs sm:text-sm font-medium">{{ classRoomSocket().isStarted ? 'LIVE' : 'NOT LIVE' }}</span>
             </div>
-            <div class="text-xs sm:text-sm text-gray-300">
+            <div class="text-xs sm:text-sm text-gray-300" [class.hidden]="!classRoomSocket().isStarted">
                 <i class="far fa-clock mr-1"></i>
                 <span #sessionTimeEl>{{ sessionTime() }}</span>
             </div>
@@ -31,28 +31,36 @@
                 <!-- Video View -->
                 <div #videoView [class.hidden]="whiteboardOpen()" class="w-full h-full flex items-center justify-center bg-gray-950">
                     <!-- Video or Screen Share -->
-                    <div id="mainVideo" class="w-full h-full flex items-center justify-center">
+                    <video #videoElement [class.hidden]="!videoTrack() || !videoTrack()?.enabled" class="w-full h-full flex items-center justify-center"
+                    autoplay
+                    playsinline
+                    muted
+
+                    ></video>
+                     
+                    <div id="mainVideo" [class.hidden]="videoTrack() && videoTrack()?.enabled" class="w-full h-full flex items-center justify-center">
                         <div class="text-center text-gray-500">
                             <i class="fas fa-video text-4xl mb-2 opacity-50"></i>
                             <p class="text-sm">Teacher Video</p>
                         </div>
                     </div>
+                    
                     <!-- Video Overlay Info -->
                     <div class="video-overlay">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-2">
                                 <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">JS</div>
                                 <div>
-                                    <p class="text-white font-medium text-sm">John Smith</p>
-                                    <p class="text-gray-300 text-xs">Teacher</p>
+                                    <p class="text-white font-medium text-sm">{{ currentUserDetails()?.firstName }} {{ currentUserDetails()?.lastName }}</p>
+                                    <p class="text-gray-300 text-xs">{{ currentUserDetails()?.role === UserRole.TEACHER ? 'Teacher' : 'Student' }}</p>
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <span class="px-2 py-1 bg-red-500 text-white rounded text-xs">
-                                    <i class="fas fa-microphone-slash"></i>
+                                <span class="px-2 py-1 bg-green-500 text-white rounded text-xs" (click)="onToggleMic()" [class.bg-red-500]="!currentUserControls().micOn">
+                                    <i [class.fa-microphone]="currentUserControls().micOn" [class.fa-microphone-slash]="!currentUserControls().micOn" class="fas"></i>
                                 </span>
-                                <span class="px-2 py-1 bg-green-500 text-white rounded text-xs">
-                                    <i class="fas fa-video"></i>
+                                <span class="px-2 py-1 bg-green-500 text-white rounded text-xs" (click)="onToggleVideo()" [class.bg-red-500]="!currentUserControls().videoOn">
+                                    <i  [class.fa-video]="currentUserControls().videoOn" [class.fa-video-slash]="!currentUserControls().videoOn" class="fas"></i>
                                 </span>
                             </div>
                         </div>
@@ -62,7 +70,7 @@
 
             <!-- Students Video Grid -->
             <div class="bg-gray-800 rounded-lg p-3">
-                <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center justify-between mb-2 hidden">
                     <h3 class="text-white font-medium text-sm">
                         <i class="fas fa-users mr-2"></i>
                         Participants (<span id="participantCount">3</span>)
@@ -72,62 +80,49 @@
                     </button>
                 </div>
                 <div #studentsGrid [class]="'video-grid grid-' + gridSize()">
+                    @if(classRoomSocket().hasTeacherJoined && otherParticipant() && otherParticipant()?.user && currentUserDetails() && currentUserDetails()?.role === UserRole.STUDENT){
+                        <div class="video-container aspect-video">
+                            <div class="w-full h-full flex items-center justify-center bg-gray-950">
+                                <div class="text-center text-gray-500">
+                                    <i class="fas fa-user text-2xl mb-1 opacity-50"></i>
+                                    <p class="text-xs">Teacher</p>
+                                </div>
+                            </div>
+                            <div class="video-overlay">
+                                <div class="flex items-center justify-between">
+                                    <p class="text-white text-xs font-medium">{{ otherParticipant()?.user?.firstName }} {{ otherParticipant()?.user?.lastName }}</p>
+                                    <div class="flex items-center space-x-1">
+                                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                        <i class="fas fa-microphone text-green-500 text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if(classRoomSocket().hasStudentJoined && otherParticipant() && otherParticipant()?.user && currentUserDetails() && currentUserDetails()?.role === UserRole.TEACHER){
+                        <div class="video-container aspect-video">
+                            <div class="w-full h-full flex items-center justify-center bg-gray-950">
+                                <div class="text-center text-gray-500">
+                                    <i class="fas fa-user text-2xl mb-1 opacity-50"></i>
+                                    <p class="text-xs">Student</p>
+                                </div>
+                            </div>
+                            <div class="video-overlay">
+                                <div class="flex items-center justify-between">
+                                    <p class="text-white text-xs font-medium">{{ otherParticipant()?.user?.firstName }} {{ otherParticipant()?.user?.lastName }}</p>
+                                    <div class="flex items-center space-x-1">
+                                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                        <i class="fas fa-microphone text-green-500 text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
                     <!-- Student 1 -->
-                    <div class="video-container aspect-video">
-                        <div class="w-full h-full flex items-center justify-center bg-gray-950">
-                            <div class="text-center text-gray-500">
-                                <i class="fas fa-user text-2xl mb-1 opacity-50"></i>
-                                <p class="text-xs">Student 1</p>
-                            </div>
-                        </div>
-                        <div class="video-overlay">
-                            <div class="flex items-center justify-between">
-                                <p class="text-white text-xs font-medium">Alice Johnson</p>
-                                <div class="flex items-center space-x-1">
-                                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                                    <i class="fas fa-microphone text-green-500 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Student 2 -->
-                    <div class="video-container aspect-video">
-                        <div class="w-full h-full flex items-center justify-center bg-gray-950">
-                            <div class="text-center text-gray-500">
-                                <i class="fas fa-user text-2xl mb-1 opacity-50"></i>
-                                <p class="text-xs">Student 2</p>
-                            </div>
-                        </div>
-                        <div class="video-overlay">
-                            <div class="flex items-center justify-between">
-                                <p class="text-white text-xs font-medium">Bob Williams</p>
-                                <div class="flex items-center space-x-1">
-                                    <span class="w-2 h-2 bg-red-500 rounded-full"></span>
-                                    <i class="fas fa-microphone-slash text-red-500 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Student 3 -->
-                    <div class="video-container aspect-video">
-                        <div class="w-full h-full flex items-center justify-center bg-gray-950">
-                            <div class="text-center text-gray-500">
-                                <i class="fas fa-user text-2xl mb-1 opacity-50"></i>
-                                <p class="text-xs">You</p>
-                            </div>
-                        </div>
-                        <div class="video-overlay">
-                            <div class="flex items-center justify-between">
-                                <p class="text-white text-xs font-medium">You</p>
-                                <div class="flex items-center space-x-1">
-                                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                                    <i class="fas fa-microphone text-green-500 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
+                 
                     <!-- Empty slot for grid alignment -->
-                    <div class="video-container aspect-video border-2 border-dashed border-gray-600">
+                    <div class="video-container aspect-video border-2 border-dashed border-gray-600 hidden">
                         <div class="w-full h-full flex items-center justify-center">
                             <i class="fas fa-user-plus text-gray-500 text-xl"></i>
                         </div>
@@ -300,391 +295,18 @@
             </div>
         </div>
     </div>
-    <div #whiteboardView [class.hidden]="!whiteboardOpen()" class="fixed inset-0 bg-white flex flex-col z-50">
-        <!-- Whiteboard Toolbar -->
-        <div class="bg-gray-100 border-b border-gray-300 relative z-10">
-            <!-- Desktop/Tablet Layout -->
-            <div class="hidden sm:block">
-                <!-- Main Toolbar Row -->
-                <div class="px-2 sm:px-4 py-2 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2">
-                    <!-- Left Group: Drawing Tools -->
-                    <div class="flex items-center flex-wrap gap-2 flex-1 min-w-0">
-                        <!-- Drawing Tools Group -->
-                        <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
-                            <button id="penTool" (click)="selectTool('penTool')" [class.active]="currentTool() === 'pen'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Pen">
-                                <i class="fas fa-pen text-gray-700 text-sm"></i>
-                            </button>
-                            <button id="highlighterTool" (click)="selectTool('highlighterTool')" [class.active]="currentTool() === 'highlighter'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Highlighter">
-                                <i class="fas fa-highlighter text-gray-700 text-sm"></i>
-                            </button>
-                            <button id="eraserTool" (click)="selectTool('eraserTool')" [class.active]="currentTool() === 'eraser'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Eraser">
-                                <i class="fas fa-eraser text-gray-700 text-sm"></i>
-                            </button>
-                            <div class="w-px h-6 bg-gray-300 mx-1"></div>
-                            <button id="shapeTool" (click)="selectTool('shapeTool')" [class.active]="currentTool() === 'rectangle'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Rectangle">
-                                <i class="fas fa-square text-gray-700 text-sm"></i>
-                            </button>
-                            <button id="circleTool" (click)="selectTool('circleTool')" [class.active]="currentTool() === 'circle'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Circle">
-                                <i class="far fa-circle text-gray-700 text-sm"></i>
-                            </button>
-                            <button id="arrowTool" (click)="selectTool('arrowTool')" [class.active]="currentTool() === 'arrow'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Arrow">
-                                <i class="fas fa-arrow-right text-gray-700 text-sm"></i>
-                            </button>
-                            <button id="lineTool" (click)="selectTool('lineTool')" [class.active]="currentTool() === 'line'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Line">
-                                <i class="fas fa-minus text-gray-700 text-sm"></i>
-                            </button>
-                            <button id="textTool" (click)="selectTool('textTool')" [class.active]="currentTool() === 'text'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Text">
-                                <i class="fas fa-font text-gray-700 text-sm"></i>
-                            </button>
-                            <button id="imageTool" (click)="selectTool('imageTool')" [class.active]="currentTool() === 'image'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Upload Image">
-                                <i class="fas fa-image text-gray-700 text-sm"></i>
-                            </button>
-                            <input #imageUpload type="file" (change)="onImageUpload($event)" accept="image/*" class="hidden">
-                        </div>
-
-                        <!-- Style Options Group -->
-                        <div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
-                            <button id="fillToggle" (click)="onToggleFill()" class="px-2 py-1 hover:bg-gray-100 rounded text-xs text-gray-700 flex items-center" title="Fill Shapes">
-                                <i class="fas fa-fill-drip mr-1"></i>Fill: <span>{{ getFillStatus() }}</span>
-                            </button>
-                            <div class="w-px h-4 bg-gray-300"></div>
-                            <div class="flex items-center gap-0.5">
-                                <button id="lineStyleSolid" (click)="onLineStyleChange('solid')" [class.active]="lineStyle() === 'solid'" class="px-1.5 py-1 hover:bg-gray-100 rounded line-style-btn" title="Solid">
-                                    <div class="w-6 h-0.5 bg-gray-700"></div>
-                                </button>
-                                <button id="lineStyleDashed" (click)="onLineStyleChange('dashed')" [class.active]="lineStyle() === 'dashed'" class="px-1.5 py-1 hover:bg-gray-100 rounded line-style-btn" title="Dashed">
-                                    <div class="w-6 h-0.5 border-t border-dashed border-gray-700"></div>
-                                </button>
-                                <button id="lineStyleDotted" (click)="onLineStyleChange('dotted')" [class.active]="lineStyle() === 'dotted'" class="px-1.5 py-1 hover:bg-gray-100 rounded line-style-btn" title="Dotted">
-                                    <div class="w-6 h-1 flex space-x-0.5 justify-center">
-                                        <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                        <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                        <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Color & Size Group -->
-                        <div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
-                            <div class="flex items-center gap-1.5">
-                                <label class="text-xs text-gray-700">Color:</label>
-                                <input type="color" [value]="currentColor()" (input)="onColorChange($any($event.target).value)" class="w-8 h-8 rounded border border-gray-300 cursor-pointer">
-                                <div class="flex space-x-0.5">
-                                    <button (click)="onColorChange('#000000')" [class.active]="currentColor() === '#000000'" class="color-btn w-5 h-5 rounded border border-gray-300 bg-black" title="Black"></button>
-                                    <button (click)="onColorChange('#ef4444')" [class.active]="currentColor() === '#ef4444'" class="color-btn w-5 h-5 rounded border border-gray-300 bg-red-500" title="Red"></button>
-                                    <button (click)="onColorChange('#3b82f6')" [class.active]="currentColor() === '#3b82f6'" class="color-btn w-5 h-5 rounded border border-gray-300 bg-blue-500" title="Blue"></button>
-                                    <button (click)="onColorChange('#10b981')" [class.active]="currentColor() === '#10b981'" class="color-btn w-5 h-5 rounded border border-gray-300 bg-green-500" title="Green"></button>
-                                </div>
-                                <button class="px-1.5 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded" id="moreColorsBtn" title="More Colors">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </button>
-                            </div>
-                            <div id="additionalColors" class="hidden flex items-center gap-0.5 ml-1">
-                                <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-yellow-500" data-color="#eab308" title="Yellow"></button>
-                                <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-purple-500" data-color="#a855f7" title="Purple"></button>
-                                <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-pink-500" data-color="#ec4899" title="Pink"></button>
-                            </div>
-                            <div class="w-px h-4 bg-gray-300"></div>
-                            <div class="flex items-center gap-1.5">
-                                <label class="text-xs text-gray-700">Size:</label>
-                                <input type="range" [value]="currentLineWidth()" (input)="onLineWidthChange(+$any($event.target).value)" min="1" max="30" class="w-20">
-                                <span class="text-xs text-gray-700 w-6">{{ currentLineWidth() }}</span>
-                            </div>
-                        </div>
-
-                        <!-- Canvas Options Group -->
-                        <div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
-                            <div class="flex items-center gap-1.5 hidden md:flex">
-                                <label class="text-xs text-gray-700">BG:</label>
-                                <select (change)="onBackgroundColorChange($any($event.target).value)" class="px-1.5 py-1 bg-white border border-gray-300 rounded text-xs">
-                                    <option value="#ffffff">White</option>
-                                    <option value="#f9fafb">Gray</option>
-                                    <option value="#fef3c7">Yellow</option>
-                                    <option value="#dbeafe">Blue</option>
-                                    <option value="#fce7f3">Pink</option>
-                                    <option value="#e0e7ff">Purple</option>
-                                    <option value="#d1fae5">Green</option>
-                                </select>
-                            </div>
-                            <button id="gridToggle" (click)="onToggleGridVisible()" class="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-xs text-gray-700 flex items-center" title="Toggle Grid">
-                                <i class="fas fa-th mr-1"></i>Grid: <span>{{ getGridStatus() }}</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Right Group: Actions & Zoom -->
-                    <div class="flex items-center gap-2 flex-wrap justify-end w-full lg:w-auto">
-                        <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-0.5">
-                            <button id="undoBtn" (click)="onUndo()" class="p-1.5 hover:bg-gray-100 rounded" title="Undo">
-                                <i class="fas fa-undo text-gray-700 text-sm"></i>
-                            </button>
-                            <button id="redoBtn" (click)="onRedo()" class="p-1.5 hover:bg-gray-100 rounded" title="Redo">
-                                <i class="fas fa-redo text-gray-700 text-sm"></i>
-                            </button>
-                        </div>
-                        <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
-                            <button id="zoomOut" (click)="onZoomOut()" class="px-2 py-1 hover:bg-gray-100 rounded" title="Zoom Out">
-                                <i class="fas fa-search-minus text-gray-700 text-xs"></i>
-                            </button>
-                            <span class="px-2 text-xs text-gray-700 min-w-[3rem] text-center">{{ getZoomLevel() }}</span>
-                            <button id="zoomIn" (click)="onZoomIn()" class="px-2 py-1 hover:bg-gray-100 rounded" title="Zoom In">
-                                <i class="fas fa-search-plus text-gray-700 text-xs"></i>
-                            </button>
-                            <button id="zoomReset" (click)="onZoomReset()" class="px-1.5 py-1 hover:bg-gray-100 rounded text-xs text-gray-700" title="Reset">
-                                Reset
-                            </button>
-                        </div>
-                        <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
-                            <button id="clearBtn" (click)="onClear()" class="px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-xs flex items-center" title="Clear">
-                                <i class="fas fa-trash mr-1"></i>Clear
-                            </button>
-                            <button id="saveWhiteboardBtn" (click)="onSaveWhiteboard()" class="px-2 py-1 bg-primary hover:bg-blue-600 text-white rounded text-xs flex items-center" title="Save">
-                                <i class="fas fa-download mr-1"></i>Save
-                            </button>
-                            <button id="exportPDFBtn" (click)="onExportPDF()" class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs flex items-center" title="Export PDF">
-                                <i class="fas fa-file-pdf mr-1"></i>PDF
-                            </button>
-                        </div>
-                        <button #exitWhiteboardFullscreen (click)="onExitWhiteboard()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm flex items-center flex-shrink-0">
-                            <i class="fas fa-times mr-1.5"></i>Exit
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mobile Layout -->
-            <div class="sm:hidden">
-                <!-- Top Row: Essential Tools & Exit -->
-                <div class="px-3 py-2 flex items-center justify-between gap-2 border-b border-gray-300">
-                    <!-- Tools Scroll -->
-                    <div class="flex-1 overflow-x-auto mobile-toolbar-scroll">
-                        <div class="flex items-center gap-2 min-w-max">
-                            <button id="penToolMobile" (click)="selectTool('penToolMobile')" [class.border-blue-500]="currentTool() === 'pen'" [class.border-2]="currentTool() === 'pen'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Pen">
-                                <i [class.text-blue-600]="currentTool() === 'pen'" [class.text-gray-700]="currentTool() !== 'pen'" class="fas fa-pen"></i>
-                            </button>
-                            <button id="highlighterToolMobile" (click)="selectTool('highlighterToolMobile')" [class.border-blue-500]="currentTool() === 'highlighter'" [class.border-2]="currentTool() === 'highlighter'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Highlighter">
-                                <i [class.text-blue-600]="currentTool() === 'highlighter'" [class.text-gray-700]="currentTool() !== 'highlighter'" class="fas fa-highlighter"></i>
-                            </button>
-                            <button id="eraserToolMobile" (click)="selectTool('eraserToolMobile')" [class.border-blue-500]="currentTool() === 'eraser'" [class.border-2]="currentTool() === 'eraser'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Eraser">
-                                <i [class.text-blue-600]="currentTool() === 'eraser'" [class.text-gray-700]="currentTool() !== 'eraser'" class="fas fa-eraser"></i>
-                            </button>
-                            <button id="shapeToolMobile" (click)="selectTool('shapeToolMobile')" [class.border-blue-500]="currentTool() === 'rectangle'" [class.border-2]="currentTool() === 'rectangle'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Rectangle">
-                                <i [class.text-blue-600]="currentTool() === 'rectangle'" [class.text-gray-700]="currentTool() !== 'rectangle'" class="fas fa-square"></i>
-                            </button>
-                            <button id="circleToolMobile" (click)="selectTool('circleToolMobile')" [class.border-blue-500]="currentTool() === 'circle'" [class.border-2]="currentTool() === 'circle'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Circle">
-                                <i [class.text-blue-600]="currentTool() === 'circle'" [class.text-gray-700]="currentTool() !== 'circle'" class="far fa-circle"></i>
-                            </button>
-                            <button id="arrowToolMobile" (click)="selectTool('arrowToolMobile')" [class.border-blue-500]="currentTool() === 'arrow'" [class.border-2]="currentTool() === 'arrow'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Arrow">
-                                <i [class.text-blue-600]="currentTool() === 'arrow'" [class.text-gray-700]="currentTool() !== 'arrow'" class="fas fa-arrow-right"></i>
-                            </button>
-                            <button id="lineToolMobile" (click)="selectTool('lineToolMobile')" [class.border-blue-500]="currentTool() === 'line'" [class.border-2]="currentTool() === 'line'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Line">
-                                <i [class.text-blue-600]="currentTool() === 'line'" [class.text-gray-700]="currentTool() !== 'line'" class="fas fa-minus"></i>
-                            </button>
-                            <button id="textToolMobile" (click)="selectTool('textToolMobile')" [class.border-blue-500]="currentTool() === 'text'" [class.border-2]="currentTool() === 'text'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Text">
-                                <i [class.text-blue-600]="currentTool() === 'text'" [class.text-gray-700]="currentTool() !== 'text'" class="fas fa-font"></i>
-                            </button>
-                            <button id="imageToolMobile" (click)="selectTool('imageToolMobile')" [class.border-blue-500]="currentTool() === 'image'" [class.border-2]="currentTool() === 'image'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Image">
-                                <i [class.text-blue-600]="currentTool() === 'image'" [class.text-gray-700]="currentTool() !== 'image'" class="fas fa-image"></i>
-                            </button>
-                            <input #imageUploadMobile type="file" (change)="onImageUpload($event)" accept="image/*" class="hidden">
-                        </div>
-                    </div>
-                    <button #exitWhiteboardFullscreenMobile (click)="onExitWhiteboard()" class="p-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <!-- Collapsible Sections -->
-                <!-- Color & Size Section -->
-                <div class="border-b border-gray-300">
-                    <button id="toggleColorSizeMobile" (click)="toggleCollapsible('colorSizePanelMobile', 'colorSizeChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-palette text-gray-700"></i>
-                            <span class="text-sm font-medium text-gray-700">Color &amp; Size</span>
-                        </div>
-                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="colorSizeChevron"></i>
-                    </button>
-                    <div id="colorSizePanelMobile" class="hidden px-3 py-2 border-t border-gray-200">
-                        <div class="flex items-center gap-3">
-                            <!-- Color Picker -->
-                            <div class="flex items-center gap-2 bg-white rounded-lg px-2 py-2 border border-gray-300">
-                                <input type="color" [value]="currentColor()" (input)="onColorChange($any($event.target).value)" class="w-10 h-10 rounded border-0 cursor-pointer p-0" style="appearance: none; -webkit-appearance: none;">
-                                <div class="flex space-x-1.5">
-                                    <button (click)="onColorChange('#000000')" [class.active]="currentColor() === '#000000'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-black" title="Black"></button>
-                                    <button (click)="onColorChange('#ef4444')" [class.active]="currentColor() === '#ef4444'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-red-500" title="Red"></button>
-                                    <button (click)="onColorChange('#3b82f6')" [class.active]="currentColor() === '#3b82f6'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-blue-500" title="Blue"></button>
-                                    <button (click)="onColorChange('#10b981')" [class.active]="currentColor() === '#10b981'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-green-500" title="Green"></button>
-                                </div>
-                                <button class="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded" id="moreColorsBtnMobile" title="More Colors">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </button>
-                            </div>
-                            <!-- Additional Colors (Hidden by default) -->
-                            <div id="additionalColorsMobile" class="hidden flex items-center gap-1.5">
-                                <button (click)="onColorChange('#eab308')" [class.active]="currentColor() === '#eab308'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-yellow-500" title="Yellow"></button>
-                                <button (click)="onColorChange('#a855f7')" [class.active]="currentColor() === '#a855f7'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-purple-500" title="Purple"></button>
-                                <button (click)="onColorChange('#ec4899')" [class.active]="currentColor() === '#ec4899'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-pink-500" title="Pink"></button>
-                            </div>
-                            <!-- Line Width -->
-                            <div class="flex-1 bg-white rounded-lg px-3 py-2 border border-gray-300 flex items-center gap-2">
-                                <label class="text-xs text-gray-700 font-medium">Size:</label>
-                                <input type="range" [value]="currentLineWidth()" (input)="onLineWidthChange(+$any($event.target).value)" min="1" max="30" class="flex-1">
-                                <span class="text-xs text-gray-700 font-semibold w-8 text-center">{{ currentLineWidth() }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Style Options Section -->
-                <div class="border-b border-gray-300">
-                    <button id="toggleStyleOptionsMobile" (click)="toggleCollapsible('styleOptionsPanelMobile', 'styleOptionsChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-sliders-h text-gray-700"></i>
-                            <span class="text-sm font-medium text-gray-700">Style Options</span>
-                        </div>
-                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="styleOptionsChevron"></i>
-                    </button>
-                    <div id="styleOptionsPanelMobile" class="hidden px-3 py-2 border-t border-gray-200 space-y-2">
-                        <div class="flex items-center gap-2">
-                            <!-- Fill Toggle -->
-                            <button id="fillToggleMobile" (click)="onToggleFill()" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Fill Shapes">
-                                <i class="fas fa-fill-drip text-gray-700"></i>
-                                <span class="text-xs text-gray-700 font-medium">Fill: </span>
-                                <span class="text-xs text-gray-700 font-semibold">{{ getFillStatus() }}</span>
-                            </button>
-                            <!-- Line Style -->
-                            <div class="flex-1 bg-white rounded-lg px-2 py-2 border border-gray-300 flex items-center justify-center gap-2">
-                                <span class="text-xs text-gray-700 font-medium">Style:</span>
-                                <div class="flex items-center gap-1">
-                                    <button id="lineStyleSolidMobile" (click)="onLineStyleChange('solid')" [class.active]="lineStyle() === 'solid'" class="px-2 py-1 hover:bg-gray-100 rounded line-style-btn" title="Solid">
-                                        <div class="w-6 h-0.5 bg-gray-700"></div>
-                                    </button>
-                                    <button id="lineStyleDashedMobile" (click)="onLineStyleChange('dashed')" [class.active]="lineStyle() === 'dashed'" class="px-2 py-1 hover:bg-gray-100 rounded line-style-btn" title="Dashed">
-                                        <div class="w-6 h-0.5 border-t border-dashed border-gray-700"></div>
-                                    </button>
-                                    <button id="lineStyleDottedMobile" (click)="onLineStyleChange('dotted')" [class.active]="lineStyle() === 'dotted'" class="px-2 py-1 hover:bg-gray-100 rounded line-style-btn" title="Dotted">
-                                        <div class="w-6 h-1 flex space-x-0.5 justify-center">
-                                            <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                            <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                            <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <!-- Background Color -->
-                            <select (change)="onBackgroundColorChange($any($event.target).value)" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs">
-                                <option value="#ffffff">White BG</option>
-                                <option value="#f9fafb">Gray BG</option>
-                                <option value="#fef3c7">Yellow BG</option>
-                                <option value="#dbeafe">Blue BG</option>
-                                <option value="#fce7f3">Pink BG</option>
-                                <option value="#e0e7ff">Purple BG</option>
-                                <option value="#d1fae5">Green BG</option>
-                            </select>
-                            <!-- Grid Toggle -->
-                            <button id="gridToggleMobile" (click)="onToggleGridVisible()" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Toggle Grid">
-                                <i class="fas fa-th text-gray-700"></i>
-                                <span class="text-xs text-gray-700 font-medium">Grid: </span>
-                                <span class="text-xs text-gray-700 font-semibold">{{ getGridStatus() }}</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Zoom Controls Section -->
-                <div class="border-b border-gray-300">
-                    <button id="toggleZoomMobile" (click)="toggleCollapsible('zoomPanelMobile', 'zoomChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-search-plus text-gray-700"></i>
-                            <span class="text-sm font-medium text-gray-700">Zoom</span>
-                        </div>
-                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="zoomChevron"></i>
-                    </button>
-                    <div id="zoomPanelMobile" class="hidden px-3 py-2 border-t border-gray-200">
-                        <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-gray-300">
-                            <button id="zoomOutMobile" (click)="onZoomOut()" class="p-2 hover:bg-gray-100 rounded" title="Zoom Out">
-                                <i class="fas fa-search-minus text-gray-700"></i>
-                            </button>
-                            <span class="flex-1 text-center text-xs text-gray-700 font-semibold">{{ getZoomLevel() }}</span>
-                            <button id="zoomInMobile" (click)="onZoomIn()" class="p-2 hover:bg-gray-100 rounded" title="Zoom In">
-                                <i class="fas fa-search-plus text-gray-700"></i>
-                            </button>
-                            <button id="zoomResetMobile" (click)="onZoomReset()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-xs text-gray-700 font-medium" title="Reset">
-                                Reset
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actions Section -->
-                <div class="border-b border-gray-300">
-                    <button id="toggleActionsMobile" (click)="toggleCollapsible('actionsPanelMobile', 'actionsChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-history text-gray-700"></i>
-                            <span class="text-sm font-medium text-gray-700">History &amp; Actions</span>
-                        </div>
-                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="actionsChevron"></i>
-                    </button>
-                    <div id="actionsPanelMobile" class="hidden px-3 py-2 border-t border-gray-200 flex items-center gap-2">
-                        <button id="undoBtnMobile" (click)="onUndo()" class="flex-1 px-3 py-2.5 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Undo">
-                            <i class="fas fa-undo text-gray-700"></i>
-                            <span class="text-xs text-gray-700 font-medium">Undo</span>
-                        </button>
-                        <button id="redoBtnMobile" (click)="onRedo()" class="flex-1 px-3 py-2.5 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Redo">
-                            <i class="fas fa-redo text-gray-700"></i>
-                            <span class="text-xs text-gray-700 font-medium">Redo</span>
-                        </button>
-                        <button id="clearBtnMobile" (click)="onClear()" class="flex-1 px-3 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center justify-center gap-2" title="Clear">
-                            <i class="fas fa-trash"></i>
-                            <span class="text-xs font-medium">Clear</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Save & Export Section -->
-                <div class="border-b border-gray-300">
-                    <button id="toggleSaveExportMobile" (click)="toggleCollapsible('saveExportPanelMobile', 'saveExportChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-download text-gray-700"></i>
-                            <span class="text-sm font-medium text-gray-700">Save &amp; Export</span>
-                        </div>
-                        <i class="fas fa-chevron-down text-gray-500 transition-transform" id="saveExportChevron"></i>
-                    </button>
-                    <div id="saveExportPanelMobile" class="hidden px-3 py-2 border-t border-gray-200 flex items-center gap-2">
-                        <button id="saveWhiteboardBtnMobile" (click)="onSaveWhiteboard()" class="flex-1 px-3 py-2.5 bg-primary hover:bg-blue-600 text-white rounded-lg flex items-center justify-center gap-2" title="Save">
-                            <i class="fas fa-download"></i>
-                            <span class="text-xs font-medium">Save</span>
-                        </button>
-                        <button id="exportPDFBtnMobile" (click)="onExportPDF()" class="flex-1 px-3 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-2" title="Export PDF">
-                            <i class="fas fa-file-pdf"></i>
-                            <span class="text-xs font-medium">Export PDF</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Canvas Container -->
-        <div #canvasContainer class="flex-1 overflow-hidden bg-gray-100" style="position: relative;">
-            <div #canvasWrapper style="position: relative; width: 0px; height: 0px; transform-origin: center center; transform: scale(1);">
-                <canvas #whiteboardCanvas (mousedown)="onCanvasMouseDown($event)" (mousemove)="onCanvasMouseMove($event)" (mouseup)="onCanvasMouseUp($event)" (mouseleave)="onCanvasMouseLeave()" (touchstart)="onCanvasMouseDown($event)" (touchmove)="onCanvasMouseMove($event)" (touchend)="onCanvasMouseUp($event)" class="bg-white cursor-crosshair" style="width: 100%; height: 100%; display: block; background-color: rgb(255, 255, 255);" width="0" height="0"></canvas>
-                <!-- Grid Overlay -->
-                <canvas #gridCanvas style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.3;" width="0" height="0"></canvas>
-            </div>
-        </div>
-    </div>
+   @if(whiteboardOpen()) {
+    <app-white-board (onExitWhiteboard)="whiteboardOpen.set(false)"></app-white-board>
+   }
     <div class="sticky bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 px-2 sm:px-4 md:px-6 py-2 sm:py-4 pb-safe z-40" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
         <div class="flex items-center justify-between max-w-7xl mx-auto flex-wrap gap-2">
             <!-- Left Controls -->
             <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center sm:justify-start">
-                <button #toggleMic (click)="onToggleMic()" [class.bg-green-600]="micOn()" [class.hover:bg-green-700]="micOn()" [class.bg-red-600]="!micOn()" [class.hover:bg-red-700]="!micOn()" class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
-                    <i [class.fa-microphone]="micOn()" [class.fa-microphone-slash]="!micOn()" class="text-sm sm:text-base"></i>
+                <button #toggleMic (click)="onToggleMic()" [class.bg-green-600]="currentUserControls().micOn" [class.hover:bg-green-700]="currentUserControls().micOn" [class.bg-red-600]="!currentUserControls().micOn" [class.hover:bg-red-700]="!currentUserControls().micOn" class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
+                    <i [class.fa-microphone]="currentUserControls().micOn" [class.fa-microphone-slash]="!currentUserControls().micOn" class="fas text-sm sm:text-base"></i>
                 </button>
-                <button #toggleVideo (click)="onToggleVideo()" [class.bg-green-600]="videoOn()" [class.hover:bg-green-700]="videoOn()" [class.bg-red-600]="!videoOn()" [class.hover:bg-red-700]="!videoOn()" class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
-                    <i [class.fa-video]="videoOn()" [class.fa-video-slash]="!videoOn()" class="text-sm sm:text-base"></i>
+                <button #toggleVideo (click)="onToggleVideo()" [class.bg-green-600]="currentUserControls().videoOn" [class.hover:bg-green-700]="currentUserControls().videoOn" [class.bg-red-600]="!currentUserControls().videoOn" [class.hover:bg-red-700]="!currentUserControls().videoOn" class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
+                    <i [class.fa-video]="currentUserControls().videoOn" [class.fa-video-slash]="!currentUserControls().videoOn" class="fas text-sm sm:text-base"></i>
                 </button>
                 <button id="toggleScreenShare" class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-700 hover:bg-gray-600 text-white rounded-full flex items-center justify-center transition flex-shrink-0 hidden sm:flex">
                     <i class="fas fa-desktop text-sm sm:text-base"></i>
