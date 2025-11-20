@@ -3,6 +3,7 @@ import { RouterLink } from "@angular/router";
 import { ProfileService } from "../../../shared/services/profile.service";
 import { CommonModule } from "@angular/common";
 import { User, UserRole } from "../../../shared";
+import { environment } from "../../../../environments/environment";
 
 @Component({
     imports: [ CommonModule, RouterLink],
@@ -12,6 +13,7 @@ import { User, UserRole } from "../../../shared";
     providers: [ProfileService]
 })
 export class ProfileView implements OnInit {
+    assetsUrl = environment.assetsUrl;
     profile = signal<User | null>(null);
     readonly UserRole = UserRole;
 

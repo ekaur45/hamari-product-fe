@@ -7,7 +7,7 @@
             <div class="flex flex-col items-center mb-4">
                 <div class="relative">
                     @if(profile()?.details?.profileImage) {
-                    <img [src]="'http://localhost:8080'+ profile()?.details?.profileImage" alt="Profile Image" class="w-24 h-24 rounded-full object-cover">
+                    <img [src]="assetsUrl + profile()?.details?.profileImage" alt="Profile Image" class="w-24 h-24 rounded-full object-cover">
                     } @else {
                     <div
                         class="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-semibold">

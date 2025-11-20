@@ -11,6 +11,7 @@ import { environment } from "../../../../environments/environment";
     imports: [CommonModule]
 })
 export class ProfilePhoto {
+    class = input<string | null>(null);
     user = input<User | null>(null);
     readonly assetsUrl = environment.assetsUrl;
     profileImage = signal<string | null>(null);
