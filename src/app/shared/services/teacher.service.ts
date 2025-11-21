@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { Teacher, CreateTeacherDto, UpdateTeacherDto, PaginatedApiResponse, CreateTeacherDirectDto, TeacherDirectResponse, TeacherListDto } from '../models';
+import { Teacher, CreateTeacherDto, UpdateTeacherDto, PaginatedApiResponse, CreateTeacherDirectDto, TeacherDirectResponse, TeacherListDto, Class, Subject } from '../models';
 import TeacherBooking from '../models/teacher.interface';
 
 /**
@@ -61,6 +61,19 @@ export class TeacherService {
   }
   getTeacherBookingById(bookingId: string): Observable<TeacherBooking> {
     return this.apiService.get<TeacherBooking>(API_ENDPOINTS.TEACHERS.BY_BOOKING(bookingId)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  getTeacherClasses(teacherId: string): Observable<Class[]> {
+    return this.apiService.get<Class[]>(API_ENDPOINTS.TEACHERS.CLASSES(teacherId)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+  getTeacherSubjects(teacherId:string): Observable<Subject[]> {
+    return this.apiService.get<Subject[]>(API_ENDPOINTS.TEACHERS.SUBJECTS(teacherId)).pipe(
       map(r => r.data),
       catchError(e => throwError(() => e))
     );

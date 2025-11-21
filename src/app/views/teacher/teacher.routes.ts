@@ -2,6 +2,7 @@ import { Routes } from "@angular/router";
 import { TeacherDashboard } from "./teacher-dashboard/teacher-dashboard";
 import TeacherSettings from "./teacher-settings/teacher-settings";
 import TeacherSchedule from "./teacher-schedule/teacher-schedule";
+import TeacherClass from "./teacher-class/teacher-class";
 
 export const teacherRoutes: Routes = [
     {
@@ -20,5 +21,9 @@ export const teacherRoutes: Routes = [
     {
         path: 'schedule',
         component: TeacherSchedule
+    },
+    {
+        path: 'class',
+        component: TeacherClass
     }
 ];

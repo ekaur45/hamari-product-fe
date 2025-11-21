@@ -1,25 +1,16 @@
 import { Routes } from '@angular/router';
-import { MainLayout } from './components/layouts/main/main.layout';
-import { AuthLayout } from './components/layouts/auth/auth.layout';
-
-import { Login } from './views/auth/login/login';
-import { Register } from './views/auth/register/register';
-import { DummyLogin } from './views/auth/dummy-login/dummy-login';
 import { AuthGuard, RoleGuard } from './shared/guards/auth.guard';
-import { UserRole } from './shared/models';
-import { Dashboard } from './views/dashboard/dashboard';
-import ClassRoom from './views/class-room/class-room';
-import { TestCall } from './views/test-call/test-call';
+import { UserRole } from './shared/models/user.interface';
 
 export const routes: Routes = [
     {
         path: '',
-        component: MainLayout,
+        loadComponent: () => import('./components/layouts/main/main.layout').then(m => m.MainLayout),
         canActivate: [ AuthGuard ],
         children: [
             {
                 path: '',
-                component: Dashboard
+                loadComponent: () => import('./views/dashboard/dashboard').then(m => m.Dashboard)
             },
             {
                 path: 'admin',
@@ -49,10 +40,6 @@ export const routes: Routes = [
                 canActivate: [ AuthGuard, RoleGuard],
                 data: { roles: [UserRole.TEACHER] },
                 loadChildren: () => import('./views/teacher/teacher.routes').then(m => m.teacherRoutes)
-            },
-            {
-                path: 'chat',
-                component: TestCall
             }
             
         ]   
@@ -60,11 +47,11 @@ export const routes: Routes = [
     },
     {
         path:':bookingId/join',
-        component: ClassRoom
+        loadComponent: () => import('./views/class-room/class-room').then(m => m.default)
     },
     {
         path: 'auth',
-        component: AuthLayout,
+        loadComponent: () => import('./components/layouts/auth/auth.layout').then(m => m.AuthLayout),
         children: [
             {
                 path: '',
@@ -73,15 +60,15 @@ export const routes: Routes = [
             },
             {
                 path: 'login',
-                component: Login
+                loadComponent: () => import('./views/auth/login/login').then(m => m.Login)
             },
             {
                 path: 'register',
-                component: Register
+                loadComponent: () => import('./views/auth/register/register').then(m => m.Register)
             },
             {
                 path: 'dummy-login',
-                component: DummyLogin
+                loadComponent: () => import('./views/auth/dummy-login/dummy-login').then(m => m.DummyLogin)
             }
         ]
     },

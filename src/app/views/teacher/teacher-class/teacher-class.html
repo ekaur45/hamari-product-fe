@@ -1,0 +1,90 @@
+<!-- Page Header Card -->
+<div
+    class="bg-white rounded-lg shadow p-6 border border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between">
+    <h1 class="text-2xl font-bold text-gray-900">My Classes</h1>
+    <button
+        (click)="onAddNewClass()"
+        class="px-5 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed shadow-sm text-white shadow-lg hover:shadow-xl bg-primary hover:bg-orange-600">
+        <em class="fas fa-plus"></em>
+        <span>Add New Class</span>
+    </button>
+</div>
+<!-- Classes List -->
+<div class="mt-4">
+    @if(isLoading()) {
+        <div class="flex items-center justify-center h-full">
+            <div class="text-center">
+                <i class="fas fa-spinner fa-spin text-primary text-3xl mb-3"></i>
+                <p class="text-gray-500 text-sm">Loading classes...</p>
+            </div>
+        </div>
+    } @else {
+    @if(classes().length > 0) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @for(class of classes(); track class.id) {
+                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">{{class.name}}</h3>
+                    <p class="text-gray-600 text-sm">{{class.description}}</p>
+                </div>
+            }
+        </div>
+    } @else {
+            <div class="flex items-center justify-center min-h-[400px] py-12">
+                <div class="text-center max-w-md px-4">
+                    <div class="mb-6">
+                        <i class="fas fa-chalkboard-teacher text-gray-300 text-6xl mb-4"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">No classes yet</h3>
+                    <p class="text-gray-500 text-sm mb-6 leading-relaxed">
+                        Get started by creating your first class. Organize your students and manage your teaching schedule all in one place.
+                    </p>
+                    <button
+                        (click)="onAddNewClass()"
+                        class="px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all disabled:cursor-not-allowed shadow-md text-white bg-primary hover:bg-orange-600 hover:shadow-lg transform hover:scale-105 mx-auto">
+                        <em class="fas fa-plus"></em>
+                        <span>Add New Class</span>
+                    </button>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<!-- Add Class Dialog -->
+@if (showAddClassDialog()) {
+    <p-dialog 
+        [(visible)]="showAddClassDialog" 
+        [modal]="true" 
+        [closable]="true"
+        [draggable]="false"
+        [resizable]="false"
+        styleClass="w-[95vw] sm:w-full max-w-4xl"
+        [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+        [style]="{width: '95vw', maxWidth: '56rem'}"
+        (onHide)="onDialogClose()">
+        <ng-template pTemplate="header">
+            <div class="flex items-center justify-between w-full pr-2">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                        <i class="fas fa-chalkboard-teacher text-lg sm:text-xl"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1">
+                            Create New Class
+                        </h2>
+                        <p class="text-sm text-gray-500">Fill in the details to create a new class</p>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+        
+        <app-add-class 
+            [teacherId]="currentUser()?.id || ''"
+            (onClassAdded)="onClassAdded($event)"
+            (onCancel)="onDialogClose()">
+        </app-add-class>
+    </p-dialog>
+}
+
+<!-- Toast Messages -->
+<p-toast></p-toast>
