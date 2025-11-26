@@ -69,7 +69,9 @@ export const API_ENDPOINTS = {
     BOOKINGS: (teacherId: string) => `/teachers/${teacherId}/bookings`,
     BY_BOOKING: (bookingId: string) => `/teachers/booking/${bookingId}`,
     CLASSES: (teacherId: string) => `/teachers/${teacherId}/classes`,
-    SUBJECTS: (teacherId: string) => `/teachers/${teacherId}/subjects`
+    CREATE_CLASS: (teacherId: string) => `/teachers/${teacherId}/class`,
+    SUBJECTS: (teacherId: string) => `/teachers/${teacherId}/subjects`,
+    DELETE_CLASS: (teacherId: string, classId: string) => `/teachers/${teacherId}/class/${classId}`
   },
 
   // Classes

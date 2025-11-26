@@ -65,10 +65,6 @@ export const routes: Routes = [
             {
                 path: 'register',
                 loadComponent: () => import('./views/auth/register/register').then(m => m.Register)
-            },
-            {
-                path: 'dummy-login',
-                loadComponent: () => import('./views/auth/dummy-login/dummy-login').then(m => m.DummyLogin)
             }
         ]
     },

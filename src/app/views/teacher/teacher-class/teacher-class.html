@@ -19,12 +19,75 @@
             </div>
         </div>
     } @else {
-    @if(classes().length > 0) {
+    @if(classes() && classes().length > 0) {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @for(class of classes(); track class.id) {
-                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">{{class.name}}</h3>
-                    <p class="text-gray-600 text-sm">{{class.description}}</p>
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden group">
+                    <!-- Header Section -->
+                    <div class="bg-gradient-to-r from-primary/10 to-primary/5 px-6 py-4 border-b border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-1">{{class.subject.name}}</h3>
+                        @if(class.subject.description) {
+                            <p class="text-gray-600 text-sm line-clamp-2">{{class.subject.description}}</p>
+                        }
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="p-6 space-y-4">
+                        <!-- Schedule Days -->
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                <i class="fas fa-calendar-week text-primary text-sm"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Schedule</p>
+                                <p class="text-sm text-gray-700 font-medium">{{class.scheduleDays?.join(', ')}}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Time -->
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                <i class="fas fa-clock text-primary text-sm"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Time</p>
+                                <p class="text-sm text-gray-700">{{class.startTime}} - {{class.endTime}}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">{{class.duration}} minutes</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Capacity -->
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                <i class="fas fa-users text-primary text-sm"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Capacity</p>
+                                <p class="text-sm text-gray-700 font-medium">{{class.classBookings.length}}/{{class.maxStudents}} students</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer Actions -->
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
+                        <button 
+                            (click)="onDeleteClass(class, $event)"
+
+                            class="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-600/10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-trash mr-2"></i>
+                            Delete
+                        </button>
+                        <button 
+                            class="px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-eye mr-2"></i>
+                            View
+                        </button>
+                        <button 
+                            class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit
+                        </button>
+                    </div>
                 </div>
             }
         </div>
@@ -58,7 +121,7 @@
         [closable]="true"
         [draggable]="false"
         [resizable]="false"
-        styleClass="w-[95vw] sm:w-full max-w-4xl"
+        styleClass="w-[95vw] sm:w-full max-w-4xl overflow-y-auto max-h-[90vh]"
         [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
         [style]="{width: '95vw', maxWidth: '56rem'}"
         (onHide)="onDialogClose()">

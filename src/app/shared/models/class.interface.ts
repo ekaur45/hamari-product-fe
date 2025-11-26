@@ -3,25 +3,17 @@
  */
 export interface Class {
   id: string;
-  name: string;
-  description?: string;
-  academyId: string;
-  teacherId: string;
-  subject: string;
-  grade: string;
-  section?: string;
+  teacher: Teacher;
+  subject: Subject;
+  startTime: string;
+  endTime: string;
+  duration: number;
   maxStudents: number;
   startDate: Date;
   endDate: Date;
-  schedule: ClassSchedule;
-  meetingLink?: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  academy?: Academy;
-  teacher?: Teacher;
-  enrollments?: ClassEnrollment[];
-  performances?: Performance[];
+  scheduleDays: string[];
+  classBookings: ClassBooking[];
+
 }
 
 /**
@@ -63,17 +55,14 @@ export enum EnrollmentStatus {
  * Create Class DTO
  */
 export interface CreateClassDto {
-  name: string;
-  description?: string;
-  academyId: string;
   teacherId: string;
-  subject: string;
-  grade: string;
-  section?: string;
+  subjectId: string;
+  price: number;
+  startTime: string;
+  endTime: string;
+  duration: number;
   maxStudents: number;
-  startDate: Date;
-  endDate: Date;
-  schedule: ClassSchedule;
+  schedule: string[];
 }
 
 /**
@@ -111,4 +100,5 @@ export interface UpdateClassEnrollmentDto {
 // Re-export related interfaces
 import { Academy } from './academy.interface';
 import { Teacher } from './teacher.interface';
-import { Student } from './student.interface';
+import { ClassBooking, Student } from './student.interface';import { Subject } from './subject.interface';
+

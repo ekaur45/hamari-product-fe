@@ -1,0 +1,30 @@
+.p-confirmdialog-accept-button {
+    background-color: var(--color-danger) !important;
+    color: white !important;
+    border-color: var(--color-danger) !important;
+    border-radius: 0.5rem !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.05em !important;
+    transition: all 0.3s ease !important;
+    &:hover {
+        background-color: var(--color-danger) !important;
+        color: white !important;
+    }
+}
+.p-confirmdialog-reject-button {
+    background-color: white !important;
+    color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    border-radius: 0.5rem !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.05em !important;
+    transition: all 0.3s ease !important;
+    &:hover {
+        background-color: var(--color-primary) !important;
+        color: white !important;
+    }
+}

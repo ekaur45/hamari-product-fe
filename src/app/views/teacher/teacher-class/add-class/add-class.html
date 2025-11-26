@@ -37,51 +37,8 @@
             }
         </div>
 
-
-        <!-- Start Date and End Date Row -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Start Date -->
-            <div class="flex flex-col gap-2">
-                <label for="startDate" class="text-sm font-medium text-gray-700">
-                    Start Date <span class="text-red-500">*</span>
-                </label>
-                <p-datepicker
-                    formControlName="startDate"
-                    class="w-full"
-                    [ngClass]="{'border-red-500': addClassForm.get('startDate')?.errors && addClassForm.get('startDate')?.touched}"
-                />
-                <input 
-                    type="date" 
-                    id="startDate" 
-                    formControlName="startDate" 
-                    class="app-input-field"
-                    [ngClass]="{'border-red-500': addClassForm.get('startDate')?.errors && addClassForm.get('startDate')?.touched}"
-                />
-                @if(addClassForm.get('startDate')?.errors && addClassForm.get('startDate')?.touched) {
-                    <small class="text-red-500 text-xs">{{ getFieldError('startDate') }}</small>
-                }
-            </div>
-
-            <!-- End Date -->
-            <div class="flex flex-col gap-2">
-                <label for="endDate" class="text-sm font-medium text-gray-700">
-                    End Date <span class="text-red-500">*</span>
-                </label>
-                <input 
-                    type="date" 
-                    id="endDate" 
-                    formControlName="endDate" 
-                    class="app-input-field"
-                    [ngClass]="{'border-red-500': addClassForm.get('endDate')?.errors && addClassForm.get('endDate')?.touched}"
-                />
-                @if(addClassForm.get('endDate')?.errors && addClassForm.get('endDate')?.touched) {
-                    <small class="text-red-500 text-xs">{{ getFieldError('endDate') }}</small>
-                }
-            </div>
-        </div>
-
         <!-- Schedule Days -->
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2 mb-4">
             <label class="text-sm font-medium text-gray-700">
                 Schedule Days <span class="text-red-500">*</span>
             </label>
@@ -106,7 +63,7 @@
         <!-- Start Time and End Time Row -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Start Time -->
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-2 col-span-1">
                 <label for="startTime" class="text-sm font-medium text-gray-700">
                     Start Time <span class="text-red-500">*</span>
                 </label>
@@ -114,29 +71,50 @@
                     type="time" 
                     id="startTime" 
                     formControlName="startTime" 
-                    class="app-input-field"
+                    class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition"
                     [ngClass]="{'border-red-500': addClassForm.get('startTime')?.errors && addClassForm.get('startTime')?.touched}"
                 />
                 @if(addClassForm.get('startTime')?.errors && addClassForm.get('startTime')?.touched) {
                     <small class="text-red-500 text-xs">{{ getFieldError('startTime') }}</small>
                 }
             </div>
-
-            <!-- End Time -->
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-2 col-span-1">
                 <label for="endTime" class="text-sm font-medium text-gray-700">
                     End Time <span class="text-red-500">*</span>
                 </label>
-                <input 
+                <label 
                     type="time" 
                     id="endTime" 
                     formControlName="endTime" 
-                    class="app-input-field"
+                    class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition"
                     [ngClass]="{'border-red-500': addClassForm.get('endTime')?.errors && addClassForm.get('endTime')?.touched}"
-                />
-                @if(addClassForm.get('endTime')?.errors && addClassForm.get('endTime')?.touched) {
+                    >{{ calculateEndTime || '00:00 AM' }}</label>
+                <!-- @if(addClassForm.get('endTime')?.errors && addClassForm.get('endTime')?.touched) {
                     <small class="text-red-500 text-xs">{{ getFieldError('endTime') }}</small>
-                }
+                } -->
+            </div>
+
+            <!-- End Time -->
+            <div class="flex flex-col gap-2 col-span-2">
+                <label for="endTime" class="text-sm font-medium text-gray-700">
+                    Duration <span class="text-red-500">*</span>
+                </label>
+                <div class="flex flex-wrap gap-2">
+                    @for(duration of [{label: '15 minutes', value: 15}, {label: '30 minutes', value: 30}, {label: '45 minutes', value: 45}, {label: '60 minutes', value: 60}]; track duration.value) {
+                        <button type="button" class="px-4 py-2 rounded-lg font-medium text-sm bg-white text-gray-700 border-2 border-gray-300 hover:border-primary hover:text-primary transition-all"
+                        (click)="addClassForm.get('duration')?.setValue(duration.value);"
+                        [class]="addClassForm.get('duration')?.value === duration.value ? 'px-4 py-2 rounded-lg font-medium text-sm bg-primary text-primary border-2 border-primary transition-all' : 'px-4 py-2 rounded-lg font-medium text-sm bg-white text-gray-700 border-2 border-gray-300 hover:border-primary hover:text-primary transition-all'"
+                        >
+                            {{ duration.label }}
+                        </button>
+                    }
+                </div>
+                <!-- <p-select [options]="" placeholder="Select a duration"
+                formControlName="duration"
+                size="large"
+                [ngClass]="{'border-red-500': addClassForm.get('duration')?.errors && addClassForm.get('duration')?.touched}"
+                [ngClass]="{'border-red-500': addClassForm.get('duration')?.errors && addClassForm.get('duration')?.touched}"
+                ></p-select> -->
             </div>
         </div>
 

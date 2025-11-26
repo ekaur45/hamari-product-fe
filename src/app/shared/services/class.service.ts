@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { Class, CreateClassDto } from '../models';
+import { Class, CreateClassDto, PaginatedApiResponse } from '../models';
 
 /**
  * Class Service
@@ -21,6 +21,13 @@ export class ClassService {
   createClass(dto: CreateClassDto): Observable<Class> {
     return this.apiService.post<Class>(API_ENDPOINTS.CLASSES.BASE, dto).pipe(
       map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  getClasses(page: number, limit: number): Observable< PaginatedApiResponse<Class>> {
+    return this.apiService.getPaginated<Class>(API_ENDPOINTS.CLASSES.BASE, page, limit).pipe(
+      map(r => r),
       catchError(e => throwError(() => e))
     );
   }

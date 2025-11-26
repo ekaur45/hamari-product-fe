@@ -2,7 +2,7 @@ import { CommonModule } from "@angular/common";
 import { Component, OnInit, signal } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { SubjectService } from "../../../shared/services/subject.service";
-import { Subject, Teacher, TeacherService, TeacherSubject } from "../../../shared";
+import { Class, ClassService, Subject, Teacher, TeacherService, TeacherSubject } from "../../../shared";
 import { ProfilePhoto } from "../../../components/misc/profile-photo/profile-photo";
 @Component({
     selector: 'app-browse-and-book',
@@ -23,14 +23,24 @@ export default class BrowseAndBook implements OnInit{
     currentTotal = signal(0);
     currentTotalPages = signal(0);
     teachers = signal<Teacher[]>([]);
-    constructor(private subjectService: SubjectService,private readonly teacherService: TeacherService) {
+    classes = signal<Class[]>([]);
+    constructor(private subjectService: SubjectService,private readonly teacherService: TeacherService,private readonly classService: ClassService) {
         
     }
     ngOnInit(): void {
         this.getSubjects();
         this.getTeachers();
+        this.getClasses();
     }
 
+
+    getClasses(): void {
+        this.classService.getClasses(this.page(), this.limit()).subscribe((classes) => {
+            this.classes.set(classes.data);
+            this.total.set(classes.pagination.total);
+            this.totalPages.set(classes.pagination.totalPages);
+        });
+    }
     getSubjects(): void {
         this.subjectService.getSubjects(this.page(), this.limit()).subscribe((subjects) => {
             this.subjects.set(subjects.data);
