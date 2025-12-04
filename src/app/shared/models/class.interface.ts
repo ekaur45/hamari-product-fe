@@ -11,7 +11,8 @@ export interface Class {
   maxStudents: number;
   startDate: Date;
   endDate: Date;
-  scheduleDays: string[];
+  scheduleDays?: string[];
+  price: number;
   classBookings: ClassBooking[];
 
 }

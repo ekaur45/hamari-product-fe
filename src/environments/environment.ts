@@ -1,6 +1,6 @@
 export const environment = {
     production: false,
-    assetsUrl: 'https://192.168.0.105:8080',
-    apiUrl: 'https://192.168.0.105:8080/api',
-    socketUrl: 'https://192.168.0.105:8080/',
+    assetsUrl: 'https://api.taleemiyat.com',
+    apiUrl: 'https://api.taleemiyat.com/api',
+    socketUrl: 'https://api.taleemiyat.com/',
 };

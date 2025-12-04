@@ -61,6 +61,17 @@ export interface StudentScheduleDto {
   paidAmount: number;
 }
 
+export interface StudentBookingDto {
+  id: string;
+  classId: string;
+  class: Class;
+  studentId: string;
+  student: Student;
+  bookingDate: Date;
+  month: string;
+  year: number;
+  createdAt: Date;
+}
 
 
 
@@ -69,7 +80,7 @@ export interface StudentScheduleDto {
 // Re-export related interfaces
 import { AvailabilitySlot, User } from './user.interface';
 import { Academy } from './academy.interface';
-import { ClassEnrollment } from './class.interface';
+import { Class, ClassEnrollment } from './class.interface';
 import { Performance } from './performance.interface';
 import { Parent, ParentChild } from './parent-child.interface';
 import TeacherBooking, { Teacher, TeacherSubject } from './teacher.interface';

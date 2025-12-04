@@ -31,4 +31,16 @@ export class ClassService {
       catchError(e => throwError(() => e))
     );
   }
+  getClassById(id: string): Observable<Class> {
+    return this.apiService.get<Class>(API_ENDPOINTS.CLASSES.BY_ID(id)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+  bookClass(id: string, data: {month: string, year: number}): Observable<Class> {
+    return this.apiService.post<Class>(API_ENDPOINTS.CLASSES.BOOK(id), data).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
 }

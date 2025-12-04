@@ -13,7 +13,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Featured Class 1 -->
         @for (subject of subjects(); track subject.id) {
-        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition" [routerLink]="['/booking', subject.id, 'class']">
+        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition" [routerLink]="['/booking', subject.id, 'session']">
             <div class="flex items-center mb-3">
                 <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white mr-3">
                     <i class="fas fa-book"></i>
@@ -182,5 +182,44 @@
                 <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs">Featured</span>
             </div>
         </div>
+    </div>
+</div>
+<div class="mb-8">
+    <h4 class="text-xl font-semibold text-gray-900 mb-4 flex items-center justify-between">
+        <span>
+            <i class="fas fa-calendar-day text-primary mr-2"></i>
+            <span>Featured Classes</span>
+        </span>
+        <a href="javascript:void(0)" class="text-primary text-sm flex items-center">
+            <span>View All Classes</span>
+            <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+    </h4>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        @for (class of classes(); track class.id) {
+        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer" [routerLink]="['/booking', class.id, 'class']">
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white mr-3">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="flex-1">
+                    <h5 class="font-medium text-gray-900">{{class.subject.name}}</h5>
+                    <p class="text-xs text-gray-500">{{class.subject.description}}</p>
+                </div>
+            </div>
+            <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-clock mr-2 text-gray-400"></i>
+                <span>{{class.startTime}} - {{class.endTime}}</span>
+            </div>
+            <div class="flex items-center text-sm text-gray-600 mb-2">
+                <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
+                <span>{{class.scheduleDays?.join(', ') || 'No schedule'}}</span>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-gray-300">
+                <span class="text-sm font-medium text-gray-900">PKR {{class?.price ?? 1000}}/month</span>
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs">Available</span>
+            </div>
+        </div>
+        }
     </div>
 </div>

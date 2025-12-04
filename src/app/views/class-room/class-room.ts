@@ -24,32 +24,32 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
     socket!: Socket;
     bookingId = signal<string>('');
     dashboardLink = signal<string>('');
-    
+
     // Session Timer
     sessionStartTime = Date.now();
     sessionTime = signal<string>('00:00:00');
     private timerInterval?: number;
-    
+
     // Tab State
     activeTab = signal<'chat' | 'participants'>('chat');
-    
+
     // Chat
     chatInput = signal<string>('');
-    
+
     // Media Controls
     micOn = signal<boolean>(true);
     videoOn = signal<boolean>(true);
-    
+
     // Grid
     gridSize = signal<number>(4);
-    
+
     // Sidebar (Mobile)
     sidebarOpen = signal<boolean>(false);
     isMobile = signal<boolean>(false);
     // Whiteboard
     whiteboardOpen = signal<boolean>(false);
-    
-    
+
+
     booking = signal<TeacherBooking | null>(null);
     classRoomSocket = signal<ClassRoomSocket>({
         isStarted: false,
@@ -69,8 +69,8 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
     videoTrack = signal<MediaStreamTrack | null>(null);
     @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
     UserRole = UserRole;
-   
-    
+
+
     // ViewChild References
     @ViewChild('sessionTimeEl') sessionTimeEl?: ElementRef<HTMLSpanElement>;
     @ViewChild('chatTab') chatTab?: ElementRef<HTMLButtonElement>;
@@ -92,11 +92,11 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
     @ViewChild('videoView') videoView?: ElementRef<HTMLDivElement>;
     @ViewChild('toggleWhiteboard') toggleWhiteboardBtn?: ElementRef<HTMLButtonElement>;
 
-    
-    
-    
 
-    
+
+
+
+
     constructor(private route: ActivatedRoute, private authService: AuthService, private router: Router, private teacherService: TeacherService) {
         this.dashboardLink.set(ROUTES_MAP[this.authService.getCurrentUser()!.role]['SCHEDULE']);
         this.route.params.subscribe(params => {
@@ -106,7 +106,7 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
     }
 
     ngOnInit(): void {
-        
+
         this.getBookingDetails();
         this.checkMicAndCameraStatus().then((status) => {
             console.log('Mic and camera status:', status);
@@ -114,13 +114,12 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
         navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
             const audioTrack = stream.getAudioTracks()[0];
             const videoTrack = stream.getVideoTracks()[0];
-          
+
             console.log('🎤 Mic muted:', audioTrack.muted);
             console.log('📷 Camera muted:', videoTrack.muted);
             console.log('🎤 Mic enabled:', audioTrack.enabled);
             console.log('📷 Camera enabled:', videoTrack.enabled);
-            debugger;
-            if(this.videoElement) {
+            if (this.videoElement) {
                 this.videoElement.nativeElement.srcObject = stream;
                 this.videoElement.nativeElement.autoplay = true;
                 this.videoElement.nativeElement.playsInline = true;
@@ -128,7 +127,7 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
                 this.videoElement.nativeElement.className = 'w-full h-full flex items-center justify-center object-cover';
                 this.videoTrack.set(videoTrack);
             }
-            if(this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
+            if (this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
                 this.classRoomSocket.set({
                     ...this.classRoomSocket(),
                     teacherControls: {
@@ -137,7 +136,7 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
                     },
                 });
             }
-            if(this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
+            if (this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
                 this.classRoomSocket.set({
                     ...this.classRoomSocket(),
                     studentControls: {
@@ -149,42 +148,42 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
         });
     }
     currentUserControls = computed<{ micOn: boolean, videoOn: boolean }>(() => {
-        if(this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
+        if (this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
             return this.classRoomSocket().teacherControls ?? { micOn: false, videoOn: false };
         }
-        if(this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
+        if (this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
             return this.classRoomSocket().studentControls ?? { micOn: false, videoOn: false };
         }
         return { micOn: false, videoOn: false };
     });
     async checkMicAndCameraStatus() {
         try {
-          const mic = await navigator.permissions.query({ name: 'microphone' });
-          const cam = await navigator.permissions.query({ name: 'camera' });
-          if(this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
-            this.classRoomSocket.set({
-                ...this.classRoomSocket(),
-                teacherControls: {
-                    micOn: mic.state === 'granted',
-                    videoOn: cam.state === 'granted',
-                },
-            });
-        }
-        if(this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
-            this.classRoomSocket.set({
-                ...this.classRoomSocket(),
-                studentControls: {
-                    micOn: mic.state === 'granted',
-                    videoOn: cam.state === 'granted',
-                },
-            });
-        }
-          console.log('🎤 Mic permission:', mic.state); // "granted", "denied", or "prompt"
-          console.log('📷 Camera permission:', cam.state);
+            const mic = await navigator.permissions.query({ name: 'microphone' });
+            const cam = await navigator.permissions.query({ name: 'camera' });
+            if (this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
+                this.classRoomSocket.set({
+                    ...this.classRoomSocket(),
+                    teacherControls: {
+                        micOn: mic.state === 'granted',
+                        videoOn: cam.state === 'granted',
+                    },
+                });
+            }
+            if (this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
+                this.classRoomSocket.set({
+                    ...this.classRoomSocket(),
+                    studentControls: {
+                        micOn: mic.state === 'granted',
+                        videoOn: cam.state === 'granted',
+                    },
+                });
+            }
+            console.log('🎤 Mic permission:', mic.state); // "granted", "denied", or "prompt"
+            console.log('📷 Camera permission:', cam.state);
         } catch (error) {
-          console.error('Permissions API not supported or error:', error);
+            console.error('Permissions API not supported or error:', error);
         }
-      }
+    }
     getBookingDetails(): void {
         this.teacherService.getTeacherBookingById(this.bookingId()).subscribe({
             next: (booking: TeacherBooking) => {
@@ -205,31 +204,31 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
         this.initializeMediaControls();
         this.initializeGridToggle();
         this.initializeSidebar();
-        
+
         this.setupClickOutsideListener();
     }
-    
+
     @HostListener('window:resize')
     onResize(): void {
         this.checkScreenSize();
     }
-    
+
     private checkScreenSize(): void {
         this.isMobile.set(window.innerWidth < 768);
     }
-    
+
     ngOnDestroy(): void {
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
         }
     }
-    
+
     // Session Timer
     private initializeSessionTimer(): void {
         this.updateTimer();
         this.timerInterval = window.setInterval(() => this.updateTimer(), 1000);
     }
-    
+
     private updateTimer(): void {
         const elapsed = Math.floor((Date.now() - this.sessionStartTime) / 1000);
         const hours = Math.floor(elapsed / 3600).toString().padStart(2, '0');
@@ -240,31 +239,31 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
             this.sessionTimeEl.nativeElement.textContent = `${hours}:${minutes}:${seconds}`;
         }
     }
-    
+
     // Tab Switching
     private initializeTabs(): void {
         // Tabs are handled via click handlers in template
     }
-    
+
     onChatTabClick(): void {
         this.activeTab.set('chat');
     }
-    
+
     onParticipantsTabClick(): void {
         this.activeTab.set('participants');
     }
-    
+
     // Chat Input
     private initializeChat(): void {
         // Chat is handled via template bindings
     }
-    
+
     onChatInputKeyPress(event: KeyboardEvent): void {
         if (event.key === 'Enter') {
             this.sendChatMessage();
         }
     }
-    
+
     sendChatMessage(): void {
         const message = this.chatInput().trim();
         if (message) {
@@ -273,26 +272,26 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
             // In a real app, this would send the message via WebSocket
         }
     }
-    
+
     // Media Controls
     private initializeMediaControls(): void {
         // Media controls are handled via click handlers
     }
-    
-  
-    
+
+
+
     // Leave Session
     leaveSession(): void {
         if (confirm('Are you sure you want to leave the session?')) {
             this.router.navigate([this.dashboardLink()]);
         }
     }
-    
+
     // Grid Toggle
     private initializeGridToggle(): void {
         // Grid toggle is handled via click handler
     }
-    
+
     onToggleGrid(): void {
         const currentSize = this.gridSize();
         const newSize = currentSize === 4 ? 1 : currentSize === 1 ? 2 : currentSize === 2 ? 3 : 4;
@@ -301,31 +300,31 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
             this.studentsGrid.nativeElement.className = `video-grid grid-${newSize}`;
         }
     }
-    
+
     // Mobile Sidebar
     private initializeSidebar(): void {
         // Sidebar is handled via click handlers
     }
-    
+
     onSidebarToggle(): void {
         this.sidebarOpen.set(true);
     }
-    
+
     onMobileSidebarClose(): void {
         this.sidebarOpen.set(false);
     }
-    
+
     onMobileChatToggle(): void {
         this.sidebarOpen.set(true);
         this.activeTab.set('chat');
     }
-    
+
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: MouseEvent): void {
         if (this.isMobile() && this.sidebarPanel && this.sidebarToggle && this.mobileChatToggle) {
             const target = event.target as HTMLElement;
-            if (!this.sidebarPanel.nativeElement.contains(target) && 
-                !this.sidebarToggle.nativeElement.contains(target) && 
+            if (!this.sidebarPanel.nativeElement.contains(target) &&
+                !this.sidebarToggle.nativeElement.contains(target) &&
                 !this.mobileChatToggle.nativeElement.contains(target)) {
                 if (this.sidebarOpen()) {
                     this.sidebarOpen.set(false);
@@ -333,59 +332,59 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
             }
         }
     }
-    
+
     private setupClickOutsideListener(): void {
         // Handled by @HostListener
     }
-    
-    
-    
-   
-     // Helper methods for template
-     getSessionTime(): string {
+
+
+
+
+    // Helper methods for template
+    getSessionTime(): string {
         return this.sessionTime();
     }
-    
+
     isChatTabActive(): boolean {
         return this.activeTab() === 'chat';
     }
-    
+
     isParticipantsTabActive(): boolean {
         return this.activeTab() === 'participants';
     }
-    
+
     isMicOn(): boolean {
         return this.micOn();
     }
-    
+
     isVideoOn(): boolean {
         return this.videoOn();
     }
     isSidebarOpen(): boolean {
         return this.sidebarOpen();
     }
-    
+
     getGridSize(): number {
         return this.gridSize();
     }
     onToggleWhiteboard(): void {
         this.whiteboardOpen.set(!this.whiteboardOpen());
     }
-    
-   
-    
-   
-    
-   
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
     onToggleMic(): void {
-        if(this.videoElement) {
+        if (this.videoElement) {
             this.videoElement.nativeElement.muted = !this.videoElement.nativeElement.muted;
         }
-        if(this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
+        if (this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
             this.classRoomSocket.set({
                 ...this.classRoomSocket(),
                 teacherControls: {
@@ -395,7 +394,7 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
                 },
             });
         }
-        if(this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
+        if (this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
             this.classRoomSocket.set({
                 ...this.classRoomSocket(),
                 studentControls: {
@@ -406,13 +405,13 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
         }
     }
     onToggleVideo(): void {
-        if(this.videoElement) {
+        if (this.videoElement) {
             this.videoTrack.set({
                 ...this.videoTrack(),
                 enabled: !this.videoTrack()?.enabled,
             } as MediaStreamTrack);
         }
-        if(this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
+        if (this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
             this.classRoomSocket.set({
                 ...this.classRoomSocket(),
                 teacherControls: {
@@ -422,7 +421,7 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
                 },
             });
         }
-        if(this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
+        if (this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
             this.classRoomSocket.set({
                 ...this.classRoomSocket(),
                 studentControls: {
@@ -431,16 +430,16 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
                 },
             });
         }
-        
+
     }
     currentUserDetails = computed<User | null | undefined>(() => {
         return this.authService.getCurrentUser();
     });
     otherParticipant = computed<Student | Teacher | null | undefined>(() => {
-        if(this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
+        if (this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
             return this.booking()?.student
         }
-        if(this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
+        if (this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
             return this.booking()?.teacher
         }
         return null;
@@ -464,16 +463,16 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
         TEACHER_JOINED_SESSION: (bookingId: string | undefined, teacherId: string | undefined) => `teacher-joined-class_${bookingId}_${teacherId}`,
     }
     private initializeListeners(): void {
-        const socketUrl = environment.socketUrl.endsWith('/') 
-            ? environment.socketUrl.slice(0, -1) 
+        const socketUrl = environment.socketUrl.endsWith('/')
+            ? environment.socketUrl.slice(0, -1)
             : environment.socketUrl;
         this.socket = io(`${socketUrl}/class-room?bookingId=${this.bookingId()}`);
         this.socket.on(this.LISTENERS.CONNECT, () => {
             console.log('✅ Connected to class room server', this.socket.id);
-            if(this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
+            if (this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
                 this.socket.emit(this.EMITTERS.STUDENT_JOINED_CLASS, { bookingId: this.bookingId(), studentId: this.authService.getCurrentUser()?.student?.id });
             }
-            if(this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
+            if (this.authService.getCurrentUser()?.role === UserRole.TEACHER) {
                 this.socket.emit(this.EMITTERS.TEACHER_JOINED_CLASS, { bookingId: this.bookingId(), teacherId: this.authService.getCurrentUser()?.teacher?.id });
             }
         });
@@ -526,8 +525,8 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
             });
             console.log('Teacher joined:', data);
         });
-     
-        
+
+
     }
     //#endregion
 }
