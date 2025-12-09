@@ -1,4 +1,4 @@
-<div class="bg-gray-900">
+<div class="bg-gray-900 grid">
     <header
         class="bg-gray-800 text-white px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between border-b border-gray-700">
         <div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
@@ -16,43 +16,32 @@
         <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
             <div class="flex items-center space-x-1 sm:space-x-2 bg-green-600 px-2 sm:px-3 py-1 rounded-lg">
                 <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                <span class="text-xs sm:text-sm font-medium">{{ classRoomSocket().isStarted ? 'LIVE' : 'NOT LIVE'
+                <span class="text-xs sm:text-sm font-medium">{{ 1==1 ? 'LIVE' : 'NOT LIVE'
                     }}</span>
             </div>
-            <div class="text-xs sm:text-sm text-gray-300" [class.hidden]="!classRoomSocket().isStarted">
+            <div class="text-xs sm:text-sm text-gray-300">
                 <i class="far fa-clock mr-1"></i>
-                <span #sessionTimeEl>{{ sessionTime() }}</span>
+                <span>{{ sessionTime() }}</span>
             </div>
         </div>
     </header>
 
-    <div class="flex flex-col md:flex-row h-[calc(100vh-64px)] overflow-hidden">
+    <div class="flex flex-col md:flex-row h-[calc(100vh-146px)] overflow-hidden">
         <!-- Main Video Area -->
         <div class="flex-1 flex flex-col p-2 sm:p-4 space-y-2 sm:space-y-4 overflow-y-auto">
             <!-- Teacher/Shared Screen Area (Main) -->
             <div class="flex-1 video-container">
                 <!-- Video View -->
-                <div #videoView [class.hidden]="whiteboardOpen()"
-                    class="w-full h-full flex items-center justify-center bg-gray-950">
+                <div #videoView class="w-full h-full flex items-center justify-center bg-gray-950">
                     <!-- Video or Screen Share -->
-                    <video #videoElement [class.hidden]="!videoTrack() || !videoTrack()?.enabled"
-                        class="w-full h-full flex items-center justify-center" autoplay playsinline muted></video>
-
-                    <div id="mainVideo" [class.hidden]="videoTrack() && videoTrack()?.enabled"
-                        class="w-full h-full flex items-center justify-center">
-                        <div class="text-center text-gray-500">
-                            <i class="fas fa-video text-4xl mb-2 opacity-50"></i>
-                            <p class="text-sm">Teacher Video</p>
-                        </div>
-                    </div>
-
+                    <video #videoElement [class.hidden]="!localStream" [srcObject]="localStream"
+                        class="w-full h-full flex items-center justify-center" autoplay playsinline muted
+                        style="transform: scaleX(-1);"></video>
                     <!-- Video Overlay Info -->
                     <div class="video-overlay">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-2">
-                                <div
-                                    class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                                    JS</div>
+                                <profile-photo [user]="currentUserDetails()"></profile-photo>
                                 <div>
                                     <p class="text-white font-medium text-sm">{{ currentUserDetails()?.firstName }} {{
                                         currentUserDetails()?.lastName }}</p>
@@ -60,30 +49,53 @@
                                         ? 'Teacher' : 'Student' }}</p>
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="px-2 py-1 bg-green-500 text-white rounded text-xs" (click)="onToggleMic()"
-                                    [class.bg-red-500]="!currentUserControls().micOn">
-                                    <i [class.fa-microphone]="currentUserControls().micOn"
-                                        [class.fa-microphone-slash]="!currentUserControls().micOn" class="fas"></i>
-                                </span>
-                                <span class="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                                    (click)="onToggleVideo()" [class.bg-red-500]="!currentUserControls().videoOn">
-                                    <i [class.fa-video]="currentUserControls().videoOn"
-                                        [class.fa-video-slash]="!currentUserControls().videoOn" class="fas"></i>
-                                </span>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Students Video Grid -->
+            @if(remoteStreams.length>0){
             <div class="bg-gray-800 rounded-lg p-3">
-                <div class="flex items-center justify-between mb-2 hidden">
+                <div class="flex items-center justify-between mb-2">
                     <h3 class="text-white font-medium text-sm">
                         <i class="fas fa-users mr-2"></i>
-                        Participants (<span id="participantCount">3</span>)
+                        Participants (<span id="participantCount">{{remoteStreams.length}}</span>)
                     </h3>
+                </div>
+
+                <div [class]="'video-grid grid-' + gridSize()">
+                    @for(s of remoteStreams;track s.stream.id){
+                    <div class="video-container aspect-video">
+                        <div class="w-full h-full flex items-center justify-center bg-gray-950">
+                            <video [appStream]="s.stream" autoplay playsinline class="remote-video">
+                            </video>
+                        </div>
+                        <div class="video-overlay">
+                            <div class="text-center text-gray-500">
+                                <i class="fas fa-user text-2xl mb-1 opacity-50"></i>
+                                <p class="text-xs">Student</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <p class="text-white text-xs font-medium">{{ otherParticipant()?.user?.firstName }} {{
+                                    otherParticipant()?.user?.lastName }}</p>
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-2 h-2 rounded-full" [ngClass]="{
+                                        'bg-green-500': getStreamController(s.stream).video,
+                                        'bg-red-500': !getStreamController(s.stream).video
+                                    }"></span>
+                                    <i class="fas fa-microphone text-xs" [ngClass]="{
+                                        'text-green-500': getStreamController(s.stream).audio,
+                                        'text-red-500': !getStreamController(s.stream).audio
+                                    }"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    }
+
+
+
                     <!-- Empty slot for grid alignment -->
                     <div class="video-container aspect-video border-2 border-dashed border-gray-600 hidden">
                         <div class="w-full h-full flex items-center justify-center">
@@ -92,237 +104,37 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Right Sidebar -->
-        <div #sidebarPanel [class.hidden]="!sidebarOpen() && isMobile()" [class.fixed]="sidebarOpen() && isMobile()"
-            [class.inset-y-0]="sidebarOpen() && isMobile()" [class.right-0]="sidebarOpen() && isMobile()"
-            [class.z-50]="sidebarOpen() && isMobile()" [class.w-80]="sidebarOpen() && isMobile()"
-            [class.shadow-2xl]="sidebarOpen() && isMobile()"
-            class="md:flex md:w-80 bg-gray-800 border-l border-gray-700 flex flex-col">
-            <!-- Mobile Toggle Button -->
-            <button #sidebarToggle (click)="onSidebarToggle()"
-                class="md:hidden fixed top-16 right-4 z-50 bg-gray-800 text-white p-2 rounded-lg shadow-lg">
-                <i class="fas fa-comments"></i>
-            </button>
-            <!-- Tabs -->
-            <div class="flex border-b border-gray-700">
-                <button #chatTab (click)="onChatTabClick()" [class.border-primary]="activeTab() === 'chat'"
-                    [class.bg-gray-750]="activeTab() === 'chat'" [class.text-white]="activeTab() === 'chat'"
-                    [class.text-gray-400]="activeTab() !== 'chat'"
-                    class="flex-1 px-2 sm:px-4 py-2 sm:py-3 font-medium border-b-2 text-sm sm:text-base">
-                    <i class="fas fa-comments sm:mr-2"></i><span class="hidden sm:inline">Chat</span>
-                </button>
-                <button #participantsTab (click)="onParticipantsTabClick()"
-                    [class.border-primary]="activeTab() === 'participants'"
-                    [class.bg-gray-750]="activeTab() === 'participants'"
-                    [class.text-white]="activeTab() === 'participants'"
-                    [class.text-gray-400]="activeTab() !== 'participants'"
-                    class="flex-1 px-2 sm:px-4 py-2 sm:py-3 hover:text-white transition text-sm sm:text-base">
-                    <i class="fas fa-users sm:mr-2"></i><span class="hidden sm:inline">People</span>
-                </button>
-                <button #mobileSidebarClose (click)="onMobileSidebarClose()"
-                    class="md:hidden px-4 py-2 text-white hover:bg-gray-700">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <!-- Chat Panel -->
-            <div #chatPanel [class.hidden]="activeTab() !== 'chat'" class="flex-1 flex flex-col overflow-hidden">
-                <!-- Chat Messages -->
-                <div class="flex-1 overflow-y-auto p-4 space-y-3">
-                    <!-- Message 1 -->
-                    <div class="flex items-start space-x-2">
-                        <div
-                            class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
-                            JS</div>
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2 mb-1">
-                                <span class="text-white text-sm font-medium">John Smith</span>
-                                <span class="text-gray-500 text-xs">10:30 AM</span>
-                            </div>
-                            <p class="text-gray-300 text-sm">Welcome everyone! Let's start today's lesson on algebraic
-                                equations.</p>
-                        </div>
-                    </div>
-
-                    <!-- Message 2 -->
-                    <div class="flex items-start space-x-2">
-                        <div
-                            class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
-                            AJ</div>
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2 mb-1">
-                                <span class="text-white text-sm font-medium">Alice Johnson</span>
-                                <span class="text-gray-500 text-xs">10:32 AM</span>
-                            </div>
-                            <p class="text-gray-300 text-sm">Good morning! Ready to learn.</p>
-                        </div>
-                    </div>
-
-                    <!-- Message 3 -->
-                    <div class="flex items-start space-x-2">
-                        <div
-                            class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
-                            ST</div>
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2 mb-1">
-                                <span class="text-white text-sm font-medium">You</span>
-                                <span class="text-gray-500 text-xs">10:33 AM</span>
-                            </div>
-                            <p class="text-gray-300 text-sm">Excited for today's lesson!</p>
-                        </div>
-                    </div>
-
-                    <!-- Message 4 -->
-                    <div class="flex items-start space-x-2">
-                        <div
-                            class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
-                            JS</div>
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2 mb-1">
-                                <span class="text-white text-sm font-medium">John Smith</span>
-                                <span class="text-gray-500 text-xs">10:35 AM</span>
-                            </div>
-                            <p class="text-gray-300 text-sm">Great! Let's begin with linear equations. I'll share my
-                                screen now.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chat Input -->
-                <div class="border-t border-gray-700 p-3">
-                    <div class="flex items-center space-x-2">
-                        <input #chatInputEl type="text" [ngModel]="chatInput()" (ngModelChange)="chatInput.set($event)"
-                            (keypress)="onChatInputKeyPress($event)" placeholder="Type a message..."
-                            class="flex-1 bg-gray-700 text-white placeholder-gray-400 px-2 sm:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm">
-                        <button #sendMessage (click)="sendChatMessage()"
-                            class="px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition flex-shrink-0">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                    <div class="flex items-center space-x-2 mt-2">
-                        <button class="text-gray-400 hover:text-white transition">
-                            <i class="fas fa-paperclip"></i>
-                        </button>
-                        <button class="text-gray-400 hover:text-white transition">
-                            <i class="far fa-smile"></i>
-                        </button>
-                        <button class="text-gray-400 hover:text-white transition">
-                            <i class="fas fa-image"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Participants Panel -->
-            <div #participantsPanel [class.hidden]="activeTab() !== 'participants'"
-                class="flex-1 flex flex-col overflow-hidden">
-                <div class="flex-1 overflow-y-auto p-4 space-y-3">
-                    <!-- Teacher -->
-                    <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div
-                                class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
-                                JS</div>
-                            <div>
-                                <p class="text-white font-medium text-sm">John Smith</p>
-                                <p class="text-gray-400 text-xs">Teacher</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                            <i class="fas fa-video text-green-500 text-sm"></i>
-                            <i class="fas fa-microphone-slash text-red-500 text-sm"></i>
-                        </div>
-                    </div>
-
-                    <!-- Student 1 -->
-                    <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div
-                                class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold">
-                                AJ</div>
-                            <div>
-                                <p class="text-white font-medium text-sm">Alice Johnson</p>
-                                <p class="text-gray-400 text-xs">Student</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                            <i class="fas fa-video text-green-500 text-sm"></i>
-                            <i class="fas fa-microphone text-green-500 text-sm"></i>
-                        </div>
-                    </div>
-
-                    <!-- Student 2 -->
-                    <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div
-                                class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                                BW</div>
-                            <div>
-                                <p class="text-white font-medium text-sm">Bob Williams</p>
-                                <p class="text-gray-400 text-xs">Student</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                            <i class="fas fa-video text-green-500 text-sm"></i>
-                            <i class="fas fa-microphone-slash text-red-500 text-sm"></i>
-                        </div>
-                    </div>
-
-                    <!-- You -->
-                    <div class="flex items-center justify-between p-3 bg-blue-600 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div
-                                class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                                ST</div>
-                            <div>
-                                <p class="text-white font-medium text-sm">You</p>
-                                <p class="text-blue-200 text-xs">Student</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                            <i class="fas fa-video text-white text-sm"></i>
-                            <i class="fas fa-microphone text-white text-sm"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
-    @if(whiteboardOpen()) {
-    <app-white-board (onExitWhiteboard)="whiteboardOpen.set(false)"></app-white-board>
-    }
     <div class="sticky bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 px-2 sm:px-4 md:px-6 py-2 sm:py-4 pb-safe z-40"
         style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
         <div class="flex items-center justify-between max-w-7xl mx-auto flex-wrap gap-2">
             <!-- Left Controls -->
             <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center sm:justify-start">
-                <button #toggleMic (click)="onToggleMic()" [class.bg-green-600]="currentUserControls().micOn"
-                    [class.hover:bg-green-700]="currentUserControls().micOn"
-                    [class.bg-red-600]="!currentUserControls().micOn"
-                    [class.hover:bg-red-700]="!currentUserControls().micOn"
+                <button (click)="onToggleMic()" [class.bg-green-600]="getStreamController(localStream).audio"
+                    [class.hover:bg-green-700]="getStreamController(localStream).audio"
+                    [class.bg-red-600]="!getStreamController(localStream).audio"
+                    [class.hover:bg-red-700]="!getStreamController(localStream).audio"
                     class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
-                    <i [class.fa-microphone]="currentUserControls().micOn"
-                        [class.fa-microphone-slash]="!currentUserControls().micOn" class="fas text-sm sm:text-base"></i>
+                    <i [class.fa-microphone]="getStreamController(localStream).audio"
+                        [class.fa-microphone-slash]="!getStreamController(localStream).audio"
+                        class="fas text-sm sm:text-base"></i>
                 </button>
-                <button #toggleVideo (click)="onToggleVideo()" [class.bg-green-600]="currentUserControls().videoOn"
-                    [class.hover:bg-green-700]="currentUserControls().videoOn"
-                    [class.bg-red-600]="!currentUserControls().videoOn"
-                    [class.hover:bg-red-700]="!currentUserControls().videoOn"
+                <button (click)="onToggleVideo()" [class.bg-green-600]="getStreamController(localStream).video"
+                    [class.hover:bg-green-700]="getStreamController(localStream).video"
+                    [class.bg-red-600]="!getStreamController(localStream).video"
+                    [class.hover:bg-red-700]="!getStreamController(localStream).video"
                     class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
-                    <i [class.fa-video]="currentUserControls().videoOn"
-                        [class.fa-video-slash]="!currentUserControls().videoOn" class="fas text-sm sm:text-base"></i>
+                    <i [class.fa-video]="getStreamController(localStream).video"
+                        [class.fa-video-slash]="!getStreamController(localStream).video"
+                        class="fas text-sm sm:text-base"></i>
                 </button>
                 <button id="toggleScreenShare"
                     class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-700 hover:bg-gray-600 text-white rounded-full flex items-center justify-center transition flex-shrink-0 hidden sm:flex">
                     <i class="fas fa-desktop text-sm sm:text-base"></i>
                 </button>
-                <button #toggleWhiteboard (click)="onToggleWhiteboard()" [class.bg-primary]="whiteboardOpen()"
+                <!-- <button #toggleWhiteboard (click)="onToggleWhiteboard()" [class.bg-primary]="whiteboardOpen()"
                     [class.hover:bg-blue-600]="whiteboardOpen()" [class.bg-gray-700]="!whiteboardOpen()"
                     [class.hover:bg-gray-600]="!whiteboardOpen()"
                     class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
@@ -331,7 +143,7 @@
                 <span #whiteboardActive [class.hidden]="!whiteboardOpen()"
                     class="px-2 py-1 bg-green-600 text-white rounded text-xs">
                     <i class="fas fa-check mr-1"></i><span class="hidden sm:inline">Whiteboard Active</span>
-                </span>
+                </span> -->
             </div>
 
             <!-- Center Controls -->
@@ -340,7 +152,7 @@
                     class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm hidden sm:flex items-center">
                     <i class="fas fa-cog sm:mr-2"></i><span class="hidden md:inline">Settings</span>
                 </button>
-                <button #mobileChatToggle (click)="onMobileChatToggle()"
+                <button
                     class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm flex items-center md:hidden">
                     <i class="fas fa-comments"></i>
                 </button>
@@ -363,34 +175,4 @@
             </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </div>

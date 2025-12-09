@@ -12,17 +12,17 @@ import { environment } from "../../../../environments/environment";
 })
 export class ProfilePhoto {
     class = input<string | null>(null);
-    user = input<User | null>(null);
+    user = input<User | null | undefined>(null);
     readonly assetsUrl = environment.assetsUrl;
     profileImage = signal<string | null>(null);
     userDisplayName = signal<string | null>(null);
     constructor() {
         effect(() => {
             const u = this.user();
-            if(u) {
+            if (u) {
                 this.profileImage.set(u.details?.profileImage ? this.assetsUrl + u.details?.profileImage : null);
                 this.userDisplayName.set(u.firstName.charAt(0) + u.lastName.charAt(0));
-            }            
+            }
         });
     }
 }

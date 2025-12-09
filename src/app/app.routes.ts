@@ -6,7 +6,7 @@ export const routes: Routes = [
     {
         path: '',
         loadComponent: () => import('./components/layouts/main/main.layout').then(m => m.MainLayout),
-        canActivate: [ AuthGuard ],
+        canActivate: [AuthGuard],
         children: [
             {
                 path: '',
@@ -14,39 +14,43 @@ export const routes: Routes = [
             },
             {
                 path: 'admin',
-                canActivate: [ AuthGuard, RoleGuard],
+                canActivate: [AuthGuard, RoleGuard],
                 data: { roles: [UserRole.ADMIN] },
                 loadChildren: () => import('./views/admin/admin.routes').then(m => m.adminRoutes)
             },
             {
                 path: 'profile',
-                canActivate: [ AuthGuard ],
+                canActivate: [AuthGuard],
                 loadChildren: () => import('./views/profile/profile.routes').then(m => m.profileRoutes)
             },
             {
                 path: 'student',
-                canActivate: [ AuthGuard, RoleGuard],
+                canActivate: [AuthGuard, RoleGuard],
                 data: { roles: [UserRole.STUDENT] },
                 loadChildren: () => import('./views/student/student.routes').then(m => m.studentRoutes)
             },
             {
                 path: 'booking',
-                canActivate: [ AuthGuard, RoleGuard],
+                canActivate: [AuthGuard, RoleGuard],
                 data: { roles: [UserRole.STUDENT] },
                 loadChildren: () => import('./views/booking/booking.routes').then(m => m.bookingRoutes)
             },
             {
                 path: 'teacher',
-                canActivate: [ AuthGuard, RoleGuard],
+                canActivate: [AuthGuard, RoleGuard],
                 data: { roles: [UserRole.TEACHER] },
                 loadChildren: () => import('./views/teacher/teacher.routes').then(m => m.teacherRoutes)
+            },
+            {
+                path: 'test-call',
+                loadComponent: () => import('./views/test-call/test-call').then(m => m.TestCall)
             }
-            
-        ]   
-    
+
+        ]
+
     },
     {
-        path:':bookingId/join',
+        path: ':bookingId/join',
         loadComponent: () => import('./views/class-room/class-room').then(m => m.default)
     },
     {
