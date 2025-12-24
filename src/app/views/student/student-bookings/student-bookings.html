@@ -1,0 +1,135 @@
+<!-- Page Header Card -->
+<div class="bg-white rounded-lg shadow p-6 border border-gray-200 mb-4">
+    <h1 class="text-2xl font-bold text-gray-900">My Bookings</h1>
+    <p class="text-gray-600 text-sm mt-1">View and manage your one-on-one session bookings</p>
+</div>
+
+<!-- Bookings List -->
+<div class="mt-4">
+    @if(isLoading()) {
+        <div class="flex items-center justify-center h-full min-h-[400px]">
+            <div class="text-center">
+                <i class="fas fa-spinner fa-spin text-primary text-3xl mb-3"></i>
+                <p class="text-gray-500 text-sm">Loading bookings...</p>
+            </div>
+        </div>
+    } @else {
+        @if(bookings() && bookings().length > 0) {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @for(booking of bookings(); track booking.id) {
+                    <div class="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden">
+                        <!-- Header Section -->
+                        <div class="bg-gradient-to-r from-primary/10 to-primary/5 px-6 py-4 border-b border-gray-100">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">{{booking.teacherSubject?.subject?.name || 'Session'}}</h3>
+                                    <p class="text-gray-600 text-sm">{{booking.teacher?.user?.firstName}} {{booking.teacher?.user?.lastName}}</p>
+                                </div>
+                                <div class="ml-4">
+                                    @if(booking.status === 'completed') {
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                            Completed
+                                        </span>
+                                    } @else if(booking.status === 'confirmed') {
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            Confirmed
+                                        </span>
+                                    } @else if(booking.status === 'cancelled') {
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            Cancelled
+                                        </span>
+                                    } @else {
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            Pending
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Content Section -->
+                        <div class="p-6 space-y-4">
+                            <!-- Booking Date -->
+                            <div class="flex items-start gap-3">
+                                <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                    <i class="fas fa-calendar text-primary text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Booking Date</p>
+                                    <p class="text-sm text-gray-700 font-medium">{{formatDate(booking.bookingDate)}}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Time -->
+                            @if(booking.availability) {
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                        <i class="fas fa-clock text-primary text-sm"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Time</p>
+                                        <p class="text-sm text-gray-700">{{booking.availability.startTime}} - {{booking.availability.endTime}}</p>
+                                    </div>
+                                </div>
+                            }
+                            
+                            <!-- Amount -->
+                            @if(booking.totalAmount) {
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                        <i class="fas fa-dollar-sign text-primary text-sm"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Amount</p>
+                                        <p class="text-sm text-gray-700 font-medium">${{booking.totalAmount}}</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                        <!-- Footer Actions -->
+                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
+                            @if(canCancel(booking)) {
+                                <button 
+                                    (click)="cancelBooking(booking)"
+                                    class="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200">
+                                    <i class="fas fa-times mr-2"></i>
+                                    Cancel
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            <!-- Pagination -->
+            @if(pagination().totalPages > 1) {
+                <div class="mt-6">
+                    <p-paginator
+                        [rows]="pagination().limit"
+                        [totalRecords]="pagination().total"
+                        [first]="(pagination().page - 1) * pagination().limit"
+                        (onPageChange)="onPageChange($event)"
+                        [rowsPerPageOptions]="[10, 20, 50]">
+                    </p-paginator>
+                </div>
+            }
+        } @else {
+            <div class="flex items-center justify-center min-h-[400px] py-12">
+                <div class="text-center max-w-md px-4">
+                    <div class="mb-6">
+                        <i class="fas fa-calendar-times text-gray-300 text-6xl mb-4"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">No bookings found</h3>
+                    <p class="text-gray-500 text-sm mb-6 leading-relaxed">
+                        You don't have any bookings yet. Browse teachers and book a session to get started.
+                    </p>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+

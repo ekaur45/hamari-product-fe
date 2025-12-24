@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { ParentChildService } from '../../../shared/services/parent-child.service';
 import { User } from '../../../shared/models';
 import { AuthService } from '../../../shared/services/auth.service';
@@ -8,7 +9,7 @@ import { AuthService } from '../../../shared/services/auth.service';
 @Component({
     selector: 'app-parent-children',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterModule],
     templateUrl: './parent-children.html'
 })
 export class ParentChildrenComponent implements OnInit {

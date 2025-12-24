@@ -42,24 +42,14 @@
             <div class="flex items-center space-x-3 flex-1">
                 <div class="relative flex-1 max-w-xs">
                     <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" placeholder="Search students..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <input [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="onSearch()" type="text" placeholder="Search students..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div class="relative">
-                    <i class="fas fa-school absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <select class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
-                        <option value="all">All Academies</option>
-                        <option value="elite">Elite Academy</option>
-                        <option value="premier">Premier Academy</option>
-                    </select>
-                    <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-                </div>
-                <div class="relative">
-                    <i class="fas fa-graduation-cap absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <select class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
-                        <option value="all">All Grades</option>
-                        <option value="grade-1">Grade 1</option>
-                        <option value="grade-2">Grade 2</option>
-                        <option value="grade-10">Grade 10</option>
+                    <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <select [ngModel]="isActiveFilter()" (ngModelChange)="onStatusFilterChange($event)" class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                        <option value="">All Status</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
                     </select>
                     <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                 </div>
@@ -68,8 +58,8 @@
                 <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
                     <i class="fas fa-download mr-2"></i>Export
                 </button>
-                <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
-                    <i class="fas fa-user-plus mr-2"></i>Add Student
+                <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition" (click)="onSearch()">
+                    <i class="fas fa-sync-alt mr-2"></i>Refresh
                 </button>
             </div>
         </div>
@@ -112,20 +102,17 @@
                         }
                         <td class="py-3 px-4 text-sm text-gray-700">{{student.grade ?? 'N/A'}}</td>
                         <td class="py-3 px-4">
-                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">Active</span>
+                            <span class="px-2 py-1 rounded-lg text-xs font-medium" [ngClass]="student.user.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'">
+                                {{student.user.isActive ? 'Active' : 'Inactive'}}
+                            </span>
                         </td>
                         <td class="py-3 px-4 text-sm text-gray-700">{{student.createdAt | date:'dd/MM/yyyy'}}</td>
                         <td class="py-3 px-4">
                             <div class="flex items-center space-x-2">
-                                <a href="profile-student-view.html" class="text-primary hover:text-blue-600 transition text-sm" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="text-red-600 hover:text-red-700 transition text-sm" title="Suspend">
-                                    <i class="fas fa-ban"></i>
-                                </button>
+                                    <button class="text-green-600 hover:text-green-700 transition text-sm" (click)="toggleActive(student, true)" [disabled]="student.user.isActive">Activate</button>
+                                    <button class="text-orange-600 hover:text-orange-700 transition text-sm" (click)="toggleActive(student, false)" [disabled]="!student.user.isActive">Deactivate</button>
+                                    <button class="text-red-600 hover:text-red-700 transition text-sm" (click)="toggleDeletion(student, true)">Delete</button>
+                                    <button class="text-gray-600 hover:text-gray-700 transition text-sm" (click)="toggleDeletion(student, false)">Restore</button>
                             </div>
                         </td>
                     </tr>

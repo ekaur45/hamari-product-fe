@@ -13,6 +13,12 @@ export interface Teacher {
   teacherSubjects: TeacherSubject[];
   availabilities: AvailabilitySlot[];
   user?: User;
+  isVerified: boolean;
+  verificationNote?: string | null;
+  isActive: boolean;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
+  isDeleted?: boolean;
 }
 
 /**

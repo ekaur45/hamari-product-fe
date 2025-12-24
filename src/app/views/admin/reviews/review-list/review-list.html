@@ -1,0 +1,100 @@
+<div class="bg-white rounded-lg shadow-md p-5 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-center space-x-3 flex-1">
+            <div class="relative flex-1 max-w-xs">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="onSearch()" type="text" placeholder="Search reviews..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="relative w-48">
+                <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <select [ngModel]="reviewerRole()" (ngModelChange)="reviewerRole.set($event); onSearch()" class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                    <option value="">All Reviewer Roles</option>
+                    @for (r of roles; track r) {
+                        <option [value]="r">{{r}}</option>
+                    }
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            </div>
+            <div class="relative w-48">
+                <i class="fas fa-user-check absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <select [ngModel]="revieweeRole()" (ngModelChange)="revieweeRole.set($event); onSearch()" class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                    <option value="">All Reviewee Roles</option>
+                    @for (r of roles; track r) {
+                        <option [value]="r">{{r}}</option>
+                    }
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            </div>
+            <div class="relative w-40">
+                <i class="fas fa-eye absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <select [ngModel]="isVisibleFilter()" (ngModelChange)="isVisibleFilter.set($event); onSearch()" class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                    <option value="">All Visibility</option>
+                    <option value="true">Visible</option>
+                    <option value="false">Hidden</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition" (click)="onSearch()">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow-md">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Reviewer</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Reviewee</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Rating</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Comment</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Visibility</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Created</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @for (review of reviews(); track review.id) {
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4 text-sm text-gray-800">
+                            {{review.reviewer?.firstName}} {{review.reviewer?.lastName}} ({{review.reviewerRole}})
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-800">
+                            {{review.reviewee?.firstName}} {{review.reviewee?.lastName}} ({{review.revieweeRole}})
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-800">
+                            <span class="font-semibold text-yellow-600">{{review.rating}}/5</span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">
+                            {{review.comment || '—'}}
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-lg text-xs font-medium" [ngClass]="review.isVisible ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'">
+                                {{review.isVisible ? 'Visible' : 'Hidden'}}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">{{review.createdAt | date:'medium'}}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="text-green-600 hover:text-green-700 text-sm" (click)="onToggleVisibility(review, true)" [disabled]="review.isVisible">Show</button>
+                                <button class="text-orange-600 hover:text-orange-700 text-sm" (click)="onToggleVisibility(review, false)" [disabled]="!review.isVisible">Hide</button>
+                                <button class="text-red-600 hover:text-red-700 text-sm" (click)="onDelete(review)">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+        <p-paginator [totalRecords]="pagination().total" [rows]="rows()" [first]="first()" 
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} reviews"
+        [rowsPerPageOptions]="[5,10,20,50]" (onPageChange)="onPageChange($event)"></p-paginator>
+    </div>
+</div>
+

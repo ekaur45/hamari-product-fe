@@ -19,14 +19,14 @@ export class EnrollmentService {
         );
     }
 
-    browseClasses(): Observable<any[]> {
-        return this.apiService.get<any[]>('enrollments/browse-classes').pipe(
+    browseClasses(page: number = 1, limit: number = 10, filters: any = {}): Observable<any> {
+        return this.apiService.get<any>('enrollments/browse-classes', { params: { page, limit, ...filters } }).pipe(
             map(res => res.data)
         );
     }
 
-    browseTeachers(): Observable<any[]> {
-        return this.apiService.get<any[]>('enrollments/browse-teachers').pipe(
+    browseTeachers(page: number = 1, limit: number = 10, filters: any = {}): Observable<any> {
+        return this.apiService.get<any>('enrollments/browse-teachers', { params: { page, limit, ...filters } }).pipe(
             map(res => res.data)
         );
     }

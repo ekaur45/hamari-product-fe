@@ -46,19 +46,19 @@
             <!-- Search Input -->
             <div class="relative flex-1 w-full sm:max-w-xs">
                 <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-                <input type="text" placeholder="Search users..."
+                <input [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="onSearch()" type="text" placeholder="Search users..."
                     class="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <!-- Role Filter -->
             <div class="relative w-full sm:w-auto sm:min-w-[140px]">
                 <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
                 <select
+                    [ngModel]="roleFilter()" (ngModelChange)="onRoleFilterChange($event)"
                     class="w-full sm:w-auto pl-10 pr-8 py-2 text-sm sm:text-base border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
-                    <option value="all">All Roles</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="student">Student</option>
-                    <option value="parent">Parent</option>
-                    <option value="academy-owner">Academy Owner</option>
+                    <option value="">All Roles</option>
+                    @for (r of roles; track r) {
+                        <option [value]="r">{{r}}</option>
+                    }
                 </select>
                 <i
                     class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-sm"></i>
@@ -67,12 +67,11 @@
             <div class="relative w-full sm:w-auto sm:min-w-[140px]">
                 <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
                 <select
+                    [ngModel]="isActiveFilter()" (ngModelChange)="onStatusFilterChange($event)"
                     class="w-full sm:w-auto pl-10 pr-8 py-2 text-sm sm:text-base border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="pending">Pending</option>
-                    <option value="suspended">Suspended</option>
+                    <option value="">All Status</option>
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
                 </select>
                 <i
                     class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-sm"></i>
@@ -82,6 +81,9 @@
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 w-full sm:w-auto">
             <button class="w-full sm:w-auto px-4 py-2 text-sm sm:text-base border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition flex items-center justify-center sm:justify-start">
                 <i class="fas fa-download mr-2"></i>Export
+            </button>
+            <button class="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-primary text-white rounded-lg hover:bg-primary/80 transition flex items-center justify-center sm:justify-start" (click)="onSearch()">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
             </button>
             <button class="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-primary text-white rounded-lg hover:bg-primary/80 transition flex items-center justify-center sm:justify-start" (click)="showAddUserDialog.set(true)">
                 <i class="fas fa-user-plus mr-2"></i>Add User
@@ -134,21 +136,21 @@
                     </td>
                     <td class="py-3 px-4 text-sm text-gray-700">{{user.email}}</td>
                     <td class="py-3 px-4">
-                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">{{user.isActive ? 'Active' : 'Inactive'}}</span>
+                        <span class="px-2 py-1 rounded-lg text-xs font-medium" [ngClass]="user.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'">{{user.isActive ? 'Active' : 'Inactive'}}</span>
                     </td>
                     <td class="py-3 px-4 text-sm text-gray-700">{{user.createdAt | date:'dd/MM/yyyy'}}</td>
                     <td class="py-3 px-4 text-sm text-gray-700">2 hours ago</td>
                     <td class="py-3 px-4">
                         <div class="flex items-center space-x-2">
-                            <button class="text-primary hover:text-blue-600 transition text-sm" title="View">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="text-gray-600 hover:text-gray-900 transition text-sm" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-red-600 hover:text-red-700 transition text-sm" title="Suspend" (click)="onUserDeleted(user)">
-                                <i class="fas fa-ban"></i>
-                            </button>
+                            <select class="text-sm border rounded px-2 py-1" [ngModel]="user.role" (ngModelChange)="changeRole(user, $event)">
+                                @for (r of roles; track r) {
+                                    <option [value]="r">{{r}}</option>
+                                }
+                            </select>
+                            <button class="text-green-600 hover:text-green-700 transition text-sm" (click)="toggleActive(user, true)" [disabled]="user.isActive">Activate</button>
+                            <button class="text-orange-600 hover:text-orange-700 transition text-sm" (click)="toggleActive(user, false)" [disabled]="!user.isActive">Deactivate</button>
+                            <button class="text-red-600 hover:text-red-700 transition text-sm" (click)="toggleDeletion(user, true)">Delete</button>
+                            <button class="text-gray-600 hover:text-gray-700 transition text-sm" (click)="toggleDeletion(user, false)">Restore</button>
                         </div>
                     </td>
                 </tr>

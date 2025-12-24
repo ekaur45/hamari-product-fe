@@ -14,7 +14,8 @@ export interface Class {
   scheduleDays?: string[];
   price: number;
   classBookings: ClassBooking[];
-
+  status?: ClassStatus;
+  cancelReason?: string | null;
 }
 
 /**
@@ -82,6 +83,25 @@ export interface UpdateClassDto {
   isActive?: boolean;
 }
 
+export interface UpdateAdminClassScheduleDto {
+  startTime?: string;
+  endTime?: string;
+  duration?: number;
+  maxStudents?: number;
+  scheduleDays?: string[];
+}
+
+export interface UpdateAdminClassStatusDto {
+  status: ClassStatus;
+  cancelReason?: string;
+}
+
+export interface AdminClassListDto {
+  classes: Class[];
+  totalClasses: number;
+  pagination: PaginationDto;
+}
+
 /**
  * Create Class Enrollment DTO
  */
@@ -102,4 +122,11 @@ export interface UpdateClassEnrollmentDto {
 import { Academy } from './academy.interface';
 import { Teacher } from './teacher.interface';
 import { ClassBooking, Student } from './student.interface';import { Subject } from './subject.interface';
+import { PaginationDto } from './user.interface';
+export enum ClassStatus {
+  SCHEDULED = 'scheduled',
+  ONGOING = 'ongoing',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}
 

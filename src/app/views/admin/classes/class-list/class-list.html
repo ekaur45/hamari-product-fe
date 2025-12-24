@@ -1,0 +1,82 @@
+<div class="bg-white rounded-lg shadow-md p-5 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-center space-x-3 flex-1">
+            <div class="relative flex-1 max-w-xs">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="onSearch()" type="text" placeholder="Search classes (teacher or subject)..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="relative w-48">
+                <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onStatusChange($event)" class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none w-full">
+                    <option value="">All Status</option>
+                    @for (s of classStatuses; track s) {
+                        <option [value]="s">{{s | titlecase}}</option>
+                    }
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2 hidden md:flex">
+            <button (click)="onSearch()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow-md">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Subject</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Teacher</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Time</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Capacity</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Price</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @for (cls of classes(); track cls.id) {
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4">
+                            <div class="text-sm font-medium text-gray-900">{{cls.subject?.name || '—'}}</div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="text-sm text-gray-900">{{cls.teacher?.user?.firstName}} {{cls.teacher?.user?.lastName}}</div>
+                            <div class="text-xs text-gray-500">{{cls.teacher?.user?.email}}</div>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">
+                            {{cls.startTime}} - {{cls.endTime}}
+                            <div class="text-xs text-gray-500">Days: {{cls.scheduleDays?.join(', ') || '—'}}</div>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">{{cls.maxStudents}}</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">PKR {{cls.price}}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-lg text-xs font-medium" [ngClass]="badgeClass(cls.status)">{{cls.status | titlecase}}</span>
+                            @if (cls.cancelReason) {
+                                <div class="text-xs text-red-500 mt-1">Reason: {{cls.cancelReason}}</div>
+                            }
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="text-green-600 hover:text-green-700 text-sm" (click)="updateStatus(cls, ClassStatus.ONGOING)">Start</button>
+                                <button class="text-gray-700 hover:text-gray-900 text-sm" (click)="updateStatus(cls, ClassStatus.COMPLETED)">Complete</button>
+                                <button class="text-red-600 hover:text-red-700 text-sm" (click)="updateStatus(cls, ClassStatus.CANCELLED)">Cancel</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+        <p-paginator [totalRecords]="totalClasses()" [rows]="rows()" [first]="first()" 
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} classes"
+        [rowsPerPageOptions]="[5,10,20,50]" (onPageChange)="onPageChange($event)"></p-paginator>
+    </div>
+</div>
+

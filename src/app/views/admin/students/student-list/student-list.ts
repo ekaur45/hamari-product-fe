@@ -3,10 +3,11 @@ import { PaginationDto, Student } from '../../../../shared/models';
 import { StudentService } from '../../../../shared/services/student.service';
 import { CommonModule } from '@angular/common';
 import { PaginatorModule } from 'primeng/paginator';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-student-list',
-  imports: [CommonModule, PaginatorModule],
+  imports: [CommonModule, PaginatorModule, FormsModule],
   templateUrl: './student-list.html',
   styleUrl: './student-list.css',
 })
@@ -27,6 +28,8 @@ export class StudentList implements OnInit {
   });
   first = signal<number>(0);
   rows = signal<number>(10);
+  search = signal('');
+  isActiveFilter = signal<string>('');
   constructor(private studentService: StudentService) {
   }
   ngOnInit(): void {
@@ -34,7 +37,8 @@ export class StudentList implements OnInit {
   }
   getStudents(): void {
     this.isLoading.set(true);
-    this.studentService.getStudents(this.pagination().page, this.pagination().limit).subscribe((students) => {
+    const isActive = this.isActiveFilter() === '' ? undefined : this.isActiveFilter() === 'true';
+    this.studentService.getStudents(this.pagination().page, this.pagination().limit, this.search() || undefined, isActive).subscribe((students) => {
       this.isLoading.set(false);
       this.students.set(students.students);
       this.totalStudents.set(students.totalStudents);
@@ -49,8 +53,44 @@ export class StudentList implements OnInit {
   onPageChange(event: any): void {
     this.first.set(event.first ?? 0);
     this.rows.set(event.rows ?? 10);
-    this.pagination.set({ ...this.pagination(), page: event.page });
+    this.pagination.set({ ...this.pagination(), page: (event?.page ?? 0) + 1 });
     this.getStudents();
   }
 
+  onSearch(): void {
+    this.pagination.set({ ...this.pagination(), page: 1 });
+    this.getStudents();
+  }
+
+  onStatusFilterChange(value: string): void {
+    this.isActiveFilter.set(value);
+    this.pagination.set({ ...this.pagination(), page: 1 });
+    this.getStudents();
+  }
+
+  toggleActive(student: Student, next: boolean): void {
+    const ok = window.confirm(`Are you sure you want to ${next ? 'activate' : 'deactivate'} this student?`);
+    if (!ok) return;
+    this.isLoading.set(true);
+    this.studentService.updateAdminStudentStatus(student.id, next).subscribe({
+      next: () => this.getStudents(),
+      error: (err) => {
+        console.error(err);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  toggleDeletion(student: Student, next: boolean): void {
+    const ok = window.confirm(`Are you sure you want to ${next ? 'delete' : 'restore'} this student?`);
+    if (!ok) return;
+    this.isLoading.set(true);
+    this.studentService.updateAdminStudentDeletion(student.id, next).subscribe({
+      next: () => this.getStudents(),
+      error: (err) => {
+        console.error(err);
+        this.isLoading.set(false);
+      }
+    });
+  }
 }

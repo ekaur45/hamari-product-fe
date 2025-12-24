@@ -16,7 +16,15 @@ export const API_ENDPOINTS = {
   ADMIN: {
     USERS: '/admin/users',
     TEACHERS: '/admin/teachers',
-    STUDENTS: '/admin/students'
+    STUDENTS: '/admin/students',
+    CLASSES: '/admin/classes',
+    LOGS: '/admin/logs',
+    REVIEWS: '/admin/reviews',
+    SUPPORT: '/admin/support',
+    FINANCIAL: {
+      PAYOUTS: '/admin/financial/payouts',
+      REFUNDS: '/admin/financial/refunds'
+    }
   },
 
   // Authentication
@@ -57,7 +65,27 @@ export const API_ENDPOINTS = {
     BY_ACADEMY: (academyId: string) => `/students/academy/${academyId}`,
     SEARCH: '/students/search',
     SCHEDULE: (studentId: string) => `/students/${studentId}/schedule`,
-    CLASS_BOOKINGS: (studentId: string) => `/students/${studentId}/classes/bookings`
+    CLASS_BOOKINGS: (studentId: string) => `/students/${studentId}/classes/bookings`,
+    ASSIGNMENTS: (studentId: string) => `/students/${studentId}/assignments`,
+    ASSIGNMENT_BY_ID: (studentId: string, assignmentId: string) => `/students/${studentId}/assignments/${assignmentId}`,
+    SUBMIT_ASSIGNMENT: (studentId: string, assignmentId: string) => `/students/${studentId}/assignments/${assignmentId}/submit`,
+    SUBMISSIONS: (studentId: string) => `/students/${studentId}/submissions`,
+    BOOKINGS: (studentId: string) => `/students/${studentId}/bookings`,
+    CANCEL_BOOKING: (studentId: string, bookingId: string) => `/students/${studentId}/bookings/${bookingId}/cancel`,
+    CLASS_DETAILS: (studentId: string, classId: string) => `/students/${studentId}/classes/${classId}`,
+    CREATE_REVIEW: (studentId: string, teacherId: string) => `/students/${studentId}/reviews/teachers/${teacherId}`,
+    TEACHER_REVIEWS: (studentId: string, teacherId: string) => `/students/${studentId}/reviews/teachers/${teacherId}`,
+    PERFORMANCE: (studentId: string) => `/students/${studentId}/performance`
+  },
+
+  // Parents
+  PARENTS: {
+    BASE: '/parents',
+    CHILD_CLASSES: (childId: string) => `/parents/children/${childId}/classes`,
+    CHILD_ASSIGNMENTS: (childId: string) => `/parents/children/${childId}/assignments`,
+    CHILD_SCHEDULE: (childId: string) => `/parents/children/${childId}/schedule`,
+    CHILD_BOOKINGS: (childId: string) => `/parents/children/${childId}/bookings`,
+    CHILD_PERFORMANCE: (childId: string) => `/parents/children/${childId}/performance`
   },
 
   // Teachers
@@ -72,7 +100,11 @@ export const API_ENDPOINTS = {
     CLASSES: (teacherId: string) => `/teachers/${teacherId}/classes`,
     CREATE_CLASS: (teacherId: string) => `/teachers/${teacherId}/class`,
     SUBJECTS: (teacherId: string) => `/teachers/${teacherId}/subjects`,
-    DELETE_CLASS: (teacherId: string, classId: string) => `/teachers/${teacherId}/class/${classId}`
+    DELETE_CLASS: (teacherId: string, classId: string) => `/teachers/${teacherId}/class/${classId}`,
+    ASSIGNMENTS: (teacherId: string) => `/teachers/${teacherId}/assignments`,
+    ASSIGNMENT_BY_ID: (teacherId: string, assignmentId: string) => `/teachers/${teacherId}/assignments/${assignmentId}`,
+    ASSIGNMENT_SUBMISSIONS: (teacherId: string, assignmentId: string) => `/teachers/${teacherId}/assignments/${assignmentId}/submissions`,
+    GRADE_SUBMISSION: (teacherId: string, assignmentId: string, submissionId: string) => `/teachers/${teacherId}/assignments/${assignmentId}/submissions/${submissionId}/grade`
   },
 
   // Classes

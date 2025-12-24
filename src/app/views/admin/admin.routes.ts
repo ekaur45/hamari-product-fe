@@ -36,6 +36,12 @@ export const adminRoutes: Routes = [
         loadChildren: () => import('./students/students.routes').then(m => m.studentsRoutes)
     },
     {
+        path: 'classes',
+        canActivate: [RoleGuard],
+        data: { roles: [UserRole.ADMIN] },
+        loadChildren: () => import('./classes/classes.routes').then(m => m.classesRoutes)
+    },
+    {
         path: 'settings',
         canActivate: [RoleGuard],
         data: { roles: [UserRole.ADMIN] },
@@ -58,6 +64,24 @@ export const adminRoutes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: [UserRole.ADMIN] },
         loadChildren: () => import('./logs/logs.routes').then(m => m.logsRoutes)
+    },
+    {
+        path: 'reviews',
+        canActivate: [RoleGuard],
+        data: { roles: [UserRole.ADMIN] },
+        loadChildren: () => import('./reviews/reviews.routes').then(m => m.reviewsRoutes)
+    },
+    {
+        path: 'support',
+        canActivate: [RoleGuard],
+        data: { roles: [UserRole.ADMIN] },
+        loadChildren: () => import('./support/support.routes').then(m => m.supportRoutes)
+    },
+    {
+        path: 'financial',
+        canActivate: [RoleGuard],
+        data: { roles: [UserRole.ADMIN] },
+        loadChildren: () => import('./financial/financial.routes').then(m => m.financialRoutes)
     },
     {
         path: 'courses',

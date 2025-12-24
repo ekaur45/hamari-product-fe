@@ -27,16 +27,18 @@ export interface ApiErrorResponse {
 /**
  * Paginated API Response Interface
  */
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
 export interface PaginatedApiResponse<T = any> extends ApiResponse<T[]> {
   data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrev: boolean;
-  };
+  pagination: Pagination;
 }
 
 /**

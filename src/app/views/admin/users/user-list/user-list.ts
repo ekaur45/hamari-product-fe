@@ -9,6 +9,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { FormsModule } from "@angular/forms";
 import { SelectModule } from "primeng/select";
 import { PaginatorModule } from "primeng/paginator";
+import { API_ENDPOINTS } from "../../../../shared/constants";
 
 @Component({
     selector: 'app-user-list',
@@ -41,6 +42,10 @@ export class UserList implements OnInit {
         hasPrev: false,
     });
     isLoading = signal(false);
+    search = signal('');
+    roleFilter = signal<string>('');
+    isActiveFilter = signal<string>('');
+    readonly roles = Object.values(UserRole);
     constructor(private userService: UserService, private confirmDialog: ConfirmationService, private messageService: MessageService) { }
     ngOnInit(): void {
         this.getAdminUsers();
@@ -48,7 +53,10 @@ export class UserList implements OnInit {
 
     getAdminUsers(): void {
         this.isLoading.set(true);
-        this.userService.getAdminUsers(this.pagination().page, this.pagination().limit).subscribe({
+        const isActive = this.isActiveFilter() === '' ? undefined : this.isActiveFilter() === 'true';
+        const role = this.roleFilter() || undefined;
+        const search = this.search() || undefined;
+        this.userService.getAdminUsers(this.pagination().page, this.pagination().limit, search, role, isActive).subscribe({
             next: (users) => {
                 this.users.set(users.users);
                 this.totalUsers.set(users.totalUsers);
@@ -86,6 +94,63 @@ export class UserList implements OnInit {
         this.rows.set(event.rows ?? 10);
         this.pagination.set({ ...this.pagination(), page: (event?.page ?? 0) + 1 });
         this.getAdminUsers();
+    }
+    onSearch(): void {
+        this.pagination.set({ ...this.pagination(), page: 1 });
+        this.getAdminUsers();
+    }
+    onRoleFilterChange(value: string): void {
+        this.roleFilter.set(value);
+        this.pagination.set({ ...this.pagination(), page: 1 });
+        this.getAdminUsers();
+    }
+    onStatusFilterChange(value: string): void {
+        this.isActiveFilter.set(value);
+        this.pagination.set({ ...this.pagination(), page: 1 });
+        this.getAdminUsers();
+    }
+
+    toggleActive(user: User, next: boolean): void {
+        const ok = window.confirm(`Are you sure you want to ${next ? 'activate' : 'deactivate'} this user?`);
+        if (!ok) return;
+        this.isLoading.set(true);
+        this.userService.updateAdminUserStatus(user.id, next).subscribe({
+            next: () => this.getAdminUsers(),
+            error: (err) => {
+                console.error(err);
+                this.isLoading.set(false);
+            }
+        });
+    }
+
+    changeRole(user: User, role: UserRole): void {
+        if (user.role === UserRole.ADMIN && role !== UserRole.ADMIN) {
+            const ok = window.confirm('Are you sure you want to downgrade an admin?');
+            if (!ok) return;
+        }
+        const confirmRole = window.confirm(`Change role of ${user.firstName} ${user.lastName} to ${role}?`);
+        if (!confirmRole) return;
+        this.isLoading.set(true);
+        this.userService.updateAdminUserRole(user.id, role).subscribe({
+            next: () => this.getAdminUsers(),
+            error: (err) => {
+                console.error(err);
+                this.isLoading.set(false);
+            }
+        });
+    }
+
+    toggleDeletion(user: User, next: boolean): void {
+        const ok = window.confirm(`Are you sure you want to ${next ? 'delete' : 'restore'} this user?`);
+        if (!ok) return;
+        this.isLoading.set(true);
+        this.userService.updateAdminUserDeletion(user.id, next).subscribe({
+            next: () => this.getAdminUsers(),
+            error: (err) => {
+                console.error(err);
+                this.isLoading.set(false);
+            }
+        });
     }
     onUserAdded(user: User): void {
         this.getAdminUsers();

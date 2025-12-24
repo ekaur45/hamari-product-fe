@@ -1,4 +1,16 @@
 export interface ClassBooking {
+  id: string;
+  class: Class;
+  student: Student;
+  bookingDate: Date;
+  month: string;
+  year: number;
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
+  isActive: boolean;
+  teacher: Teacher;
+
 }
 export interface StudentClassAttendance {
 }

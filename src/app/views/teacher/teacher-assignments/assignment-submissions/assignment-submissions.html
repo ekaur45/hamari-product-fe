@@ -1,0 +1,228 @@
+<div class="max-w-7xl mx-auto">
+    <!-- Assignment Info -->
+    @if (assignment()) {
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">{{assignment()?.title}}</h1>
+                    @if (assignment()?.description) {
+                        <p class="text-gray-600 mt-2">{{assignment()?.description}}</p>
+                    }
+                </div>
+                <button
+                    (click)="router.navigate(['/teacher/assignments'])"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Assignments
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div>
+                    <span class="text-sm text-gray-500">Due Date</span>
+                    <p class="font-medium">
+                        {{assignment()?.dueDate ? (assignment()?.dueDate | date:'short') : 'No due date'}}
+                    </p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-500">Max Score</span>
+                    <p class="font-medium">{{assignment()?.maxScore}}</p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-500">Total Submissions</span>
+                    <p class="font-medium">{{pagination().total}}</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow-md p-5 mb-6">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="relative w-48">
+                <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <select
+                    [ngModel]="statusFilter()"
+                    (ngModelChange)="statusFilter.set($event); loadSubmissions()"
+                    class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                    <option value="">All Status</option>
+                    @for (s of statuses; track s) {
+                        <option [value]="s">{{s | titlecase}}</option>
+                    }
+                </select>
+            </div>
+            <button
+                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                (click)="loadSubmissions()">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Submissions Table -->
+    <div class="bg-white rounded-lg shadow-md">
+        @if (isLoading()) {
+            <div class="flex items-center justify-center h-64">
+                <div class="text-center">
+                    <i class="fas fa-spinner fa-spin text-primary text-3xl mb-3"></i>
+                    <p class="text-gray-500 text-sm">Loading submissions...</p>
+                </div>
+            </div>
+        } @else {
+            @if (submissions().length > 0) {
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Student</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Submitted At</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Score</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            @for (submission of submissions(); track submission.id) {
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-3 px-4">
+                                        <div class="font-medium text-gray-900">
+                                            {{submission.student?.user?.firstName}} {{submission.student?.user?.lastName}}
+                                        </div>
+                                        <div class="text-sm text-gray-500">{{submission.student?.user?.email}}</div>
+                                    </td>
+                                    <td class="py-3 px-4 text-sm text-gray-700">
+                                        @if (submission.submittedAt) {
+                                            <div>{{submission.submittedAt | date:'short'}}</div>
+                                            @if (submission.isLate) {
+                                                <span class="text-xs text-red-600">Late</span>
+                                            }
+                                        } @else {
+                                            <span class="text-gray-400">Not submitted</span>
+                                        }
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <span class="px-2 py-1 rounded-lg text-xs font-medium" [ngClass]="getStatusClass(submission.status)">
+                                            {{submission.status | titlecase}}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-sm text-gray-700">
+                                        @if (submission.score !== null && submission.maxScore !== null) {
+                                            <div class="font-medium">
+                                                {{submission.score}} / {{submission.maxScore}}
+                                            </div>
+                                            <div class="text-xs text-gray-500">
+                                                @if (submission.score !== null && submission.maxScore !== null) {
+                                            {{((submission.score! / submission.maxScore!) * 100).toFixed(1)}}%
+                                        }
+                                            </div>
+                                        } @else {
+                                            <span class="text-gray-400">Not graded</span>
+                                        }
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <button
+                                            (click)="onGrade(submission)"
+                                            class="text-blue-600 hover:text-blue-700 text-sm">
+                                            @if (submission.status === SubmissionStatus.GRADED) {
+                                                Update Grade
+                                            } @else {
+                                                Grade
+                                            }
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+                    <p-paginator
+                        [totalRecords]="pagination().total"
+                        [rows]="rows()"
+                        [first]="first()"
+                        [showCurrentPageReport]="true"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} submissions"
+                        [rowsPerPageOptions]="[5,10,20,50]"
+                        (onPageChange)="onPageChange($event)">
+                    </p-paginator>
+                </div>
+            } @else {
+                <div class="flex items-center justify-center h-64">
+                    <div class="text-center">
+                        <i class="fas fa-inbox text-gray-400 text-4xl mb-3"></i>
+                        <p class="text-gray-500">No submissions found</p>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- Grade Dialog -->
+<p-dialog
+    [visible]="showGradeDialog()"
+    (visibleChange)="showGradeDialog.set($event)"
+    [modal]="true"
+    [style]="{width: '500px'}"
+    header="Grade Submission"
+    [draggable]="false"
+    [resizable]="false">
+    @if (selectedSubmission()) {
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Student</label>
+                <p class="text-gray-900">
+                    {{selectedSubmission()?.student?.user?.firstName}} {{selectedSubmission()?.student?.user?.lastName}}
+                </p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Score *</label>
+                <input
+                    type="number"
+                    [ngModel]="gradeData().score"
+                    (ngModelChange)="updateGradeScore($event)"
+                    [max]="gradeData().maxScore || assignment()?.maxScore || 100"
+                    min="0"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Max Score</label>
+                <input
+                    type="number"
+                    [ngModel]="gradeData().maxScore"
+                    (ngModelChange)="updateGradeMaxScore($event)"
+                    min="0"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Feedback</label>
+                <textarea
+                    [ngModel]="gradeData().feedback"
+                    (ngModelChange)="updateGradeFeedback($event)"
+                    rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </textarea>
+            </div>
+            <div class="flex gap-4 justify-end">
+                <button
+                    type="button"
+                    (click)="showGradeDialog.set(false)"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    Cancel
+                </button>
+                <button
+                    type="button"
+                    (click)="submitGrade()"
+                    [disabled]="isLoading()"
+                    class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600 transition disabled:opacity-50">
+                    @if (isLoading()) {
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                    }
+                    Submit Grade
+                </button>
+            </div>
+        </div>
+    }
+</p-dialog>
+
+<p-toast></p-toast>
+

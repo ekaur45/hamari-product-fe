@@ -1,0 +1,218 @@
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Create Assignment</h1>
+
+        <form (ngSubmit)="onSubmit()" class="space-y-6">
+            <!-- Assignment Type Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Assignment Type</label>
+                <div class="flex gap-4">
+                    <label class="flex items-center">
+                        <input
+                            type="radio"
+                            [value]="'class'"
+                            [ngModel]="assignmentType()"
+                            (ngModelChange)="assignmentType.set($event); onTypeChange()"
+                            name="assignmentType"
+                            class="mr-2">
+                        <span>For Class</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input
+                            type="radio"
+                            [value]="'booking'"
+                            [ngModel]="assignmentType()"
+                            (ngModelChange)="assignmentType.set($event); onTypeChange()"
+                            name="assignmentType"
+                            class="mr-2">
+                        <span>For One-on-One Booking</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Class/Booking Selection -->
+            @if (assignmentType() === 'class') {
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Class *</label>
+                    <select
+                        [ngModel]="formData().classId"
+                        (ngModelChange)="updateFormField('classId', $event)"
+                        name="classId"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required>
+                        <option value="">Select a class</option>
+                        @for (c of classes(); track c.id) {
+                            <option [value]="c.id">{{c.subject?.name}}</option>
+                        }
+                    </select>
+                </div>
+            } @else {
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Booking *</label>
+                    <select
+                        [ngModel]="formData().teacherBookingId"
+                        (ngModelChange)="updateFormField('teacherBookingId', $event)"
+                        name="teacherBookingId"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required>
+                        <option value="">Select a booking</option>
+                        @for (b of bookings(); track b.id) {
+                            <option [value]="b.id">
+                                {{b.student?.user?.firstName}} {{b.student?.user?.lastName}} - {{b.teacherSubject?.subject?.name}}
+                            </option>
+                        }
+                    </select>
+                </div>
+            }
+
+            <!-- Title -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                <input
+                    type="text"
+                    [ngModel]="formData().title"
+                    (ngModelChange)="updateFormField('title', $event)"
+                    name="title"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea
+                    [ngModel]="formData().description"
+                    (ngModelChange)="updateFormField('description', $event)"
+                    name="description"
+                    rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </textarea>
+            </div>
+
+            <!-- Type and Max Score -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Assignment Type *</label>
+                    <select
+                        [ngModel]="formData().type"
+                        (ngModelChange)="updateFormField('type', $event)"
+                        name="type"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required>
+                        @for (t of types; track t) {
+                            <option [value]="t">{{t | titlecase}}</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Score *</label>
+                    <input
+                        type="number"
+                        [ngModel]="formData().maxScore"
+                        (ngModelChange)="updateFormField('maxScore', +$event)"
+                        name="maxScore"
+                        min="0"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required>
+                </div>
+            </div>
+
+            <!-- Due Date and Submission Date -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
+                    <input
+                        type="datetime-local"
+                        [ngModel]="formData().dueDate"
+                        (ngModelChange)="updateFormField('dueDate', $event)"
+                        name="dueDate"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Last Submission Date</label>
+                    <input
+                        type="datetime-local"
+                        [ngModel]="formData().submissionDate"
+                        (ngModelChange)="updateFormField('submissionDate', $event)"
+                        name="submissionDate"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Weight and Late Penalty -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Weight (%)</label>
+                    <input
+                        type="number"
+                        [ngModel]="formData().weight"
+                        (ngModelChange)="updateFormField('weight', +$event)"
+                        name="weight"
+                        min="0"
+                        max="100"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Late Penalty (% per day)</label>
+                    <input
+                        type="number"
+                        [ngModel]="formData().latePenalty"
+                        (ngModelChange)="updateFormField('latePenalty', +$event)"
+                        name="latePenalty"
+                        min="0"
+                        max="100"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Allow Late Submission -->
+            <div>
+                <label class="flex items-center">
+                    <input
+                        type="checkbox"
+                        [ngModel]="formData().allowLateSubmission"
+                        (ngModelChange)="updateFormField('allowLateSubmission', $event)"
+                        name="allowLateSubmission"
+                        class="mr-2">
+                    <span class="text-sm font-medium text-gray-700">Allow Late Submission</span>
+                </label>
+            </div>
+
+            <!-- Instructions -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Instructions</label>
+                <textarea
+                    [ngModel]="formData().instructions"
+                    (ngModelChange)="updateFormField('instructions', $event)"
+                    name="instructions"
+                    rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </textarea>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex gap-4">
+                <button
+                    type="submit"
+                    [disabled]="isLoading()"
+                    class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    @if (isLoading()) {
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        Creating...
+                    } @else {
+                        Create Assignment
+                    }
+                </button>
+                <button
+                    type="button"
+                    (click)="router.navigate(['/teacher/assignments'])"
+                    class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<p-toast></p-toast>
+

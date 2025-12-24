@@ -1,157 +1,73 @@
-    <div class="bg-white rounded-lg shadow-md p-5 mb-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div class="flex items-center space-x-3 flex-1">
-                <div class="relative flex-1 max-w-xs">
-                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" placeholder="Search activity..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div class="relative">
-                    <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <select class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
-                        <option value="all">All Actions</option>
-                        <option value="user">User Actions</option>
-                        <option value="academy">Academy Actions</option>
-                        <option value="course">Course Actions</option>
-                        <option value="system">System Actions</option>
-                    </select>
-                    <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-                </div>
-                <div class="relative">
-                    <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <select class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
-                        <option value="all">All Users</option>
-                        <option value="admin">Admin</option>
-                        <option value="teacher">Teachers</option>
-                        <option value="student">Students</option>
-                    </select>
-                    <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-                </div>
+<div class="bg-white rounded-lg shadow-md p-5 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-center space-x-3 flex-1">
+            <div class="relative flex-1 max-w-xs">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="onSearch()" type="text" placeholder="Search logs..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
-            <div class="flex items-center space-x-2">
-                <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
-                    <i class="fas fa-download mr-2"></i>Export Log
-                </button>
+            <div class="relative w-48">
+                <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <select [ngModel]="levelFilter()" (ngModelChange)="onLevelChange($event)" class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                    <option value="">All Levels</option>
+                    @for (lvl of levels; track lvl) {
+                        <option [value]="lvl">{{lvl | uppercase}}</option>
+                    }
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
             </div>
+            <input [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" type="date" class="border border-gray-300 rounded-lg px-3 py-2">
+            <input [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" type="date" class="border border-gray-300 rounded-lg px-3 py-2">
         </div>
-    </div>
-
-    <!-- Activity Log Timeline -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activities</h3>
-        <div class="space-y-4">
-            <div class="flex items-start border-l-4 border-blue-500 pl-4">
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-user-plus text-blue-600"></i>
-                </div>
-                <div class="ml-4 flex-1">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-gray-900">New teacher registered</p>
-                        <span class="text-xs text-gray-500">2 hours ago</span>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">John Smith (TEA001) registered as a teacher in Elite Academy</p>
-                    <div class="flex items-center mt-2 space-x-2">
-                        <span class="text-xs text-gray-500">By: System</span>
-                        <span class="text-xs text-gray-400">â€¢</span>
-                        <span class="text-xs text-gray-500">IP: 192.168.1.1</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-start border-l-4 border-green-500 pl-4">
-                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-building text-green-600"></i>
-                </div>
-                <div class="ml-4 flex-1">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-gray-900">New academy created</p>
-                        <span class="text-xs text-gray-500">5 hours ago</span>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">Premier Academy (REG002) was created by Sarah Brown</p>
-                    <div class="flex items-center mt-2 space-x-2">
-                        <span class="text-xs text-gray-500">By: Sarah Brown (AO002)</span>
-                        <span class="text-xs text-gray-400">â€¢</span>
-                        <span class="text-xs text-gray-500">IP: 192.168.1.2</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-start border-l-4 border-orange-500 pl-4">
-                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-user-edit text-orange-600"></i>
-                </div>
-                <div class="ml-4 flex-1">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-gray-900">User profile updated</p>
-                        <span class="text-xs text-gray-500">1 day ago</span>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">Emily Johnson (STU001) updated her profile information</p>
-                    <div class="flex items-center mt-2 space-x-2">
-                        <span class="text-xs text-gray-500">By: Emily Johnson (STU001)</span>
-                        <span class="text-xs text-gray-400">â€¢</span>
-                        <span class="text-xs text-gray-500">IP: 192.168.1.3</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-start border-l-4 border-purple-500 pl-4">
-                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-book text-purple-600"></i>
-                </div>
-                <div class="ml-4 flex-1">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-gray-900">Course enrollment</p>
-                        <span class="text-xs text-gray-500">1 day ago</span>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">45 students enrolled in Mathematics - Algebra Basics course</p>
-                    <div class="flex items-center mt-2 space-x-2">
-                        <span class="text-xs text-gray-500">By: System</span>
-                        <span class="text-xs text-gray-400">â€¢</span>
-                        <span class="text-xs text-gray-500">IP: 192.168.1.1</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-start border-l-4 border-red-500 pl-4">
-                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-ban text-red-600"></i>
-                </div>
-                <div class="ml-4 flex-1">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-gray-900">User suspended</p>
-                        <span class="text-xs text-gray-500">2 days ago</span>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">Lisa Garcia (TEA002) was suspended by Admin User</p>
-                    <div class="flex items-center mt-2 space-x-2">
-                        <span class="text-xs text-gray-500">By: Admin User (ADMIN)</span>
-                        <span class="text-xs text-gray-400">â€¢</span>
-                        <span class="text-xs text-gray-500">IP: 192.168.1.10</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-start border-l-4 border-indigo-500 pl-4">
-                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-check-circle text-indigo-600"></i>
-                </div>
-                <div class="ml-4 flex-1">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-gray-900">Academy approved</p>
-                        <span class="text-xs text-gray-500">3 days ago</span>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">Advanced Learning Center (REG003) was approved by Admin User</p>
-                    <div class="flex items-center mt-2 space-x-2">
-                        <span class="text-xs text-gray-500">By: Admin User (ADMIN)</span>
-                        <span class="text-xs text-gray-400">â€¢</span>
-                        <span class="text-xs text-gray-500">IP: 192.168.1.10</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Load More -->
-        <div class="mt-6 text-center">
-            <button class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
-                Load More Activities
+        <div class="flex items-center space-x-2">
+            <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition" (click)="onSearch()">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
             </button>
         </div>
     </div>
+</div>
+
+<div class="bg-white rounded-lg shadow-md">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Level</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Message</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Context</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Timestamp</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @for (log of logs(); track log.id) {
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-lg text-xs font-medium"
+                            [ngClass]="{
+                                'bg-red-100 text-red-700': log.level === 'error',
+                                'bg-orange-100 text-orange-700': log.level === 'warn',
+                                'bg-blue-100 text-blue-700': log.level === 'info',
+                                'bg-gray-100 text-gray-700': log.level === 'debug' || log.level === 'verbose'
+                            }">
+                                {{log.level | uppercase}}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-800">
+                            {{log.message}}
+                            @if (log.metadata) {
+                                <div class="text-xs text-gray-500 mt-1">{{ log.metadata | json }}</div>
+                            }
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">{{log.context || '—'}}</td>
+                        <td class="py-3 px-4 text-sm text-gray-700">{{log.timestamp | date:'medium'}}</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+        <p-paginator [totalRecords]="pagination().total" [rows]="rows()" [first]="first()"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} logs"
+        [rowsPerPageOptions]="[5,10,20,50]" (onPageChange)="onPageChange($event)"></p-paginator>
+    </div>
+</div>

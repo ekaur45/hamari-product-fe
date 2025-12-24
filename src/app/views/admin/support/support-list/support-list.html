@@ -1,0 +1,102 @@
+<div class="bg-white rounded-lg shadow-md p-5 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-center space-x-3 flex-1">
+            <div class="relative flex-1 max-w-xs">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="onSearch()" type="text" placeholder="Search tickets..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="relative w-48">
+                <i class="fas fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); onSearch()" class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                    <option value="">All Status</option>
+                    @for (s of statuses; track s) {
+                        <option [value]="s">{{s | titlecase}}</option>
+                    }
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            </div>
+            <div class="relative w-48">
+                <i class="fas fa-flag absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <select [ngModel]="priorityFilter()" (ngModelChange)="priorityFilter.set($event); onSearch()" class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                    <option value="">All Priority</option>
+                    @for (p of priorities; track p) {
+                        <option [value]="p">{{p | titlecase}}</option>
+                    }
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition" (click)="onSearch()">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow-md">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Title</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">User</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Priority</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Created</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @for (ticket of tickets(); track ticket.id) {
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-4 text-sm text-gray-800">
+                            <div class="font-medium">{{ticket.title}}</div>
+                            <div class="text-xs text-gray-500 line-clamp-2">{{ticket.description || '—'}}</div>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-800">
+                            {{ticket.user?.firstName}} {{ticket.user?.lastName}}
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-lg text-xs font-medium"
+                            [ngClass]="{
+                                'bg-green-100 text-green-700': ticket.priority === 'low',
+                                'bg-yellow-100 text-yellow-700': ticket.priority === 'medium',
+                                'bg-red-100 text-red-700': ticket.priority === 'high'
+                            }">
+                                {{ticket.priority | titlecase}}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-lg text-xs font-medium"
+                            [ngClass]="{
+                                'bg-blue-100 text-blue-700': ticket.status === 'open',
+                                'bg-orange-100 text-orange-700': ticket.status === 'in_progress',
+                                'bg-green-100 text-green-700': ticket.status === 'resolved',
+                                'bg-gray-200 text-gray-700': ticket.status === 'closed'
+                            }">
+                                {{ticket.status | titlecase}}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">{{ticket.createdAt | date:'medium'}}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="text-blue-600 hover:text-blue-700 text-sm" (click)="updateStatus(ticket, SupportTicketStatus.IN_PROGRESS)" [disabled]="ticket.status === SupportTicketStatus.IN_PROGRESS">In Progress</button>
+                                <button class="text-green-600 hover:text-green-700 text-sm" (click)="updateStatus(ticket, SupportTicketStatus.RESOLVED)" [disabled]="ticket.status === SupportTicketStatus.RESOLVED">Resolve</button>
+                                <button class="text-gray-600 hover:text-gray-700 text-sm" (click)="updateStatus(ticket, SupportTicketStatus.CLOSED)" [disabled]="ticket.status === SupportTicketStatus.CLOSED">Close</button>
+                                <button class="text-red-600 hover:text-red-700 text-sm" (click)="deleteTicket(ticket)">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+        <p-paginator [totalRecords]="pagination().total" [rows]="rows()" [first]="first()" 
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} tickets"
+        [rowsPerPageOptions]="[5,10,20,50]" (onPageChange)="onPageChange($event)"></p-paginator>
+    </div>
+</div>
+

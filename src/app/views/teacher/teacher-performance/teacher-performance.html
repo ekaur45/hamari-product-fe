@@ -1,0 +1,226 @@
+<div class="max-w-7xl mx-auto">
+    @if (viewMode() === 'overview') {
+        <!-- Overview: All Students Performance -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h1 class="text-2xl font-bold text-gray-900">Students Performance Overview</h1>
+                <button
+                    (click)="navigateToStudents()"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fas fa-users mr-2"></i>View Students
+                </button>
+            </div>
+        </div>
+
+        @if (isLoading()) {
+            <div class="flex items-center justify-center h-64">
+                <div class="text-center">
+                    <i class="fas fa-spinner fa-spin text-primary text-3xl mb-3"></i>
+                    <p class="text-gray-500 text-sm">Loading performance data...</p>
+                </div>
+            </div>
+        } @else {
+            @if (allStudentsPerformance().length > 0) {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @for (performance of allStudentsPerformance(); track performance.student.id) {
+                        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">
+                                        {{performance.student.user?.firstName}} {{performance.student.user?.lastName}}
+                                    </h3>
+                                    <p class="text-sm text-gray-500">{{performance.student.user?.email}}</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold" [ngClass]="getGradeColor(performance)">
+                                        {{getOverallGrade(performance)}}
+                                    </div>
+                                    <div class="text-xs text-gray-500">Grade</div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Average Score:</span>
+                                    <span class="font-semibold">{{performance.averageScore.toFixed(1)}}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Total Score:</span>
+                                    <span class="font-semibold">{{performance.totalScore.toFixed(1)}} / {{performance.maxPossibleScore.toFixed(1)}}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Assignments:</span>
+                                    <span class="font-semibold">{{performance.completedAssignments}} / {{performance.totalAssignments}}</span>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div
+                                            class="bg-primary h-2 rounded-full transition-all"
+                                            [style.width.%]="performance.maxPossibleScore > 0 ? (performance.totalScore / performance.maxPossibleScore) * 100 : 0">
+                                        </div>
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-1 text-right">
+                                        {{performance.maxPossibleScore > 0 ? ((performance.totalScore / performance.maxPossibleScore) * 100).toFixed(1) : 0}}%
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                (click)="viewStudentDetail(performance.student.id)"
+                                class="mt-4 w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-orange-600 transition">
+                                View Details
+                            </button>
+                        </div>
+                    }
+                </div>
+            } @else {
+                <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                    <i class="fas fa-chart-line text-gray-400 text-4xl mb-3"></i>
+                    <p class="text-gray-500">No performance data available</p>
+                </div>
+            }
+        }
+    } @else {
+        <!-- Detail: Single Student Performance -->
+        @if (studentPerformance()) {
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">
+                            {{studentPerformance()?.student!.user!.firstName}} {{studentPerformance()?.student!.user!.lastName}}
+                        </h1>
+                        <p class="text-gray-600">{{studentPerformance()?.student!.user!.email}}</p>
+                    </div>
+                    <button
+                        (click)="navigateToOverview()"
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Overview
+                    </button>
+                </div>
+            </div>
+
+            <!-- Performance Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Overall Grade</div>
+                    <div class="text-3xl font-bold" [ngClass]="getGradeColor(studentPerformance()!)">
+                        {{getOverallGrade(studentPerformance()!)}}
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Average Score</div>
+                    <div class="text-3xl font-bold text-gray-900">
+                        {{studentPerformance()?.averageScore?.toFixed(1) || 0}}
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Total Score</div>
+                    <div class="text-3xl font-bold text-gray-900">
+                        {{studentPerformance()?.totalScore?.toFixed(1) || 0}} / {{studentPerformance()?.maxPossibleScore?.toFixed(1) || 0}}
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-sm text-gray-600 mb-1">Completion</div>
+                    <div class="text-3xl font-bold text-gray-900">
+                        {{studentPerformance()?.completedAssignments}} / {{studentPerformance()?.totalAssignments}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance by Type -->
+            @if (studentPerformance()?.performanceByType && studentPerformance()!.performanceByType.length > 0) {
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Performance by Assignment Type</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        @for (typePerf of studentPerformance()!.performanceByType; track typePerf.type) {
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 mb-1">{{typePerf.type | titlecase}}</div>
+                                <div class="text-2xl font-bold text-gray-900">{{typePerf.averageScore.toFixed(1)}}</div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    {{typePerf.completedAssignments}} / {{typePerf.totalAssignments}} completed
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Assignments List -->
+            <div class="bg-white rounded-lg shadow-md">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Assignments</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Assignment</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Type</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Due Date</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            @for (item of studentPerformance()?.assignments || []; track item.assignment.id) {
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-3 px-4">
+                                        <div class="font-medium text-gray-900">{{item.assignment.title}}</div>
+                                    </td>
+                                    <td class="py-3 px-4 text-sm text-gray-700">
+                                        <span class="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                                            {{item.assignment.type | titlecase}}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-sm text-gray-700">
+                                        @if (item.assignment.dueDate) {
+                                            {{item.assignment.dueDate | date:'short'}}
+                                        } @else {
+                                            —
+                                        }
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        @if (item.submission) {
+                                            <span class="px-2 py-1 rounded-lg text-xs font-medium"
+                                                [ngClass]="{
+                                                    'bg-green-100 text-green-700': item.submission.status === 'graded',
+                                                    'bg-blue-100 text-blue-700': item.submission.status === 'submitted',
+                                                    'bg-gray-100 text-gray-700': item.submission.status === 'pending'
+                                                }">
+                                                {{item.submission.status | titlecase}}
+                                            </span>
+                                        } @else {
+                                            <span class="px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700">
+                                                Not Submitted
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="py-3 px-4 text-sm text-gray-700">
+                                        @if (item.score !== null) {
+                                            <div class="font-medium">
+                                                {{item.score}} / {{item.maxScore}}
+                                            </div>
+                                            <div class="text-xs text-gray-500">
+                                                {{item.percentage?.toFixed(1)}}%
+                                            </div>
+                                        } @else {
+                                            <span class="text-gray-400">—</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        } @else if (isLoading()) {
+            <div class="flex items-center justify-center h-64">
+                <div class="text-center">
+                    <i class="fas fa-spinner fa-spin text-primary text-3xl mb-3"></i>
+                    <p class="text-gray-500 text-sm">Loading performance data...</p>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<p-toast></p-toast>
+

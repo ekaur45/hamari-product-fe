@@ -11,3 +11,5 @@ export * from './class.service';
 export * from './payment.service';
 export * from './performance.service';
 export * from './subject.service';
+export * from './enrollment.service';
+export * from './assignment.service';

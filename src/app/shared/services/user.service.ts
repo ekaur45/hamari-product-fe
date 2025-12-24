@@ -17,7 +17,12 @@ export class UserService {
 
 
   getAdminUsers(page: number = 1, limit: number = 10, search?: string, role?: string, isActive?: boolean): Observable<AdminUsersListDto> {
-    return this.apiService.get<AdminUsersListDto>(API_ENDPOINTS.ADMIN.USERS, { params: { page, limit } }).pipe(
+    const params: any = { page, limit };
+    if (search) params.search = search;
+    if (role) params.role = role;
+    if (typeof isActive === 'boolean') params.isActive = String(isActive);
+
+    return this.apiService.get<AdminUsersListDto>(API_ENDPOINTS.ADMIN.USERS, { params }).pipe(
       map(r => r.data),
       catchError(e => throwError(() => e))
     );
@@ -88,6 +93,27 @@ export class UserService {
           return throwError(() => error);
         })
       );
+  }
+
+  updateAdminUserStatus(id: string, isActive: boolean): Observable<User> {
+    return this.apiService.patch<User>(`${API_ENDPOINTS.ADMIN.USERS}/${id}/status`, { isActive }).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  updateAdminUserRole(id: string, role: string): Observable<User> {
+    return this.apiService.patch<User>(`${API_ENDPOINTS.ADMIN.USERS}/${id}/role`, { role }).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
+  updateAdminUserDeletion(id: string, isDeleted: boolean): Observable<User> {
+    return this.apiService.patch<User>(`${API_ENDPOINTS.ADMIN.USERS}/${id}/deletion`, { isDeleted }).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
   }
 
   /**
