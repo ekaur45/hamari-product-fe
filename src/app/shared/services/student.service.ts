@@ -13,7 +13,7 @@ import { Student, CreateStudentDto, UpdateStudentDto, PaginatedApiResponse, Stud
   providedIn: 'root'
 })
 export class StudentService {
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) { }
 
   /**
    * Get all students with pagination
@@ -30,8 +30,8 @@ export class StudentService {
     );
   }
 
-  getStudentSchedule(studentId: string): Observable<StudentScheduleDto[]> {
-    return this.apiService.get<StudentScheduleDto[]>(API_ENDPOINTS.STUDENTS.SCHEDULE(studentId)).pipe(
+  getStudentSchedule(studentId: string): Observable<StudentScheduleDto> {
+    return this.apiService.get<StudentScheduleDto>(API_ENDPOINTS.STUDENTS.SCHEDULE(studentId)).pipe(
       map(r => r.data),
       catchError(e => throwError(() => e))
     );

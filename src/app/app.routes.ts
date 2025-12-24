@@ -42,6 +42,12 @@ export const routes: Routes = [
                 loadChildren: () => import('./views/teacher/teacher.routes').then(m => m.teacherRoutes)
             },
             {
+                path: 'parent',
+                canActivate: [AuthGuard, RoleGuard],
+                data: { roles: [UserRole.PARENT] },
+                loadChildren: () => import('./views/parent/parent.routes').then(m => m.parentRoutes)
+            },
+            {
                 path: 'test-call',
                 loadComponent: () => import('./views/test-call/test-call').then(m => m.TestCall)
             }

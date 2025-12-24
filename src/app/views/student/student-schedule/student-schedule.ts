@@ -1,13 +1,13 @@
 import { CommonModule } from "@angular/common";
 import { Component, computed, HostListener, OnInit, signal } from "@angular/core";
-import { AuthService, StudentScheduleDto, StudentService } from "../../../shared";
+import { AuthService, ClassBooking, StudentScheduleDto, StudentService, TeacherBookingDto } from "../../../shared";
 import CalendarDay from "../../../shared/models/calendar.interface";
 import { DialogModule } from "primeng/dialog";
 import { Router } from "@angular/router";
 
 interface ScheduleCalendarDay extends CalendarDay {
     hasBooking: boolean;
-    bookings: StudentScheduleDto[];
+    bookings: TeacherBookingDto[];
 }
 
 @Component({
@@ -17,13 +17,14 @@ interface ScheduleCalendarDay extends CalendarDay {
     imports: [CommonModule, DialogModule]
 })
 export class StudentSchedule implements OnInit {
-    studentSchedule = signal<StudentScheduleDto[]>([]);
+    studentSchedule = signal<TeacherBookingDto[]>([]);
+    studentClassSchedule = signal<ClassBooking[]>([]);
     isLoading = signal(false);
     showMonthPicker = signal(false);
     currentMonth = signal(new Date());
     selectedDate = signal<Date | null>(null);
     showBookingDialog = signal(false);
-    selectedDateBookings = signal<StudentScheduleDto[]>([]);
+    selectedDateBookings = signal<TeacherBookingDto[]>([]);
 
     constructor(
         private authService: AuthService,
@@ -42,7 +43,8 @@ export class StudentSchedule implements OnInit {
                 this.isLoading.set(false);
             },
             next: (schedule) => {
-                this.studentSchedule.set(schedule);
+                this.studentSchedule.set(schedule.courseBooking);
+                this.studentClassSchedule.set(schedule.classBooking);
             },
             error: (error) => {
                 console.error(error);
@@ -67,21 +69,21 @@ export class StudentSchedule implements OnInit {
     calendarDays = computed(() => {
         const month = this.currentMonth();
         const bookings = this.studentSchedule();
-        
+
         const year = month.getFullYear();
         const monthIndex = month.getMonth();
-        
+
         // First day of the month
         const firstDay = new Date(year, monthIndex, 1);
         const lastDay = new Date(year, monthIndex + 1, 0);
-        
+
         // Day of week for first day (0 = Sunday, 1 = Monday, etc.)
         // Convert to Monday-based (0 = Monday, 6 = Sunday)
         const startDayOfWeek = firstDay.getDay();
         const mondayBasedDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
-        
+
         // Create date to bookings mapping
-        const bookingMap: Record<string, StudentScheduleDto[]> = {};
+        const bookingMap: Record<string, TeacherBookingDto[]> = {};
         bookings.forEach(booking => {
             if (booking.bookingDate) {
                 const bookingDate = new Date(booking.bookingDate);
@@ -114,7 +116,7 @@ export class StudentSchedule implements OnInit {
             date.setHours(0, 0, 0, 0);
             const dateKey = date.toISOString().split('T')[0];
             const dayBookings = bookingMap[dateKey] || [];
-            
+
             days.push({
                 date,
                 day: date.getDate(),
@@ -133,7 +135,7 @@ export class StudentSchedule implements OnInit {
             date.setHours(0, 0, 0, 0);
             const dateKey = date.toISOString().split('T')[0];
             const dayBookings = bookingMap[dateKey] || [];
-            
+
             days.push({
                 date,
                 day,
@@ -153,7 +155,7 @@ export class StudentSchedule implements OnInit {
             date.setHours(0, 0, 0, 0);
             const dateKey = date.toISOString().split('T')[0];
             const dayBookings = bookingMap[dateKey] || [];
-            
+
             days.push({
                 date,
                 day: date.getDate(),
@@ -225,16 +227,16 @@ export class StudentSchedule implements OnInit {
         if (!startTime || !endTime) return '';
         const [startHours, startMinutes] = startTime.split(':').map(Number);
         const [endHours, endMinutes] = endTime.split(':').map(Number);
-        
+
         const startTotalMinutes = startHours * 60 + startMinutes;
         const endTotalMinutes = endHours * 60 + endMinutes;
         const durationMinutes = endTotalMinutes - startTotalMinutes;
-        
+
         if (durationMinutes < 0) return 'Invalid';
-        
+
         const hours = Math.floor(durationMinutes / 60);
         const minutes = durationMinutes % 60;
-        
+
         if (hours === 0) {
             return `${minutes} min${minutes !== 1 ? 's' : ''}`;
         } else if (minutes === 0) {
@@ -249,20 +251,20 @@ export class StudentSchedule implements OnInit {
         const [hours, minutes] = time.split(':').map(Number);
         const date = new Date();
         date.setHours(hours, minutes);
-        return date.toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
             minute: '2-digit',
-            hour12: true 
+            hour12: true
         });
     }
 
     isSameDay(date1: Date, date2: Date): boolean {
         return date1.getFullYear() === date2.getFullYear() &&
-               date1.getMonth() === date2.getMonth() &&
-               date1.getDate() === date2.getDate();
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate();
     }
 
-    getTimeRemaining(booking: StudentScheduleDto): string {
+    getTimeRemaining(booking: TeacherBookingDto): string {
         if (!booking.bookingDate || !booking.availability.startTime) {
             return '';
         }
@@ -279,7 +281,7 @@ export class StudentSchedule implements OnInit {
             const endDate = new Date(bookingDate);
             const [endHours, endMinutes] = booking.availability.endTime.split(':').map(Number);
             endDate.setHours(endHours, endMinutes, 0, 0);
-            
+
             if (now.getTime() < endDate.getTime()) {
                 return 'In Progress';
             } else {
@@ -304,7 +306,7 @@ export class StudentSchedule implements OnInit {
         }
     }
 
-    getBookingStartDateTime(booking: StudentScheduleDto): Date | null {
+    getBookingStartDateTime(booking: TeacherBookingDto): Date | null {
         if (!booking.bookingDate || !booking.availability.startTime) {
             return null;
         }
@@ -314,7 +316,7 @@ export class StudentSchedule implements OnInit {
         return bookingDate;
     }
 
-    getBookingEndDateTime(booking: StudentScheduleDto): Date | null {
+    getBookingEndDateTime(booking: TeacherBookingDto): Date | null {
         if (!booking.bookingDate || !booking.availability.endTime) {
             return null;
         }

@@ -7,7 +7,8 @@
                 <p class="text-blue-100">Here's your teaching overview for today.</p>
             </div>
             <div class="mt-4 md:mt-0">
-                <a href="teacher-classes.html" class="bg-white text-primary px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition inline-flex items-center">
+                <a routerLink="/teacher/classes"
+                    class="bg-white text-primary px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition inline-flex items-center">
                     <i class="fas fa-book mr-2"></i>
                     Manage Classes
                 </a>
@@ -21,7 +22,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Active Classes</p>
-                    <p class="text-3xl font-bold text-gray-900">8</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ classes().length }}</p>
                     <p class="text-xs text-blue-600 mt-1">
                         <i class="fas fa-check-circle mr-1"></i>All active
                     </p>
@@ -30,7 +31,7 @@
                     <i class="fas fa-book text-white text-2xl"></i>
                 </div>
             </div>
-            <a href="teacher-classes.html" class="text-primary text-xs font-medium mt-3 inline-block hover:underline">
+            <a routerLink="/teacher/classes" class="text-primary text-xs font-medium mt-3 inline-block hover:underline">
                 View all classes <i class="fas fa-arrow-right ml-1"></i>
             </a>
         </div>
@@ -38,16 +39,17 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Total Students</p>
-                    <p class="text-3xl font-bold text-gray-900">245</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ bookings().length }}</p>
                     <p class="text-xs text-green-600 mt-1">
-                        <i class="fas fa-user-plus mr-1"></i>+12 this month
+                        <i class="fas fa-user-plus mr-1"></i>Active 1:1 sessions
                     </p>
                 </div>
                 <div class="w-14 h-14 bg-green-500 rounded-lg flex items-center justify-center">
                     <i class="fas fa-user-graduate text-white text-2xl"></i>
                 </div>
             </div>
-            <a href="teacher-students.html" class="text-green-600 text-xs font-medium mt-3 inline-block hover:underline">
+            <a routerLink="/teacher/students"
+                class="text-green-600 text-xs font-medium mt-3 inline-block hover:underline">
                 View students <i class="fas fa-arrow-right ml-1"></i>
             </a>
         </div>
@@ -55,7 +57,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Pending Grading</p>
-                    <p class="text-3xl font-bold text-gray-900">12</p>
+                    <p class="text-3xl font-bold text-gray-900">0</p>
                     <p class="text-xs text-orange-600 mt-1">
                         <i class="fas fa-exclamation-circle mr-1"></i>Needs attention
                     </p>
@@ -64,24 +66,26 @@
                     <i class="fas fa-tasks text-white text-2xl"></i>
                 </div>
             </div>
-            <a href="teacher-assignments.html" class="text-orange-600 text-xs font-medium mt-3 inline-block hover:underline">
+            <a href="teacher-assignments.html"
+                class="text-orange-600 text-xs font-medium mt-3 inline-block hover:underline">
                 Grade now <i class="fas fa-arrow-right ml-1"></i>
             </a>
         </div>
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600 mb-1">Today's Classes</p>
-                    <p class="text-3xl font-bold text-gray-900">4</p>
+                    <p class="text-sm text-gray-600 mb-1">Today's Sessions</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ classes().length + bookings().length }}</p>
                     <p class="text-xs text-purple-600 mt-1">
-                        <i class="fas fa-calendar-check mr-1"></i>Next: 9:00 AM
+                        <i class="fas fa-calendar-check mr-1"></i>Total classes/bookings
                     </p>
                 </div>
                 <div class="w-14 h-14 bg-purple-500 rounded-lg flex items-center justify-center">
                     <i class="fas fa-calendar-check text-white text-2xl"></i>
                 </div>
             </div>
-            <a href="teacher-schedule.html" class="text-purple-600 text-xs font-medium mt-3 inline-block hover:underline">
+            <a href="teacher-schedule.html"
+                class="text-purple-600 text-xs font-medium mt-3 inline-block hover:underline">
                 View schedule <i class="fas fa-arrow-right ml-1"></i>
             </a>
         </div>
@@ -98,54 +102,56 @@
                 </a>
             </div>
             <div class="space-y-3">
-                <div class="flex items-start p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg hover:bg-blue-100 transition">
+                @for (classItem of classes(); track classItem.id) {
+                <div
+                    class="flex items-start p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg hover:bg-blue-100 transition">
                     <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-video text-white"></i>
                     </div>
                     <div class="ml-3 flex-1">
                         <div class="flex items-center justify-between">
-                            <p class="text-sm font-semibold text-gray-900">Mathematics - Grade 10</p>
-                            <span class="text-xs bg-green-500 text-white px-2 py-1 rounded">Live</span>
+                            <p class="text-sm font-semibold text-gray-900">{{ classItem.name }}</p>
+                            <span class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Recurring</span>
                         </div>
-                        <p class="text-xs text-gray-600 mt-1">Elite Academy | 25 students enrolled</p>
+                        <p class="text-xs text-gray-600 mt-1">{{ classItem.subject?.name }}</p>
                         <div class="flex items-center mt-2 text-xs text-gray-600">
                             <i class="fas fa-clock mr-2"></i>
-                            <span>9:00 AM - 10:30 AM</span>
-                            <a href="session-live.html" class="ml-4 text-primary hover:underline font-medium">Start Session</a>
+                            <span>{{ classItem.day }} | {{ classItem.startTime }} - {{ classItem.endTime }}</span>
+                            <a href="session-live.html" class="ml-4 text-primary hover:underline font-medium">Start
+                                Session</a>
                         </div>
                     </div>
                 </div>
-                <div class="flex items-start p-4 bg-green-50 border-l-4 border-green-500 rounded-lg hover:bg-green-100 transition">
+                }
+
+                @for (booking of bookings(); track booking.id) {
+                <div
+                    class="flex items-start p-4 bg-green-50 border-l-4 border-green-500 rounded-lg hover:bg-green-100 transition">
                     <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-book text-white"></i>
+                        <i class="fas fa-user text-white"></i>
                     </div>
                     <div class="ml-3 flex-1">
-                        <p class="text-sm font-semibold text-gray-900">Science - Grade 9</p>
-                        <p class="text-xs text-gray-600 mt-1">Tech Academy | 18 students enrolled</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-semibold text-gray-900">1:1 Session: {{
+                                booking.student?.user?.firstName }} {{ booking.student?.user?.lastName }}</p>
+                            <span class="text-xs bg-green-500 text-white px-2 py-1 rounded">{{ booking.status }}</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1">{{ booking.teacherSubject?.subject?.name }}</p>
                         <div class="flex items-center mt-2 text-xs text-gray-600">
-                            <i class="fas fa-clock mr-2"></i>
-                            <span>11:00 AM - 12:30 PM</span>
+                            <i class="fas fa-calendar mr-2"></i>
+                            <span>{{ booking.bookingDate | date }}</span>
                         </div>
                     </div>
                 </div>
-                <div class="flex items-start p-4 bg-purple-50 border-l-4 border-purple-500 rounded-lg hover:bg-purple-100 transition">
-                    <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-book text-white"></i>
-                    </div>
-                    <div class="ml-3 flex-1">
-                        <p class="text-sm font-semibold text-gray-900">Mathematics - Grade 11</p>
-                        <p class="text-xs text-gray-600 mt-1">Elite Academy | 22 students enrolled</p>
-                        <div class="flex items-center mt-2 text-xs text-gray-600">
-                            <i class="fas fa-clock mr-2"></i>
-                            <span>2:00 PM - 3:30 PM</span>
-                        </div>
-                    </div>
+                }
+
+                @if (!classes().length && !bookings().length) {
+                <div class="text-center py-8">
+                    <p class="text-gray-500">No classes or bookings scheduled for today.</p>
+                    <a href="teacher-schedule.html"
+                        class="text-primary hover:underline font-medium mt-2 inline-block">Manage Schedule</a>
                 </div>
-                <div class="text-center pt-2">
-                    <a href="teacher-schedule.html" class="text-primary text-sm font-medium hover:underline">
-                        View all upcoming classes <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
+                }
             </div>
         </div>
 
@@ -153,16 +159,20 @@
         <div class="bg-white rounded-lg shadow-md p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
             <div class="space-y-3">
-                <a href="teacher-assignments.html" class="block w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-center font-medium">
+                <a href="teacher-assignments.html"
+                    class="block w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-center font-medium">
                     <i class="fas fa-tasks mr-2"></i>Create Assignment
                 </a>
-                <a href="teacher-assignments.html" class="block w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-center font-medium">
+                <a href="teacher-assignments.html"
+                    class="block w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-center font-medium">
                     <i class="fas fa-check-circle mr-2"></i>Grade Submissions
                 </a>
-                <a href="teacher-classes.html" class="block w-full px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-center font-medium">
+                <a href="teacher-classes.html"
+                    class="block w-full px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-center font-medium">
                     <i class="fas fa-users mr-2"></i>Manage Classes
                 </a>
-                <a href="teacher-schedule.html" class="block w-full px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-center font-medium">
+                <a href="teacher-schedule.html"
+                    class="block w-full px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-center font-medium">
                     <i class="fas fa-calendar-alt mr-2"></i>View Schedule
                 </a>
             </div>
@@ -180,7 +190,8 @@
                 </a>
             </div>
             <div class="space-y-4">
-                <div class="flex items-start justify-between p-3 border border-orange-200 rounded-lg hover:bg-orange-50 transition">
+                <div
+                    class="flex items-start justify-between p-3 border border-orange-200 rounded-lg hover:bg-orange-50 transition">
                     <div class="flex items-start flex-1">
                         <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-file-alt text-orange-600"></i>
@@ -194,11 +205,13 @@
                             </div>
                         </div>
                     </div>
-                    <a href="teacher-assignments.html" class="ml-3 px-3 py-1.5 bg-primary text-white text-xs rounded-lg hover:bg-blue-600 transition">
+                    <a href="teacher-assignments.html"
+                        class="ml-3 px-3 py-1.5 bg-primary text-white text-xs rounded-lg hover:bg-blue-600 transition">
                         Grade
                     </a>
                 </div>
-                <div class="flex items-start justify-between p-3 border border-blue-200 rounded-lg hover:bg-blue-50 transition">
+                <div
+                    class="flex items-start justify-between p-3 border border-blue-200 rounded-lg hover:bg-blue-50 transition">
                     <div class="flex items-start flex-1">
                         <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-tasks text-primary"></i>
@@ -212,11 +225,13 @@
                             </div>
                         </div>
                     </div>
-                    <a href="teacher-assignments.html" class="ml-3 px-3 py-1.5 bg-primary text-white text-xs rounded-lg hover:bg-blue-600 transition">
+                    <a href="teacher-assignments.html"
+                        class="ml-3 px-3 py-1.5 bg-primary text-white text-xs rounded-lg hover:bg-blue-600 transition">
                         Grade
                     </a>
                 </div>
-                <div class="flex items-start justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                <div
+                    class="flex items-start justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
                     <div class="flex items-start flex-1">
                         <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-book text-gray-600"></i>
@@ -230,7 +245,8 @@
                             </div>
                         </div>
                     </div>
-                    <a href="teacher-assignments.html" class="ml-3 px-3 py-1.5 bg-gray-200 text-gray-700 text-xs rounded-lg hover:bg-gray-300 transition">
+                    <a href="teacher-assignments.html"
+                        class="ml-3 px-3 py-1.5 bg-gray-200 text-gray-700 text-xs rounded-lg hover:bg-gray-300 transition">
                         Review
                     </a>
                 </div>
@@ -364,7 +380,8 @@
                     </div>
                     <div class="ml-3 flex-1">
                         <p class="text-sm font-semibold text-gray-900">New Student Enrollments</p>
-                        <p class="text-xs text-gray-600 mt-1">3 new students have enrolled in your Mathematics Grade 10 class this week.</p>
+                        <p class="text-xs text-gray-600 mt-1">3 new students have enrolled in your Mathematics Grade 10
+                            class this week.</p>
                         <p class="text-xs text-gray-500 mt-2">2 hours ago</p>
                     </div>
                 </div>
@@ -374,7 +391,8 @@
                     </div>
                     <div class="ml-3 flex-1">
                         <p class="text-sm font-semibold text-gray-900">Assignment Deadline Reminder</p>
-                        <p class="text-xs text-gray-600 mt-1">Science Project submission deadline is tomorrow. Remind students to submit.</p>
+                        <p class="text-xs text-gray-600 mt-1">Science Project submission deadline is tomorrow. Remind
+                            students to submit.</p>
                         <p class="text-xs text-gray-500 mt-2">5 hours ago</p>
                     </div>
                 </div>
@@ -384,7 +402,8 @@
                     </div>
                     <div class="ml-3 flex-1">
                         <p class="text-sm font-semibold text-gray-900">Schedule Update</p>
-                        <p class="text-xs text-gray-600 mt-1">Your Mathematics Grade 11 class time has been updated. Check your schedule.</p>
+                        <p class="text-xs text-gray-600 mt-1">Your Mathematics Grade 11 class time has been updated.
+                            Check your schedule.</p>
                         <p class="text-xs text-gray-500 mt-2">1 day ago</p>
                     </div>
                 </div>

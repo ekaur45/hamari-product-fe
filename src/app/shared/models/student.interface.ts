@@ -46,7 +46,7 @@ export interface UpdateStudentDto {
   isActive?: boolean;
 }
 
-export interface StudentScheduleDto {
+export interface TeacherBookingDto {
   id: string;
   teacherId: string;
   teacher: Teacher;
@@ -73,7 +73,10 @@ export interface StudentBookingDto {
   createdAt: Date;
 }
 
-
+export interface StudentScheduleDto {
+  courseBooking: TeacherBookingDto[];
+  classBooking: ClassBooking[];
+}
 
 
 
