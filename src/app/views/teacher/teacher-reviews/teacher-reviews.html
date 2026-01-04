@@ -12,7 +12,7 @@
                             {{reviewsData()?.stats?.averageRating?.toFixed(1) || 0}}
                         </div>
                         <div class="flex">
-                            @for (star of getStars(Math.round(reviewsData()!.stats?.averageRating || 0)); track $index) {
+                            @for (star of getStars(Math.round(reviewsData()!.stats!.averageRating || 0)); track $index) {
                                 <i class="fas fa-star text-yellow-400"></i>
                             }
                             @for (star of getStars(5 - Math.round(reviewsData()!.stats.averageRating)); track $index) {

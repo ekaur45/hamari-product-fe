@@ -39,7 +39,7 @@
                 class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
                 <option value="">All Classes</option>
                 @for (c of classes(); track c.id) {
-                    <option [value]="c.id">{{c.subject?.name}}</option>
+                    <option [value]="c.id">{{c.subject!.name}}</option>
                 }
             </select>
         </div>
@@ -90,7 +90,7 @@
                                 </td>
                                 <td class="py-3 px-4 text-sm text-gray-700">
                                     @if (assignment.class) {
-                                        {{assignment.class.subject?.name}}
+                                        {{assignment.class.subject!.name}}
                                     } @else if (assignment.teacherBooking) {
                                         One-on-One
                                     } @else {

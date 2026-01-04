@@ -218,21 +218,21 @@
                                 Professional Course</p>
                             <h3
                                 class="text-white font-extrabold text-xl leading-tight group-hover:text-primary transition-colors cursor-default drop-shadow-lg">
-                                {{item.subject?.name}}
+                                {{item.subject!.name}}
                             </h3>
                         </div>
                     </div>
 
                     <div class="p-6">
                         <div class="flex items-center gap-3 mb-8 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <profile-photo [user]="item.teacher?.user ?? null"
+                            <profile-photo [user]="item.teacher!.user ?? null"
                                 class="w-10 h-10 rounded-lg shadow-sm border-2 border-white"></profile-photo>
                             <div class="flex-1 overflow-hidden">
                                 <p
                                     class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
                                     Mentor</p>
-                                <p class="text-sm font-bold text-slate-900 truncate">{{item.teacher?.user?.firstName}}
-                                    {{item.teacher?.user?.lastName}}</p>
+                                <p class="text-sm font-bold text-slate-900 truncate">{{item.teacher!.user!.firstName}}
+                                    {{item.teacher!.user!.lastName}}</p>
                             </div>
                         </div>
 

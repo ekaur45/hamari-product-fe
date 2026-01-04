@@ -62,9 +62,9 @@
                                         </div>
                                         <div class="flex-1">
                                             <h3 class="font-semibold text-gray-900">
-                                                {{student.user?.firstName}} {{student.user?.lastName}}
+                                                {{student.user!.firstName}} {{student.user!.lastName}}
                                             </h3>
-                                            <p class="text-sm text-gray-500">{{student.user?.email}}</p>
+                                            <p class="text-sm text-gray-500">{{student.user!.email}}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -98,9 +98,9 @@
                                                 </div>
                                                 <div class="flex-1">
                                                     <h3 class="font-semibold text-gray-900">
-                                                        {{student.user?.firstName}} {{student.user?.lastName}}
+                                                        {{student.user!.firstName}} {{student.user!.lastName}}
                                                     </h3>
-                                                    <p class="text-sm text-gray-500">{{student.user?.email}}</p>
+                                                    <p class="text-sm text-gray-500">{{student.user!.email}}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -142,12 +142,12 @@
                                         <tr class="hover:bg-gray-50 transition">
                                             <td class="py-3 px-4">
                                                 <div class="font-medium text-gray-900">
-                                                    {{item.student.user?.firstName}} {{item.student.user?.lastName}}
+                                                    {{item.student.user!.firstName}} {{item.student.user!.lastName}}
                                                 </div>
-                                                <div class="text-sm text-gray-500">{{item.student.user?.email}}</div>
+                                                <div class="text-sm text-gray-500">{{item.student.user!.email}}</div>
                                             </td>
                                             <td class="py-3 px-4 text-sm text-gray-700">
-                                                {{item.booking.teacherSubject?.subject?.name || 'N/A'}}
+                                                {{item.booking.teacherSubject!.subject?.name || 'N/A'}}
                                             </td>
                                             <td class="py-3 px-4 text-sm text-gray-700">
                                                 {{item.booking.bookingDate | date:'short'}}

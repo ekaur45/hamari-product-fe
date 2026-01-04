@@ -42,7 +42,7 @@
                         required>
                         <option value="">Select a class</option>
                         @for (c of classes(); track c.id) {
-                            <option [value]="c.id">{{c.subject?.name}}</option>
+                            <option [value]="c.id">{{c.subject!.name}}</option>
                         }
                     </select>
                 </div>
@@ -58,7 +58,7 @@
                         <option value="">Select a booking</option>
                         @for (b of bookings(); track b.id) {
                             <option [value]="b.id">
-                                {{b.student?.user?.firstName}} {{b.student?.user?.lastName}} - {{b.teacherSubject?.subject?.name}}
+                                {{b.student!.user!.firstName}} {{b.student!.user!.lastName}} - {{b.teacherSubject!.subject!.name}}
                             </option>
                         }
                     </select>
