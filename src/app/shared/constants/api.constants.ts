@@ -7,6 +7,11 @@
  */
 export const API_ENDPOINTS = {
 
+  // Nationalities
+  NATIONALITIES: {
+    BASE: '/nationalities'
+  },
+
   // Profile
   PROFILE: {
     BASE: '/profile'

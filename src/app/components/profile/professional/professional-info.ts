@@ -21,6 +21,7 @@ export class ProfessionalInfo implements OnInit {
         preferredSubject: new FormControl('', [Validators.required]),
         yearsOfExperience: new FormControl(0, [Validators.required]),
         bio: new FormControl('', [Validators.required]),
+        introduction: new FormControl('', [Validators.required]),        
     });
     isSaving = signal(false);
     constructor(private profileService: ProfileService, private messageService: MessageService) {

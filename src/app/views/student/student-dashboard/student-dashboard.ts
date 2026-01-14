@@ -28,7 +28,10 @@ export class StudentDashboard implements OnInit {
 
   fetchEnrollments() {
     this.enrollmentService.getMyEnrollments().subscribe(data => {
-      this.enrollments.set(data);
+      this.enrollments.set({
+        classBookings: data.classBookings.slice(0, 3),
+        teacherBookings: data.teacherBookings.slice(0, 3),
+      });
     });
   }
 }

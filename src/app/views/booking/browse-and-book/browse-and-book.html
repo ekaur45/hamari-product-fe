@@ -17,7 +17,7 @@
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                     <!-- View Toggle -->
                     <div class="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200">
-                        <button (click)="switchView('teachers')" [class.bg-white]="viewMode() === 'teachers'"
+                        <button [routerLink]="['/booking', 'teachers']" [class.bg-white]="viewMode() === 'teachers'"
                             [class.text-primary]="viewMode() === 'teachers'"
                             [class.shadow-sm]="viewMode() === 'teachers'"
                             class="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all"
@@ -25,7 +25,14 @@
                             <i class="fas fa-user-graduate"></i>
                             Tutors
                         </button>
-                        <button (click)="switchView('classes')" [class.bg-white]="viewMode() === 'classes'"
+                        <button [routerLink]="['/booking', 'subjects']" [class.bg-white]="viewMode() === 'subjects'"
+                            [class.text-primary]="viewMode() === 'subjects'" [class.shadow-sm]="viewMode() === 'subjects'"
+                            class="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all"
+                            [class.text-slate-400]="viewMode() !== 'subjects'">
+                            <i class="fas fa-layer-group"></i>
+                            Subjects
+                        </button>
+                        <button [routerLink]="['/booking', 'classes']" [class.bg-white]="viewMode() === 'classes'"
                             [class.text-primary]="viewMode() === 'classes'" [class.shadow-sm]="viewMode() === 'classes'"
                             class="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all"
                             [class.text-slate-400]="viewMode() !== 'classes'">
@@ -189,7 +196,35 @@
                 </div>
                 }
             </div>
-            } @else {
+            } @else if (viewMode() === 'subjects') {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                @for (item of subjects(); track item.id) {
+                <div class="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-primary/30 hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] transition-all duration-500">
+                    <div class="h-44 relative overflow-hidden bg-slate-900">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10">
+                        </div>
+                        <div class="absolute inset-0 scale-105 group-hover:scale-110 transition-transform duration-700 opacity-60">
+                            <div class="w-full h-full bg-gradient-to-br from-primary/20 to-slate-900"></div>
+                        </div>
+                        <div class="absolute top-4 left-4 z-20 flex items-center gap-2">
+                            <span class="px-2 py-1 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[9px] font-black uppercase tracking-widest rounded-md">Subject</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-extrabold text-slate-900 group-hover:text-primary transition-colors mb-1 truncate">{{item.name}}</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Rate
+                            starts</p>
+                        <p class="text-xl font-black text-slate-900">PKR {{item.teacherSubjects?.[0]?.monthlyRate || 5000}}</p>
+                    </div>
+                    <div class="p-6">
+                        <button [routerLink]="['/booking', item.id, 'session']" class="px-6 py-3.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-all active:scale-95 shadow-lg shadow-slate-900/10">Enrol</button>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else if (viewMode() === 'classes') {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                 @for (item of classes(); track item.id) {
                 <div

@@ -9,6 +9,7 @@ export interface User {
   username: string;
   firstName: string;
   lastName: string;
+  profilePhoto?: string;
   role: UserRole;
   isActive: boolean;
   createdAt: Date;

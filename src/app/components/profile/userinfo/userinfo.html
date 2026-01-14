@@ -8,10 +8,9 @@
                     <span class="text-red-500">*</span>
                 </label>
                 <div class="relative">
-                    <input type="text" value="John" class="app-input-field pl-10"
-                    name="firstName"
-                    formControlName="firstName"
-                    >
+                    <input type="text" value="John"
+                        class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
+                        name="firstName" formControlName="firstName">
                 </div>
             </div>
             <div>
@@ -20,10 +19,9 @@
                     <span class="text-red-500">*</span>
                 </label>
                 <div class="relative">
-                    <input type="text" value="Smith" class="app-input-field"
-                    name="lastName"
-                    formControlName="lastName"
-                    >
+                    <input type="text" value="Smith"
+                        class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
+                        name="lastName" formControlName="lastName">
                 </div>
             </div>
             <div>
@@ -31,7 +29,8 @@
                     <i class="fas fa-envelope mr-2"></i>Email Address
                 </label>
                 <div class="relative">
-                    <input type="email" readonly [value]="user()?.email ?? ''" class="app-input-field readonly">
+                    <input type="email" readonly [value]="user()?.email ?? ''"
+                        class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none transition bg-gray-200 readonly">
                 </div>
             </div>
             <div>
@@ -39,16 +38,126 @@
                     <i class="fas fa-phone mr-2"></i>Phone Number
                 </label>
                 <div class="relative">
-                    <input type="tel" value="+1 234 567 8900" class="app-input-field">
+                    <ngx-intl-tel-input name="phone" formControlName="phone"
+                        [preferredCountries]="[CountryISO.Pakistan, CountryISO.UnitedStates]"
+                        [enableAutoCountrySelect]="true" [enablePlaceholder]="true" [searchCountryFlag]="true"
+                        [searchCountryField]="[
+          SearchCountryField.Iso2,
+          SearchCountryField.Name
+        ]" [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.Pakistan" [maxLength]="15"
+                        [phoneValidation]="true" [separateDialCode]="true" [numberFormat]="PhoneNumberFormat.National"
+                        name="phone" formControlName="phone"
+                        [cssClass]="'w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white'"></ngx-intl-tel-input>
+                    <!-- <input type="tel" value="" name="phone" formControlName="phone" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"> -->
                 </div>
             </div>
             <div>
-                <button type="button" [ngClass]="{'bg-gray-400': !hasChanges,'bg-primary hover:bg-orange-600':hasChanges}" class="px-5 py-3 rounded-xl font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm  text-white  shadow-lg hover:shadow-xl"
-                [disabled]="!hasChanges"
-                (click)="onSaveChanges()"
-                >
-                    <i class="fas fa-save mr-2"></i>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-globe mr-2"></i>
+                    Nationality
+                </label>
+                <div class="relative">
+                    <p-select 
+                        [options]="nationalities()"
+                        formControlName="nationality"
+                        class="w-full px-1 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
+                        optionLabel="name"
+                        optionValue="code"
+                        placeholder="Select a country"
+                        filter="true"
+                    ></p-select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-calendar mr-2"></i>
+                    Date of Birth
+                </label>
+                <div class="relative">
+                    <p-date-picker formControlName="dob"
+                    [inputStyleClass]="'w-full px-1 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white'"
+                    [appendTo]="'body'"
+                    size="large"
+                    
+                    class="w-full"></p-date-picker>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-genderless mr-2"></i>
+                    Gender
+                </label>
+                <div class="relative">
+                    <p-select [options]="[
+                        {name: 'Male', code: 'male'},
+                        {name: 'Female', code: 'female'},
+                        {name: 'Other', code: 'other'}
+                    ]" formControlName="gender" class="w-full px-1 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white" optionLabel="name" optionValue="code" placeholder="Select a gender"></p-select>
+                </div>
+            </div>
+            <div class="col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-map-marker-alt mr-2"></i>
+                    Address
+                </label>
+                <div class="relative">
+                    <textarea name="address" formControlName="address" rows="3" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"></textarea>
+                </div>               
+            </div>
+            <div class="col-span-2 ">
+                <div class="grid grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-city mr-2"></i>
+                        City
+                    </label>
+                    <div class="relative">
+                        <input type="text" name="city" formControlName="city" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-state mr-2"></i>
+                        State
+                    </label>
+                    <div class="relative">
+                        <input type="text" name="state" formControlName="state" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-zip mr-2"></i>
+                        Zip Code
+                    </label>
+                    <div class="relative">
+                        <input type="text" name="zip" formControlName="zip" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-globe mr-2"></i>
+                        Country
+                    </label>
+                    <div class="relative">
+                        <input type="text" name="country" formControlName="country" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                    </div>
+                </div>
+                </div>
+            </div>
+            <hr class="my-4 w-full border-gray-200 col-span-2">
+            <div>
+                <button type="button"
+                    [ngClass]="{'bg-gray-400': !hasChanges,'bg-primary hover:bg-orange-600':hasChanges}"
+                    class="px-6 py-2 rounded-xl font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm  text-white  shadow-lg hover:shadow-xl"
+                    [disabled]="!hasChanges" (click)="onSaveChanges()">
+                    <i class="fas mr-2"
+                        [ngClass]="{'fa-spinner fa-spin animate-spin': isSaving(),'fa-save': !isSaving()}"></i>
+                    @if(isSaving()) {
+                    <span>Saving...</span>
+                    } @else {
                     <span>Save Changes</span>
+                    }
                 </button>
             </div>
         </div>

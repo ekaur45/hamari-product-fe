@@ -1,6 +1,30 @@
 <p-toast />
 <form class="form-section" [formGroup]="professionalForm">
     <div class="bg-white rounded-lg shadow-md p-6">
+        <h4 class="text-lg font-semibold text-gray-900 mb-4">
+            Introduction
+        </h4>
+        <div>
+            <h4 class="text-md font-semibold text-gray-500 mb-4">About You</h4>
+            <div class="relative">
+                <textarea rows="3"
+                    class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition"
+                    placeholder="Enter your introduction..." name="introduction"
+                    formControlName="introduction"></textarea>
+            </div>
+
+            <div>
+                <button>Upload your introduction video (max 10MB)</button>
+                <br>
+                Or
+                <br>
+                <label>Provide a youtube link to your introduction video</label>
+                <input type="text" name="youtubeLink" formControlName="youtubeLink"
+                    class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition">
+                <div id="youtubeLinkPreview"></div>
+            </div>
+
+        </div>
         <h4 class="text-lg font-semibold text-gray-900 mb-4">Professional Information</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -8,9 +32,7 @@
                     <i class="fas fa-book mr-2"></i>Preferred Subject
                 </label>
                 <div class="relative">
-                    <input type="text"
-                    name="preferredSubject"
-                    formControlName="preferredSubject"
+                    <input type="text" name="preferredSubject" formControlName="preferredSubject"
                         class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition">
                 </div>
             </div>
@@ -19,9 +41,7 @@
                     <i class="fas fa-calendar-alt mr-2"></i>Years of Experience
                 </label>
                 <div class="relative">
-                    <input type="number"
-                    name="yearsOfExperience"
-                    formControlName="yearsOfExperience"
+                    <input type="text" name="yearsOfExperience" formControlName="yearsOfExperience"
                         class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition">
                 </div>
             </div>
@@ -30,22 +50,21 @@
                 <div class="relative">
                     <textarea rows="3"
                         class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition"
-                        placeholder="Enter your bio or tagline..."
-                        name="bio"
-                        formControlName="bio">
+                        placeholder="Enter your bio or tagline..." name="bio" formControlName="bio">
                     </textarea>
                 </div>
             </div>
             <div>
-                <button type="button" [ngClass]="{'bg-gray-400': !hasChanges,'bg-primary hover:bg-orange-600':hasChanges}" class="px-5 py-3 rounded-xl font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm  text-white  shadow-lg hover:shadow-xl"
-                [disabled]="!hasChanges"
-                (click)="onSaveChanges()"
-                >
-                    <i class="fas mr-2" [ngClass]="{'fa-spinner fa-spin animate-spin': isSaving(),'fa-save': !isSaving()}"></i>
+                <button type="button"
+                    [ngClass]="{'bg-gray-400': !hasChanges,'bg-primary hover:bg-orange-600':hasChanges}"
+                    class="px-6 py-2 rounded-xl font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm  text-white  shadow-lg hover:shadow-xl"
+                    [disabled]="!hasChanges" (click)="onSaveChanges()">
+                    <i class="fas mr-2"
+                        [ngClass]="{'fa-spinner fa-spin animate-spin': isSaving(),'fa-save': !isSaving()}"></i>
                     @if(isSaving()) {
-                        Saving...
+                    Saving...
                     } @else {
-                        Save Changes
+                    Save Changes
                     }
                 </button>
             </div>

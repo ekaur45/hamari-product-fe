@@ -9,7 +9,12 @@ import TestPayment from "./test-payment/test-payment";
 export const bookingRoutes: Routes = [
     {
         path: '',
-        component: BrowseAndBook
+        redirectTo: 'teachers',
+        pathMatch: 'full'
+    },
+    {
+        path: ':viewMode',
+        component: BrowseAndBook        
     },
     {
         path:':id/session',

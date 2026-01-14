@@ -1,1 +1,119 @@
-Teacher Booking
+<!-- Loading State -->
+@if(isLoading()) {
+<div class="flex items-center justify-center min-h-screen">
+    <div class="text-center">
+        <i class="fas fa-spinner fa-spin text-4xl text-primary mb-4"></i>
+        <p class="text-gray-600">Loading teacher subjects...</p>
+    </div>
+</div>
+} @else {
+
+
+<!-- Two Column Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-[30%_70%] px-2">
+    <!-- First Column: Teacher Details & Subjects (30%) -->
+    <div class="flex flex-col lg:pr-2">
+        <!-- Teacher Details Section -->
+        @if(teacher()) {
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200 flex-shrink-0">
+            <div class="flex items-start justify-between">
+                <button [routerLink]="['/booking']" class="px-4 py-2 pl-0 text-gray-600 hover:text-gray-900 transition">
+                    <i class="fas fa-arrow-left mr-2 text-2xl"></i>
+                </button>
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                        {{teacher()?.user?.firstName || ''}} {{teacher()?.user?.lastName || ''}}
+                    </h1>
+                    @if(teacher()?.tagline) {
+                    <p class="text-gray-600 leading-relaxed">{{teacher()?.tagline}}</p>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+
+        <!-- Available Subjects Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 flex-1">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-book text-primary"></i>
+                <span>Available Subjects</span>
+                <span class="text-sm font-normal text-gray-500">({{teacherSubjects().length}})</span>
+            </h2>
+
+            @if(teacherSubjects().length > 0) {
+            <div class="space-y-4">
+                @for(subjectItem of teacherSubjects(); track subjectItem.id) {
+                <div class="border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+                    [class.border-primary]="selectedSubject()?.id === subjectItem.id"
+                    [class.border-gray-200]="selectedSubject()?.id !== subjectItem.id"
+                    [class.bg-primary/5]="selectedSubject()?.id === subjectItem.id"
+                    (click)="selectSubject(subjectItem)">
+                    <div class="flex items-start gap-3 mb-3">
+                        <div
+                            class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-gray-900 truncate">{{subjectItem.name}}</h3>
+                            @if(subjectItem.description) {
+                            <p class="text-sm text-gray-600 line-clamp-2">{{subjectItem.description}}</p>
+                            }
+                        </div>
+                        @if(selectedSubject()?.id === subjectItem.id) {
+                        <i class="fas fa-check-circle text-primary text-xl"></i>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="text-center py-12 border border-gray-200 border-dashed rounded-lg">
+                <i class="fas fa-book text-gray-300 text-4xl mb-4"></i>
+                <p class="text-gray-500 text-lg font-medium mb-2">No subjects available</p>
+                <p class="text-gray-400 text-sm">This teacher doesn't teach any subjects yet</p>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Second Column: Calendar/Availability (70%) -->
+    <div class="flex flex-col lg:pl-2">
+        @if(selectedTeacher()) {
+        <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200 h-full flex flex-col">
+            <!-- Calendar Header -->
+            <div class="flex items-center justify-between mb-3 flex-shrink-0">
+                <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-calendar-check text-primary text-sm"></i>
+                    <span>Select Date & Time</span>
+                </h2>
+                <div class="text-xs text-gray-600">
+                    <span class="font-medium">{{selectedTeacher()?.teacher?.user?.firstName || ''}}
+                        {{selectedTeacher()?.teacher?.user?.lastName || ''}}</span>
+                </div>
+            </div>
+
+            @if(selectedTeacher()?.teacher?.availabilities && selectedTeacher()!.teacher!.availabilities.length > 0) {
+            <!-- View Toggle & Navigation -->
+            <app-booking-calendar [availabilities]="selectedTeacher()!.teacher!.availabilities" (onBookSlot)="bookSlot($event)"></app-booking-calendar>
+            } @else {
+            <div
+                class="text-center py-12 border border-gray-200 border-dashed rounded-lg flex-1 flex items-center justify-center flex-col">
+                <i class="fas fa-calendar-times text-gray-300 text-4xl mb-4"></i>
+                <p class="text-gray-500 text-lg font-medium mb-2">No availability slots</p>
+                <p class="text-gray-400 text-sm">This teacher hasn't set their availability yet</p>
+            </div>
+            }
+        </div>
+        } @else {
+        <!-- No Teacher Selected -->
+        <div
+            class="bg-white rounded-lg shadow-md p-12 border border-gray-200 text-center h-full flex items-center justify-center flex-col">
+            <i class="fas fa-hand-pointer text-gray-300 text-5xl mb-4"></i>
+            <p class="text-gray-500 text-lg font-medium mb-2">Select a teacher to view availability</p>
+            <p class="text-gray-400 text-sm">Choose a teacher from the list to see their available time slots</p>
+        </div>
+        }
+    </div>
+</div>
+
+}

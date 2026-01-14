@@ -44,12 +44,8 @@
                     [class.border-gray-200]="selectedTeacher()?.id !== teacherSubject.id"
                     [class.bg-primary/5]="selectedTeacher()?.id === teacherSubject.id"
                     (click)="selectTeacher(teacherSubject)">
-                    <div class="flex items-start gap-3 mb-3">
-                        <div
-                            class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
-                            {{teacherSubject.teacher?.user?.firstName?.charAt(0) ||
-                            ''}}{{teacherSubject.teacher?.user?.lastName?.charAt(0) || ''}}
-                        </div>
+                    <div class="flex items-start gap-3 mb-3">    
+                        <profile-photo [user]="teacherSubject.teacher?.user"></profile-photo>
                         <div class="flex-1 min-w-0">
                             <h3 class="font-semibold text-gray-900 truncate">
                                 {{teacherSubject.teacher?.user?.firstName || ''}}

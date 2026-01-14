@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit, signal } from "@angular/core";
-import { RouterModule } from "@angular/router";
+import { ActivatedRoute, RouterModule } from "@angular/router";
 import { SubjectService } from "../../../shared/services/subject.service";
 import { Class, EnrollmentService, Subject, Teacher, TeacherSubject } from "../../../shared";
 import { ProfilePhoto } from "../../../components/misc/profile-photo/profile-photo";
@@ -15,9 +15,10 @@ import { FormsModule } from "@angular/forms";
 export default class BrowseAndBook implements OnInit {
     subjects = signal<Subject[]>([]);
     isLoading = signal(false);
+    isLoadingSubjects = signal(false);
 
     // View state
-    viewMode = signal<'teachers' | 'classes'>('teachers');
+    viewMode = signal<'teachers' | 'classes' | 'subjects'>('teachers');
     searchQuery = signal('');
     selectedSubject = signal('');
     priceRange = signal(50000);
@@ -30,13 +31,20 @@ export default class BrowseAndBook implements OnInit {
 
     teachers = signal<Teacher[]>([]);
     classes = signal<Class[]>([]);
-    constructor(private subjectService: SubjectService, private readonly enrollmentService: EnrollmentService) {
-
+    constructor(private subjectService: SubjectService, private readonly enrollmentService: EnrollmentService, private readonly route: ActivatedRoute) {
+        this.route.params.subscribe((params: any) => {
+            this.viewMode.set(params['viewMode'] as 'teachers' | 'classes' | 'subjects');
+            if (this.viewMode() === 'subjects') {
+                this.getSubjects();
+            } else if (this.viewMode() === 'teachers') {
+                this.getTeachers();
+            } else if (this.viewMode() === 'classes') {
+                this.getClasses();
+            }
+        });
     }
     ngOnInit(): void {
-        this.getSubjects();
-        this.getTeachers();
-        this.getClasses();
+        
     }
 
 
@@ -59,7 +67,9 @@ export default class BrowseAndBook implements OnInit {
     }
 
     getSubjects(): void {
+        this.isLoadingSubjects.set(true);
         this.subjectService.getSubjects(1, 100).subscribe((subjects) => {
+            this.isLoadingSubjects.set(false);
             this.subjects.set(subjects.data);
         });
     }
@@ -91,7 +101,7 @@ export default class BrowseAndBook implements OnInit {
         }
     }
 
-    switchView(mode: 'teachers' | 'classes') {
+    switchView(mode: 'teachers' | 'classes' | 'subjects') {
         this.viewMode.set(mode);
         this.page.set(1);
         this.applyFilters();

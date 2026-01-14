@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { SubjectService } from "../../../shared";
 import { AvailabilitySlot, Subject, TeacherSubject } from "../../../shared/models";
 import BookingCalendar from "../../../components/misc/booking-calendar/booking-calendar";
+import { ProfilePhoto } from "../../../components/misc/profile-photo/profile-photo";
 
 
 
@@ -11,7 +12,7 @@ import BookingCalendar from "../../../components/misc/booking-calendar/booking-c
     selector: 'app-book-class',
     standalone: true,
     templateUrl: './book-session.html',
-    imports: [CommonModule, RouterModule, BookingCalendar],
+    imports: [CommonModule, RouterModule, BookingCalendar, ProfilePhoto],
 })
 export default class BookSession {
     subjectId = signal<string>('');

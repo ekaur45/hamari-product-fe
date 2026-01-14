@@ -34,10 +34,12 @@ export class TeacherDashboard implements OnInit {
         // Teacher endpoints in the backend use the authenticated user, but the frontend service takes teacherId.
         // I need to ensure the service matches the backend.
         this.teacherService.getTeacherClasses(userId).subscribe(data => {
-            this.classes.set(data);
+            console.log(data.slice(0, 3).length);
+            this.classes.set(data.slice(0, 3));
         });
         this.teacherService.getTeacherBookings(userId).subscribe(data => {
-            this.bookings.set(data);
+            console.log(data.slice(0, 3).length);
+            this.bookings.set(data.slice(0, 3));
         });
     }
 }
