@@ -19,9 +19,10 @@ export class ProfessionalInfo implements OnInit {
     isLoading = signal(false);
     professionalForm = new FormGroup({
         preferredSubject: new FormControl('', [Validators.required]),
-        yearsOfExperience: new FormControl(0, [Validators.required]),
+        yearsOfExperience: new FormControl(0, [Validators.required, Validators.min(0)]),
         bio: new FormControl('', [Validators.required]),
-        introduction: new FormControl('', [Validators.required]),        
+        introduction: new FormControl('', [Validators.required]),
+        youtubeLink: new FormControl('', []),        
     });
     isSaving = signal(false);
     constructor(private profileService: ProfileService, private messageService: MessageService) {
