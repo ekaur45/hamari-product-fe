@@ -38,9 +38,10 @@
     <!-- User Section -->
     <div class="border-t px-4 py-4 border-gray-200">
       <div class="flex items-center mb-3">
-        <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-semibold">
+        <profile-photo [user]="getCurrentUser() ?? null"></profile-photo>
+        <!-- <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-semibold">
           {{ (getCurrentUser()?.firstName || getCurrentUser()?.username || 'U') | slice:0:2 | uppercase }}
-        </div>
+        </div> -->
         <div class="ml-3 flex-1">
           <p class="text-sm font-medium text-gray-900">{{ getCurrentUser()?.firstName || getCurrentUser()?.username || 'User' }}</p>
           <p class="text-xs text-gray-500">{{ getCurrentUser()?.email }}</p>

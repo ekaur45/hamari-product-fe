@@ -32,7 +32,13 @@ export interface UserDetails {
   userId: string;
   phone?: string;
   address?: string;
-  dateOfBirth?: Date;
+  dateOfBirth?: Date | null;
+  nationalityId?: string;
+  gender?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
   profileImage?: string;
   bio?: string;
   createdAt: Date;
@@ -61,12 +67,12 @@ export interface AvailabilitySlot {
   notes?: string;
 }
 
-export interface UpdateUserDetailsDto {
-  phone?: string;
-  address?: string;
-  dateOfBirth?: Date;
-  bio?: string;
-}
+// export interface UpdateUserDetailsDto {
+//   phone?: string;
+//   address?: string;
+//   dateOfBirth?: Date;
+//   bio?: string;
+// }
 
 export interface UpsertEducationDto {
   type: EducationType;
@@ -186,4 +192,8 @@ export interface StudentListDto {
   newEnrollments: number;
   suspendedStudents: number;
   pagination: PaginationDto;
+}
+
+
+export interface UpdateUserDetailsDto extends UserDetails,User {
 }

@@ -1,6 +1,6 @@
-<div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold">
+<div [class]="'w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ' + class()">
     @if(profileImage()){
-    <img class="w-10 h-10 rounded-full object-cover" [src]="profileImage()" alt="avatar" />
+    <img [class]="'w-full h-full rounded-full object-cover '" [src]="profileImage()" alt="avatar" />
     }
     @else{
     <span>{{ userDisplayName() | uppercase }}</span>

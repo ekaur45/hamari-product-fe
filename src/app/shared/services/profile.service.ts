@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "../../utils/api.service";
 import { catchError, map, Observable, throwError } from "rxjs";
-import { AvailabilitySlot, EducationItem, Subject, Teacher, User } from "../models";
+import { AvailabilitySlot, EducationItem, Subject, Teacher, UpdateUserDetailsDto, User } from "../models";
 import { API_ENDPOINTS } from "../constants";
 import { AuthService } from "./auth.service";
 
@@ -21,7 +21,7 @@ export class ProfileService {
     );
   }
 
-  updateProfile( userId: string, profile: User): Observable<User> {
+  updateProfile( userId: string, profile: UpdateUserDetailsDto): Observable<User> {
     return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE+'/'+userId, profile).pipe(
       map(response => {
         if (response.data) {
@@ -36,7 +36,7 @@ export class ProfileService {
   }
 
   updateProfessionalInfo( userId: string, professionalInfo: Teacher): Observable<Teacher> {
-    return this.apiService.put<Teacher>(API_ENDPOINTS.TEACHERS.BASE+'/'+userId+'/professional-info', professionalInfo).pipe(
+    return this.apiService.put<Teacher>(API_ENDPOINTS.PROFILE.BASE+'/'+userId+'/professional-info', professionalInfo).pipe(
       map(response => {
         if (response.statusCode === 200) {
           return response.data;
@@ -136,6 +136,32 @@ export class ProfileService {
           return response.data;
         }
         throw new Error('Failed to update profile photo');
+      }),
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+  uploadThumbnail(userId: string, file: File): Observable<{url: string}> {
+    return this.apiService.uploadFile<{url: string}>(API_ENDPOINTS.FILES.UPLOAD, file).pipe(
+      map(response => {
+        if (response.statusCode === 200) {
+          return response.data as {url: string};
+        }
+        throw new Error('Failed to upload thumbnail');
+      }),
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+  uploadVideo(userId: string, file: File): Observable<{url: string}> {
+    return this.apiService.uploadFile<{url: string}>(API_ENDPOINTS.FILES.UPLOAD, file).pipe(
+      map(response => {
+        if (response.statusCode === 200) {
+          return response.data as {url: string};
+        }
+        throw new Error('Failed to upload video');
       }),
       catchError(error => {
         return throwError(() => error);

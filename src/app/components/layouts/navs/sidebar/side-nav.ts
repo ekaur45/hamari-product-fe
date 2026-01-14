@@ -4,11 +4,12 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { UserRole } from '../../../../shared/models';
 import { sidenavData, SidenavItem } from './sidenav-data';
+import { ProfilePhoto } from "../../../misc/profile-photo/profile-photo";
 
 @Component({
 	selector: 'app-side-nav',
 	standalone: true,
-	imports: [CommonModule, RouterLink, RouterLinkActive],
+	imports: [CommonModule, RouterLink, RouterLinkActive, ProfilePhoto],
 	templateUrl: './side-nav.html'
 })
 export class SideNav implements OnInit {

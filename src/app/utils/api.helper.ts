@@ -355,4 +355,11 @@ export class ApiHelper {
       }
     };
   }
+  
+  /**
+   * Check if string is a YouTube URL
+   */
+  static isYouTubeUrl(url: string): boolean {
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  }
 }

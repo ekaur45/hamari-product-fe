@@ -6,7 +6,10 @@
  * API Endpoints
  */
 export const API_ENDPOINTS = {
-
+  // Upload
+  FILES: {
+    UPLOAD: '/files/upload'
+  },
   // Nationalities
   NATIONALITIES: {
     BASE: '/nationalities'

@@ -1,62 +1,117 @@
-<div class="bg-white rounded-lg shadow-md p-6 mb-4">
-    <div class="mb-4">
-        <div class="relative">
-            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            <input type="text" [ngModel]="searchValue$ | async" (input)="searchSubjects($event)"
-                class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition pl-10">
-        </div>
-        <div id="subjectsList">
-            <div class="flex flex-col divide-y rounded-xl border border-gray-200">
-                @for(subject of searchedSubjects(); track subject.id) {
-                <div class="px-4 py-3 text-left hover:bg-gray-50 transition cursor-pointer rounded-xl"
-                    (click)="addSearchedSubject(subject); searchValue$.next('');searchedSubjects.set([])">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                        <i class="fas fa-plus mr-2"></i>
-                        {{ subject.name }}</h3>
-                </div>
-                }
-                @empty {
-                @if((searchValue$ | async) && subjectNotFound()) {
-                <div class="px-4 py-3 text-left hover:bg-gray-50 transition cursor-pointer rounded-xl" (click)="suggestSubject()">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                        <i class="fas fa-plus mr-2"></i>
-                        {{ searchValue$ | async }}
-                    </h3>
-                </div>
-                }
-                }
-            </div>
-        </div>
+<div class="bg-white rounded-lg shadow-md p-6 mb-4 space-y-4">
+    <!-- Header -->
+    <div>
+        <h4 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-book text-primary"></i>
+            <span>Add Subjects</span>
+        </h4>
+        <p class="text-sm text-gray-500 mt-1">
+            Start typing to search for subjects and click on a result to add it to your profile.
+        </p>
     </div>
 
+    <!-- Search Input -->
+    <div class="relative">
+        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        <input
+            type="text"
+            [ngModel]="searchValue$ | async"
+            (input)="searchSubjects($event)"
+            placeholder="Search for subjects e.g., Mathematics, Physics, English..."
+            class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+        >
+    </div>
+
+    <!-- Search Results -->
+    <div id="subjectsList" class="mt-2">
+        <div class="flex flex-col rounded-xl border border-gray-200 overflow-hidden divide-y">
+            @for(subject of searchedSubjects(); track subject.id) {
+            <button
+                type="button"
+                class="px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-2 w-full"
+                (click)="addSearchedSubject(subject); searchValue$.next('');searchedSubjects.set([])"
+            >
+                <span
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0"
+                >
+                    <i class="fas fa-plus text-xs"></i>
+                </span>
+                <span class="text-sm font-medium text-gray-900 truncate">
+                    {{ subject.name }}
+                </span>
+            </button>
+            }
+            @empty {
+            @if((searchValue$ | async) && subjectNotFound()) {
+            <button
+                type="button"
+                class="px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-2 w-full"
+                (click)="suggestSubject()"
+            >
+                <span
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex-shrink-0"
+                >
+                    <i class="fas fa-lightbulb text-xs"></i>
+                </span>
+                <span class="text-sm font-medium text-gray-900 truncate">
+                    Suggest: {{ searchValue$ | async }}
+                </span>
+            </button>
+            }
+            }
+        </div>
+    </div>
 </div>
+
 <div class="bg-white rounded-lg shadow-md p-6 mb-4">
     @if(subjects().length > 0) {
-        <div class="w-full mb-4 flex justify-between items-center">
-            <span class="font-medium text-gray-900">Subjects</span>
-            <button class="px-4 py-2 bg-primary text-white rounded-xl font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm  text-white  shadow-lg hover:shadow-xl" (click)="saveSubjects()">
-                <i class="fas fa-save mr-2"></i>
-                Save Changes
-            </button>
-        </div>
-    <div class="flex justify-start">
-        @for(subject of subjects(); track subject.id) {
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-            {{ subject.name }}
-            <span
-                class="text-gray-500 text-sm h-4 w-4 border border-gray-400 rounded-full flex items-center justify-center ml-2 cursor-pointer"
-                (click)="removeSubject(subject)">
-                <i class="fas fa-times"></i>
+    <div class="w-full mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <span class="font-medium text-gray-900 flex items-center gap-2">
+                <i class="fas fa-list text-primary"></i>
+                <span>Selected Subjects</span>
+                <span class="text-xs font-normal text-gray-500">
+                    ({{subjects().length}})
+                </span>
             </span>
+            <p class="text-xs text-gray-500 mt-1">
+                These subjects will be visible on your public teacher profile.
+            </p>
+        </div>
+        <button
+            type="button"
+            class="px-6 py-2 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition disabled:cursor-not-allowed shadow-sm shadow-lg hover:shadow-xl"
+            (click)="saveSubjects()"
+        >
+            <i class="fas fa-save"></i>
+            <span>Save Subjects</span>
+        </button>
+    </div>
+
+    <div class="flex flex-wrap gap-2 justify-start">
+        @for(subject of subjects(); track subject.id) {
+        <span
+            class="inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-primary/5 text-primary border border-primary/20"
+        >
+            <i class="fas fa-book-open mr-1.5 text-[10px]"></i>
+            <span class="max-w-[140px] sm:max-w-xs truncate">{{ subject.name }}</span>
+            <button
+                type="button"
+                class="ml-2 text-primary-700/80 hover:text-red-600 h-4 w-4 rounded-full flex items-center justify-center border border-primary/40 hover:border-red-500 transition"
+                (click)="removeSubject(subject)"
+            >
+                <i class="fas fa-times text-[10px]"></i>
+            </button>
         </span>
         }
     </div>
-
     } @else {
     <div class="p-12 text-center">
         <i class="fas fa-book text-gray-300 text-4xl mb-4"></i>
         <p class="text-gray-500 text-lg font-medium mb-2">No subjects found</p>
-        <p class="text-gray-400 text-sm">Add your subjects to get started</p>
+        <p class="text-gray-400 text-sm">
+            Start typing above to search and add subjects to your profile.
+        </p>
     </div>
     }
 </div>

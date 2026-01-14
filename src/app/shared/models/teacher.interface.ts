@@ -19,6 +19,12 @@ export interface Teacher {
   createdAt: Date | string;
   updatedAt?: Date | string;
   isDeleted?: boolean;
+  introduction?: string | null;
+  introductionVideoUrl?: string | null;
+  introductionVideoTitle?: string | null;
+  introductionVideoDescription?: string | null;
+  introductionVideoThumbnailUrl?: string | null;
+  introductionVideo?: string | null;
 }
 
 /**

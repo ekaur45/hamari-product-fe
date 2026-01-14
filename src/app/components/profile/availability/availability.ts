@@ -54,20 +54,59 @@ export class AvailabilityComponent implements OnInit {
     ngOnInit(): void {
     }
     addAvailability() {
-        // check if the availability slot already exists
-        const existingSlot = this.availabilitySlots().find(slot => slot.dayOfWeek === this.availabilityForm.value.dayOfWeek && slot.startTime === this.availabilityForm.value.startTime && slot.endTime === this.availabilityForm.value.endTime);
+        const { dayOfWeek, startTime, endTime } = this.availabilityForm.value as {
+            dayOfWeek: string | null;
+            startTime: string | null;
+            endTime: string | null;
+        };
+
+        if (!dayOfWeek || !startTime || !endTime) {
+            return;
+        }
+
+        // check if the availability slot already exists (same day, start and end)
+        const existingSlot = this.availabilitySlots().find(
+            slot =>
+                slot.dayOfWeek === dayOfWeek &&
+                slot.startTime === startTime &&
+                slot.endTime === endTime
+        );
         if (existingSlot) {
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Availability slot already exists' });
             return;
         }
-        // // check if the start time is before the end time
-        // if (this.availabilityForm.value.startTime >= this.availabilityForm.value.endTime) {
-        //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Start time must be before end time' });
-        //     return;
-        // }
+
+        // check if the start time is before the end time
+        if (startTime >= endTime) {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Start time must be before end time' });
+            return;
+        }
+
+        // helper to convert HH:mm to minutes
+        const toMinutes = (time: string) => {
+            const [h, m] = time.split(':').map(Number);
+            return h * 60 + m;
+        };
+
+        const newStart = toMinutes(startTime);
+        const newEnd = toMinutes(endTime);
+
+        // prevent overlapping with existing slots on the same day
+        const hasOverlap = this.availabilitySlots().some(slot => {
+            if (slot.dayOfWeek !== dayOfWeek) return false;
+            const slotStart = toMinutes(slot.startTime);
+            const slotEnd = toMinutes(slot.endTime);
+            // overlap if ranges intersect
+            return newStart < slotEnd && newEnd > slotStart;
+        });
+
+        if (hasOverlap) {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Availability slot overlaps with an existing slot' });
+            return;
+        }
 
         // check if the slot minutes are less than 15
-        const duration = this.calculateDuration(this.availabilityForm.value.startTime as string, this.availabilityForm.value.endTime as string,false) as number;
+        const duration = this.calculateDuration(startTime as string, endTime as string,false) as number;
         if (duration < 15) {
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Slot duration must be at least 15 minutes' });
             return;

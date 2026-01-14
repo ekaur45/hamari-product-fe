@@ -11,10 +11,11 @@ import { ToastModule } from "primeng/toast";
 import { Education } from "../../../components/profile/education/education";
 import Subjects from "../../../components/profile/subjects/subjects";
 import { AvailabilityComponent } from "../../../components/profile/availability/availability";
+import { ProfilePhoto } from "../../../components/misc/profile-photo/profile-photo";
 
 @Component({
     standalone: true,
-    imports: [CommonModule, RouterLink, UserInfo,ProfessionalInfo, ReactiveFormsModule, ToastModule, Education, Subjects, AvailabilityComponent],
+    imports: [CommonModule, RouterLink, UserInfo, ProfessionalInfo, ReactiveFormsModule, ToastModule, Education, Subjects, AvailabilityComponent, ProfilePhoto],
     selector: 'app-profile-edit',
     templateUrl: './profile-edit.html',
     providers: [MessageService]

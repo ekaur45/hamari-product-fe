@@ -71,13 +71,33 @@ export default class Subjects implements OnInit {
     addSubject(): void {
     }
     suggestSubject(): void {
-        this.subjects.update(subjects => [{
-            id: '',
-            name: this.searchValue$.value
-        }, ...subjects]);
+        const name = this.searchValue$.value;
+        if (!name) return;
+
+        this.subjects.update(subjects => {
+            // prevent duplicate by case-insensitive name match
+            const exists = subjects.some(s => (s.name || '').toLowerCase() === name.toLowerCase());
+            if (exists) {
+                return subjects;
+            }
+
+            return [{
+                id: '',
+                name
+            }, ...subjects];
+        });
     }
     addSearchedSubject(subject: SubjectModel): void {
-        this.subjects.update(subjects => [subject, ...subjects]);
+        if (!subject) return;
+
+        this.subjects.update(subjects => {
+            const exists = subjects.some(s => s.id === subject.id || (s.name || '').toLowerCase() === (subject.name || '').toLowerCase());
+            if (exists) {
+                return subjects;
+            }
+
+            return [subject, ...subjects];
+        });
     }
     removeSubject(subject: SubjectModel): void {
         this.subjects.update(subjects => subjects.filter(s => s.id !== subject.id));

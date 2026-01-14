@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { Component, computed, effect, input, Input, OnInit, output, signal, ViewEncapsulation } from "@angular/core";
-import { User } from "../../../shared";
+import { UpdateUserDetailsDto, User, UserDetails } from "../../../shared";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { map, startWith } from "rxjs";
 import { toSignal } from "@angular/core/rxjs-interop";
@@ -10,6 +10,8 @@ import { Select } from "primeng/select";
 import { DatePicker } from "primeng/datepicker";
 import { NationalityService } from "../../../shared/services/nationality.service";
 import { Nationality } from "../../../shared/models/nationality.interface";
+import { MessageService } from "primeng/api";
+
 
 @Component({
     standalone: true,
@@ -31,17 +33,17 @@ export class UserInfo implements OnInit {
     userForm = new FormGroup({
         firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
         lastName: new FormControl('', [Validators.required, Validators.minLength(2)]),
-        phone: new FormControl('', [Validators.required, Validators.minLength(10)]),
-        nationality: new FormControl('', [Validators.required]),
-        dob: new FormControl('', [Validators.required]),
-        gender: new FormControl('', [Validators.required]),
-        address: new FormControl('', [Validators.required]),
-        city: new FormControl('', [Validators.required]),
-        state: new FormControl('', [Validators.required]),
-        zip: new FormControl('', [Validators.required]),
-        country: new FormControl('', [Validators.required])
+        phone: new FormControl<any | null>(null, [Validators.required, Validators.minLength(10)]),
+        nationalityId: new FormControl('', []),
+        dateOfBirth: new FormControl<Date | null>(null, []),
+        gender: new FormControl('', []),
+        address: new FormControl('', []),
+        city: new FormControl('', []),
+        state: new FormControl('', []),
+        zipCode: new FormControl('', []),
+        country: new FormControl('', [])
     });
-    constructor(private profileService: ProfileService, private nationalityService: NationalityService) {
+    constructor(private profileService: ProfileService, private nationalityService: NationalityService, private messageService: MessageService) {
         effect(() => {
             const u = this.user();
             if (u) {
@@ -49,6 +51,14 @@ export class UserInfo implements OnInit {
                     firstName: u.firstName,
                     lastName: u.lastName,
                     phone: u.details?.phone ?? '',
+                    dateOfBirth: u.details?.dateOfBirth ? new Date(u.details.dateOfBirth) : null,
+                    nationalityId: u.details?.nationalityId ?? '',
+                    gender: u.details?.gender ?? '',
+                    address: u.details?.address ?? '',
+                    city: u.details?.city ?? '',
+                    state: u.details?.state ?? '',
+                    zipCode: u.details?.zipCode ?? '',
+                    country: u.details?.country ?? ''
                 });
             }
         });
@@ -73,10 +83,21 @@ export class UserInfo implements OnInit {
 
     onSaveChanges() {
         this.isSaving.set(true);
-        this.profileService.updateProfile( this.user()?.id as string, this.userForm.value as User).subscribe((profile) => {
-            this.isSaving.set(false);
-            //this.user.set(profile);
-            this.nextStep.emit();
+        const userDetails: UpdateUserDetailsDto = {
+            ...(this.userForm.value as UpdateUserDetailsDto),
+            phone: this.userForm.value.phone?.e164Number ?? '',
+            dateOfBirth: this.userForm.value.dateOfBirth ?? null as Date | null,
+            gender: this.userForm.value.gender ?? '',
+        }
+        this.profileService.updateProfile( this.user()?.id as string, userDetails).subscribe({
+            next: (profile) => {
+                this.isSaving.set(false);
+                this.nextStep.emit();
+            },
+            error: (error) => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message });
+                this.isSaving.set(false);
+            }
         });
     }
 }
