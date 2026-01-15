@@ -7,7 +7,8 @@
             <div class="flex flex-col items-center mb-4">
                 <div class="relative">
                     @if(profile()?.details?.profileImage) {
-                    <img [src]="assetsUrl + profile()?.details?.profileImage" alt="Profile Image" class="w-24 h-24 rounded-full object-cover">
+                    <img [src]="assetsUrl + profile()?.details?.profileImage" alt="Profile Image"
+                        class="w-24 h-24 rounded-full object-cover">
                     } @else {
                     <div
                         class="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-semibold">
@@ -17,21 +18,25 @@
                     <label id="uploadPhotoBtn"
                         class="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition">
                         <i class="fas fa-camera text-sm"></i>
-                        <input type="file" id="profilePhoto" accept="image/*" class="hidden" (change)="onProfilePhotoChange($event)">
+                        <input type="file" id="profilePhoto" accept="image/*" class="hidden"
+                            (change)="onProfilePhotoChange($event)">
                     </label>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-1">{{profile()?.firstName ?? ""}} {{profile()?.lastName ?? ""}}</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-1">{{profile()?.firstName ?? ""}} {{profile()?.lastName ??
+                    ""}}</h3>
                 <p class="text-sm text-gray-600 mb-4">{{profile()?.role ?? ""}}</p>
             </div>
-            
-            <a [routerLink]="['/profile/edit',1]" class="w-full py-3 rounded-xl font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm bg-primary text-white hover:bg-orange-600 shadow-lg hover:shadow-xl">
+
+            <a [routerLink]="['/profile/edit',1]"
+                class="w-full py-3 rounded-xl font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm bg-primary text-white hover:bg-orange-600 shadow-lg hover:shadow-xl">
                 <i class="fas fa-edit mr-2"></i>
                 <span>Edit Profile</span>
             </a>
-            
+
             <div class="border-t border-gray-200 pt-4 space-y-3">
                 <div class="flex items-start group hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
-                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
+                    <div
+                        class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
                         <i class="fas fa-envelope text-primary text-sm"></i>
                     </div>
                     <div class="flex-1 min-w-0">
@@ -40,7 +45,8 @@
                     </div>
                 </div>
                 <div class="flex items-start group hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
-                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
+                    <div
+                        class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
                         <i class="fas fa-phone text-primary text-sm"></i>
                     </div>
                     <div class="flex-1 min-w-0">
@@ -49,7 +55,8 @@
                     </div>
                 </div>
                 <div class="flex items-start group hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
-                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
+                    <div
+                        class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
                         <i class="fas fa-id-card text-primary text-sm"></i>
                     </div>
                     @if(profile()?.role === UserRole.STUDENT) {
@@ -84,7 +91,8 @@
                     }
                 </div>
                 <div class="flex items-start group hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
-                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
+                    <div
+                        class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
                         <i class="fas fa-calendar text-primary text-sm"></i>
                     </div>
                     <div class="flex-1 min-w-0">
@@ -94,12 +102,14 @@
                 </div>
                 @if(profile()?.role === UserRole.STUDENT) {
                 <div class="flex items-start group hover:bg-gray-50 rounded-lg p-2 -mx-2 transition">
-                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
+                    <div
+                        class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-blue-100 transition">
                         <i class="fas fa-graduation-cap text-primary text-sm"></i>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-xs text-gray-500 mb-0.5">Grade/Class</p>
-                        <p class="text-sm text-gray-900 font-medium">{{profile()?.student?.grade ?? ""}} - {{profile()?.student?.section ?? ""}}</p>
+                        <p class="text-sm text-gray-900 font-medium">{{profile()?.student?.grade ?? ""}} -
+                            {{profile()?.student?.section ?? ""}}</p>
                     </div>
                 </div>
                 }
@@ -242,10 +252,12 @@
     </div>
 </div>
 } @else if(isLoading()) {
-    <!-- generate skeleton loader -->
-       Loader
+<!-- generate skeleton loader -->
+<div class="flex justify-center items-center h-full">
+    <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-primary text-primary "></div>
+</div>
 } @else {
-    <div class="flex justify-center items-center h-full">
-        <p class="text-gray-500">No profile found</p>
-    </div>
+<div class="flex justify-center items-center h-full">
+    <p class="text-gray-500">No profile found</p>
+</div>
 }

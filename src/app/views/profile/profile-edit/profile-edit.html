@@ -3,10 +3,10 @@
     <div class="flex flex-col md:flex-row items-start md:items-center md:justify-between mb-6">
         <div class="flex items-center mb-4 md:mb-0">
             <div class="relative">
-                <profile-photo 
-                [class]="'w-24 h-24 bg-transparent border-2 border-gray-200 rounded-full flex items-center justify-center text-white text-3xl font-semibold'"
-                [user]="profile() ?? null"></profile-photo>
-                
+                <profile-photo
+                    [class]="'w-24 h-24 bg-transparent border-2 border-gray-200 rounded-full flex items-center justify-center text-white text-3xl font-semibold'"
+                    [user]="profile() ?? null"></profile-photo>
+
                 <button id="uploadPhotoBtn"
                     class="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition">
                     <i class="fas fa-camera text-sm"></i>
@@ -19,11 +19,11 @@
                 </h3>
                 <p class="text-gray-600">
                     @if(profile()?.role === UserRole.TEACHER) {
-                        {{profile()?.teacher?.preferredSubject || 'Teacher'}}
+                    {{profile()?.teacher?.preferredSubject || 'Teacher'}}
                     } @else if(profile()?.role === UserRole.STUDENT) {
-                        Student
+                    Student
                     } @else {
-                        {{profile()?.role || 'User'}}
+                    {{profile()?.role || 'User'}}
                     }
                 </p>
             </div>
@@ -41,7 +41,8 @@
 <div class="bg-white rounded-lg shadow-md p-5 mb-6">
     <div class="flex items-center justify-between overflow-x-auto">
         <div class="flex items-center flex-1 min-w-0">
-            <a routerLink="/profile/edit/1" class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer transition" >
+            <a routerLink="/profile/edit/1"
+                class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer transition">
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm mr-2 transition"
                     [ngClass]="{'bg-primary text-white': step() >= 1, 'bg-gray-200 text-gray-600': step() < 1}">1</div>
                 <span class="text-sm font-medium whitespace-nowrap transition"
@@ -49,30 +50,35 @@
             </a>
             @if(profile()?.role !== UserRole.PARENT) {
             <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
-            <a routerLink="/profile/edit/2" class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer transition" >
+            <a routerLink="/profile/edit/2"
+                class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer transition">
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm mr-2 transition"
                     [ngClass]="{'bg-primary text-white': step() >= 2, 'bg-gray-200 text-gray-600': step() < 2}">2</div>
                 <span class="text-sm font-medium whitespace-nowrap transition"
                     [ngClass]="{'text-gray-900': step() >= 2, 'text-gray-600': step() < 2}">About</span>
             </a>
-            }
-            @if(profile()?.role === UserRole.TEACHER) {
+
+
             <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
-            <a routerLink="/profile/edit/3" class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer transition" >
+            <a routerLink="/profile/edit/3"
+                class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer transition">
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm mr-2 transition"
                     [ngClass]="{'bg-primary text-white': step() >= 3, 'bg-gray-200 text-gray-600': step() < 3}">3</div>
                 <span class="text-sm font-medium whitespace-nowrap transition"
                     [ngClass]="{'text-gray-900': step() >= 3, 'text-gray-600': step() < 3}">Education</span>
             </a>
+            }
+            @if(profile()?.role === UserRole.TEACHER) {
             <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
-            <a routerLink="/profile/edit/4" class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer transition" >
+            <a routerLink="/profile/edit/4"
+                class="step-item flex items-center flex-shrink-0 mr-4 cursor-pointer transition">
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm mr-2 transition"
                     [ngClass]="{'bg-primary text-white': step() >= 4, 'bg-gray-200 text-gray-600': step() < 4}">4</div>
                 <span class="text-sm font-medium whitespace-nowrap transition"
                     [ngClass]="{'text-gray-900': step() >= 4, 'text-gray-600': step() < 4}">Subjects</span>
             </a>
             <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
-            <a routerLink="/profile/edit/5" class="step-item flex items-center flex-shrink-0 cursor-pointer transition" >
+            <a routerLink="/profile/edit/5" class="step-item flex items-center flex-shrink-0 cursor-pointer transition">
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm mr-2 transition"
                     [ngClass]="{'bg-primary text-white': step() >= 5, 'bg-gray-200 text-gray-600': step() < 5}">5</div>
                 <span class="text-sm font-medium whitespace-nowrap transition"
@@ -110,8 +116,7 @@
             <div class="relative">
                 <textarea rows="4"
                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none"
-                    placeholder="Write a catchy tagline or short bio that describes you..."
-                    name="bio" 
+                    placeholder="Write a catchy tagline or short bio that describes you..." name="bio"
                     formControlName="bio"></textarea>
             </div>
             @if(bioForm.get('bio')?.invalid && bioForm.get('bio')?.touched) {
@@ -125,10 +130,8 @@
             <button type="button"
                 [ngClass]="{'bg-gray-400 cursor-not-allowed': !hasBioChanged, 'bg-primary hover:bg-primary/90': hasBioChanged}"
                 class="px-6 py-2 rounded-xl font-semibold flex items-center justify-center gap-2 transition shadow-md hover:shadow-lg text-white disabled:opacity-50"
-                [disabled]="!hasBioChanged || isSavingBio()" 
-                (click)="onSaveBioChanges()">
-                <i class="fas"
-                    [ngClass]="{'fa-spinner fa-spin': isSavingBio(), 'fa-save': !isSavingBio()}"></i>
+                [disabled]="!hasBioChanged || isSavingBio()" (click)="onSaveBioChanges()">
+                <i class="fas" [ngClass]="{'fa-spinner fa-spin': isSavingBio(), 'fa-save': !isSavingBio()}"></i>
                 @if(isSavingBio()) {
                 <span>Saving Changes...</span>
                 } @else {
@@ -164,14 +167,13 @@
                 <i class="fas fa-arrow-left mr-2"></i>Previous
             </button>
             }
-            @if(step() < 5) {
-            <button type="button" id="nextBtn"
+            @if(!isLastStep) { <button type="button" id="nextBtn"
                 class="px-6 py-2 bg-primary text-white text-center rounded-lg hover:bg-blue-600 transition flex items-center w-full sm:w-auto"
                 (click)="!isLastStep&&handleNext()">
                 Next<i class="fas fa-arrow-right ml-2"></i>
             </button>
             }
-            @if(step() === 5) {
+            @if(isLastStep) {
             <a routerLink="/profile" type="button" id="saveBtn"
                 class="px-6 py-2 bg-primary text-white text-center rounded-lg hover:bg-primary/90 transition flex items-center w-full sm:w-auto">
                 Done<i class="fas fa-check ml-2"></i>

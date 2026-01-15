@@ -1,55 +1,55 @@
-
-    
-
 <!-- <aside id="sidebar" [ngClass]="{
     'fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md transform transition-transform duration-300 lg:hidden': isMobile(),
     'bg-white shadow-md w-64 flex-shrink-0 hidden lg:block transition-all duration-300 h-full': !isMobile(),
     'translate-x-0 bg-white': isOpen,
     '-translate-x-full': !isOpen
 }"> -->
-  <div class="flex flex-col h-full">
-    <!-- Logo -->
-    <div class="flex items-center justify-between px-6 py-6 border-b border-gray-200 hidden md:block">
-        <div class="flex items-center">
-            <i class="fas fa-graduation-cap text-primary text-2xl mr-2"></i>
-            <h1 class="text-xl font-bold text-primary">Hamari Product</h1>
-        </div>
-        @if(isMobile()){
-            <button (click)="close.emit()" class="text-gray-600 hover:text-gray-900">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        }
+<div class="flex flex-col h-full">
+  <!-- Logo -->
+  <div class="flex items-center justify-between px-6 py-6 border-b border-gray-200 hidden md:block">
+    <div class="flex items-center">
+      <i class="fas fa-graduation-cap text-primary text-2xl mr-2"></i>
+      <h1 class="text-xl font-bold text-primary">Taleemiyat</h1>
     </div>
+    @if(isMobile()){
+    <button (click)="close.emit()" class="text-gray-600 hover:text-gray-900">
+      <i class="fas fa-times text-xl"></i>
+    </button>
+    }
+  </div>
 
-    <!-- Navigation -->
-    <nav class="flex-1 px-4 py-4 overflow-y-auto">
-      <ul class="space-y-2">
-        @for(item of userNavigation(); track item.label){
-            <li>
-                <a [routerLink]="item.link" routerLinkActive="border-l-4 border-primary border text-primary" class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                    <i [ngClass]="item.icon" class="w-5 mr-3 fa"></i>
-                    <span>{{ item.label }}</span>
-                </a>
-            </li>
-        }        
+  <!-- Navigation -->
+  <nav class="flex-1 px-4 py-4 overflow-y-auto">
+    <ul class="space-y-2">
+      @for(item of userNavigation(); track item.label){
+      <li>
+        <a [routerLink]="item.link" routerLinkActive="border-l-4 border-primary border text-primary"
+          class="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition">
+          <i [ngClass]="item.icon" class="w-5 mr-3 fa"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+      }
     </ul>
-    </nav>
+  </nav>
 
-    <!-- User Section -->
-    <div class="border-t px-4 py-4 border-gray-200">
-      <div class="flex items-center mb-3">
-        <profile-photo [user]="getCurrentUser() ?? null"></profile-photo>
-        <!-- <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-semibold">
+  <!-- User Section -->
+  <div class="border-t px-4 py-4 border-gray-200">
+    <div class="flex items-center mb-3">
+      <profile-photo [user]="getCurrentUser() ?? null"></profile-photo>
+      <!-- <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-semibold">
           {{ (getCurrentUser()?.firstName || getCurrentUser()?.username || 'U') | slice:0:2 | uppercase }}
         </div> -->
-        <div class="ml-3 flex-1">
-          <p class="text-sm font-medium text-gray-900">{{ getCurrentUser()?.firstName || getCurrentUser()?.username || 'User' }}</p>
-          <p class="text-xs text-gray-500">{{ getCurrentUser()?.email }}</p>
-        </div>
+      <div class="ml-3 flex-1">
+        <p class="text-sm font-medium text-gray-900">{{ getCurrentUser()?.firstName || getCurrentUser()?.username ||
+          'User' }}</p>
+        <p class="text-xs text-gray-500">{{ getCurrentUser()?.email }}</p>
       </div>
-      <button (click)="logout()" class="flex items-center px-4 py-2 text-red-600 rounded-lg hover:bg-red-50 transition w-full">
-        <i class="fas fa-sign-out-alt w-5 mr-3"></i>
-        <span>Logout</span>
-      </button>
     </div>
+    <button (click)="logout()"
+      class="flex items-center px-4 py-2 text-red-600 rounded-lg hover:bg-red-50 transition w-full">
+      <i class="fas fa-sign-out-alt w-5 mr-3"></i>
+      <span>Logout</span>
+    </button>
   </div>
+</div>

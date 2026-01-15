@@ -21,8 +21,8 @@ export class ProfileService {
     );
   }
 
-  updateProfile( userId: string, profile: UpdateUserDetailsDto): Observable<User> {
-    return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE+'/'+userId, profile).pipe(
+  updateProfile(userId: string, profile: UpdateUserDetailsDto): Observable<User> {
+    return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE + '/' + userId, profile).pipe(
       map(response => {
         if (response.data) {
           return response.data;
@@ -35,8 +35,8 @@ export class ProfileService {
     );
   }
 
-  updateProfessionalInfo( userId: string, professionalInfo: Teacher): Observable<Teacher> {
-    return this.apiService.put<Teacher>(API_ENDPOINTS.PROFILE.BASE+'/'+userId+'/professional-info', professionalInfo).pipe(
+  updateProfessionalInfo(userId: string, professionalInfo: Teacher): Observable<Teacher> {
+    return this.apiService.put<Teacher>(API_ENDPOINTS.PROFILE.BASE + '/' + userId + '/professional-info', professionalInfo).pipe(
       map(response => {
         if (response.statusCode === 200) {
           return response.data;
@@ -50,8 +50,8 @@ export class ProfileService {
   }
 
 
-  updateOverallRates( userId: string, {hourlyRate, monthlyRate}: {hourlyRate: number, monthlyRate: number}): Observable<Teacher> {
-    return this.apiService.put<Teacher>(API_ENDPOINTS.TEACHERS.BASE+'/'+userId+'/rates', {hourlyRate, monthlyRate}).pipe(
+  updateOverallRates(userId: string, { hourlyRate, monthlyRate }: { hourlyRate: number, monthlyRate: number }): Observable<Teacher> {
+    return this.apiService.put<Teacher>(API_ENDPOINTS.TEACHERS.BASE + '/' + userId + '/rates', { hourlyRate, monthlyRate }).pipe(
       map(response => {
         if (response.statusCode === 200) {
           return response.data;
@@ -63,8 +63,8 @@ export class ProfileService {
       })
     );
   }
-  updateSubjectRates( userId: string, subjectRates: Array<{ id: string, hourlyRate: number, monthlyRate: number}>): Observable<Teacher> {
-    return this.apiService.put<Teacher>(API_ENDPOINTS.SUBJECTS.BASE+'/rates', subjectRates).pipe(
+  updateSubjectRates(userId: string, subjectRates: Array<{ id: string, hourlyRate: number, monthlyRate: number }>): Observable<Teacher> {
+    return this.apiService.put<Teacher>(API_ENDPOINTS.SUBJECTS.BASE + '/rates', subjectRates).pipe(
       map(response => {
         if (response.statusCode === 200) {
           return response.data;
@@ -76,8 +76,8 @@ export class ProfileService {
       })
     );
   }
-  updateBio( userId: string, bio: string): Observable<User> {
-    return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE+'/'+userId+'/bio', {bio}).pipe(
+  updateBio(userId: string, bio: string): Observable<User> {
+    return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE + '/' + userId + '/bio', { bio }).pipe(
       map(response => {
         if (response.statusCode === 200) {
           return response.data;
@@ -89,8 +89,8 @@ export class ProfileService {
       })
     );
   }
-  updateUserEducation( userId: string, education: EducationItem): Observable<User> {
-    return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE+'/'+userId+'/education', education).pipe(
+  updateUserEducation(userId: string, education: EducationItem): Observable<User> {
+    return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE + '/' + userId + '/education', education).pipe(
       map(response => {
         if (response.statusCode === 200) {
           return response.data;
@@ -102,8 +102,21 @@ export class ProfileService {
       })
     );
   }
-  updateUserSubjects( userId: string, subjects: Subject[]): Observable<User> {
-    return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE+'/'+userId+'/subjects', subjects).pipe(
+  deleteUserEducation(userId: string, educationId: string): Observable<User> {
+    return this.apiService.delete<User>(API_ENDPOINTS.PROFILE.BASE + '/' + userId + '/education/' + educationId).pipe(
+      map(response => {
+        if (response.statusCode === 200) {
+          return response.data;
+        }
+        throw new Error('Failed to delete user education');
+      }),
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+  updateUserSubjects(userId: string, subjects: Subject[]): Observable<User> {
+    return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE + '/' + userId + '/subjects', subjects).pipe(
       map(response => {
         if (response.statusCode === 200) {
           return response.data;
@@ -115,8 +128,8 @@ export class ProfileService {
       })
     );
   }
-  updateUserAvailability( userId: string, availability: AvailabilitySlot[]): Observable<User> {
-    return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE+'/'+userId+'/availability', availability).pipe(
+  updateUserAvailability(userId: string, availability: AvailabilitySlot[]): Observable<User> {
+    return this.apiService.put<User>(API_ENDPOINTS.PROFILE.BASE + '/' + userId + '/availability', availability).pipe(
       map(response => {
         if (response.statusCode === 200) {
           return response.data;
@@ -129,9 +142,9 @@ export class ProfileService {
     );
   }
   updateProfilePhoto(file: File): Observable<User> {
-    return this.apiService.uploadFile<User>(API_ENDPOINTS.PROFILE.BASE+'/profile-photo', file).pipe(
+    return this.apiService.uploadFile<User>(API_ENDPOINTS.PROFILE.BASE + '/profile-photo', file).pipe(
       map(response => {
-        if (response.statusCode === 200) {          
+        if (response.statusCode === 200) {
           this.authService.setCurrentUser(response.data);
           return response.data;
         }
@@ -142,11 +155,11 @@ export class ProfileService {
       })
     );
   }
-  uploadThumbnail(userId: string, file: File): Observable<{url: string}> {
-    return this.apiService.uploadFile<{url: string}>(API_ENDPOINTS.FILES.UPLOAD, file).pipe(
+  uploadThumbnail(userId: string, file: File): Observable<{ url: string }> {
+    return this.apiService.uploadFile<{ url: string }>(API_ENDPOINTS.FILES.UPLOAD, file).pipe(
       map(response => {
         if (response.statusCode === 200) {
-          return response.data as {url: string};
+          return response.data as { url: string };
         }
         throw new Error('Failed to upload thumbnail');
       }),
@@ -155,11 +168,11 @@ export class ProfileService {
       })
     );
   }
-  uploadVideo(userId: string, file: File): Observable<{url: string}> {
-    return this.apiService.uploadFile<{url: string}>(API_ENDPOINTS.FILES.UPLOAD, file).pipe(
+  uploadVideo(userId: string, file: File): Observable<{ url: string }> {
+    return this.apiService.uploadFile<{ url: string }>(API_ENDPOINTS.FILES.UPLOAD, file).pipe(
       map(response => {
         if (response.statusCode === 200) {
-          return response.data as {url: string};
+          return response.data as { url: string };
         }
         throw new Error('Failed to upload video');
       }),

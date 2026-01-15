@@ -26,7 +26,7 @@ export class ProfileEdit implements OnInit {
         [UserRole.ADMIN]: [1, 2, 3, 4, 5, 6],
         [UserRole.ACADEMY_OWNER]: [1, 2, 3, 4, 5, 6],
         [UserRole.TEACHER]: [1, 2, 3, 4, 5],
-        [UserRole.STUDENT]: [1, 2],
+        [UserRole.STUDENT]: [1, 2, 3],
         [UserRole.PARENT]: [1],
     };
     bioForm = new FormGroup({
@@ -83,8 +83,8 @@ export class ProfileEdit implements OnInit {
     }
     onSaveBioChanges() {
         this.isSavingBio.set(true);
-        this.profileService.updateBio(this.profile()?.id as string, this.bioForm.value.bio as string || '').subscribe( {
-            next: () => {                
+        this.profileService.updateBio(this.profile()?.id as string, this.bioForm.value.bio as string || '').subscribe({
+            next: () => {
                 this.isSavingBio.set(false);
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Bio updated successfully' });
             },
@@ -96,7 +96,7 @@ export class ProfileEdit implements OnInit {
                 this.isSavingBio.set(false);
             }
         });
-    }   
+    }
     get isLastStep() {
         return this.step() === (this.roleSteps[this.profile()?.role as UserRole]?.length ?? 0);
     }

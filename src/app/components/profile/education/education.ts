@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, computed, effect, input, OnInit, output, signal } from "@angular/core";
 import { FormControl, ReactiveFormsModule, Validators, FormGroup } from "@angular/forms";
-import { MessageService } from "primeng/api";
+import { ConfirmationService, MessageService } from "primeng/api";
 import { ToastModule } from "primeng/toast";
 import { EducationItem, User } from "../../../shared";
 import { ProfileService } from "../../../shared/services/profile.service";
@@ -19,13 +19,14 @@ export class Education implements OnInit {
     profile = input<User | null>(null);
     reloadProfile = output<void>();
     isLoading = signal(false);
-    
+
 
     educations = computed<EducationItem[]>(() => {
         const p = this.profile();
         return p?.educations || [];
     });
     educationForm = new FormGroup({
+        id: new FormControl('', [Validators.required]),
         instituteName: new FormControl('', [Validators.required]),
         degreeName: new FormControl('', [Validators.required]),
         startedYear: new FormControl(0, [Validators.required]),
@@ -35,7 +36,7 @@ export class Education implements OnInit {
     });
     isSaving = signal(false);
 
-    constructor(private profileService: ProfileService, private messageService: MessageService) {
+    constructor(private profileService: ProfileService, private messageService: MessageService, private confirmationService: ConfirmationService) {
         effect(() => {
             const p = this.profile();
             if (p) {
@@ -51,7 +52,10 @@ export class Education implements OnInit {
         });
     }
     ngOnInit(): void {
-        
+
+    }
+    onEdit(educationItem: EducationItem) {
+        this.educationForm.patchValue(educationItem);
     }
 
     getFormValue(controlName: string) {
@@ -65,9 +69,44 @@ export class Education implements OnInit {
             },
             error: (error) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message });
+                this.isSaving.set(false);
             },
             complete: () => {
+                this.educationForm.reset();
                 this.isSaving.set(false);
+                this.reloadProfile.emit();
+            }
+        });
+    }
+    onEducationDeleteConfirm(educationItem: EducationItem) {
+        this.confirmationService.confirm({
+            message: 'Are you sure you want to delete this education?',
+            header: 'Delete Education',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Yes',
+            rejectLabel: 'No',
+            acceptIcon: 'pi pi-check',
+            rejectIcon: 'pi pi-times',
+            acceptButtonProps: {
+                severity: 'warn'
+            },
+            rejectButtonProps: {
+                severity: 'secondary'
+            },
+            accept: () => {
+                this.onDeleteEducation(educationItem);
+            }
+        });
+    }
+    onDeleteEducation(educationItem: EducationItem) {
+        this.profileService.deleteUserEducation(this.profile()?.id as string, educationItem.id as string).subscribe({
+            next: (profile) => {
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Education deleted successfully' });
+            },
+            error: (error) => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message });
+            },
+            complete: () => {
                 this.reloadProfile.emit();
             }
         });

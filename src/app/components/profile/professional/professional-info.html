@@ -24,8 +24,7 @@
                     <textarea rows="5"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none bg-gray-50/50"
                         placeholder="Write a brief introduction about yourself, your teaching philosophy, and what makes you unique..."
-                        name="introduction"
-                        formControlName="introduction"></textarea>
+                        name="introduction" formControlName="introduction"></textarea>
                 </div>
                 @if(professionalForm.get('introduction')?.invalid && professionalForm.get('introduction')?.touched) {
                 <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
@@ -53,13 +52,13 @@
                             Video Thumbnail
                             <span class="text-red-500">*</span>
                         </label>
-                        
+
                         @if(professionalForm.get('introductionVideoThumbnailUrl')?.value) {
                         <!-- Thumbnail Preview -->
                         <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-white w-64 h-48">
-                            <img [src]="assetsUrl + professionalForm.get('introductionVideoThumbnailUrl')?.value!" alt="Thumbnail preview" class="w-full h-48 object-cover">
-                            <button type="button" 
-                                (click)="removeThumbnail()"
+                            <img [src]="assetsUrl + professionalForm.get('introductionVideoThumbnailUrl')?.value!"
+                                alt="Thumbnail preview" class="w-full h-48 object-cover">
+                            <button type="button" (click)="removeThumbnail()"
                                 class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg w-8 h-8 flex items-center justify-center">
                                 <i class="fas fa-times text-sm"></i>
                             </button>
@@ -70,8 +69,10 @@
                         </div>
                         } @else {
                         <!-- Upload Area -->
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer group w-64 h-48">
-                            <input type="file" id="thumbnailUpload" accept="image/*" class="hidden" (change)="onThumbnailSelected($event)" />
+                        <div
+                            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer group w-64 h-48">
+                            <input type="file" id="thumbnailUpload" accept="image/*" class="hidden"
+                                (change)="onThumbnailSelected($event)" />
                             @if(isThumbnailUploading()) {
                             <div class="flex items-center justify-center h-full">
                                 <i class="fas fa-spinner fa-spin text-primary text-2xl"></i>
@@ -79,35 +80,37 @@
                             } @else {
                             <label for="thumbnailUpload" class="cursor-pointer block">
                                 <div class="flex flex-col items-center gap-3">
-                                    <div class="w-14 h-14 bg-primary/10 group-hover:bg-primary/20 rounded-full flex items-center justify-center transition-colors">
+                                    <div
+                                        class="w-14 h-14 bg-primary/10 group-hover:bg-primary/20 rounded-full flex items-center justify-center transition-colors">
                                         <i class="fas fa-cloud-upload-alt text-primary text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="text-sm font-medium text-gray-700">
-                                            <span class="text-primary group-hover:underline">Click to upload</span> or drag and drop
+                                            <span class="text-primary group-hover:underline">Click to upload</span> or
+                                            drag and drop
                                         </p>
                                         <p class="text-xs text-gray-500 mt-1">JPEG, PNG, GIF (Max 10MB)</p>
                                     </div>
-                                    </div>
-                                </label>
+                                </div>
+                            </label>
                             }
                         </div>
                         }
                     </div>
-    
+
                     <!-- Video File Upload -->
                     <div class="space-y-2">
                         <label class="block text-sm font-medium text-gray-700">
                             <i class="fas fa-file-video mr-2 text-primary"></i>
                             Video File
                         </label>
-                        
+
                         @if(professionalForm.get('introductionVideo')?.value) {
                         <!-- Video Preview -->
                         <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-black w-64 h-48">
-                            <video [src]="assetsUrl + professionalForm.get('introductionVideo')?.value!" controls class="w-full h-64 object-contain"></video>
-                            <button type="button" 
-                                (click)="removeVideo()"
+                            <video [src]="assetsUrl + professionalForm.get('introductionVideo')?.value!" controls
+                                class="w-full h-64 object-contain"></video>
+                            <button type="button" (click)=" removeVideo()"
                                 class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg z-10 w-8 h-8 flex items-center justify-center">
                                 <i class="fas fa-times text-sm"></i>
                             </button>
@@ -118,91 +121,90 @@
                         </div>
                         } @else {
                         <!-- Upload Area -->
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer group w-64 h-48">
+                        <div
+                            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer group w-64 h-48">
                             @if(isVideoUploading()) {
                             <div class="flex items-center justify-center h-full">
                                 <i class="fas fa-spinner fa-spin text-primary text-2xl"></i>
                             </div>
                             } @else {
-                            <input type="file" id="videoFileUpload" accept="video/*" class="hidden" (change)="onVideoSelected($event)" />
+                            <input type="file" id="videoFileUpload" accept="video/*" class="hidden"
+                                [disabled]="youtubeVideoId()" (change)="!youtubeVideoId() && onVideoSelected($event)" />
                             <label for="videoFileUpload" class="cursor-pointer block">
                                 <div class="flex flex-col items-center gap-3">
-                                    <div class="w-14 h-14 bg-primary/10 group-hover:bg-primary/20 rounded-full flex items-center justify-center transition-colors">
+                                    <div
+                                        class="w-14 h-14 bg-primary/10 group-hover:bg-primary/20 rounded-full flex items-center justify-center transition-colors">
                                         <i class="fas fa-cloud-upload-alt text-primary text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="text-sm font-medium text-gray-700">
-                                            <span class="text-primary group-hover:underline">Click to upload</span> or drag and drop
+                                            <span class="text-primary group-hover:underline">Click to upload</span> or
+                                            drag and drop
                                         </p>
                                         <p class="text-xs text-gray-500 mt-1">MP4, MOV, AVI (Max 100MB)</p>
                                     </div>
-                                    </div>
-                                </label>
+                                </div>
+                            </label>
                             }
                         </div>
                         }
                     </div>
-                </div>
+                    <!-- Divider -->
+                    <div class="flex flex-col items-center gap-4 my-4">
+                        <div class="flex-1 h-full bg-gray-300 w-[2px]"></div>
+                        <span
+                            class="text-xs text-gray-500 font-semibold uppercase tracking-wider bg-gray-50 px-3 py-1 rounded-full">OR</span>
+                        <div class="flex-1 h-full bg-gray-300 w-[2px]"></div>
+                    </div>
 
-                <!-- Divider -->
-                <div class="flex items-center gap-4 my-4">
-                    <div class="flex-1 border-t border-gray-300"></div>
-                    <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider bg-gray-50 px-3 py-1 rounded-full">OR</span>
-                    <div class="flex-1 border-t border-gray-300"></div>
-                </div>
+                    <!-- YouTube Link Input -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            <i class="fab fa-youtube mr-2 text-red-500"></i>
+                            YouTube Video Link
+                        </label>
 
-                <!-- YouTube Link Input -->
-                <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700">
-                        <i class="fab fa-youtube mr-2 text-red-500"></i>
-                        YouTube Video Link
-                    </label>
-                    
-                    @if(youtubeVideoId()) {
-                    <!-- YouTube Preview -->
-                    <div class="space-y-3">
-                        <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-white">
-                            <div class="aspect-video bg-black">
-                                <iframe 
-                                    [src]="getYouTubeEmbedUrl()" 
-                                    frameborder="0" 
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen
-                                    class="w-full h-full">
-                                </iframe>
+                        @if(youtubeVideoId()) {
+                        <!-- YouTube Preview -->
+                        <div class="space-y-3">
+                            <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-white">
+                                <div class="aspect-video bg-black">
+                                    <iframe [src]="getYouTubeEmbedUrl()" frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen class="w-full h-full">
+                                    </iframe>
+                                </div>
+                                <button type="button" (click)="removeYouTubeLink()"
+                                    class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg z-10 w-8 h-8 flex items-center justify-center">
+                                    <i class="fas fa-times text-sm"></i>
+                                </button>
                             </div>
-                            <button type="button" 
-                                (click)="removeYouTubeLink()"
-                                class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg z-10">
-                                <i class="fas fa-times text-sm"></i>
-                            </button>
+                            <!-- <div class="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                                <i class="fab fa-youtube text-red-500"></i>
+                                <span>YouTube video loaded</span>
+                            </div> -->
                         </div>
-                        <div class="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                            <i class="fab fa-youtube text-red-500"></i>
-                            <span>YouTube video loaded</span>
+                        } @else {
+                        <!-- Input Field -->
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fab fa-youtube text-gray-400 text-lg"></i>
+                            </div>
+                            <input type="url" name="youtubeLink" formControlName="youtubeLink"
+                                placeholder="https://www.youtube.com/watch?v=..."
+                                class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white"
+                                [ngClass]="{'disabled:opacity-50 cursor-not-allowed': professionalForm.get('introductionVideo')?.value }"
+                                [readonly]="professionalForm.get('introductionVideo')?.value">
                         </div>
+                        <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                            <i class="fas fa-info-circle"></i>
+                            Paste your YouTube video URL here
+                        </p>
+                        }
                     </div>
-                    } @else {
-                    <!-- Input Field -->
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fab fa-youtube text-gray-400 text-lg"></i>
-                        </div>
-                        <input type="url" 
-                            name="youtubeLink" 
-                            formControlName="youtubeLink"
-                            placeholder="https://www.youtube.com/watch?v=..."
-                            class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white"
-                            [ngClass]="{'disabled:opacity-50 cursor-not-allowed': professionalForm.get('introductionVideo')?.value }"
-                            [readonly]="professionalForm.get('introductionVideo')?.value"
-                            >
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
-                        <i class="fas fa-info-circle"></i>
-                        Paste your YouTube video URL here
-                    </p>
-                    }
                 </div>
+
+
 
                 <!-- Video Title and Description -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -211,21 +213,17 @@
                             <i class="fas fa-heading mr-2 text-primary"></i>
                             Video Title
                         </label>
-                        <input type="text" 
-                            name="introductionVideoTitle" 
-                            formControlName="introductionVideoTitle" 
-                            placeholder="Enter video title" 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">                    
+                        <input type="text" name="introductionVideoTitle" formControlName="introductionVideoTitle"
+                            placeholder="Enter video title"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">
                     </div>
                     <div class="space-y-2 md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700">
                             <i class="fas fa-align-left mr-2 text-primary"></i>
                             Video Description
                         </label>
-                        <textarea rows="3" 
-                            name="introductionVideoDescription" 
-                            formControlName="introductionVideoDescription" 
-                            placeholder="Enter video description" 
+                        <textarea rows="3" name="introductionVideoDescription"
+                            formControlName="introductionVideoDescription" placeholder="Enter video description"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none bg-white"></textarea>
                     </div>
                 </div>
@@ -260,13 +258,12 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="fas fa-book text-gray-400"></i>
                         </div>
-                        <input type="text" 
-                            name="preferredSubject" 
-                            formControlName="preferredSubject"
+                        <input type="text" name="preferredSubject" formControlName="preferredSubject"
                             placeholder="e.g., Mathematics, Science, English"
                             class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-gray-50/50">
                     </div>
-                    @if(professionalForm.get('preferredSubject')?.invalid && professionalForm.get('preferredSubject')?.touched) {
+                    @if(professionalForm.get('preferredSubject')?.invalid &&
+                    professionalForm.get('preferredSubject')?.touched) {
                     <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
                         <i class="fas fa-exclamation-circle"></i>
                         Preferred subject is required
@@ -285,14 +282,12 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="fas fa-calendar-alt text-gray-400"></i>
                         </div>
-                        <input type="text" 
-                            name="yearsOfExperience" 
-                            formControlName="yearsOfExperience"
-                            placeholder="0"
+                        <input type="text" name="yearsOfExperience" formControlName="yearsOfExperience" placeholder="0"
                             min="0"
                             class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-gray-50/50">
                     </div>
-                    @if(professionalForm.get('yearsOfExperience')?.invalid && professionalForm.get('yearsOfExperience')?.touched) {
+                    @if(professionalForm.get('yearsOfExperience')?.invalid &&
+                    professionalForm.get('yearsOfExperience')?.touched) {
                     <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
                         <i class="fas fa-exclamation-circle"></i>
                         Years of experience is required
@@ -311,8 +306,7 @@
                         <textarea rows="3"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none bg-gray-50/50"
                             placeholder="Write a catchy tagline or short bio that describes your teaching style..."
-                            name="bio" 
-                            formControlName="bio"></textarea>
+                            name="bio" formControlName="bio"></textarea>
                     </div>
                     @if(professionalForm.get('bio')?.invalid && professionalForm.get('bio')?.touched) {
                     <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
@@ -322,16 +316,14 @@
                     }
                 </div>
             </div>
-        </div>        
+        </div>
         <!-- Save Button -->
         <div class="flex justify-end pt-6 border-t border-gray-200">
             <button type="button"
                 [ngClass]="{'bg-gray-400 cursor-not-allowed': !hasChanges, 'bg-primary hover:bg-primary/90 active:scale-95': hasChanges}"
                 class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white disabled:opacity-50 min-w-[160px]"
-                [disabled]="!hasChanges || isSaving()" 
-                (click)="onSaveChanges()">
-                <i class="fas"
-                    [ngClass]="{'fa-spinner fa-spin': isSaving(), 'fa-save': !isSaving()}"></i>
+                [disabled]="!hasChanges || isSaving()" (click)="onSaveChanges()">
+                <i class="fas" [ngClass]="{'fa-spinner fa-spin': isSaving(), 'fa-save': !isSaving()}"></i>
                 @if(isSaving()) {
                 <span>Saving Changes...</span>
                 } @else {

@@ -6,7 +6,7 @@ import { User, UserRole } from "../../../shared";
 import { environment } from "../../../../environments/environment";
 
 @Component({
-    imports: [ CommonModule, RouterLink],
+    imports: [CommonModule, RouterLink],
     standalone: true,
     selector: 'app-profile-view',
     templateUrl: './profile-view.html',
