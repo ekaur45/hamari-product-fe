@@ -59,7 +59,11 @@ export class Login implements OnInit {
       this.authService.login(loginData).subscribe({
         next: (user) => {
           if (this.returnUrl) {
-            this.router.navigate([this.returnUrl]);
+            if (this.returnUrl.startsWith("http")) {
+              window.location.href = this.returnUrl;
+            } else {
+              this.router.navigate([this.returnUrl]);
+            }
           } else {
             this.router.navigate([ROUTES_MAP[user.role]['DASHBOARD']]);
           }
@@ -102,7 +106,7 @@ export class Login implements OnInit {
     this.loginForm.patchValue({ username: email, password: this.commonPassword });
     this.errorMessage.set('');
   }
-  togglePasswordVisibility(){
+  togglePasswordVisibility() {
     this.showPassword.set(!this.showPassword());
   }
 }

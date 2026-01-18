@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
     selector: 'app-checkout',
     templateUrl: './checkout.html',
     standalone: true,
-    imports: [DatePipe, RouterModule, DialogModule, FormsModule,CommonModule],
+    imports: [DatePipe, RouterModule, DialogModule, FormsModule, CommonModule],
 })
 export default class Checkout implements OnInit {
     subjectId = signal<string>('');
@@ -36,7 +36,7 @@ export default class Checkout implements OnInit {
             this.getTeacherById();
             this.getSubjectById();
         });
-        
+
         this.route.queryParams.subscribe(params => {
             this.slot.set(JSON.parse(params['slot']));
             this.selectedDate.set(params['selectedDate']);
@@ -106,7 +106,7 @@ export default class Checkout implements OnInit {
         this.paymentService.createPaymentIntent({
             subjectId: this.subjectId(),
             teacherId: this.teacherId(),
-            slotId: this.slot()!.id,
+            slotId: this.slot()!.id!,
             selectedDate: this.selectedDate(),
             paymentMethod: this.selectedPaymentMethod()
         }).subscribe({
@@ -118,7 +118,7 @@ export default class Checkout implements OnInit {
                 console.error('Error creating payment intent:', error);
             }
         });
-        
+
         // Close dialog and process payment
         this.showPaymentDialog.set(false);
         // Add your payment processing logic here based on selectedPaymentMethod

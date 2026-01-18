@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { Observable, map, take } from 'rxjs';
+import { Observable, catchError, map, of, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 /**
@@ -14,28 +14,40 @@ export class AuthGuard implements CanActivate {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
     // Ensure auth state is restored on hard refresh
-    this.authService.restoreFromStorage();
-    return this.authService.isAuthenticated$.pipe(
-      take(1),
-      map(isAuthenticated => {
-        if (isAuthenticated) {
-          return true;
-        } else {
-          // Redirect to login page with return URL
-          this.router.navigate(['/auth/login'], { 
-            queryParams: { returnUrl: state.url } 
-          });
-          return false;
-        }
+    return this.authService.getProfile().pipe(
+      map((user) => {
+        this.authService.setCurrentUser(user);
+        return true;
+      }),
+      catchError((error) => {
+        this.authService.logout().subscribe(() => {
+          this.router.navigate(['/auth/login']);
+        });
+        return of(false);
       })
     );
+    // this.authService.restoreFromStorage();
+    // return this.authService.isAuthenticated$.pipe(
+    //   take(1),
+    //   map(isAuthenticated => {
+    //     if (isAuthenticated) {
+    //       return true;
+    //     } else {
+    //       // Redirect to login page with return URL
+    //       this.router.navigate(['/auth/login'], { 
+    //         queryParams: { returnUrl: state.url } 
+    //       });
+    //       return false;
+    //     }
+    //   })
+    // );
   }
 }
 
@@ -50,25 +62,43 @@ export class RoleGuard implements CanActivate {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
 
+
     const requiredRoles = route.data['roles'] as string[];
-    
+
     if (!requiredRoles || requiredRoles.length === 0) {
       return true; // No role requirements
     }
+    return this.authService.getProfile().pipe(
+      map((user) => {
+        this.authService.setCurrentUser(user);
+        const hasRequiredRole = this.authService.hasAnyRole(requiredRoles);
+        if (!hasRequiredRole) {
+          this.router.navigate(['/dashboard']); // Redirect to dashboard if no permission
+          return false;
+        }
+        return true;
+      }),
+      catchError((error) => {
+        this.authService.logout();
+        return of(false);
+      })
+    );
+
+
 
     return this.authService.isAuthenticated$.pipe(
       take(1),
       map(isAuthenticated => {
         if (!isAuthenticated) {
-          this.router.navigate(['/auth/login'], { 
-            queryParams: { returnUrl: state.url } 
+          this.router.navigate(['/auth/login'], {
+            queryParams: { returnUrl: state.url }
           });
           return false;
         }

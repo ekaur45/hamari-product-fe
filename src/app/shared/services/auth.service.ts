@@ -34,7 +34,7 @@ export class AuthService {
   private initializeAuth(): void {
     const token = this.getToken();
     const user = this.getStoredUser();
-    
+
     if (token && user) {
       this.currentUserSubject.next(user);
       this.isAuthenticatedSubject.next(true);
@@ -106,14 +106,13 @@ export class AuthService {
     return this.apiService.get<User>(API_ENDPOINTS.AUTH.PROFILE)
       .pipe(
         map(response => {
-          if (response.data) {
+          if (response.data && response.statusCode === 200) {
             this.setCurrentUser(response.data);
             return response.data;
           }
-          throw new Error('Invalid response format');
+          throw new Error('401');
         }),
         catchError(error => {
-          console.error('Get profile error:', error);
           return throwError(() => error);
         })
       );
@@ -122,11 +121,11 @@ export class AuthService {
   /**
    * Logout user
    */
-  logout(): Observable<void> {
+  logout(): Observable<ApiResponse<void>> {
     this.clearToken();
     this.clearCurrentUser();
     this.isAuthenticatedSubject.next(false);
-    return of(void 0);
+    return this.handleLogout();
   }
 
   /**
@@ -147,6 +146,7 @@ export class AuthService {
    * Get authentication token
    */
   getToken(): string | null {
+
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
@@ -256,6 +256,19 @@ export class AuthService {
       catchError(error => {
         console.error('Change password error:', error);
         return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * 
+   */
+  handleLogout(): Observable<ApiResponse<void>> {
+    return this.apiService.get<void>(API_ENDPOINTS.AUTH.LOGOUT).pipe(
+      tap(() => {
+        this.clearToken();
+        this.clearCurrentUser();
+        this.isAuthenticatedSubject.next(false);
       })
     );
   }

@@ -100,4 +100,12 @@ export class ProfileEdit implements OnInit {
     get isLastStep() {
         return this.step() === (this.roleSteps[this.profile()?.role as UserRole]?.length ?? 0);
     }
+    onProfilePhotoChange(event: Event) {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (file) {
+            this.profileService.updateProfilePhoto(file).subscribe((profile) => {
+                this.profile.set(profile);
+            });
+        }
+    }
 }

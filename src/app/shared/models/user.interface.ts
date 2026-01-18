@@ -60,7 +60,7 @@ export interface EducationItem {
 }
 
 export interface AvailabilitySlot {
-  id: string;
+  id?: string;
   dayOfWeek: string; // 0=Sun
   startTime: string; // HH:mm
   endTime: string; // HH:mm
@@ -195,5 +195,5 @@ export interface StudentListDto {
 }
 
 
-export interface UpdateUserDetailsDto extends UserDetails,User {
+export interface UpdateUserDetailsDto extends UserDetails, User {
 }

@@ -42,7 +42,7 @@ export class ApiService {
   private loadingSubject = new BehaviorSubject<boolean>(false);
   public loading$ = this.loadingSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Set loading state
@@ -112,7 +112,8 @@ export class ApiService {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       }),
-      params: options?.params
+      params: options?.params,
+      withCredentials: true
     };
     // Only add responseType and observe if they are specified
     if (options?.responseType) {
@@ -198,7 +199,7 @@ export class ApiService {
     options?: RequestOptions
   ): Observable<PaginatedApiResponse<T>> {
     let params: HttpParams | { [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean> };
-    
+
     if (options?.params instanceof HttpParams) {
       params = options.params.set('page', page.toString()).set('limit', limit.toString());
     } else if (options?.params) {
@@ -223,7 +224,7 @@ export class ApiService {
   uploadFile<T>(endpoint: string, file: File, additionalData?: any): Observable<ApiResponse<T>> {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     // if (additionalData) {
     //   Object.keys(additionalData).forEach(key => {
     //     formData.append(key, additionalData[key]);

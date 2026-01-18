@@ -26,7 +26,7 @@ export class Education implements OnInit {
         return p?.educations || [];
     });
     educationForm = new FormGroup({
-        id: new FormControl('', [Validators.required]),
+        id: new FormControl('', []),
         instituteName: new FormControl('', [Validators.required]),
         degreeName: new FormControl('', [Validators.required]),
         startedYear: new FormControl(0, [Validators.required]),

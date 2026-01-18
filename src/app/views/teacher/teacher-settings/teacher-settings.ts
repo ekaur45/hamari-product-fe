@@ -59,7 +59,7 @@ export default class TeacherSettings implements OnInit {
                 // Build form controls for each subject
                 const formControls: { [key: string]: FormControl } = {};
                 subjectRates.forEach(subject => {
-                    
+
                     formControls[`hourly_${subject.id}`] = new FormControl<number | null>(
                         subject.hourlyRate || null,
                         [Validators.min(0)]
@@ -69,7 +69,7 @@ export default class TeacherSettings implements OnInit {
                         [Validators.min(0)]
                     );
                 });
-                
+
                 // Rebuild form group
                 this.subjectRatesForm = new FormGroup(formControls);
             }
@@ -114,7 +114,7 @@ export default class TeacherSettings implements OnInit {
 
         this.profileService.updateOverallRates(
             this.profile()!.teacher!.id,
-            {hourlyRate: this.overallRatesForm.value.hourlyRate || 0, monthlyRate: this.overallRatesForm.value.monthlyRate || 0}
+            { hourlyRate: this.overallRatesForm.value.hourlyRate || 0, monthlyRate: this.overallRatesForm.value.monthlyRate || 0 }
         ).subscribe({
             next: (updatedTeacher) => {
                 // Update local profile
@@ -154,20 +154,19 @@ export default class TeacherSettings implements OnInit {
 
         this.isSavingSubjectRates.set(true);
         const formValue: { [key: string]: any } = this.subjectRatesForm.value;
-        
+
         // Update teacher subjects with new rates
         const updatedTeacherSubjects: TeacherSubject[] = this.subjects().map(subject => {
             const hourlyKey = `hourly_${subject.id}`;
             const monthlyKey = `monthly_${subject.id}`;
-            
+
             const existingSubject = this.profile()!.teacher!.teacherSubjects?.find(
                 ts => ts.id === subject.id
             );
-
             return {
                 ...existingSubject!,
-                fee: formValue[hourlyKey] ? Number(formValue[hourlyKey]) : undefined,
-                monthlyFee: formValue[monthlyKey] ? Number(formValue[monthlyKey]) : undefined
+                hourlyRate: formValue[hourlyKey] ? Number(formValue[hourlyKey]) : undefined,
+                monthlyRate: formValue[monthlyKey] ? Number(formValue[monthlyKey]) : undefined
             } as TeacherSubject;
         });
 

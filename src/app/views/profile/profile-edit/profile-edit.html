@@ -7,11 +7,12 @@
                     [class]="'w-24 h-24 bg-transparent border-2 border-gray-200 rounded-full flex items-center justify-center text-white text-3xl font-semibold'"
                     [user]="profile() ?? null"></profile-photo>
 
-                <button id="uploadPhotoBtn"
+                <label id="uploadPhotoBtn"
                     class="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition">
                     <i class="fas fa-camera text-sm"></i>
-                </button>
-                <input type="file" id="profilePhoto" accept="image/*" class="hidden">
+                    <input type="file" id="profilePhoto" accept="image/*" class="hidden"
+                        (change)="onProfilePhotoChange($event)">
+                </label>
             </div>
             <div class="ml-6">
                 <h3 class="text-2xl font-bold text-gray-900">
@@ -91,11 +92,12 @@
 }
 <!-- Content Here -->
 @if(step() === 1) {
-<app-userinfo [user]="profile()" (nextStep)="handleNextStep()"></app-userinfo>
+<app-userinfo [user]="profile()" (reloadProfile)="refreshProfile()" (nextStep)="handleNextStep()"></app-userinfo>
 }
 @if(step() === 2) {
 @if(profile()?.role === UserRole.TEACHER) {
-<app-professional-info [profile]="profile()" (nextStep)="handleNextStep()"></app-professional-info>
+<app-professional-info [profile]="profile()" (reloadProfile)="refreshProfile()"
+    (nextStep)="handleNextStep()"></app-professional-info>
 }
 @if(profile()?.role === UserRole.STUDENT) {
 <form class="form-section" [formGroup]="bioForm">

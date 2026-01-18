@@ -13,27 +13,20 @@
     <!-- Search Input -->
     <div class="relative">
         <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-        <input
-            type="text"
-            [ngModel]="searchValue$ | async"
-            (input)="searchSubjects($event)"
+        <input type="text" [ngModel]="searchValue$ | async" (input)="searchSubjects($event)"
             placeholder="Search for subjects e.g., Mathematics, Physics, English..."
-            class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
-        >
+            class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition">
     </div>
 
     <!-- Search Results -->
     <div id="subjectsList" class="mt-2">
         <div class="flex flex-col rounded-xl border border-gray-200 overflow-hidden divide-y">
             @for(subject of searchedSubjects(); track subject.id) {
-            <button
-                type="button"
-                class="px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-2 w-full"
-                (click)="addSearchedSubject(subject); searchValue$.next('');searchedSubjects.set([])"
-            >
+            <button type="button"
+                class="px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-2 w-full border-gray-200"
+                (click)="addSearchedSubject(subject); searchValue$.next('');searchedSubjects.set([])">
                 <span
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0"
-                >
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0">
                     <i class="fas fa-plus text-xs"></i>
                 </span>
                 <span class="text-sm font-medium text-gray-900 truncate">
@@ -43,14 +36,11 @@
             }
             @empty {
             @if((searchValue$ | async) && subjectNotFound()) {
-            <button
-                type="button"
+            <button type="button"
                 class="px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-2 w-full"
-                (click)="suggestSubject()"
-            >
+                (click)="suggestSubject()">
                 <span
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex-shrink-0"
-                >
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex-shrink-0">
                     <i class="fas fa-lightbulb text-xs"></i>
                 </span>
                 <span class="text-sm font-medium text-gray-900 truncate">
@@ -78,11 +68,9 @@
                 These subjects will be visible on your public teacher profile.
             </p>
         </div>
-        <button
-            type="button"
+        <button type="button"
             class="px-6 py-2 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition disabled:cursor-not-allowed shadow-sm shadow-lg hover:shadow-xl"
-            (click)="saveSubjects()"
-        >
+            (click)="saveSubjects()">
             <i class="fas fa-save"></i>
             <span>Save Subjects</span>
         </button>
@@ -91,15 +79,12 @@
     <div class="flex flex-wrap gap-2 justify-start">
         @for(subject of subjects(); track subject.id) {
         <span
-            class="inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-primary/5 text-primary border border-primary/20"
-        >
+            class="inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-primary/5 text-primary border border-primary/20">
             <i class="fas fa-book-open mr-1.5 text-[10px]"></i>
             <span class="max-w-[140px] sm:max-w-xs truncate">{{ subject.name }}</span>
-            <button
-                type="button"
+            <button type="button"
                 class="ml-2 text-primary-700/80 hover:text-red-600 h-4 w-4 rounded-full flex items-center justify-center border border-primary/40 hover:border-red-500 transition"
-                (click)="removeSubject(subject)"
-            >
+                (click)="removeSubject(subject)">
                 <i class="fas fa-times text-[10px]"></i>
             </button>
         </span>

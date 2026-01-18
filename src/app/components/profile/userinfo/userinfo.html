@@ -83,15 +83,9 @@
                     Nationality
                 </label>
                 <div class="relative">
-                    <p-select 
-                        [options]="nationalities()"
-                        formControlName="nationalityId"
+                    <p-select [options]="nationalities()" formControlName="nationalityId"
                         class="w-full px-1 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
-                        optionLabel="name"
-                        optionValue="id"
-                        placeholder="Select a country"
-                        filter="true"
-                    ></p-select>
+                        optionLabel="name" optionValue="id" placeholder="Select a country" filter="true"></p-select>
                 </div>
             </div>
             <div>
@@ -101,14 +95,11 @@
                 </label>
                 <div class="relative">
                     <p-date-picker formControlName="dateOfBirth"
-                    
-                    [inputStyleClass]="'w-full px-1 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white'"
-                    [appendTo]="'body'"
-                    size="large"
-                    class="w-full"></p-date-picker>
+                        [inputStyleClass]="'w-full px-1 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white'"
+                        [appendTo]="'body'" size="large" fluid="false" class="w-full"></p-date-picker>
                 </div>
             </div>
-            
+
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-genderless mr-2"></i>
@@ -119,10 +110,9 @@
                         {name: 'Male', code: 'male'},
                         {name: 'Female', code: 'female'},
                         {name: 'Other', code: 'other'}
-                    ]" 
-                    optionValue="code"
-                    
-                    formControlName="gender" class="w-full px-1 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white" optionLabel="name" optionValue="code" placeholder="Select a gender"></p-select>
+                    ]" optionValue="code" formControlName="gender"
+                        class="w-full px-1 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
+                        optionLabel="name" optionValue="code" placeholder="Select a gender"></p-select>
                 </div>
             </div>
             <div class="col-span-2">
@@ -131,47 +121,52 @@
                     Address
                 </label>
                 <div class="relative">
-                    <textarea name="address" formControlName="address" rows="3" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"></textarea>
-                </div>               
+                    <textarea name="address" formControlName="address" rows="3"
+                        class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"></textarea>
+                </div>
             </div>
             <div class="col-span-2 ">
                 <div class="grid grid-cols-4 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-city mr-2"></i>
-                        City
-                    </label>
-                    <div class="relative">
-                        <input type="text" name="city" formControlName="city" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-city mr-2"></i>
+                            City
+                        </label>
+                        <div class="relative">
+                            <input type="text" name="city" formControlName="city"
+                                class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-state mr-2"></i>
-                        State
-                    </label>
-                    <div class="relative">
-                        <input type="text" name="state" formControlName="state" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-state mr-2"></i>
+                            State
+                        </label>
+                        <div class="relative">
+                            <input type="text" name="state" formControlName="state"
+                                class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-zip mr-2"></i>
-                        Zip Code
-                    </label>
-                    <div class="relative">
-                        <input type="text" name="zipCode" formControlName="zipCode" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-zip mr-2"></i>
+                            Zip Code
+                        </label>
+                        <div class="relative">
+                            <input type="text" name="zipCode" formControlName="zipCode"
+                                class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-globe mr-2"></i>
-                        Country
-                    </label>
-                    <div class="relative">
-                        <input type="text" name="country" formControlName="country" class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-globe mr-2"></i>
+                            Country
+                        </label>
+                        <div class="relative">
+                            <input type="text" name="country" formControlName="country"
+                                class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                        </div>
                     </div>
-                </div>
                 </div>
             </div>
             <hr class="my-4 w-full border-gray-200 col-span-2">

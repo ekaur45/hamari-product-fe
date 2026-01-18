@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl, ValidatorFn, ValidationErrors } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../shared/services/auth.service';
 import { RegisterDto, UserRole } from '../../../shared/models';
@@ -51,8 +51,16 @@ export class Register implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private activeRoute: ActivatedRoute
   ) {
+    this.activeRoute.params.subscribe(params => {
+      const role = params['role'];
+      if (role) {
+        this.selectRole(role as UserRole);
+        this.step.set(2);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -87,7 +95,7 @@ export class Register implements OnInit {
         next: (response: any) => {
           this.successMessage.set('Registration successful! Please login with your credentials.');
           this.isLoading.set(false);
-          
+
           // Redirect to login after 2 seconds
           setTimeout(() => {
             this.router.navigate(['/auth/login']);
@@ -113,7 +121,10 @@ export class Register implements OnInit {
   }
 
   backToRole(): void {
-    this.step.set(1);
+    this.router.navigate(['/auth/register']);
+  }
+  navigateToRole(role: UserRole): void {
+    this.router.navigate(['/auth/register', role]);
   }
 
   selectRole(role: UserRole): void {
@@ -194,7 +205,7 @@ export class Register implements OnInit {
         return 'text-primary';
     }
   }
- 
+
 
   private markFormGroupTouched(): void {
     Object.keys(this.registerForm.controls).forEach(key => {
@@ -243,11 +254,11 @@ export class Register implements OnInit {
     this.router.navigate(['/auth/login']);
   }
 
-  togglePasswordVisibility(){
+  togglePasswordVisibility() {
     this.showPassword.set(!this.showPassword());
   }
 
-  toggleConfirmPasswordVisibility(){
+  toggleConfirmPasswordVisibility() {
     this.showConfirmPassword.set(!this.showConfirmPassword());
   }
 }

@@ -27,9 +27,9 @@ export const ApiInterceptor: HttpInterceptorFn = (req, next) => {
     'X-Requested-With': req.headers.get('X-Requested-With') || 'XMLHttpRequest'
   };
 
-  if (token && !req.headers.has('Authorization')) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+  // if (token && !req.headers.has('Authorization')) {
+  //   headers['Authorization'] = `Bearer ${token}`;
+  // }
 
   const modifiedReq = req.clone({ setHeaders: headers });
 
@@ -65,7 +65,7 @@ function handleHttpError(error: HttpErrorResponse, req: any): Observable<never> 
     // Server-side error
     const statusCode = error.status || 500;
     const message = getErrorMessage(statusCode, error);
-    
+
     apiError = {
       statusCode,
       message,

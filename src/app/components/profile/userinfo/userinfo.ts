@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, computed, effect, input, Input, OnInit, output, signal, ViewEncapsulation } from "@angular/core";
+import { Component, computed, effect, input, Input, OnInit, output, signal, SimpleChanges, untracked, ViewEncapsulation } from "@angular/core";
 import { UpdateUserDetailsDto, User, UserDetails } from "../../../shared";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { map, startWith } from "rxjs";
@@ -24,6 +24,7 @@ import { MessageService } from "primeng/api";
 })
 export class UserInfo implements OnInit {
     user = input<User | null>(null);
+    reloadProfile = output<void>();
     nextStep = output<void>();
     isSaving = signal(false);
     CountryISO: typeof CountryISO = CountryISO;
@@ -47,18 +48,20 @@ export class UserInfo implements OnInit {
         effect(() => {
             const u = this.user();
             if (u) {
-                this.userForm.patchValue({
-                    firstName: u.firstName,
-                    lastName: u.lastName,
-                    phone: u.details?.phone ?? '',
-                    dateOfBirth: u.details?.dateOfBirth ? new Date(u.details.dateOfBirth) : null,
-                    nationalityId: u.details?.nationalityId ?? '',
-                    gender: u.details?.gender ?? '',
-                    address: u.details?.address ?? '',
-                    city: u.details?.city ?? '',
-                    state: u.details?.state ?? '',
-                    zipCode: u.details?.zipCode ?? '',
-                    country: u.details?.country ?? ''
+                untracked(() => {
+                    this.userForm.patchValue({
+                        firstName: u.firstName,
+                        lastName: u.lastName,
+                        phone: u.details?.phone ?? '',
+                        dateOfBirth: u.details?.dateOfBirth ? new Date(u.details.dateOfBirth) : null,
+                        nationalityId: u.details?.nationalityId ?? '',
+                        gender: u.details?.gender ?? '',
+                        address: u.details?.address ?? '',
+                        city: u.details?.city ?? '',
+                        state: u.details?.state ?? '',
+                        zipCode: u.details?.zipCode ?? '',
+                        country: u.details?.country ?? ''
+                    });
                 });
             }
         });
@@ -66,6 +69,25 @@ export class UserInfo implements OnInit {
     ngOnInit(): void {
         this.getNationalities();
     }
+    // ngOnChanges(changes: SimpleChanges) {
+    //     if (changes['user']?.currentValue) {
+    //         const u = this.user();
+    //         if (!u) return;
+    //         this.userForm.patchValue({
+    //             firstName: u.firstName,
+    //             lastName: u.lastName,
+    //             phone: u.details?.phone ?? '',
+    //             dateOfBirth: u.details?.dateOfBirth ? new Date(u.details.dateOfBirth) : null,
+    //             nationalityId: u.details?.nationalityId ?? '',
+    //             gender: u.details?.gender ?? '',
+    //             address: u.details?.address ?? '',
+    //             city: u.details?.city ?? '',
+    //             state: u.details?.state ?? '',
+    //             zipCode: u.details?.zipCode ?? '',
+    //             country: u.details?.country ?? ''
+    //         });
+    //     }
+    // }
     getNationalities() {
         this.nationalityService.getNationalities().subscribe({
             next: (nationalities) => {
@@ -89,10 +111,11 @@ export class UserInfo implements OnInit {
             dateOfBirth: this.userForm.value.dateOfBirth ?? null as Date | null,
             gender: this.userForm.value.gender ?? '',
         }
-        this.profileService.updateProfile( this.user()?.id as string, userDetails).subscribe({
+        this.profileService.updateProfile(this.user()?.id as string, userDetails).subscribe({
             next: (profile) => {
                 this.isSaving.set(false);
                 this.nextStep.emit();
+                this.reloadProfile.emit();
             },
             error: (error) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message });
