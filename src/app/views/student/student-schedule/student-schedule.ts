@@ -4,6 +4,7 @@ import { AuthService, ClassBooking, StudentScheduleDto, StudentService, TeacherB
 import CalendarDay from "../../../shared/models/calendar.interface";
 import { DialogModule } from "primeng/dialog";
 import { Router } from "@angular/router";
+import moment from "moment";
 
 interface ScheduleCalendarDay extends CalendarDay {
     hasBooking: boolean;

@@ -26,14 +26,14 @@ export class MainLayout implements AfterViewInit, OnInit {
 
   // Mobile menu state
   isMobileMenuOpen = signal(false);
-  
+
   // User menu state
   isUserMenuOpen = signal(false);
 
 
 
   // Screen size tracking
-  
+
 
   // User state
   currentUser = signal<User | null>(null);
@@ -41,7 +41,7 @@ export class MainLayout implements AfterViewInit, OnInit {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadUserData();
@@ -116,8 +116,14 @@ export class MainLayout implements AfterViewInit, OnInit {
 
   onSignOutClick() {
     this.isUserMenuOpen.set(false);
-    this.authService.logout();
-    this.router.navigate(['/auth/login']);
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/auth/login']);
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    })
   }
 
   hasRole(roles: UserRole[]): boolean {

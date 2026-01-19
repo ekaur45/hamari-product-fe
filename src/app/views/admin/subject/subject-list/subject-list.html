@@ -1,0 +1,85 @@
+<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+    <div class="bg-white rounded-lg shadow-md p-5">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-600">Total Subjects</p>
+            <i class="fas fa-users text-primary"></i>
+        </div>
+        <p class="text-2xl font-bold text-gray-900">{{totalSubjects()}}</p>
+    </div>
+</div>
+<div class="bg-white rounded-lg shadow-md p-3 sm:p-5 mb-6">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+        <!-- Filters Section -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-3 flex-1 w-full lg:w-auto">
+            <!-- Search Input -->
+            <div class="relative flex-1 w-full sm:max-w-xs">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input [(ngModel)]="search" (keyup)="onSearch()" type="text" placeholder="Search users..."
+                    class="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+        </div>
+        <!-- Actions Section -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 w-full sm:w-auto">
+            <button
+                class="w-full sm:w-auto px-4 py-2 text-sm sm:text-base border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition flex items-center justify-center sm:justify-start cursor-pointer">
+                <i class="fas fa-download mr-2"></i>Export
+            </button>
+            <button
+                class="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-primary text-white rounded-lg hover:bg-primary/80 transition flex items-center justify-center sm:justify-start cursor-pointer"
+                (click)="onSearch()">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+            <button
+                class="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-primary text-white rounded-lg hover:bg-primary/80 transition flex items-center justify-center sm:justify-start cursor-pointer">
+                <i class="fas fa-user-plus mr-2"></i>Add Subject
+            </button>
+        </div>
+    </div>
+</div>
+@if(isLoading()){
+<div>Loading...</div>
+}
+@else{
+<div class="bg-white rounded-lg shadow-md">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <!-- <th class="text-left py-3 px-4 font-medium text-gray-700">
+                        <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
+                    </th> -->
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Subject</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700">Teachers</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-700 max-w-[100px] w-[100px]">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @for (subject of subjects(); track subject.id) {
+                <tr>
+                    <td class="py-3 px-4">{{ subject.name }}</td>
+                    <td class="py-3 px-4">{{ subject?.teacherSubjects?.length }} {{
+                        subject?.teacherSubjects?.length == 1 ? 'Teacher' : 'Teachers' }}
+                    </td>
+                    <td class="py-3 px-4 flex gap-2 max-w-[100px]">
+                        <button
+                            class="w-8 h-8 flex items-center justify-center hover:bg-primary/20 text-primary rounded-full cursor-pointer transition-all duration-200 ease-in-out">
+                            <em class="fas fa-edit text-sm"></em>
+                        </button>
+                        <button
+                            class="w-8 h-8 flex items-center justify-center hover:bg-red-500/20 text-red-500 rounded-full cursor-pointer transition-all duration-200 ease-in-out">
+                            <em class="fas fa-trash text-sm"></em>
+                        </button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+        <p-paginator [totalRecords]="totalSubjects()" [rows]="pagination().limit" [first]="pagination().page - 1"
+            [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+            [rowsPerPageOptions]="[5,10, 20, 50]" (onPageChange)="onPageChange($event)"></p-paginator>
+    </div>
+</div>
+
+}

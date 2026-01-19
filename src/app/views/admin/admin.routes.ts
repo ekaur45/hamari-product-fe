@@ -94,5 +94,11 @@ export const adminRoutes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: [UserRole.ADMIN] },
         loadChildren: () => import('./academies/academies.routes').then(m => m.academiesRoutes)
+    },
+    {
+        path: 'subjects',
+        canActivate: [RoleGuard],
+        data: { roles: [UserRole.ADMIN] },
+        loadChildren: () => import('./subject/subject.routes').then(m => m.subjectRoutes)
     }
 ];
