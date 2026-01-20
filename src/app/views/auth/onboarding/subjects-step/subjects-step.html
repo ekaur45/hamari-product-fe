@@ -1,3 +1,4 @@
+<p-toast />
 <div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-4xl space-y-10">
         <!-- Header -->
@@ -27,48 +28,43 @@
                     <i class="fas fa-search text-gray-400"></i>
                 </div>
                 <input type="text"
+                    [ngModel]="searchValue$ | async"
+                    (input)="searchSubjects($event)"
                     placeholder="Search for subjects e.g., Mathematics, Physics, English..."
                     class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-gray-50/50">
             </div>
 
             <!-- Search Results Dropdown -->
-            <div class="relative">
-                <div class="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden divide-y divide-gray-200 max-h-64 overflow-y-auto">
-                    <!-- Search Result Item -->
-                    <button type="button"
-                        class="w-full px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-3">
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0">
-                            <i class="fas fa-plus text-xs"></i>
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">Mathematics</span>
-                    </button>
-                    <button type="button"
-                        class="w-full px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-3">
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0">
-                            <i class="fas fa-plus text-xs"></i>
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">Physics</span>
-                    </button>
-                    <button type="button"
-                        class="w-full px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-3">
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0">
-                            <i class="fas fa-plus text-xs"></i>
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">English Literature</span>
-                    </button>
-
-                    <!-- Suggest Subject (when no results found) -->
-                    <!-- <button type="button"
-                        class="w-full px-4 py-3 text-left hover:bg-amber-50 transition flex items-center gap-3">
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex-shrink-0">
-                            <i class="fas fa-lightbulb text-xs"></i>
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">
-                            Suggest: <span class="text-amber-600">Chemistry</span>
-                        </span>
-                    </button> -->
+            @if (showSearchResults()) {
+                <div class="relative">
+                    <div class="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden divide-y divide-gray-200 max-h-64 overflow-y-auto">
+                        @for (subject of searchedSubjects(); track subject.id) {
+                            <button type="button"
+                                (click)="addSearchedSubject(subject)"
+                                class="w-full px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-3">
+                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0">
+                                    <i class="fas fa-plus text-xs"></i>
+                                </span>
+                                <span class="text-sm font-medium text-gray-900">{{ subject.name }}</span>
+                            </button>
+                        }
+                        @empty {
+                            @if ((searchValue$ | async) && subjectNotFound()) {
+                                <button type="button"
+                                    (click)="suggestSubject()"
+                                    class="w-full px-4 py-3 text-left hover:bg-amber-50 transition flex items-center gap-3">
+                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex-shrink-0">
+                                        <i class="fas fa-lightbulb text-xs"></i>
+                                    </span>
+                                    <span class="text-sm font-medium text-gray-900">
+                                        Suggest: <span class="text-amber-600">{{ searchValue$ | async }}</span>
+                                    </span>
+                                </button>
+                            }
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         </div>
 
         <!-- Divider -->
@@ -87,51 +83,37 @@
                         </h4>
                         <p class="text-sm text-gray-600 mt-2 ml-13">
                             These subjects will be visible on your public teacher profile
-                            <span class="text-gray-500">(3)</span>
+                            <span class="text-gray-500">({{ subjects().length }})</span>
                         </p>
                     </div>
                 </div>
             </div>
 
             <!-- Selected Subjects Tags -->
-            <div class="flex flex-wrap gap-3">
-                <!-- Subject Tag -->
-                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
-                    <i class="fas fa-book-open mr-2 text-xs"></i>
-                    <span>Mathematics</span>
-                    <button type="button"
-                        class="ml-2 text-primary/70 hover:text-red-600 h-5 w-5 rounded-full flex items-center justify-center border border-primary/30 hover:border-red-500 transition">
-                        <i class="fas fa-times text-xs"></i>
-                    </button>
-                </span>
-
-                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
-                    <i class="fas fa-book-open mr-2 text-xs"></i>
-                    <span>Physics</span>
-                    <button type="button"
-                        class="ml-2 text-primary/70 hover:text-red-600 h-5 w-5 rounded-full flex items-center justify-center border border-primary/30 hover:border-red-500 transition">
-                        <i class="fas fa-times text-xs"></i>
-                    </button>
-                </span>
-
-                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
-                    <i class="fas fa-book-open mr-2 text-xs"></i>
-                    <span>English Literature</span>
-                    <button type="button"
-                        class="ml-2 text-primary/70 hover:text-red-600 h-5 w-5 rounded-full flex items-center justify-center border border-primary/30 hover:border-red-500 transition">
-                        <i class="fas fa-times text-xs"></i>
-                    </button>
-                </span>
-            </div>
-
-            <!-- Empty State (when no subjects selected) -->
-            <!-- <div class="bg-gray-50 border border-gray-200 border-dashed rounded-lg p-12 text-center">
-                <i class="fas fa-book text-gray-300 text-4xl mb-4"></i>
-                <p class="text-gray-500 text-lg font-medium mb-2">No subjects selected</p>
-                <p class="text-gray-400 text-sm">
-                    Start typing above to search and add subjects to your profile.
-                </p>
-            </div> -->
+            @if (subjects().length > 0) {
+                <div class="flex flex-wrap gap-3">
+                    @for (subject of subjects(); track subject.id) {
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
+                            <i class="fas fa-book-open mr-2 text-xs"></i>
+                            <span>{{ subject.name }}</span>
+                            <button type="button"
+                                (click)="removeSubject(subject)"
+                                class="ml-2 text-primary/70 hover:text-red-600 h-5 w-5 rounded-full flex items-center justify-center border border-primary/30 hover:border-red-500 transition">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </span>
+                    }
+                </div>
+            } @else {
+                <!-- Empty State (when no subjects selected) -->
+                <div class="bg-gray-50 border border-gray-200 border-dashed rounded-lg p-12 text-center">
+                    <i class="fas fa-book text-gray-300 text-4xl mb-4"></i>
+                    <p class="text-gray-500 text-lg font-medium mb-2">No subjects selected</p>
+                    <p class="text-gray-400 text-sm">
+                        Start typing above to search and add subjects to your profile.
+                    </p>
+                </div>
+            }
         </div>
 
         <!-- Info Box -->
@@ -150,9 +132,17 @@
         <!-- Action Buttons -->
         <div class="flex justify-end pt-6 border-t border-gray-200">
             <button type="button"
-                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px]">
-                <i class="fas fa-arrow-right"></i>
-                <span>Continue</span>
+                (click)="onContinue()"
+                [disabled]="isSaving()"
+                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px] disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas" [ngClass]="{'fa-spinner fa-spin': isSaving(), 'fa-arrow-right': !isSaving()}"></i>
+                <span>
+                    @if (isSaving()) {
+                        Saving...
+                    } @else {
+                        Continue
+                    }
+                </span>
             </button>
         </div>
     </div>

@@ -1,3 +1,4 @@
+<p-toast />
 <div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-5xl space-y-10">
         <!-- Header -->
@@ -21,7 +22,7 @@
                 <p class="text-sm text-gray-600 mt-2 ml-13">Choose a day and time range to add a new availability slot</p>
             </div>
 
-            <form class="bg-gray-50/50 rounded-lg p-6 border border-gray-200 space-y-6">
+            <form [formGroup]="availabilityForm" (ngSubmit)="addAvailability()" class="bg-gray-50/50 rounded-lg p-6 border border-gray-200 space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <!-- Day of Week -->
                     <div class="space-y-2">
@@ -34,20 +35,18 @@
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <i class="fas fa-calendar-day text-gray-400"></i>
                             </div>
-                            <select class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white appearance-none">
-                                <option value="">Select a day</option>
-                                <option value="Monday">Monday</option>
-                                <option value="Tuesday">Tuesday</option>
-                                <option value="Wednesday">Wednesday</option>
-                                <option value="Thursday">Thursday</option>
-                                <option value="Friday">Friday</option>
-                                <option value="Saturday">Saturday</option>
-                                <option value="Sunday">Sunday</option>
-                            </select>
-                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                                <i class="fas fa-chevron-down text-gray-400"></i>
-                            </div>
+                            <p-select 
+                                [options]="availabilityDays()" 
+                                formControlName="dayOfWeek" 
+                                class="w-full" 
+                                size="large"
+                                placeholder="Select a day"
+                                [style]="{'padding-left': '2.75rem'}">
+                            </p-select>
                         </div>
+                        @if (availabilityForm.get('dayOfWeek')?.invalid && availabilityForm.get('dayOfWeek')?.touched) {
+                            <p class="text-red-500 text-xs mt-1">Please select a day</p>
+                        }
                     </div>
 
                     <!-- Start Time -->
@@ -62,8 +61,15 @@
                                 <i class="fas fa-clock text-gray-400"></i>
                             </div>
                             <input type="time"
-                                class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">
+                                formControlName="startTime"
+                                (change)="onStartDateChange($event)"
+                                class="w-full pl-11 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white"
+                                [class.border-red-300]="availabilityForm.get('startTime')?.invalid && availabilityForm.get('startTime')?.touched"
+                                [class.border-gray-300]="!(availabilityForm.get('startTime')?.invalid && availabilityForm.get('startTime')?.touched)">
                         </div>
+                        @if (availabilityForm.get('startTime')?.invalid && availabilityForm.get('startTime')?.touched) {
+                            <p class="text-red-500 text-xs mt-1">Please choose a start time</p>
+                        }
                     </div>
 
                     <!-- Duration -->
@@ -76,14 +82,14 @@
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <i class="fas fa-hourglass-half text-gray-400"></i>
                             </div>
-                            <select class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white appearance-none">
-                                <option value="30">30 Min</option>
-                                <option value="45">45 Min</option>
-                                <option value="60">60 Min</option>
-                            </select>
-                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                                <i class="fas fa-chevron-down text-gray-400"></i>
-                            </div>
+                            <p-select 
+                                [options]="[{label:'30 Min',value:30},{label:'45 Min',value:45},{label:'60 Min',value:60}]"
+                                formControlName="duration" 
+                                class="w-full" 
+                                size="large"
+                                (onChange)="onStartDateChange($event)"
+                                [style]="{'padding-left': '2.75rem'}">
+                            </p-select>
                         </div>
                     </div>
 
@@ -99,8 +105,14 @@
                                 <i class="fas fa-clock text-gray-400"></i>
                             </div>
                             <input type="time"
-                                class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">
+                                formControlName="endTime"
+                                class="w-full pl-11 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white"
+                                [class.border-red-300]="availabilityForm.get('endTime')?.invalid && availabilityForm.get('endTime')?.touched"
+                                [class.border-gray-300]="!(availabilityForm.get('endTime')?.invalid && availabilityForm.get('endTime')?.touched)">
                         </div>
+                        @if (availabilityForm.get('endTime')?.invalid && availabilityForm.get('endTime')?.touched) {
+                            <p class="text-red-500 text-xs mt-1">Please choose an end time</p>
+                        }
                     </div>
                 </div>
 
@@ -110,8 +122,9 @@
                         <i class="fas fa-info-circle text-gray-400 mt-0.5"></i>
                         <span>You can add multiple slots for the same day. Make sure time ranges don't overlap.</span>
                     </p>
-                    <button type="button"
-                        class="px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px]">
+                    <button type="submit"
+                        [disabled]="!availabilityForm.valid"
+                        class="px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px] disabled:opacity-50 disabled:cursor-not-allowed">
                         <i class="fas fa-plus"></i>
                         <span>Add Availability</span>
                     </button>
@@ -135,172 +148,66 @@
                         </h4>
                         <p class="text-sm text-gray-600 mt-2 ml-13">
                             Manage your available time slots
-                            <span class="text-gray-500">(5 slots)</span>
+                            <span class="text-gray-500">({{ availabilitySlots().length }} slot{{ availabilitySlots().length !== 1 ? 's' : '' }})</span>
                         </p>
                     </div>
                 </div>
             </div>
 
             <!-- Grouped Availability by Day -->
-            <div class="space-y-4">
-                <!-- Monday -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <!-- Day Header -->
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-calendar-day text-primary"></i>
-                                <span class="font-semibold text-gray-900">Monday</span>
-                                <span class="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
-                                    2 slots
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Time Slots -->
-                    <div class="divide-y divide-gray-100">
-                        <!-- Slot 1 -->
-                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex items-center gap-2 text-sm text-gray-700">
-                                        <i class="fas fa-clock text-gray-400"></i>
-                                        <span class="font-medium">09:00 AM - 10:30 AM</span>
-                                        <span class="text-gray-400">•</span>
-                                        <span class="text-gray-600">1 hr 30 min</span>
+            @if (availabilitySlots().length > 0) {
+                <div class="space-y-4">
+                    @for (dayGroup of getGroupedAvailabilitySlots(); track dayGroup.day) {
+                        <div class="border border-gray-200 rounded-lg overflow-hidden">
+                            <!-- Day Header -->
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-calendar-day text-primary"></i>
+                                        <span class="font-semibold text-gray-900">{{ dayGroup.day }}</span>
+                                        <span class="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
+                                            {{ dayGroup.slots.length }} slot{{ dayGroup.slots.length !== 1 ? 's' : '' }}
+                                        </span>
                                     </div>
                                 </div>
-                                <button type="button"
-                                    class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
-                                    <i class="fas fa-trash"></i>
-                                    <span>Remove</span>
-                                </button>
                             </div>
-                        </div>
 
-                        <!-- Slot 2 -->
-                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex items-center gap-2 text-sm text-gray-700">
-                                        <i class="fas fa-clock text-gray-400"></i>
-                                        <span class="font-medium">02:00 PM - 04:00 PM</span>
-                                        <span class="text-gray-400">•</span>
-                                        <span class="text-gray-600">2 hrs</span>
+                            <!-- Time Slots -->
+                            <div class="divide-y divide-gray-100">
+                                @for (slot of dayGroup.slots; track slot.dayOfWeek + slot.startTime + slot.endTime) {
+                                    <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                            <div class="flex items-center gap-4">
+                                                <div class="flex items-center gap-2 text-sm text-gray-700">
+                                                    <i class="fas fa-clock text-gray-400"></i>
+                                                    <span class="font-medium">{{ formatTime(slot.startTime) }} - {{ formatTime(slot.endTime) }}</span>
+                                                    <span class="text-gray-400">•</span>
+                                                    <span class="text-gray-600">{{ calculateDuration(slot.startTime, slot.endTime) }}</span>
+                                                </div>
+                                            </div>
+                                            <button type="button"
+                                                (click)="removeAvailability(slot)"
+                                                class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
+                                                <i class="fas fa-trash"></i>
+                                                <span>Remove</span>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                                <button type="button"
-                                    class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
-                                    <i class="fas fa-trash"></i>
-                                    <span>Remove</span>
-                                </button>
+                                }
                             </div>
                         </div>
-                    </div>
+                    }
                 </div>
-
-                <!-- Wednesday -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <!-- Day Header -->
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-calendar-day text-primary"></i>
-                                <span class="font-semibold text-gray-900">Wednesday</span>
-                                <span class="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
-                                    1 slot
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Time Slots -->
-                    <div class="divide-y divide-gray-100">
-                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex items-center gap-2 text-sm text-gray-700">
-                                        <i class="fas fa-clock text-gray-400"></i>
-                                        <span class="font-medium">10:00 AM - 12:00 PM</span>
-                                        <span class="text-gray-400">•</span>
-                                        <span class="text-gray-600">2 hrs</span>
-                                    </div>
-                                </div>
-                                <button type="button"
-                                    class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
-                                    <i class="fas fa-trash"></i>
-                                    <span>Remove</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Friday -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <!-- Day Header -->
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-calendar-day text-primary"></i>
-                                <span class="font-semibold text-gray-900">Friday</span>
-                                <span class="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
-                                    2 slots
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Time Slots -->
-                    <div class="divide-y divide-gray-100">
-                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex items-center gap-2 text-sm text-gray-700">
-                                        <i class="fas fa-clock text-gray-400"></i>
-                                        <span class="font-medium">09:00 AM - 11:00 AM</span>
-                                        <span class="text-gray-400">•</span>
-                                        <span class="text-gray-600">2 hrs</span>
-                                    </div>
-                                </div>
-                                <button type="button"
-                                    class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
-                                    <i class="fas fa-trash"></i>
-                                    <span>Remove</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex items-center gap-2 text-sm text-gray-700">
-                                        <i class="fas fa-clock text-gray-400"></i>
-                                        <span class="font-medium">03:00 PM - 05:00 PM</span>
-                                        <span class="text-gray-400">•</span>
-                                        <span class="text-gray-600">2 hrs</span>
-                                    </div>
-                                </div>
-                                <button type="button"
-                                    class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
-                                    <i class="fas fa-trash"></i>
-                                    <span>Remove</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            } @else {
                 <!-- Empty State (when no slots added) -->
-                <!-- <div class="bg-gray-50 border border-gray-200 border-dashed rounded-lg p-12 text-center">
+                <div class="bg-gray-50 border border-gray-200 border-dashed rounded-lg p-12 text-center">
                     <i class="fas fa-calendar-times text-gray-300 text-4xl mb-4"></i>
                     <p class="text-gray-500 text-lg font-medium mb-2">No availability slots added yet</p>
                     <p class="text-gray-400 text-sm">
                         Add your available time slots to let students know when you're available
                     </p>
-                </div> -->
-            </div>
+                </div>
+            }
         </div>
 
         <!-- Info Box -->
@@ -320,9 +227,17 @@
         <!-- Action Buttons -->
         <div class="flex justify-end pt-6 border-t border-gray-200">
             <button type="button"
-                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px]">
-                <i class="fas fa-arrow-right"></i>
-                <span>Continue</span>
+                (click)="onContinue()"
+                [disabled]="isSaving()"
+                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px] disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas" [ngClass]="{'fa-spinner fa-spin': isSaving(), 'fa-arrow-right': !isSaving()}"></i>
+                <span>
+                    @if (isSaving()) {
+                        Saving...
+                    } @else {
+                        Continue
+                    }
+                </span>
             </button>
         </div>
     </div>

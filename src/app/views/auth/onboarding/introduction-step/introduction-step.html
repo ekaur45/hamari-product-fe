@@ -1,5 +1,5 @@
 <p-toast />
-<div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
+<form [formGroup]="introductionForm" class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-4xl space-y-10">
         <!-- Header -->
         <div class="text-center mb-8">
@@ -30,9 +30,16 @@
                 </label>
                 <div class="relative">
                     <textarea rows="3"
+                        formControlName="bio"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none bg-gray-50/50"
                         placeholder="Write a catchy tagline or short bio that describes your teaching style..."></textarea>
                 </div>
+                @if(introductionForm.get('bio')?.invalid && introductionForm.get('bio')?.touched) {
+                    <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Bio/Tagline is required
+                    </p>
+                }
             </div>
         </div>
 
@@ -59,9 +66,16 @@
                 </label>
                 <div class="relative">
                     <textarea rows="5"
+                        formControlName="introduction"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none bg-gray-50/50"
                         placeholder="Write a brief introduction about yourself, your teaching philosophy, and what makes you unique..."></textarea>
                 </div>
+                @if(introductionForm.get('introduction')?.invalid && introductionForm.get('introduction')?.touched) {
+                    <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Introduction is required
+                    </p>
+                }
             </div>
         </div>
 
@@ -87,10 +101,10 @@
                         Video Thumbnail
                     </label>
 
-                    @if (thumbnailPreview()) {
+                    @if (introductionForm.get('introductionVideoThumbnailUrl')?.value || thumbnailPreview()) {
                         <!-- Thumbnail Preview -->
                         <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-white w-64 h-48">
-                            <img [src]="thumbnailPreview()!" alt="Thumbnail preview" class="w-full h-48 object-cover">
+                            <img [src]="thumbnailPreview() ? (assetsUrl + thumbnailPreview()) : (assetsUrl + introductionForm.get('introductionVideoThumbnailUrl')?.value)" alt="Thumbnail preview" class="w-full h-48 object-cover">
                             <button type="button" (click)="removeThumbnail()"
                                 class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg w-8 h-8 flex items-center justify-center">
                                 <i class="fas fa-times text-sm"></i>
@@ -135,10 +149,10 @@
                         Video File
                     </label>
 
-                    @if (videoPreview()) {
+                    @if (introductionForm.get('introductionVideo')?.value || videoPreview()) {
                         <!-- Video Preview -->
                         <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-black w-full max-w-md aspect-video">
-                            <video [src]="videoPreview()!" controls class="w-full h-full object-contain"></video>
+                            <video [src]="videoPreview() ? (assetsUrl + videoPreview()) : (assetsUrl + introductionForm.get('introductionVideo')?.value)" controls class="w-full h-full object-contain"></video>
                             <button type="button" (click)="removeVideo()"
                                 class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg z-10 w-8 h-8 flex items-center justify-center">
                                 <i class="fas fa-times text-sm"></i>
@@ -185,6 +199,7 @@
                         Video Title
                     </label>
                     <input type="text"
+                        formControlName="introductionVideoTitle"
                         placeholder="Enter video title"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">
                 </div>
@@ -194,6 +209,7 @@
                         Video Description
                     </label>
                     <textarea rows="3"
+                        formControlName="introductionVideoDescription"
                         placeholder="Enter video description"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none bg-white"></textarea>
                 </div>
@@ -227,6 +243,7 @@
                             <i class="fas fa-book text-gray-400"></i>
                         </div>
                         <input type="text"
+                            formControlName="preferredSubject"
                             placeholder="e.g., Mathematics, Science, English"
                             class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-gray-50/50">
                     </div>
@@ -242,8 +259,10 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="fas fa-calendar-alt text-gray-400"></i>
                         </div>
-                        <input type="text"
+                        <input type="number"
+                            formControlName="yearsOfExperience"
                             placeholder="0"
+                            min="0"
                             class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-gray-50/50">
                     </div>
                 </div>
@@ -253,13 +272,20 @@
         <!-- Action Buttons -->
         <div class="flex justify-end pt-6 border-t border-gray-200">
             <button type="button"
-                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px]">
-                <i class="fas fa-save"></i>
-                <span>Continue</span>
+                [ngClass]="{'bg-gray-400 cursor-not-allowed': !hasChanges, 'bg-primary hover:bg-primary/90 active:scale-95': hasChanges}"
+                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white disabled:opacity-50 min-w-[160px]"
+                [disabled]="!hasChanges || isSaving()" 
+                (click)="onSaveChanges()">
+                <i class="fas" [ngClass]="{'fa-spinner fa-spin': isSaving(), 'fa-save': !isSaving()}"></i>
+                @if(isSaving()) {
+                    <span>Saving...</span>
+                } @else {
+                    <span>Continue</span>
+                }
             </button>
         </div>
     </div>
-</div>
+</form>
 
 <!-- Thumbnail Crop Dialog -->
 <p-dialog 

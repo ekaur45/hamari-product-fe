@@ -1,21 +1,30 @@
-import { Component, signal, ViewChild } from "@angular/core";
-import { RouterModule } from "@angular/router";
+import { Component, effect, OnInit, signal, ViewChild } from "@angular/core";
+import { Router, RouterModule } from "@angular/router";
 import { CommonModule } from "@angular/common";
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { MessageService } from "primeng/api";
 import { ToastModule } from "primeng/toast";
 import { DialogModule } from "primeng/dialog";
 import { ImageCroppedEvent, ImageCropperComponent } from "ngx-image-cropper";
+import { ProfileService } from "../../../../shared/services/profile.service";
+import { AuthService } from "../../../../shared/services/auth.service";
+import { Teacher, User } from "../../../../shared";
+import { environment } from "../../../../../environments/environment";
 
 @Component({
     selector: 'app-introduction-step',
     templateUrl: './introduction-step.html',
     standalone: true,
-    imports: [CommonModule, RouterModule, ToastModule, DialogModule, ImageCropperComponent],
-    providers: [MessageService]
+    imports: [CommonModule, RouterModule, ToastModule, DialogModule, ImageCropperComponent, ReactiveFormsModule],
+    providers: [MessageService, ProfileService]
 })
-export class IntroductionStep {
+export class IntroductionStep implements OnInit {
     @ViewChild(ImageCropperComponent) imageCropper?: ImageCropperComponent;
 
+    assetsUrl = environment.assetsUrl;
+    currentUser = signal<User | null>(null);
+    isSaving = signal<boolean>(false);
+    
     thumbnailFile = signal<File | null>(null);
     thumbnailPreview = signal<string | null>(null);
     videoFile = signal<File | null>(null);
@@ -41,7 +50,56 @@ export class IntroductionStep {
         cropperMinHeight: 56
     };
 
-    constructor(private messageService: MessageService) {
+    introductionForm = new FormGroup({
+        bio: new FormControl('', [Validators.required]),
+        introduction: new FormControl('', [Validators.required]),
+        preferredSubject: new FormControl('', []),
+        yearsOfExperience: new FormControl(0, []),
+        introductionVideoTitle: new FormControl('', []),
+        introductionVideoDescription: new FormControl('', []),
+        introductionVideoThumbnailUrl: new FormControl('', []),
+        introductionVideo: new FormControl('', []),
+    });
+
+    constructor(
+        private messageService: MessageService,
+        private profileService: ProfileService,
+        private authService: AuthService,
+        private router: Router
+    ) {
+        effect(() => {
+            const user = this.currentUser();
+            if (user) {
+                this.introductionForm.patchValue({
+                    bio: user.teacher?.tagline || '',
+                    introduction: user.teacher?.introduction || '',
+                    preferredSubject: user.teacher?.preferredSubject || '',
+                    yearsOfExperience: user.teacher?.yearsOfExperience || 0,
+                    introductionVideoTitle: user.teacher?.introductionVideoTitle || '',
+                    introductionVideoDescription: user.teacher?.introductionVideoDescription || '',
+                    introductionVideoThumbnailUrl: user.teacher?.introductionVideoThumbnailUrl || '',
+                    introductionVideo: user.teacher?.introductionVideoUrl || '',
+                });
+
+                // Set existing previews if available (just the URL, assetsUrl will be added in template)
+                if (user.teacher?.introductionVideoThumbnailUrl) {
+                    this.thumbnailPreview.set(user.teacher.introductionVideoThumbnailUrl);
+                }
+                if (user.teacher?.introductionVideoUrl && !user.teacher.introductionVideoUrl.includes('youtube.com')) {
+                    this.videoPreview.set(user.teacher.introductionVideoUrl);
+                }
+            }
+        });
+    }
+
+    ngOnInit(): void {
+        this.authService.currentUser$.subscribe(user => {
+            this.currentUser.set(user);
+        });
+    }
+
+    get hasChanges() {
+        return this.introductionForm.dirty && this.introductionForm.valid;
     }
 
     onThumbnailSelected(event: Event): void {
@@ -76,7 +134,7 @@ export class IntroductionStep {
     }
 
     imageCropped(event: ImageCroppedEvent): void {
-        this.croppedImage.set(event.base64 || null);
+        this.croppedImage.set(event.objectUrl || null);
     }
 
     imageLoaded(): void {
@@ -124,6 +182,9 @@ export class IntroductionStep {
             this.showCropDialog.set(false);
             this.imageChangedEvent = null;
             this.croppedImage.set(null);
+            
+            // Upload thumbnail immediately after cropping
+            this.uploadThumbnail();
         } catch (error) {
             this.messageService.add({
                 severity: 'error',
@@ -133,7 +194,65 @@ export class IntroductionStep {
         }
     }
 
-    private base64ToFile(base64: string, filename: string): Promise<File> {
+    uploadThumbnail(): void {
+        const file = this.thumbnailFile();
+        if (!file) return;
+        
+        this.isThumbnailUploading.set(true);
+        this.profileService.uploadThumbnail(this.currentUser()?.id as string, file).subscribe({
+            next: (response) => {
+                this.isThumbnailUploading.set(false);
+                this.thumbnailPreview.set(response.url);
+                this.introductionForm.patchValue({ introductionVideoThumbnailUrl: response.url });
+                this.introductionForm.markAsDirty();
+                this.messageService.add({ 
+                    severity: 'success', 
+                    summary: 'Success', 
+                    detail: 'Thumbnail uploaded successfully' 
+                });
+            },
+            error: (error) => {
+                this.isThumbnailUploading.set(false);
+                this.messageService.add({ 
+                    severity: 'error', 
+                    summary: 'Error', 
+                    detail: error?.error?.message || error?.message || 'Failed to upload thumbnail' 
+                });
+            }
+        });
+    }
+
+    uploadVideo(): void {
+        const file = this.videoFile();
+        if (!file) return;
+        
+        this.isVideoUploading.set(true);
+        this.profileService.uploadVideo(this.currentUser()?.id as string, file).subscribe({
+            next: (response) => {
+                this.isVideoUploading.set(false);
+                this.videoPreview.set(response.url);
+                this.introductionForm.patchValue({ introductionVideo: response.url });
+                this.introductionForm.markAsDirty();
+                this.messageService.add({ 
+                    severity: 'success', 
+                    summary: 'Success', 
+                    detail: 'Video uploaded successfully' 
+                });
+            },
+            error: (error) => {
+                this.isVideoUploading.set(false);
+                this.messageService.add({ 
+                    severity: 'error', 
+                    summary: 'Error', 
+                    detail: error?.error?.message || error?.message || 'Failed to upload video' 
+                });
+            }
+        });
+    }
+
+    private async base64ToFile(base64: string, filename: string): Promise<File> {
+        const blob = await fetch(base64).then(response => response.blob())
+        return new File([blob], filename, { type: blob.type });
         return new Promise((resolve, reject) => {
             // Remove data URL prefix if present
             const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
@@ -151,14 +270,6 @@ export class IntroductionStep {
             const file = new File([blob], filename, { type: 'image/png' });
             resolve(file);
         });
-    }
-
-    removeThumbnail(): void {
-        this.thumbnailPreview.set(null);
-        this.thumbnailFile.set(null);
-        // Reset file input
-        const input = document.getElementById('thumbnailUpload') as HTMLInputElement;
-        if (input) input.value = '';
     }
 
     onVideoSelected(event: Event): void {
@@ -193,7 +304,8 @@ export class IntroductionStep {
         const reader = new FileReader();
         reader.onload = (e) => {
             this.videoPreview.set(e.target?.result as string);
-            this.isVideoUploading.set(false);
+            // Upload video after preview
+            this.uploadVideo();
         };
         reader.onerror = () => {
             this.messageService.add({
@@ -209,8 +321,72 @@ export class IntroductionStep {
     removeVideo(): void {
         this.videoPreview.set(null);
         this.videoFile.set(null);
+        this.introductionForm.patchValue({ introductionVideo: '' });
+        this.introductionForm.markAsDirty();
         // Reset file input
         const input = document.getElementById('videoFileUpload') as HTMLInputElement;
         if (input) input.value = '';
+    }
+
+    removeThumbnail(): void {
+        this.thumbnailPreview.set(null);
+        this.thumbnailFile.set(null);
+        this.introductionForm.patchValue({ introductionVideoThumbnailUrl: '' });
+        this.introductionForm.markAsDirty();
+        // Reset file input
+        const input = document.getElementById('thumbnailUpload') as HTMLInputElement;
+        if (input) input.value = '';
+    }
+
+    onSaveChanges(): void {
+        if (!this.introductionForm.valid) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: 'Please fill in all required fields'
+            });
+            return;
+        }
+
+        this.isSaving.set(true);
+
+        // Prepare the professional info data
+        const professionalInfo: any = {
+            preferredSubject: this.introductionForm.get('preferredSubject')?.value || '',
+            yearsOfExperience: this.introductionForm.get('yearsOfExperience')?.value || 0,
+            tagline: this.introductionForm.get('bio')?.value || '',
+            introduction: this.introductionForm.get('introduction')?.value || '',
+            introductionVideoUrl: this.introductionForm.get('introductionVideo')?.value || null,
+            introductionVideoTitle: this.introductionForm.get('introductionVideoTitle')?.value || null,
+            introductionVideoDescription: this.introductionForm.get('introductionVideoDescription')?.value || null,
+            introductionVideoThumbnailUrl: this.introductionForm.get('introductionVideoThumbnailUrl')?.value || null
+        };
+
+        this.profileService.updateProfessionalInfo(this.currentUser()?.id as string, professionalInfo as Teacher).subscribe({
+            next: (teacher) => {
+                this.isSaving.set(false);
+                this.messageService.add({ 
+                    severity: 'success', 
+                    summary: 'Success', 
+                    detail: 'Introduction updated successfully' 
+                });
+                this.introductionForm.markAsPristine();
+                
+                // Reload user profile
+                this.profileService.getProfile().subscribe(profile => {
+                    this.authService.setCurrentUser(profile);
+                    // Navigate to next step
+                    this.router.navigate(['/auth/onboarding/education-step']);
+                });
+            },
+            error: (error) => {
+                this.isSaving.set(false);
+                this.messageService.add({ 
+                    severity: 'error', 
+                    summary: 'Error', 
+                    detail: error?.error?.message || error?.message || 'Failed to update introduction' 
+                });
+            }
+        });
     }
 }
