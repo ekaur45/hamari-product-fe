@@ -19,6 +19,8 @@ export class Onboarding {
         { label: 'Education', icon: 'pi pi-building', link: '/auth/onboarding/education-step', description: 'Add your education' },
         { label: 'Subjects', icon: 'pi pi-book', link: '/auth/onboarding/subjects-step', description: 'Add your subjects' },
         { label: 'Availability', icon: 'pi pi-calendar', link: '/auth/onboarding/availability-step', description: 'Add your availability' },
+        { label: 'Rates', icon: 'pi pi-dollar', link: '/auth/onboarding/rates-step', description: 'Set your rates' },
+        { label: 'Final', icon: 'pi pi-check', link: '/auth/onboarding/final-step', description: 'Final step' },
     ];
     currentUser = signal<User | null>(null);
     userDisplayName = signal<string>('');
@@ -30,13 +32,13 @@ export class Onboarding {
             this.currentUser.set(user);
             this.userDisplayName.set(user?.firstName + ' ' + user?.lastName);
             this.userEmail.set(user?.email ?? '');
-            if (!user?.details?.profileImage) {
-                this.router.navigate(['/auth/onboarding/profile-photo-step']);
-            } else if (!user?.details?.bio) {
-                this.router.navigate(['/auth/onboarding/bio-step']);
-            } else {
-                this.router.navigate(['/dashboard']);
-            }
+            //this.router.navigate(['/auth/onboarding/profile-photo-step']);
+            // if (!user?.details?.profileImage) {
+            // } else if (!user?.details?.bio) {
+            //     this.router.navigate(['/auth/onboarding/bio-step']);
+            // } else {
+            //     this.router.navigate(['/dashboard']);
+            // }
         });
     }
     onLogoutClick(): void {

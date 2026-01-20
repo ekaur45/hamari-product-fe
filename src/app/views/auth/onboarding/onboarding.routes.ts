@@ -31,6 +31,10 @@ export const onboardingRoutes: Routes = [
                 loadComponent: () => import('./availability-step/availability-step').then(m => m.AvailabilityStep)
             },
             {
+                path: 'rates-step',
+                loadComponent: () => import('./rates-step/rates-step').then(m => m.RatesStep)
+            },
+            {
                 path: 'final-step',
                 loadComponent: () => import('./final-step/final-step').then(m => m.FinalStep)
             }

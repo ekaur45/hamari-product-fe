@@ -1,0 +1,227 @@
+<p-toast />
+<div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-5xl space-y-10">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-dollar-sign text-primary text-3xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Rates & Pricing</h2>
+            <p class="text-gray-600">Set your teaching rates for hourly and monthly sessions</p>
+        </div>
+
+        <!-- Overall Rates Section -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-dollar-sign text-primary text-lg"></i>
+                    </div>
+                    <span>Overall Rates</span>
+                </h3>
+                <p class="text-sm text-gray-600 mt-2 ml-13">Set your default hourly and monthly rates</p>
+            </div>
+            <div class="p-6">
+                <form [formGroup]="overallRatesForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-800 mb-2">
+                                <i class="fas fa-clock mr-2 text-primary"></i>
+                                Overall Hourly Rate
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="fas fa-dollar-sign text-gray-400"></i>
+                                </div>
+                                <input 
+                                    type="number" 
+                                    formControlName="hourlyRate"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="Enter hourly rate"
+                                    class="w-full pl-11 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-gray-50/50"
+                                    [class.border-red-300]="overallRatesForm.get('hourlyRate')?.invalid && overallRatesForm.get('hourlyRate')?.touched"
+                                    [class.border-gray-300]="!(overallRatesForm.get('hourlyRate')?.invalid && overallRatesForm.get('hourlyRate')?.touched)">
+                            </div>
+                            @if (overallRatesForm.get('hourlyRate')?.invalid && overallRatesForm.get('hourlyRate')?.touched) {
+                                <p class="text-red-500 text-xs mt-1">Hourly rate is required and must be 0 or greater</p>
+                            }
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-800 mb-2">
+                                <i class="fas fa-calendar mr-2 text-primary"></i>
+                                Overall Monthly Rate
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="fas fa-dollar-sign text-gray-400"></i>
+                                </div>
+                                <input 
+                                    type="number" 
+                                    formControlName="monthlyRate"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="Enter monthly rate"
+                                    class="w-full pl-11 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-gray-50/50"
+                                    [class.border-red-300]="overallRatesForm.get('monthlyRate')?.invalid && overallRatesForm.get('monthlyRate')?.touched"
+                                    [class.border-gray-300]="!(overallRatesForm.get('monthlyRate')?.invalid && overallRatesForm.get('monthlyRate')?.touched)">
+                            </div>
+                            @if (overallRatesForm.get('monthlyRate')?.invalid && overallRatesForm.get('monthlyRate')?.touched) {
+                                <p class="text-red-500 text-xs mt-1">Monthly rate is required and must be 0 or greater</p>
+                            }
+                        </div>
+                    </div>
+                    <div class="flex justify-end pt-4 border-t border-gray-200">
+                        <button 
+                            type="button"
+                            [disabled]="!overallRatesForm.dirty || !overallRatesForm.valid || isSavingOverallRates()"
+                            [ngClass]="{'bg-gray-400 cursor-not-allowed': !overallRatesForm.dirty || !overallRatesForm.valid || isSavingOverallRates(), 'bg-primary hover:bg-primary/90': overallRatesForm.dirty && overallRatesForm.valid && !isSavingOverallRates()}"
+                            class="px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white active:scale-95 min-w-[160px]"
+                            (click)="saveOverallRates()">
+                            <i class="fas" [ngClass]="{'fa-spinner fa-spin': isSavingOverallRates(), 'fa-save': !isSavingOverallRates()}"></i>
+                            <span>
+                                @if (isSavingOverallRates()) {
+                                    Saving...
+                                } @else {
+                                    Save Overall Rates
+                                }
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200"></div>
+
+        <!-- Subject Rates Section -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-book text-primary text-lg"></i>
+                    </div>
+                    <span>Subject Rates</span>
+                </h3>
+                <p class="text-sm text-gray-600 mt-2 ml-13">
+                    Set the hourly and monthly rates for each subject. 
+                    <span class="font-semibold">You can add or remove subjects from your profile first.</span>
+                </p>
+            </div>
+            <div class="p-6">
+                @if (isLoading()) {
+                    <div class="flex justify-center items-center py-12">
+                        <i class="fas fa-spinner fa-spin text-3xl text-primary"></i>
+                    </div>
+                } @else if (subjects().length === 0) {
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-book-open text-5xl mb-4 text-gray-300"></i>
+                        <p class="text-lg font-medium mb-2">No subjects added yet</p>
+                        <p class="text-sm">Please add subjects in your profile first.</p>
+                        <button type="button"
+                            (click)="onEditSubjects()"
+                            class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add Subjects
+                        </button>
+                    </div>
+                } @else {
+                    <form [formGroup]="subjectRatesForm" class="space-y-6">
+                        <div class="space-y-4">
+                            @for (subject of subjects(); track subject.id) {
+                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition">
+                                    <h4 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                        <i class="fas fa-bookmark text-primary"></i>
+                                        {{ subject.name }}
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                <i class="fas fa-clock mr-2 text-primary"></i>
+                                                Hourly Rate
+                                            </label>
+                                            <div class="relative">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class="fas fa-dollar-sign text-gray-400"></i>
+                                                </div>
+                                                <input 
+                                                    type="number" 
+                                                    [formControlName]="'hourly_' + subject.id"
+                                                    min="0"
+                                                    step="0.01"
+                                                    placeholder="Enter hourly rate"
+                                                    class="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                <i class="fas fa-calendar mr-2 text-primary"></i>
+                                                Monthly Rate
+                                            </label>
+                                            <div class="relative">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class="fas fa-dollar-sign text-gray-400"></i>
+                                                </div>
+                                                <input 
+                                                    type="number" 
+                                                    [formControlName]="'monthly_' + subject.id"
+                                                    min="0"
+                                                    step="0.01"
+                                                    placeholder="Enter monthly rate"
+                                                    class="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="flex justify-end pt-4 border-t border-gray-200">
+                            <button 
+                                type="button"
+                                [disabled]="!subjectRatesForm.dirty || !subjectRatesForm.valid || isSavingSubjectRates()"
+                                [ngClass]="{'bg-gray-400 cursor-not-allowed': !subjectRatesForm.dirty || !subjectRatesForm.valid || isSavingSubjectRates(), 'bg-primary hover:bg-primary/90': subjectRatesForm.dirty && subjectRatesForm.valid && !isSavingSubjectRates()}"
+                                class="px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white active:scale-95 min-w-[160px]"
+                                (click)="saveSubjectRates()">
+                                <i class="fas" [ngClass]="{'fa-spinner fa-spin': isSavingSubjectRates(), 'fa-save': !isSavingSubjectRates()}"></i>
+                                <span>
+                                    @if (isSavingSubjectRates()) {
+                                        Saving...
+                                    } @else {
+                                        Save Subject Rates
+                                    }
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+            <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+            <div class="text-sm text-blue-700">
+                <p class="font-semibold mb-1">Tips:</p>
+                <ul class="list-disc list-inside space-y-1 text-blue-600">
+                    <li>Overall rates are your default rates that apply to all subjects</li>
+                    <li>Subject-specific rates override overall rates for that subject</li>
+                    <li>You can update these rates anytime from your settings</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end pt-6 border-t border-gray-200">
+            <button type="button"
+                (click)="onContinue()"
+                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px]">
+                <i class="fas fa-arrow-right"></i>
+                <span>Continue</span>
+            </button>
+        </div>
+    </div>
+</div>
+

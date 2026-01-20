@@ -1,0 +1,457 @@
+<p-toast />
+<div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-6xl space-y-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <i class="fas fa-check-circle text-white text-4xl"></i>
+            </div>
+            <h2 class="text-4xl font-bold text-gray-900 mb-2">Profile Summary</h2>
+            <p class="text-gray-600 text-lg">Review all your information before completing your profile</p>
+        </div>
+
+        <!-- Profile Photo & Basic Info -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+                <div class="flex-shrink-0">
+                    @if (currentUser()?.details?.profileImage) {
+                        <img [src]="assetsUrl + currentUser()?.details?.profileImage" 
+                             alt="Profile Photo"
+                             class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
+                    } @else {
+                        <div class="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center border-4 border-white shadow-lg">
+                            <i class="fas fa-user text-primary text-5xl"></i>
+                        </div>
+                    }
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                        {{ currentUser()?.firstName }} {{ currentUser()?.lastName }}
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        <i class="fas fa-envelope mr-2 text-primary"></i>
+                        {{ currentUser()?.email }}
+                    </p>
+                    <button type="button"
+                        (click)="onEdit('profile-photo-step')"
+                        class="px-4 py-2 text-sm bg-white text-primary rounded-lg hover:bg-primary hover:text-white transition flex items-center gap-2 mx-auto md:mx-0">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit Photo</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-user text-primary text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Personal Information</h3>
+                    </div>
+                    <button type="button"
+                        (click)="onEdit('personal-info-step')"
+                        class="px-4 py-2 text-sm bg-white text-primary rounded-lg hover:bg-primary hover:text-white transition flex items-center gap-2">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-phone text-primary mt-1"></i>
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Phone</p>
+                            <p class="text-gray-900 font-medium">{{ currentUser()?.details?.phone || 'Not provided' }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-calendar text-primary mt-1"></i>
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Date of Birth</p>
+                            <p class="text-gray-900 font-medium">{{ formatDate(currentUser()?.details?.dateOfBirth) }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-venus-mars text-primary mt-1"></i>
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Gender</p>
+                            <p class="text-gray-900 font-medium">{{ currentUser()?.details?.gender || 'Not provided' }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-flag text-primary mt-1"></i>
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Nationality</p>
+                            <p class="text-gray-900 font-medium">{{ currentUser()?.details?.nationalityId || 'Not provided' }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 md:col-span-2">
+                        <i class="fas fa-map-marker-alt text-primary mt-1"></i>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-500 mb-1">Address</p>
+                            <p class="text-gray-900 font-medium">
+                                {{ currentUser()?.details?.address || 'Not provided' }}
+                                @if (currentUser()?.details?.city || currentUser()?.details?.state || currentUser()?.details?.zipCode) {
+                                    <span class="text-gray-600">
+                                        , {{ currentUser()?.details?.city || '' }} 
+                                        {{ currentUser()?.details?.state || '' }} 
+                                        {{ currentUser()?.details?.zipCode || '' }}
+                                    </span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Introduction & Professional Info -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-info-circle text-primary text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Introduction & Professional Info</h3>
+                    </div>
+                    <button type="button"
+                        (click)="onEdit('introduction-step')"
+                        class="px-4 py-2 text-sm bg-white text-primary rounded-lg hover:bg-primary hover:text-white transition flex items-center gap-2">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-6">
+                @if (currentUser()?.teacher?.tagline) {
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2 flex items-center gap-2">
+                            <i class="fas fa-quote-left text-primary"></i>
+                            <span>Bio / Tagline</span>
+                        </p>
+                        <p class="text-gray-900 font-medium text-lg italic">{{ currentUser()?.teacher?.tagline }}</p>
+                    </div>
+                }
+                @if (currentUser()?.teacher?.introduction) {
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2 flex items-center gap-2">
+                            <i class="fas fa-align-left text-primary"></i>
+                            <span>About You</span>
+                        </p>
+                        <p class="text-gray-700 leading-relaxed">{{ currentUser()?.teacher?.introduction }}</p>
+                    </div>
+                }
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-200">
+                    @if (currentUser()?.teacher?.preferredSubject) {
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-book text-primary mt-1"></i>
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Preferred Subject</p>
+                                <p class="text-gray-900 font-medium">{{ currentUser()?.teacher?.preferredSubject }}</p>
+                            </div>
+                        </div>
+                    }
+                    @if (currentUser()?.teacher?.yearsOfExperience) {
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-briefcase text-primary mt-1"></i>
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Years of Experience</p>
+                                <p class="text-gray-900 font-medium">{{ currentUser()?.teacher?.yearsOfExperience }} years</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+                @if (currentUser()?.teacher?.introductionVideoUrl || currentUser()?.teacher?.introductionVideoThumbnailUrl) {
+                    <div class="pt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-500 mb-3 flex items-center gap-2">
+                            <i class="fas fa-video text-primary"></i>
+                            <span>Introduction Video</span>
+                        </p>
+                        @if (currentUser()?.teacher?.introductionVideoThumbnailUrl) {
+                            <div class="relative rounded-lg overflow-hidden border border-gray-200">
+                                <img [src]="assetsUrl + currentUser()?.teacher?.introductionVideoThumbnailUrl" 
+                                     alt="Video Thumbnail"
+                                     class="w-full h-48 object-cover">
+                                @if (currentUser()?.teacher?.introductionVideoUrl) {
+                                    <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                                        <i class="fas fa-play-circle text-white text-5xl"></i>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        @if (currentUser()?.teacher?.introductionVideoTitle) {
+                            <p class="text-gray-900 font-semibold mt-2">{{ currentUser()?.teacher?.introductionVideoTitle }}</p>
+                        }
+                        @if (currentUser()?.teacher?.introductionVideoDescription) {
+                            <p class="text-gray-600 text-sm mt-1">{{ currentUser()?.teacher?.introductionVideoDescription }}</p>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Education -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-primary text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Education</h3>
+                        <span class="text-sm text-gray-600 bg-white px-3 py-1 rounded-full">
+                            {{ currentUser()?.educations?.length || 0 }} {{ (currentUser()?.educations?.length || 0) === 1 ? 'record' : 'records' }}
+                        </span>
+                    </div>
+                    <button type="button"
+                        (click)="onEdit('education-step')"
+                        class="px-4 py-2 text-sm bg-white text-primary rounded-lg hover:bg-primary hover:text-white transition flex items-center gap-2">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                @if (currentUser()?.educations && (currentUser()?.educations?.length ?? 0) > 0) {
+                    <div class="space-y-4">
+                        @for (education of (currentUser()!.educations || []); track education.id) {
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-1">{{ education.degreeName }}</h4>
+                                        <p class="text-gray-600 mb-2 flex items-center gap-2">
+                                            <i class="fas fa-university text-primary text-sm"></i>
+                                            {{ education.instituteName }}
+                                        </p>
+                                        <p class="text-sm text-gray-500 flex items-center gap-2">
+                                            <i class="fas fa-calendar text-gray-400"></i>
+                                            {{ education.startedYear }} - {{ education.isStillStudying ? 'Present' : (education.endedYear || 'N/A') }}
+                                            @if (education.isStillStudying) {
+                                                <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">
+                                                    Ongoing
+                                                </span>
+                                            }
+                                        </p>
+                                        @if (education.remarks) {
+                                            <p class="text-sm text-gray-600 mt-2">{{ education.remarks }}</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                } @else {
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-graduation-cap text-4xl mb-2 text-gray-300"></i>
+                        <p>No education records added</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Subjects -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-book text-primary text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Subjects</h3>
+                        <span class="text-sm text-gray-600 bg-white px-3 py-1 rounded-full">
+                            {{ currentUser()?.teacher?.teacherSubjects?.length || 0 }} {{ (currentUser()?.teacher?.teacherSubjects?.length || 0) === 1 ? 'subject' : 'subjects' }}
+                        </span>
+                    </div>
+                    <button type="button"
+                        (click)="onEdit('subjects-step')"
+                        class="px-4 py-2 text-sm bg-white text-primary rounded-lg hover:bg-primary hover:text-white transition flex items-center gap-2">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                @if (currentUser()?.teacher?.teacherSubjects && currentUser()!.teacher!.teacherSubjects.length > 0) {
+                    <div class="flex flex-wrap gap-3">
+                        @for (teacherSubject of (currentUser()!.teacher!.teacherSubjects || []); track teacherSubject.id) {
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
+                                <i class="fas fa-book-open mr-2 text-xs"></i>
+                                {{ teacherSubject.subject?.name }}
+                            </span>
+                        }
+                    </div>
+                } @else {
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-book text-4xl mb-2 text-gray-300"></i>
+                        <p>No subjects added</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Rates -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-yellow-50 to-amber-50 px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-dollar-sign text-primary text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Rates & Pricing</h3>
+                    </div>
+                    <button type="button"
+                        (click)="onEdit('rates-step')"
+                        class="px-4 py-2 text-sm bg-white text-primary rounded-lg hover:bg-primary hover:text-white transition flex items-center gap-2">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-6">
+                <!-- Overall Rates -->
+                <div>
+                    <p class="text-sm text-gray-500 mb-3 flex items-center gap-2">
+                        <i class="fas fa-dollar-sign text-primary"></i>
+                        <span>Overall Rates</span>
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <p class="text-sm text-gray-500 mb-1">Hourly Rate</p>
+                            <p class="text-2xl font-bold text-gray-900">
+                                ${{ currentUser()?.teacher?.hourlyRate || '0.00' }}
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <p class="text-sm text-gray-500 mb-1">Monthly Rate</p>
+                            <p class="text-2xl font-bold text-gray-900">
+                                ${{ currentUser()?.teacher?.monthlyRate || '0.00' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject Rates -->
+                @if (currentUser()?.teacher?.teacherSubjects && currentUser()!.teacher!.teacherSubjects.length > 0) {
+                    <div class="pt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-500 mb-3 flex items-center gap-2">
+                            <i class="fas fa-book text-primary"></i>
+                            <span>Subject-Specific Rates</span>
+                        </p>
+                        <div class="space-y-3">
+                            @for (teacherSubject of (currentUser()!.teacher!.teacherSubjects || []); track teacherSubject.id) {
+                                @if (teacherSubject.hourlyRate || teacherSubject.monthlyRate) {
+                                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                        <h4 class="font-semibold text-gray-900 mb-2">{{ teacherSubject.subject?.name }}</h4>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            @if (teacherSubject.hourlyRate) {
+                                                <div>
+                                                    <p class="text-xs text-gray-500 mb-1">Hourly</p>
+                                                    <p class="text-lg font-semibold text-gray-900">${{ teacherSubject.hourlyRate }}</p>
+                                                </div>
+                                            }
+                                            @if (teacherSubject.monthlyRate) {
+                                                <div>
+                                                    <p class="text-xs text-gray-500 mb-1">Monthly</p>
+                                                    <p class="text-lg font-semibold text-gray-900">${{ teacherSubject.monthlyRate }}</p>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Availability -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-calendar-alt text-primary text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Availability Schedule</h3>
+                        <span class="text-sm text-gray-600 bg-white px-3 py-1 rounded-full">
+                            {{ currentUser()?.teacher?.availabilities?.length || 0 }} {{ (currentUser()?.teacher?.availabilities?.length || 0) === 1 ? 'slot' : 'slots' }}
+                        </span>
+                    </div>
+                    <button type="button"
+                        (click)="onEdit('availability-step')"
+                        class="px-4 py-2 text-sm bg-white text-primary rounded-lg hover:bg-primary hover:text-white transition flex items-center gap-2">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                @if (currentUser()?.teacher?.availabilities && currentUser()!.teacher!.availabilities.length > 0) {
+                    <div class="space-y-4">
+                        @for (dayGroup of getGroupedAvailabilitySlots(); track dayGroup.day) {
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-calendar-day text-primary"></i>
+                                        <span class="font-semibold text-gray-900 capitalize">{{ dayGroup.day }}</span>
+                                        <span class="text-xs text-gray-500 bg-white px-2 py-0.5 rounded">
+                                            {{ dayGroup.slots.length }} slot{{ dayGroup.slots.length !== 1 ? 's' : '' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="divide-y divide-gray-100">
+                                    @for (slot of dayGroup.slots; track slot.dayOfWeek + slot.startTime + slot.endTime) {
+                                        <div class="px-4 py-3 hover:bg-gray-50 transition-colors">
+                                            <div class="flex items-center gap-3 text-sm text-gray-700">
+                                                <i class="fas fa-clock text-gray-400"></i>
+                                                <span class="font-medium">{{ formatTime(slot.startTime) }} - {{ formatTime(slot.endTime) }}</span>
+                                                <span class="text-gray-400">•</span>
+                                                <span class="text-gray-600">{{ calculateDuration(slot.startTime, slot.endTime) }}</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                } @else {
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-calendar-times text-4xl mb-2 text-gray-300"></i>
+                        <p>No availability slots added</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-200">
+            <button type="button"
+                (click)="onEdit('availability-step')"
+                class="px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 active:scale-95 min-w-[160px]">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Edit</span>
+            </button>
+            <button type="button"
+                (click)="onComplete()"
+                [disabled]="isCompleting()"
+                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 active:scale-95 min-w-[200px] disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas" [ngClass]="{'fa-spinner fa-spin': isCompleting(), 'fa-check-circle': !isCompleting()}"></i>
+                <span>
+                    @if (isCompleting()) {
+                        Completing...
+                    } @else {
+                        Complete Profile
+                    }
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+

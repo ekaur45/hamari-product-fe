@@ -265,8 +265,8 @@ export class AvailabilityStep implements OnInit {
                 // Reload user profile
                 this.authService.refreshUser().subscribe({
                     complete: () => {
-                        // Navigate to next step or complete onboarding
-                        this.router.navigate(['/auth/onboarding/complete']);
+                        // Navigate to next step
+                        this.router.navigate(['/auth/onboarding/rates-step']);
                     }
                 });
             },
