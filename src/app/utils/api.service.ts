@@ -1,9 +1,12 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { ApiResponse, ApiErrorResponse, PaginatedApiResponse, ApiStatusCodes } from '../shared/models';
 import { environment } from '../../environments/environment';
+import { HTTP_STATUS } from '../shared/constants/api.constants';
+import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
 
 /**
  * API Configuration
@@ -42,7 +45,7 @@ export class ApiService {
   private loadingSubject = new BehaviorSubject<boolean>(false);
   public loading$ = this.loadingSubject.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
   /**
    * Set loading state
@@ -146,6 +149,14 @@ export class ApiService {
     }
 
     return request$.pipe(
+      map((response: ApiResponse<T>) => {
+        if(response.statusCode == HTTP_STATUS.UNAUTHORIZED) {
+          this.router.navigate(['/auth/login']);
+          throw new Error('Unauthorized');
+        }else{
+          return response;
+        }
+      }),
       tap(() => this.setLoading(false)),
       catchError((error: HttpErrorResponse) => {
         this.setLoading(false);
