@@ -1,0 +1,345 @@
+<p-toast />
+<div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-4xl space-y-10">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-user-circle text-primary text-3xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Introduction</h2>
+            <p class="text-gray-600">Tell students about yourself and your teaching approach</p>
+        </div>
+
+        <!-- Bio / Tagline Section -->
+        <div class="space-y-6">
+            <div class="pb-2 border-b border-gray-100">
+                <h4 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-quote-left text-primary text-lg"></i>
+                    </div>
+                    <span>Bio / Tagline</span>
+                </h4>
+                <p class="text-sm text-gray-600 mt-2 ml-13">Write a catchy tagline or short bio that describes your teaching style</p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-gray-800 mb-2">
+                    <i class="fas fa-quote-left mr-2 text-primary"></i>
+                    Bio / Tagline
+                    <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="relative">
+                    <textarea rows="3"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none bg-gray-50/50"
+                        placeholder="Write a catchy tagline or short bio that describes your teaching style..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200"></div>
+
+        <!-- About You Section -->
+        <div class="space-y-6">
+            <div class="pb-2 border-b border-gray-100">
+                <h4 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-info-circle text-primary text-lg"></i>
+                    </div>
+                    <span>About You</span>
+                </h4>
+                <p class="text-sm text-gray-600 mt-2 ml-13">Write a brief introduction about yourself, your teaching philosophy, and what makes you unique</p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-gray-800 mb-2">
+                    <i class="fas fa-info-circle mr-2 text-primary"></i>
+                    About You
+                    <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="relative">
+                    <textarea rows="5"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none bg-gray-50/50"
+                        placeholder="Write a brief introduction about yourself, your teaching philosophy, and what makes you unique..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200"></div>
+
+        <!-- Introduction Video Section -->
+        <div class="space-y-6 bg-gray-50/50 rounded-lg p-6 border border-gray-200">
+            <div class="mb-4">
+                <h5 class="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                    <i class="fas fa-video text-primary"></i>
+                    <span>Introduction Video</span>
+                </h5>
+                <p class="text-xs text-gray-600">Upload a video to introduce yourself</p>
+            </div>
+
+            <!-- Video Thumbnail and Video Upload -->
+            <div class="flex flex-col md:flex-row items-start gap-6">
+                <!-- Video Thumbnail Upload -->
+                <div class="space-y-2 flex-shrink-0">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-image mr-2 text-primary"></i>
+                        Video Thumbnail
+                    </label>
+
+                    @if (thumbnailPreview()) {
+                        <!-- Thumbnail Preview -->
+                        <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-white w-64 h-48">
+                            <img [src]="thumbnailPreview()!" alt="Thumbnail preview" class="w-full h-48 object-cover">
+                            <button type="button" (click)="removeThumbnail()"
+                                class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
+                            <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2">
+                                <i class="fas fa-image mr-1"></i>
+                                Thumbnail selected
+                            </div>
+                        </div>
+                    } @else {
+                        <!-- Upload Area -->
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer group w-64 h-48">
+                            <input type="file" id="thumbnailUpload" accept="image/*" class="hidden"
+                                (change)="onThumbnailSelected($event)" />
+                            @if (isThumbnailUploading()) {
+                                <div class="flex items-center justify-center h-full">
+                                    <i class="fas fa-spinner fa-spin text-primary text-2xl"></i>
+                                </div>
+                            } @else {
+                                <label for="thumbnailUpload" class="cursor-pointer block">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div class="w-14 h-14 bg-primary/10 group-hover:bg-primary/20 rounded-full flex items-center justify-center transition-colors">
+                                            <i class="fas fa-cloud-upload-alt text-primary text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-700">
+                                                <span class="text-primary group-hover:underline">Click to upload</span> or drag and drop
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">JPEG, PNG, GIF (Max 10MB)</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Video File Upload -->
+                <div class="space-y-2 flex-1">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-file-video mr-2 text-primary"></i>
+                        Video File
+                    </label>
+
+                    @if (videoPreview()) {
+                        <!-- Video Preview -->
+                        <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-black w-full max-w-md aspect-video">
+                            <video [src]="videoPreview()!" controls class="w-full h-full object-contain"></video>
+                            <button type="button" (click)="removeVideo()"
+                                class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg z-10 w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
+                            <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2">
+                                <i class="fas fa-video mr-1"></i>
+                                Video selected
+                            </div>
+                        </div>
+                    } @else {
+                        <!-- Upload Area -->
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer group w-full max-w-md aspect-video">
+                            @if (isVideoUploading()) {
+                                <div class="flex items-center justify-center h-full">
+                                    <i class="fas fa-spinner fa-spin text-primary text-2xl"></i>
+                                </div>
+                            } @else {
+                                <input type="file" id="videoFileUpload" accept="video/*" class="hidden"
+                                    (change)="onVideoSelected($event)" />
+                                <label for="videoFileUpload" class="cursor-pointer block h-full flex items-center justify-center">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div class="w-14 h-14 bg-primary/10 group-hover:bg-primary/20 rounded-full flex items-center justify-center transition-colors">
+                                            <i class="fas fa-cloud-upload-alt text-primary text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-700">
+                                                <span class="text-primary group-hover:underline">Click to upload</span> or drag and drop
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">MP4, MOV, AVI (Max 100MB)</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Video Title and Description -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-heading mr-2 text-primary"></i>
+                        Video Title
+                    </label>
+                    <input type="text"
+                        placeholder="Enter video title"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">
+                </div>
+                <div class="space-y-2 md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-align-left mr-2 text-primary"></i>
+                        Video Description
+                    </label>
+                    <textarea rows="3"
+                        placeholder="Enter video description"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none bg-white"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200"></div>
+
+        <!-- Professional Information Section -->
+        <div class="space-y-6">
+            <div class="pb-2 border-b border-gray-100">
+                <h4 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-briefcase text-primary text-lg"></i>
+                    </div>
+                    <span>Professional Information</span>
+                </h4>
+                <p class="text-sm text-gray-600 mt-2 ml-13">Share your professional background and expertise</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Preferred Subject -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-800">
+                        <i class="fas fa-book mr-2 text-primary"></i>
+                        Preferred Subject
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-book text-gray-400"></i>
+                        </div>
+                        <input type="text"
+                            placeholder="e.g., Mathematics, Science, English"
+                            class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-gray-50/50">
+                    </div>
+                </div>
+
+                <!-- Years of Experience -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-800">
+                        <i class="fas fa-calendar-alt mr-2 text-primary"></i>
+                        Years of Experience
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-calendar-alt text-gray-400"></i>
+                        </div>
+                        <input type="text"
+                            placeholder="0"
+                            class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-gray-50/50">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end pt-6 border-t border-gray-200">
+            <button type="button"
+                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px]">
+                <i class="fas fa-save"></i>
+                <span>Continue</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Thumbnail Crop Dialog -->
+<p-dialog 
+    [(visible)]="showCropDialog" 
+    [modal]="true" 
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="w-[95vw] sm:w-full max-w-4xl"
+    [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+    [style]="{width: '95vw', maxWidth: '56rem'}"
+    (onHide)="cancelCrop()">
+    <ng-template pTemplate="header">
+        <div class="flex items-center justify-between w-full pr-2">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-crop text-primary text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900">Crop Thumbnail</h3>
+                    <p class="text-sm text-gray-600">Adjust the image to your preferred dimensions (16:9)</p>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+    
+    <div class="space-y-6">
+        <!-- Cropper Container -->
+        <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
+            <image-cropper
+                [imageChangedEvent]="imageChangedEvent"
+                [maintainAspectRatio]="cropperConfig.maintainAspectRatio"
+                [aspectRatio]="cropperConfig.aspectRatio"
+                [resizeToWidth]="cropperConfig.resizeToWidth"
+                [resizeToHeight]="cropperConfig.resizeToHeight"
+                [format]="cropperConfig.format"
+                [imageQuality]="cropperConfig.imageQuality"
+                [autoCrop]="cropperConfig.autoCrop"
+                [cropperMinWidth]="cropperConfig.cropperMinWidth"
+                [cropperMinHeight]="cropperConfig.cropperMinHeight"
+                (imageCropped)="imageCropped($event)"
+                (imageLoaded)="imageLoaded()"
+                (cropperReady)="cropperReady()"
+                (loadImageFailed)="loadImageFailed()">
+            </image-cropper>
+        </div>
+
+        <!-- Preview -->
+        @if (croppedImage()) {
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-gray-800">Preview</label>
+                <div class="border border-gray-300 rounded-lg p-4 bg-gray-50 flex justify-center">
+                    <img [src]="croppedImage()!" alt="Cropped preview" class="max-w-full h-auto rounded-lg shadow-md" style="max-height: 300px;" />
+                </div>
+            </div>
+        }
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-3">
+            <button
+                type="button"
+                (click)="cancelCrop()"
+                class="px-6 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
+                <i class="fas fa-times mr-2"></i>
+                Cancel
+            </button>
+            <button
+                type="button"
+                (click)="applyCrop()"
+                [disabled]="!croppedImage()"
+                [ngClass]="{
+                    'bg-gray-400 cursor-not-allowed': !croppedImage(),
+                    'bg-primary hover:bg-primary/90': croppedImage()
+                }"
+                class="px-6 py-2 text-sm font-semibold text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50">
+                <i class="fas fa-check mr-2"></i>
+                Apply Crop
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>
+

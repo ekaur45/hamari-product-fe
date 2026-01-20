@@ -1,12 +1,13 @@
 import { Routes } from '@angular/router';
 import { AuthGuard, RoleGuard } from './shared/guards/auth.guard';
 import { UserRole } from './shared/models/user.interface';
+import { ProfileGuard } from './shared/guards/profile.guard';
 
 export const routes: Routes = [
     {
         path: '',
         loadComponent: () => import('./components/layouts/main/main.layout').then(m => m.MainLayout),
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, ProfileGuard],
         children: [
             {
                 path: '',
@@ -79,6 +80,11 @@ export const routes: Routes = [
             {
                 path: 'register/:role',
                 loadComponent: () => import('./views/auth/register/register').then(m => m.Register)
+            },
+            {
+                path: 'onboarding',
+                canActivate: [AuthGuard],
+                loadChildren: () => import('./views/auth/onboarding/onboarding.routes').then(m => m.onboardingRoutes)
             }
         ]
     },

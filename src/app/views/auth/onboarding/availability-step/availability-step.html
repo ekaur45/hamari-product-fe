@@ -1,0 +1,330 @@
+<div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-5xl space-y-10">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-calendar-alt text-primary text-3xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Availability</h2>
+            <p class="text-gray-600">Set your available time slots for teaching sessions</p>
+        </div>
+
+        <!-- Add Availability Form -->
+        <div class="space-y-6">
+            <div class="pb-2 border-b border-gray-100">
+                <h4 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-plus-circle text-primary text-lg"></i>
+                    </div>
+                    <span>Add Availability Slot</span>
+                </h4>
+                <p class="text-sm text-gray-600 mt-2 ml-13">Choose a day and time range to add a new availability slot</p>
+            </div>
+
+            <form class="bg-gray-50/50 rounded-lg p-6 border border-gray-200 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Day of Week -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            <i class="fas fa-calendar-day mr-2 text-primary"></i>
+                            Day
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-calendar-day text-gray-400"></i>
+                            </div>
+                            <select class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white appearance-none">
+                                <option value="">Select a day</option>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <i class="fas fa-chevron-down text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Start Time -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            <i class="fas fa-clock mr-2 text-primary"></i>
+                            Start Time
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </div>
+                            <input type="time"
+                                class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">
+                        </div>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            <i class="fas fa-hourglass-half mr-2 text-primary"></i>
+                            Duration
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-hourglass-half text-gray-400"></i>
+                            </div>
+                            <select class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white appearance-none">
+                                <option value="30">30 Min</option>
+                                <option value="45">45 Min</option>
+                                <option value="60">60 Min</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <i class="fas fa-chevron-down text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- End Time -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            <i class="fas fa-clock mr-2 text-primary"></i>
+                            End Time
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </div>
+                            <input type="time"
+                                class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Helper Text & Add Button -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-200">
+                    <p class="text-xs text-gray-500 flex items-start gap-2">
+                        <i class="fas fa-info-circle text-gray-400 mt-0.5"></i>
+                        <span>You can add multiple slots for the same day. Make sure time ranges don't overlap.</span>
+                    </p>
+                    <button type="button"
+                        class="px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px]">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Availability</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200"></div>
+
+        <!-- Availability Schedule -->
+        <div class="space-y-6">
+            <div class="pb-2 border-b border-gray-100">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h4 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                            <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-primary text-lg"></i>
+                            </div>
+                            <span>Your Availability Schedule</span>
+                        </h4>
+                        <p class="text-sm text-gray-600 mt-2 ml-13">
+                            Manage your available time slots
+                            <span class="text-gray-500">(5 slots)</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grouped Availability by Day -->
+            <div class="space-y-4">
+                <!-- Monday -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <!-- Day Header -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-calendar-day text-primary"></i>
+                                <span class="font-semibold text-gray-900">Monday</span>
+                                <span class="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
+                                    2 slots
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots -->
+                    <div class="divide-y divide-gray-100">
+                        <!-- Slot 1 -->
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2 text-sm text-gray-700">
+                                        <i class="fas fa-clock text-gray-400"></i>
+                                        <span class="font-medium">09:00 AM - 10:30 AM</span>
+                                        <span class="text-gray-400">•</span>
+                                        <span class="text-gray-600">1 hr 30 min</span>
+                                    </div>
+                                </div>
+                                <button type="button"
+                                    class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Remove</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Slot 2 -->
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2 text-sm text-gray-700">
+                                        <i class="fas fa-clock text-gray-400"></i>
+                                        <span class="font-medium">02:00 PM - 04:00 PM</span>
+                                        <span class="text-gray-400">•</span>
+                                        <span class="text-gray-600">2 hrs</span>
+                                    </div>
+                                </div>
+                                <button type="button"
+                                    class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Remove</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wednesday -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <!-- Day Header -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-calendar-day text-primary"></i>
+                                <span class="font-semibold text-gray-900">Wednesday</span>
+                                <span class="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
+                                    1 slot
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots -->
+                    <div class="divide-y divide-gray-100">
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2 text-sm text-gray-700">
+                                        <i class="fas fa-clock text-gray-400"></i>
+                                        <span class="font-medium">10:00 AM - 12:00 PM</span>
+                                        <span class="text-gray-400">•</span>
+                                        <span class="text-gray-600">2 hrs</span>
+                                    </div>
+                                </div>
+                                <button type="button"
+                                    class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Remove</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Friday -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <!-- Day Header -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-calendar-day text-primary"></i>
+                                <span class="font-semibold text-gray-900">Friday</span>
+                                <span class="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
+                                    2 slots
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots -->
+                    <div class="divide-y divide-gray-100">
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2 text-sm text-gray-700">
+                                        <i class="fas fa-clock text-gray-400"></i>
+                                        <span class="font-medium">09:00 AM - 11:00 AM</span>
+                                        <span class="text-gray-400">•</span>
+                                        <span class="text-gray-600">2 hrs</span>
+                                    </div>
+                                </div>
+                                <button type="button"
+                                    class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Remove</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2 text-sm text-gray-700">
+                                        <i class="fas fa-clock text-gray-400"></i>
+                                        <span class="font-medium">03:00 PM - 05:00 PM</span>
+                                        <span class="text-gray-400">•</span>
+                                        <span class="text-gray-600">2 hrs</span>
+                                    </div>
+                                </div>
+                                <button type="button"
+                                    class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center gap-2 justify-center sm:justify-start flex-shrink-0">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Remove</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State (when no slots added) -->
+                <!-- <div class="bg-gray-50 border border-gray-200 border-dashed rounded-lg p-12 text-center">
+                    <i class="fas fa-calendar-times text-gray-300 text-4xl mb-4"></i>
+                    <p class="text-gray-500 text-lg font-medium mb-2">No availability slots added yet</p>
+                    <p class="text-gray-400 text-sm">
+                        Add your available time slots to let students know when you're available
+                    </p>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+            <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+            <div class="text-sm text-blue-700">
+                <p class="font-semibold mb-1">Tips:</p>
+                <ul class="list-disc list-inside space-y-1 text-blue-600">
+                    <li>Add multiple time slots for each day if needed</li>
+                    <li>Ensure time ranges don't overlap</li>
+                    <li>Minimum slot duration is 15 minutes</li>
+                    <li>Students will see these slots when booking sessions</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end pt-6 border-t border-gray-200">
+            <button type="button"
+                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px]">
+                <i class="fas fa-arrow-right"></i>
+                <span>Continue</span>
+            </button>
+        </div>
+    </div>
+</div>
+

@@ -69,25 +69,6 @@ export class UserInfo implements OnInit {
     ngOnInit(): void {
         this.getNationalities();
     }
-    // ngOnChanges(changes: SimpleChanges) {
-    //     if (changes['user']?.currentValue) {
-    //         const u = this.user();
-    //         if (!u) return;
-    //         this.userForm.patchValue({
-    //             firstName: u.firstName,
-    //             lastName: u.lastName,
-    //             phone: u.details?.phone ?? '',
-    //             dateOfBirth: u.details?.dateOfBirth ? new Date(u.details.dateOfBirth) : null,
-    //             nationalityId: u.details?.nationalityId ?? '',
-    //             gender: u.details?.gender ?? '',
-    //             address: u.details?.address ?? '',
-    //             city: u.details?.city ?? '',
-    //             state: u.details?.state ?? '',
-    //             zipCode: u.details?.zipCode ?? '',
-    //             country: u.details?.country ?? ''
-    //         });
-    //     }
-    // }
     getNationalities() {
         this.nationalityService.getNationalities().subscribe({
             next: (nationalities) => {

@@ -1,0 +1,160 @@
+<div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-4xl space-y-10">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-book text-primary text-3xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Subjects</h2>
+            <p class="text-gray-600">Add the subjects you teach to help students find you</p>
+        </div>
+
+        <!-- Add Subjects Section -->
+        <div class="space-y-6">
+            <div class="pb-2 border-b border-gray-100">
+                <h4 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-search text-primary text-lg"></i>
+                    </div>
+                    <span>Search & Add Subjects</span>
+                </h4>
+                <p class="text-sm text-gray-600 mt-2 ml-13">Start typing to search for subjects and click on a result to add it</p>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+                <input type="text"
+                    placeholder="Search for subjects e.g., Mathematics, Physics, English..."
+                    class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-gray-50/50">
+            </div>
+
+            <!-- Search Results Dropdown -->
+            <div class="relative">
+                <div class="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden divide-y divide-gray-200 max-h-64 overflow-y-auto">
+                    <!-- Search Result Item -->
+                    <button type="button"
+                        class="w-full px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0">
+                            <i class="fas fa-plus text-xs"></i>
+                        </span>
+                        <span class="text-sm font-medium text-gray-900">Mathematics</span>
+                    </button>
+                    <button type="button"
+                        class="w-full px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0">
+                            <i class="fas fa-plus text-xs"></i>
+                        </span>
+                        <span class="text-sm font-medium text-gray-900">Physics</span>
+                    </button>
+                    <button type="button"
+                        class="w-full px-4 py-3 text-left hover:bg-primary/5 transition flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0">
+                            <i class="fas fa-plus text-xs"></i>
+                        </span>
+                        <span class="text-sm font-medium text-gray-900">English Literature</span>
+                    </button>
+
+                    <!-- Suggest Subject (when no results found) -->
+                    <!-- <button type="button"
+                        class="w-full px-4 py-3 text-left hover:bg-amber-50 transition flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex-shrink-0">
+                            <i class="fas fa-lightbulb text-xs"></i>
+                        </span>
+                        <span class="text-sm font-medium text-gray-900">
+                            Suggest: <span class="text-amber-600">Chemistry</span>
+                        </span>
+                    </button> -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200"></div>
+
+        <!-- Selected Subjects Section -->
+        <div class="space-y-6">
+            <div class="pb-2 border-b border-gray-100">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h4 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                            <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-list text-primary text-lg"></i>
+                            </div>
+                            <span>Selected Subjects</span>
+                        </h4>
+                        <p class="text-sm text-gray-600 mt-2 ml-13">
+                            These subjects will be visible on your public teacher profile
+                            <span class="text-gray-500">(3)</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selected Subjects Tags -->
+            <div class="flex flex-wrap gap-3">
+                <!-- Subject Tag -->
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
+                    <i class="fas fa-book-open mr-2 text-xs"></i>
+                    <span>Mathematics</span>
+                    <button type="button"
+                        class="ml-2 text-primary/70 hover:text-red-600 h-5 w-5 rounded-full flex items-center justify-center border border-primary/30 hover:border-red-500 transition">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </span>
+
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
+                    <i class="fas fa-book-open mr-2 text-xs"></i>
+                    <span>Physics</span>
+                    <button type="button"
+                        class="ml-2 text-primary/70 hover:text-red-600 h-5 w-5 rounded-full flex items-center justify-center border border-primary/30 hover:border-red-500 transition">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </span>
+
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
+                    <i class="fas fa-book-open mr-2 text-xs"></i>
+                    <span>English Literature</span>
+                    <button type="button"
+                        class="ml-2 text-primary/70 hover:text-red-600 h-5 w-5 rounded-full flex items-center justify-center border border-primary/30 hover:border-red-500 transition">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </span>
+            </div>
+
+            <!-- Empty State (when no subjects selected) -->
+            <!-- <div class="bg-gray-50 border border-gray-200 border-dashed rounded-lg p-12 text-center">
+                <i class="fas fa-book text-gray-300 text-4xl mb-4"></i>
+                <p class="text-gray-500 text-lg font-medium mb-2">No subjects selected</p>
+                <p class="text-gray-400 text-sm">
+                    Start typing above to search and add subjects to your profile.
+                </p>
+            </div> -->
+        </div>
+
+        <!-- Info Box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+            <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+            <div class="text-sm text-blue-700">
+                <p class="font-semibold mb-1">Tips:</p>
+                <ul class="list-disc list-inside space-y-1 text-blue-600">
+                    <li>Add at least 3-5 subjects you're comfortable teaching</li>
+                    <li>Subjects help students find you when searching</li>
+                    <li>You can add or remove subjects anytime</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end pt-6 border-t border-gray-200">
+            <button type="button"
+                class="px-8 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg text-white bg-primary hover:bg-primary/90 active:scale-95 min-w-[160px]">
+                <i class="fas fa-arrow-right"></i>
+                <span>Continue</span>
+            </button>
+        </div>
+    </div>
+</div>
+
