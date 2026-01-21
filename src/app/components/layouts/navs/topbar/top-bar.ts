@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
 import { ProfilePhoto } from '../../../misc/profile-photo/profile-photo';
 import { User } from '../../../../shared';
+import { environment } from '../../../../../environments/environment';
 @Component({
 	selector: 'app-top-bar',
 	standalone: true,
@@ -11,6 +12,7 @@ import { User } from '../../../../shared';
 	templateUrl: './top-bar.html'
 })
 export class TopBar {
+	readonly environment = environment;
 	@Input() isUserMenuOpen: boolean = false;
 	@Input() title: string = '';
 	@Input() userDisplayName: string = '';

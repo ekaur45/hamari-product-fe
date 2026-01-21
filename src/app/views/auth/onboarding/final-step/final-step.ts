@@ -4,7 +4,7 @@ import { Router, RouterModule } from "@angular/router";
 import { MessageService } from "primeng/api";
 import { ToastModule } from "primeng/toast";
 import { AuthService } from "../../../../shared/services/auth.service";
-import { User } from "../../../../shared";
+import { User, UserRole } from "../../../../shared";
 import { environment } from "../../../../../environments/environment";
 import moment from 'moment';
 
@@ -16,6 +16,7 @@ import moment from 'moment';
     providers: [MessageService]
 })
 export class FinalStep implements OnInit {
+    readonly UserRole = UserRole;
     currentUser = signal<User | null>(null);
     isCompleting = signal(false);
     assetsUrl = environment.assetsUrl;

@@ -7,6 +7,12 @@ export const onboardingRoutes: Routes = [
         component: Onboarding,
         children: [
             {
+                path: '',
+                redirectTo: 'profile-photo-step',
+                pathMatch: 'full'
+
+            },
+            {
                 path: 'profile-photo-step',
                 loadComponent: () => import('./profile-photo-step/profile-photo-step').then(m => m.ProfilePhotoStep)
             },

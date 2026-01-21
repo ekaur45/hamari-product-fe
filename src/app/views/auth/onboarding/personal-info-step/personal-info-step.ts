@@ -3,7 +3,7 @@ import { Router, RouterModule } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ProfileService } from "../../../../shared/services/profile.service";
-import { UpdateUserDetailsDto, User } from "../../../../shared/models/user.interface";
+import { UpdateUserDetailsDto, User, UserRole } from "../../../../shared/models/user.interface";
 import { InputOtpModule } from "primeng/inputotp";
 import { ButtonModule } from "primeng/button";
 import { MessageService } from "primeng/api";
@@ -53,14 +53,14 @@ export class PersonalInfoStep implements OnInit, OnDestroy {
         firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
         lastName: new FormControl('', [Validators.required, Validators.minLength(2)]),
         phone: new FormControl<any | null>(null, [Validators.required, Validators.minLength(10)]),
-        nationalityId: new FormControl('', []),
-        dateOfBirth: new FormControl<Date | null>(null, []),
-        gender: new FormControl('', []),
-        address: new FormControl('', []),
-        city: new FormControl('', []),
-        state: new FormControl('', []),
-        zipCode: new FormControl('', []),
-        country: new FormControl('', [])
+        nationalityId: new FormControl('', [Validators.required,]),
+        dateOfBirth: new FormControl<Date | null>(null, [Validators.required,]),
+        gender: new FormControl('', [Validators.required,]),
+        address: new FormControl('', [Validators.required,]),
+        city: new FormControl('', [Validators.required,]),
+        state: new FormControl('', [Validators.required,]),
+        zipCode: new FormControl('', [Validators.required,]),
+        country: new FormControl('', [Validators.required,])
     });
     
     // Mock OTP - in real app, this would come from backend
@@ -224,12 +224,22 @@ export class PersonalInfoStep implements OnInit, OnDestroy {
                 this.isSaving.set(false);
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Personal info updated successfully' });
                 this.userForm.markAsPristine();
-                this.router.navigate(['/auth/onboarding/introduction-step']);
+                this.onContinue();
             },
             error: (error) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message });
                 this.isSaving.set(false);
             }
         });
+    }
+    onContinue(){
+        if(this.currentUser()?.role === UserRole.TEACHER) {
+            this.router.navigate(['/auth/onboarding/introduction-step']);
+        } else if(this.currentUser()?.role === UserRole.STUDENT) {
+            this.router.navigate(['/auth/onboarding/education-step']);
+        }
+        else {
+            this.router.navigate(['/auth/onboarding/final-step']);
+        }
     }
 }

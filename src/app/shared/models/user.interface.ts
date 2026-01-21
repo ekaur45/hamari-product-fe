@@ -23,6 +23,7 @@ export interface User {
   academy?: any;
   access_token: string;
   isProfileComplete: boolean;
+  isEmailVerified: boolean;
 }
 
 /**

@@ -23,7 +23,7 @@ export class Register implements OnInit {
     lastName: new FormControl('', [Validators.required, Validators.minLength(2)]),
     email: new FormControl('', [Validators.required, Validators.email]),
     username: new FormControl('', []),
-    phone: new FormControl('', [Validators.required]),
+    phone: new FormControl('', []),
     password: new FormControl('', [Validators.required, Validators.minLength(6)]),
     confirmPassword: new FormControl('', [Validators.required]),
     role: new FormControl('', [Validators.required]),
@@ -98,8 +98,12 @@ export class Register implements OnInit {
 
           // Redirect to login after 2 seconds
           setTimeout(() => {
-            this.router.navigate(['/auth/login']);
-          }, 2000);
+            if(response.isEmailVerified) {
+              this.router.navigate(['/auth/login']);
+            } else {
+              this.router.navigate(['/auth/otp', response.email]);
+            }
+          }, 1000);
         },
         error: (error: any) => {
           console.error('Registration error:', error);
@@ -245,7 +249,8 @@ export class Register implements OnInit {
       phone: 'Phone Number',
       password: 'Password',
       confirmPassword: 'Confirm Password',
-      role: 'Role'
+      role: 'Role',
+      agreeToTerms: 'Terms and Conditions'
     };
     return labels[fieldName] || fieldName;
   }

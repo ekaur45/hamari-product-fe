@@ -6,7 +6,7 @@ import { ConfirmationService, MessageService } from "primeng/api";
 import { ToastModule } from "primeng/toast";
 import { ConfirmDialogModule } from "primeng/confirmdialog";
 import { ToggleSwitchModule } from "primeng/toggleswitch";
-import { EducationItem, User } from "../../../../shared";
+import { EducationItem, User, UserRole } from "../../../../shared";
 import { ProfileService } from "../../../../shared/services/profile.service";
 import { AuthService } from "../../../../shared/services/auth.service";
 
@@ -212,6 +212,10 @@ export class EducationStep implements OnInit {
 
     onContinue(): void {
         // Navigate to next step
+        if (this.currentUser()?.role === UserRole.TEACHER) {
         this.router.navigate(['/auth/onboarding/subjects-step']);
+        }else{
+            this.router.navigate(['/auth/onboarding/final-step']);
+        }
     }
 }

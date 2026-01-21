@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../shared/services/auth.service';
-import { LoginDto } from '../../../shared/models';
+import { LoginDto, User } from '../../../shared/models';
 import { ApiHelper } from '../../../utils/api.helper';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
@@ -57,7 +57,11 @@ export class Login implements OnInit {
       const loginData: LoginDto = this.loginForm.value;
 
       this.authService.login(loginData).subscribe({
-        next: (user) => {
+        next: (user:User) => {
+          if(user.isEmailVerified===false) {
+            this.router.navigate(['/auth/otp', btoa(user.email)],{queryParams:{returnUrl:this.returnUrl},state:{user:user}});
+            return;
+          }
           if (this.returnUrl) {
             if (this.returnUrl.startsWith("http")) {
               window.location.href = this.returnUrl;

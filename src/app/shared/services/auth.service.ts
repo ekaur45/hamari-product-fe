@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { User, LoginDto, RegisterDto, ApiResponse } from '../models';
+import { User, LoginDto, RegisterDto, ApiResponse, UserRole } from '../models';
 
 /**
  * Authentication Service
@@ -17,7 +17,7 @@ export class AuthService {
   private readonly USER_KEY = 'current_user';
 
   // User state management
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private currentUserSubject = new BehaviorSubject<User | null>(this.getStoredUser());
   public currentUser$ = this.currentUserSubject.asObservable();
 
   // Authentication state
@@ -82,14 +82,14 @@ export class AuthService {
     return this.apiService.post<{ user: User; token: string }>(API_ENDPOINTS.AUTH.REGISTER, userData)
       .pipe(
         map(response => {
-          if (response.data) {
+          if (response.statusCode === 200 && response.data) {
             const { user, token } = response.data;
             this.setToken(token);
             this.setCurrentUser(user);
             this.isAuthenticatedSubject.next(true);
             return user;
           }
-          throw new Error('Invalid response format');
+          throw new Error(response.message);
         }),
         catchError(error => {
           console.error('Registration error:', error);
@@ -121,9 +121,9 @@ export class AuthService {
    * Logout user
    */
   logout(): Observable<ApiResponse<void>> {
-    this.clearToken();
-    this.clearCurrentUser();
-    this.isAuthenticatedSubject.next(false);
+    // this.clearToken();
+    // this.clearCurrentUser();
+    // this.isAuthenticatedSubject.next(false);
     return this.handleLogout();
   }
 
@@ -169,6 +169,59 @@ export class AuthService {
   setCurrentUser(user: User): void {
     this.currentUserSubject.next(user);
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+  }
+  get isProfileComplete(): boolean {
+    const user = this.getCurrentUser();
+      if(user?.role === UserRole.ADMIN){
+        return true;
+      }
+      const hasBaseInfo =
+        !!user?.firstName &&
+        !!user?.lastName &&
+        !!user?.details?.phone &&
+        !!user?.details?.nationalityId &&
+        !!user?.details?.dateOfBirth &&
+        !!user?.details?.gender &&
+        !!user?.details?.address &&
+        !!user?.details?.city &&
+        !!user?.details?.state &&
+        !!user?.details?.country &&
+        !!user?.details?.zipCode;
+    
+      if (user?.role === UserRole.TEACHER) {
+        return (
+          hasBaseInfo &&
+          !!user?.teacher?.tagline &&
+          user?.teacher?.yearsOfExperience !== null &&
+          user?.teacher?.yearsOfExperience !== undefined &&
+          !!user?.teacher?.preferredSubject &&
+          !!user?.teacher?.introduction &&
+          !!user?.teacher?.introductionVideoUrl &&
+          !!user?.teacher?.introductionVideoThumbnailUrl &&
+          !!user?.teacher?.introductionVideoTitle &&
+          !!user?.teacher?.introductionVideoDescription &&
+          user?.teacher?.hourlyRate !== null &&
+          user?.teacher?.hourlyRate !== undefined &&
+          user?.teacher?.monthlyRate !== null &&
+          user?.teacher?.monthlyRate !== undefined &&
+          (user?.educations?.length ?? 0) > 0 &&
+          (user?.teacher?.teacherSubjects?.length ?? 0) > 0 &&
+          (user?.teacher?.availabilities?.length ?? 0) > 0
+        );
+      }
+    
+      if (user?.role === UserRole.STUDENT) {
+        return (
+          hasBaseInfo
+        );
+      }
+    
+      if (user?.role === UserRole.PARENT) {
+        return hasBaseInfo;
+      }
+    
+      return false;
+    
   }
 
   /**
@@ -281,4 +334,19 @@ export class AuthService {
     this.setCurrentUser(user);
     this.isAuthenticatedSubject.next(true);
   }
+
+    /**
+   * Get current user profile
+   */
+    pingAuth(): Observable<ApiResponse<User>> {
+      return this.apiService.get<User>(API_ENDPOINTS.AUTH.PING)
+        .pipe(
+          map(response => {
+            return response;
+          }),
+          catchError(error => {
+            return throwError(() => error);
+          })
+        );
+    }
 }

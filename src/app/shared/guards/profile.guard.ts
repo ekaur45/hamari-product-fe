@@ -14,17 +14,19 @@ export class ProfileGuard implements CanActivate {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): Observable<boolean> | Promise<boolean> | boolean {
-        return this.authService.getProfile().pipe(
-            take(1),
-            map(user => {
-                if (user?.isProfileComplete) {
-                    return true;
-                } else {
-                    this.router.navigate(['/auth/onboarding']);
-                    return false;
-                }
-            }),
-            catchError(() => of(false))
-        );
+        if (this.authService.isProfileComplete) {
+            return true;
+        } else {
+            this.router.navigate(['/auth/onboarding']);
+            return false;
+        }
+        return false;
+        // return .pipe(
+        //     take(1),
+        //     map(user => {
+        //         debugger;
+        //     }),
+        //     catchError(() => of(false))
+        // );
     }
 }

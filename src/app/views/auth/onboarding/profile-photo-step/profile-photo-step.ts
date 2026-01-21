@@ -6,6 +6,9 @@ import { ProfileService } from "../../../../shared/services/profile.service";
 import { finalize } from "rxjs";
 import { DomSanitizer } from "@angular/platform-browser";
 import { SafePipe } from "../../../../shared/pipes/safe.pipe";
+import { User } from "../../../../shared/models/user.interface";
+import { AuthService } from "../../../../shared/services/auth.service";
+import { environment } from "../../../../../environments/environment";
 
 @Component({
     selector: 'app-profile-photo-step',
@@ -16,13 +19,13 @@ import { SafePipe } from "../../../../shared/pipes/safe.pipe";
 })
 export class ProfilePhotoStep implements OnInit {
     @ViewChild(ImageCropperComponent) imageCropper?: ImageCropperComponent;
-
+assetsUrl = environment.assetsUrl;
     imageChangedEvent: any = null;
     croppedImage = signal<string | undefined>(undefined);
     isUploading = signal<boolean>(false);
     showCropper = signal<boolean>(false);
     errorMessage = signal<string | null>(null);
-
+    currentUser = signal<User | null>(null);
     // Cropper configuration for square aspect ratio
     cropperConfig = {
         aspectRatio: 1,
@@ -40,11 +43,15 @@ export class ProfilePhotoStep implements OnInit {
     constructor(
         private profileService: ProfileService,
         private router: Router,
-        private sanitizer: DomSanitizer
+        private sanitizer: DomSanitizer,
+        private authService: AuthService
     ) {
     }
 
     ngOnInit(): void {
+        this.authService.currentUser$.subscribe(user => {
+            this.currentUser.set(user);
+        });
     }
 
     onFileSelected(event: Event): void {
@@ -157,6 +164,9 @@ export class ProfilePhotoStep implements OnInit {
             const file = new File([blob], filename, { type: 'image/png' });
             resolve(file);
         });
+    }
+    onContinue(): void {
+        this.router.navigate(['/auth/onboarding/personal-info-step']);
     }
 
 }

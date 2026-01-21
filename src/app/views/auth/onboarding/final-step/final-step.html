@@ -41,8 +41,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- Personal Information -->
+<!-- Personal Information -->
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <div class="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
@@ -109,6 +108,8 @@
                 </div>
             </div>
         </div>
+        
+        @if(currentUser()?.role === UserRole.TEACHER) {
 
         <!-- Introduction & Professional Info -->
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -195,6 +196,7 @@
                 }
             </div>
         </div>
+        }
 
         <!-- Education -->
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -255,7 +257,8 @@
             </div>
         </div>
 
-        <!-- Subjects -->
+        @if(currentUser()?.role === UserRole.TEACHER) {
+            <!-- Subjects -->
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
@@ -429,6 +432,7 @@
                 }
             </div>
         </div>
+        }
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-200">

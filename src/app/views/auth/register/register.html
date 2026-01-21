@@ -1,13 +1,8 @@
 <div class="min-h-screen flex bg-gray-50">
   <!-- Left Side: Background/Image Section -->
   <div
-    class="signup-left-bg hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 text-white relative bg-primary">
-    <!-- Floating Shapes -->
-    <div class="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl floating-shape"></div>
-    <div class="absolute bottom-32 right-20 w-40 h-40 bg-white/10 rounded-full blur-xl floating-shape"
-      style="animation-delay: -2s;"></div>
-    <div class="absolute top-1/2 right-10 w-24 h-24 bg-white/10 rounded-full blur-xl floating-shape"
-      style="animation-delay: -4s;"></div>
+    class="signup-left-bg hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 text-white relative" style="background-image: url('/img/login-side-bg.jpg'); background-size: cover; background-position: center;">
+    <div class="absolute top-0 left-0 w-full h-full bg-black/15 backdrop-blur-sm"></div>
 
     <!-- Content -->
     <div class="relative z-10 max-w-md text-center">
@@ -122,7 +117,7 @@
           <p class="text-gray-600">Choose the account type that best describes you</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
           <!-- Teacher -->
           <button type="button" (click)="navigateToRole(UserRole.TEACHER)"
             class="role-card bg-white border-2 rounded-xl p-4 text-left hover:shadow-md transition"
@@ -157,7 +152,7 @@
 
           <!-- Parent -->
           <button type="button" (click)="navigateToRole(UserRole.PARENT)"
-            class="role-card bg-white border-2 rounded-xl p-4 text-left hover:shadow-md transition col-span-2"
+            class="role-card bg-white border-2 rounded-xl p-4 text-left hover:shadow-md transition md:col-span-2"
             [class.selected]="isRoleSelected(UserRole.PARENT)"
             [class.border-gray-200]="!isRoleSelected(UserRole.PARENT)"
             [style.border-color]="isRoleSelected(UserRole.PARENT) ? '#f5530d' : ''">
@@ -272,13 +267,13 @@
           </div>
 
           <!-- Phone -->
-          <div>
+          <div class="hidden">
             <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
               <i class="fas fa-phone mr-2 text-primary"></i>Phone Number
             </label>
             <div class="relative">
               <i class="fas fa-phone absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-              <input type="tel" id="phone" formControlName="phone" required
+              <input type="tel" id="phone" formControlName="phone"
                 class="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition"
                 placeholder="Enter phone number" [class.border-red-500]="getFieldError('phone')">
             </div>
@@ -338,7 +333,6 @@
           <div *ngIf="getFieldError('agreeToTerms')" class="text-sm text-red-600">{{ getFieldError('agreeToTerms') }}
           </div>
 
-          <!-- Submit Button -->
           <button type="submit" [disabled]="isLoading() || registerForm.invalid"
             class="w-full bg-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center hover:bg-orange-600 transition shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fas fa-user-plus mr-2"></i>

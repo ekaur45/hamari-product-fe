@@ -82,6 +82,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./views/auth/register/register').then(m => m.Register)
             },
             {
+                path: 'otp/:email',
+                loadComponent: () => import('./views/auth/otp/otp').then(m => m.Otp)
+            },
+            {
                 path: 'onboarding',
                 canActivate: [AuthGuard],
                 loadChildren: () => import('./views/auth/onboarding/onboarding.routes').then(m => m.onboardingRoutes)

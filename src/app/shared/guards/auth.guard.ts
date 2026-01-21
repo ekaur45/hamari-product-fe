@@ -21,10 +21,13 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
     // Ensure auth state is restored on hard refresh
-    return this.authService.getProfile().pipe(
+    return this.authService.pingAuth().pipe(
       map((user) => {
-        this.authService.setCurrentUser(user);
-        return true;
+        if(user.statusCode === 200) {
+          return true;
+        } else {
+          return false;
+        }
       }),
       catchError((error) => {
         this.authService.logout().subscribe(() => {
@@ -75,41 +78,37 @@ export class RoleGuard implements CanActivate {
     if (!requiredRoles || requiredRoles.length === 0) {
       return true; // No role requirements
     }
-    return this.authService.getProfile().pipe(
-      map((user) => {
-        this.authService.setCurrentUser(user);
-        const hasRequiredRole = this.authService.hasAnyRole(requiredRoles);
-        if (!hasRequiredRole) {
-          this.router.navigate(['/dashboard']); // Redirect to dashboard if no permission
-          return false;
-        }
-        return true;
-      }),
-      catchError((error) => {
-        this.authService.logout();
-        return of(false);
-      })
-    );
+    // return this.authService.getProfile().pipe(
+    //   map((user) => {
+    //     this.authService.setCurrentUser(user);
+    //     const hasRequiredRole = this.authService.hasAnyRole(requiredRoles);
+    //     if (!hasRequiredRole) {
+    //       this.router.navigate(['/dashboard']); // Redirect to dashboard if no permission
+    //       return false;
+    //     }
+    //     return true;
+    //   }),
+    //   catchError((error) => {
+    //     this.authService.logout();
+    //     return of(false);
+    //   })
+    // );
 
 
 
-    return this.authService.isAuthenticated$.pipe(
+    return this.authService.pingAuth().pipe(
       take(1),
-      map(isAuthenticated => {
-        if (!isAuthenticated) {
-          this.router.navigate(['/auth/login'], {
-            queryParams: { returnUrl: state.url }
-          });
+      map(response => {
+        if(response.statusCode === 200) {
+          const hasRequiredRole = this.authService.hasAnyRole(requiredRoles);
+          if (!hasRequiredRole) {
+            this.router.navigate(['/dashboard']); // Redirect to dashboard if no permission
+            return false;
+          }
+          return true;
+        } else {
           return false;
-        }
-
-        const hasRequiredRole = this.authService.hasAnyRole(requiredRoles);
-        if (!hasRequiredRole) {
-          this.router.navigate(['/dashboard']); // Redirect to dashboard if no permission
-          return false;
-        }
-
-        return true;
+        }       
       })
     );
   }
