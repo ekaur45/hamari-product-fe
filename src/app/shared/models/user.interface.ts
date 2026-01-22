@@ -22,7 +22,7 @@ export interface User {
   parent?: any;
   academy?: any;
   access_token: string;
-  isProfileComplete: boolean;
+  hasCompletedProfile: boolean;
   isEmailVerified: boolean;
 }
 

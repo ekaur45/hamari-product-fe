@@ -5,6 +5,8 @@ import { MessageService } from "primeng/api";
 import { ToastModule } from "primeng/toast";
 import { ProfileService } from "../../../shared/services/profile.service";
 import { Teacher, TeacherSubject, User } from "../../../shared";
+import { CurrencyService } from "../../../shared/services/admin/currency.service";
+import { CurrencyPipe } from "../../../shared/pipes/currency.pipe";
 
 interface SubjectRate {
     id: string;
@@ -17,8 +19,8 @@ interface SubjectRate {
     selector: 'app-teacher-settings',
     standalone: true,
     templateUrl: './teacher-settings.html',
-    imports: [CommonModule, ReactiveFormsModule, ToastModule],
-    providers: [MessageService]
+    imports: [CommonModule, ReactiveFormsModule, ToastModule, CurrencyPipe],
+    providers: [MessageService, CurrencyPipe]
 })
 export default class TeacherSettings implements OnInit {
     profile = signal<User | null>(null);
@@ -36,22 +38,23 @@ export default class TeacherSettings implements OnInit {
 
     constructor(
         private profileService: ProfileService,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private currencyPipe: CurrencyPipe
     ) {
         effect(() => {
             const p = this.profile();
             if (p?.teacher) {
                 // Set overall rates
                 this.overallRatesForm.patchValue({
-                    hourlyRate: Number(p.teacher.hourlyRate) || null,
-                    monthlyRate: Number(p.teacher.monthlyRate) || null
+                    hourlyRate: Number(this.currencyPipe.transform(p.teacher.hourlyRate || 0)) || null,
+                    monthlyRate: Number(this.currencyPipe.transform(p.teacher.monthlyRate || 0)) || null
                 }, { emitEvent: false });
                 // Build subject rates
                 const subjectRates: SubjectRate[] = (p.teacher.teacherSubjects || []).map(ts => ({
                     id: ts.id,
                     name: ts.subject?.name || 'Unknown Subject',
-                    hourlyRate: Number(ts.hourlyRate) || undefined,
-                    monthlyRate: Number(ts.monthlyRate) || undefined
+                    hourlyRate: Number(ts.hourlyRate || 0),
+                    monthlyRate: Number(ts.monthlyRate || 0)
                 }));
 
                 this.subjects.set(subjectRates);
@@ -61,11 +64,11 @@ export default class TeacherSettings implements OnInit {
                 subjectRates.forEach(subject => {
 
                     formControls[`hourly_${subject.id}`] = new FormControl<number | null>(
-                        subject.hourlyRate || null,
+                        Number(this.currencyPipe.transform(subject.hourlyRate || 0)) || null,
                         [Validators.min(0)]
                     );
                     formControls[`monthly_${subject.id}`] = new FormControl<number | null>(
-                        subject.monthlyRate || null,
+                        Number(this.currencyPipe.transform(subject.monthlyRate || 0)) || null,
                         [Validators.min(0)]
                     );
                 });
@@ -74,6 +77,13 @@ export default class TeacherSettings implements OnInit {
                 this.subjectRatesForm = new FormGroup(formControls);
             }
         });
+
+        // this.overallRatesForm.valueChanges.subscribe((changes: any) => {
+        //     this.overallRatesForm.patchValue({
+        //         hourlyRate: changes.hourlyRate ? Number(changes.hourlyRate) : null,
+        //         monthlyRate: changes.monthlyRate ? Number(changes.monthlyRate) : null
+        //     }, { emitEvent: false });
+        // })
     }
 
     ngOnInit(): void {

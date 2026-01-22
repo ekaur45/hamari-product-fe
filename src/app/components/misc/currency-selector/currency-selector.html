@@ -1,0 +1,6 @@
+<p-select [options]="currencies()"
+[optionLabel]="'code'"
+[optionValue]="'code'"
+[(ngModel)]="selectedCurrency" 
+(ngModelChange)="onCurrencyChange($event)"
+placeholder="Select Currency"></p-select>

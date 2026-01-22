@@ -349,4 +349,20 @@ export class AuthService {
           })
         );
     }
+
+    /**
+     * Mark onboarding complete
+     */
+    markOnboardingComplete(): Observable<ApiResponse<User>> {
+      return this.apiService.put<User>(API_ENDPOINTS.PROFILE.MARK_ONBOARDING_COMPLETE(this.getCurrentUser()?.id ?? ''), {}).pipe(
+        map((d:ApiResponse<User>) => {
+          this.setCurrentUser(d.data);
+          this.isAuthenticatedSubject.next(true);
+          return d;
+        }),
+        catchError(error => {
+          return throwError(() => error);
+        })
+      );
+    }
 }

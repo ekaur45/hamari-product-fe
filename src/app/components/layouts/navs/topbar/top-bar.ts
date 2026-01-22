@@ -5,10 +5,11 @@ import { MenuModule } from 'primeng/menu';
 import { ProfilePhoto } from '../../../misc/profile-photo/profile-photo';
 import { User } from '../../../../shared';
 import { environment } from '../../../../../environments/environment';
+import { CurrencySelector } from '../../../misc/currency-selector/currency-selector';
 @Component({
 	selector: 'app-top-bar',
 	standalone: true,
-	imports: [CommonModule,RouterModule,MenuModule,ProfilePhoto],
+	imports: [CommonModule,RouterModule,MenuModule,ProfilePhoto,CurrencySelector],
 	templateUrl: './top-bar.html'
 })
 export class TopBar {

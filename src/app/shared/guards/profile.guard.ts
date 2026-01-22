@@ -14,7 +14,7 @@ export class ProfileGuard implements CanActivate {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): Observable<boolean> | Promise<boolean> | boolean {
-        if (this.authService.isProfileComplete) {
+        if (this.authService.getCurrentUser()?.hasCompletedProfile) {
             return true;
         } else {
             this.router.navigate(['/auth/onboarding']);

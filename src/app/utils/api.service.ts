@@ -113,7 +113,8 @@ export class ApiService {
     const httpOptions: any = {
       headers: options?.headers || new HttpHeaders({
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'x-Currency': document.cookie.split('; currency=')?.pop()?.split(';').shift() ?? 'USD'
       }),
       params: options?.params,
       withCredentials: true

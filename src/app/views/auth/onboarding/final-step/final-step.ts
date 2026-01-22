@@ -4,7 +4,7 @@ import { Router, RouterModule } from "@angular/router";
 import { MessageService } from "primeng/api";
 import { ToastModule } from "primeng/toast";
 import { AuthService } from "../../../../shared/services/auth.service";
-import { User, UserRole } from "../../../../shared";
+import { ApiResponse, User, UserRole } from "../../../../shared";
 import { environment } from "../../../../../environments/environment";
 import moment from 'moment';
 
@@ -110,16 +110,34 @@ export class FinalStep implements OnInit {
 
     onComplete(): void {
         this.isCompleting.set(true);
-        // Here you would typically mark onboarding as complete
-        // For now, just navigate to the main app
-        setTimeout(() => {
-            this.messageService.add({
-                severity: 'success',
-                summary: 'Congratulations!',
-                detail: 'Your profile has been completed successfully'
-            });
-            this.router.navigate(['/teacher/dashboard']);
-        }, 1000);
+        this.authService.markOnboardingComplete().subscribe({
+            next: (d:ApiResponse<User>) => {
+                if(d.statusCode === 200) {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Congratulations!',
+                    detail: 'Your profile has been completed successfully'
+                });
+                if(this.currentUser()?.role === UserRole.TEACHER) {
+                    this.router.navigate(['/teacher/dashboard']);
+                } else if(this.currentUser()?.role === UserRole.STUDENT) {
+                    this.router.navigate(['/student/dashboard']);
+                } else if(this.currentUser()?.role === UserRole.PARENT) {
+                    this.router.navigate(['/parent/dashboard']);
+                } else if(this.currentUser()?.role === UserRole.ADMIN) {
+                    this.router.navigate(['/admin/dashboard']);
+                } else {
+                    this.router.navigate(['/dashboard']);
+                }            
+            } else {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error!',
+                    detail: d.message
+                });
+            }
+        }
+        });
     }
 
     onEdit(step: string): void {

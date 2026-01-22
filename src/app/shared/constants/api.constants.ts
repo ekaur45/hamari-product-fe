@@ -17,7 +17,8 @@ export const API_ENDPOINTS = {
 
   // Profile
   PROFILE: {
-    BASE: '/profile'
+    BASE: '/profile',
+    MARK_ONBOARDING_COMPLETE: (userId: string) => `/profile/${userId}/complete-profile`
   },
 
   // Admin
@@ -41,7 +42,8 @@ export const API_ENDPOINTS = {
     REGISTER: '/auth/register',
     PROFILE: '/auth/profile',
     PING: '/auth/ping',
-    LOGOUT: '/auth/logout'
+    LOGOUT: '/auth/logout',
+   
   },
 
   // Users
