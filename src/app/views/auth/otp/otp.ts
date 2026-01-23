@@ -66,7 +66,7 @@ export class Otp implements OnInit, OnDestroy {
     startResendTimer(): void {
         this.canResend.set(false);
         this.resendTimer.set(60);
-        
+
         this.timerSubscription = interval(1000).subscribe(() => {
             const currentTimer = this.resendTimer();
             if (currentTimer > 0) {
@@ -114,7 +114,7 @@ export class Otp implements OnInit, OnDestroy {
         // Call API to verify OTP
         this.verifyEmail(this.email(), this.otpValue).subscribe({
             next: (response: any) => {
-                if(response.statusCode!==200) {
+                if (response.statusCode !== 200) {
                     this.errorMessage.set(response.message);
                     this.messageService.add({
                         severity: 'error',
@@ -124,7 +124,7 @@ export class Otp implements OnInit, OnDestroy {
                     });
                     return;
                 }
-                this.isVerifying.set(false);
+
                 this.successMessage.set('Email verified successfully!');
                 this.messageService.add({
                     severity: 'success',
@@ -136,21 +136,20 @@ export class Otp implements OnInit, OnDestroy {
                 // Refresh user to get updated verification status
                 this.authService.refreshUser().subscribe({
                     next: (user) => {
+                        this.isVerifying.set(false);
                         // Navigate to dashboard or return URL after short delay
-                        setTimeout(() => {
-                            const returnUrl = this.route.snapshot.queryParams['returnUrl'];
-                            if (returnUrl) {
-                                if (returnUrl.startsWith("http")) {
-                                    window.location.href = returnUrl;
-                                } else {
-                                    this.router.navigate([returnUrl]);
-                                }
-                            } else if (user?.role && ROUTES_MAP[user.role]) {
-                                this.router.navigate([ROUTES_MAP[user.role]['DASHBOARD']]);
+                        const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+                        if (returnUrl) {
+                            if (returnUrl.startsWith("http")) {
+                                window.location.href = returnUrl;
                             } else {
-                                this.router.navigate(['/dashboard']);
+                                this.router.navigate([returnUrl]);
                             }
-                        }, 1500);
+                        } else if (user?.role && ROUTES_MAP[user.role]) {
+                            this.router.navigate([ROUTES_MAP[user.role]['DASHBOARD']]);
+                        } else {
+                            this.router.navigate(['/dashboard']);
+                        }
                     },
                     error: () => {
                         // Still navigate even if refresh fails

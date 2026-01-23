@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl, V
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../shared/services/auth.service';
-import { RegisterDto, UserRole } from '../../../shared/models';
+import { RegisterDto, User, UserRole } from '../../../shared/models';
 import { ApiHelper } from '../../../utils/api.helper';
 
 @Component({
@@ -92,7 +92,7 @@ export class Register implements OnInit {
       };
 
       this.authService.register(registerData).subscribe({
-        next: (response: any) => {
+        next: (response: User) => {
           this.successMessage.set('Registration successful! Please login with your credentials.');
           this.isLoading.set(false);
 

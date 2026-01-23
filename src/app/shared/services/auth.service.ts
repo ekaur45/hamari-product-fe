@@ -82,7 +82,7 @@ export class AuthService {
     return this.apiService.post<{ user: User; token: string }>(API_ENDPOINTS.AUTH.REGISTER, userData)
       .pipe(
         map(response => {
-          if (response.statusCode === 200 && response.data) {
+          if ((response.statusCode === 200 || response.statusCode === 201) && response.data) {
             const { user, token } = response.data;
             this.setToken(token);
             this.setCurrentUser(user);
