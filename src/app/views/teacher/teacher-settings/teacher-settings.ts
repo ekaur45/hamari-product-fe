@@ -5,7 +5,6 @@ import { MessageService } from "primeng/api";
 import { ToastModule } from "primeng/toast";
 import { ProfileService } from "../../../shared/services/profile.service";
 import { Teacher, TeacherSubject, User } from "../../../shared";
-import { CurrencyService } from "../../../shared/services/admin/currency.service";
 import { CurrencyPipe } from "../../../shared/pipes/currency.pipe";
 
 interface SubjectRate {
@@ -19,8 +18,8 @@ interface SubjectRate {
     selector: 'app-teacher-settings',
     standalone: true,
     templateUrl: './teacher-settings.html',
-    imports: [CommonModule, ReactiveFormsModule, ToastModule, CurrencyPipe],
-    providers: [MessageService, CurrencyPipe]
+    imports: [CommonModule, ReactiveFormsModule, ToastModule],
+    providers: [MessageService]
 })
 export default class TeacherSettings implements OnInit {
     profile = signal<User | null>(null);

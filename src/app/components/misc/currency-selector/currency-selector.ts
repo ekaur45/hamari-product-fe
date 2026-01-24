@@ -4,6 +4,7 @@ import { CurrencyService } from "../../../shared/services/admin/currency.service
 import { ICurrency } from "../../../shared/models/admin/currency.interface";
 import { Select } from "primeng/select";
 import { FormsModule } from "@angular/forms";
+import { environment } from "../../../../environments/environment";
 
 @Component({
     selector: 'taleemiyat-currency-selector',
@@ -38,7 +39,7 @@ export class CurrencySelector {
         });
     }
     onCurrencyChange(event: any) {
-        document.cookie = `currency=${event}; path=/; samesite=Lax;`;
+        document.cookie = `currency=${event}; path=/; ${ environment.production ? `domain=.taleemiyat.com; secure; httpOnly` : ``};  samesite=Lax;`;
     }
 
 

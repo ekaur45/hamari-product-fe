@@ -1,4 +1,5 @@
 import { Student, Teacher } from ".";
+import { Nationality } from "./nationality.interface";
 
 /**
  * User Entity Interface
@@ -36,6 +37,7 @@ export interface UserDetails {
   address?: string;
   dateOfBirth?: Date | null;
   nationalityId?: string;
+  nationality?: Nationality;
   gender?: string;
   city?: string;
   state?: string;

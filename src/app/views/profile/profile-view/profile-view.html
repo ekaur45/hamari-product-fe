@@ -154,7 +154,7 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Gender</p>
-                                <p class="text-sm text-gray-900 font-semibold leading-relaxed">{{profile()?.details?.gender || "Not provided"}}</p>
+                                <p class="text-sm text-gray-900 font-semibold leading-relaxed capitalize">{{profile()?.details?.gender || "Not provided"}}</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4 group hover:bg-indigo-50/50 rounded-xl p-4 -mx-2 transition-all duration-200 cursor-pointer border border-transparent hover:border-indigo-200">
@@ -163,7 +163,7 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Nationality</p>
-                                <p class="text-sm text-gray-900 font-semibold leading-relaxed">{{profile()?.details?.nationalityId || "Not provided"}}</p>
+                                <p class="text-sm text-gray-900 font-semibold leading-relaxed">{{profile()?.details?.nationality?.name || "Not provided"}}</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4 group hover:bg-teal-50/50 rounded-xl p-4 -mx-2 transition-all duration-200 cursor-pointer border border-transparent hover:border-teal-200">
