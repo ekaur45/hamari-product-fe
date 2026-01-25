@@ -141,4 +141,11 @@ export class TeacherService {
       catchError(e => throwError(() => e))
     );
   }
+
+  getTeacherDetails(teacherId: string): Observable<Teacher> {
+    return this.apiService.get<Teacher>(API_ENDPOINTS.ADMIN.TEACHER_DETAILS(teacherId)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
 }

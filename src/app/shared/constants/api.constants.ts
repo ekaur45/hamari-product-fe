@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   ADMIN: {
     USERS: '/admin/users',
     TEACHERS: '/admin/teachers',
+    TEACHER_DETAILS: (teacherId: string) => `/admin/teachers/${teacherId}/details`,
     STUDENTS: '/admin/students',
     CLASSES: '/admin/classes',
     LOGS: '/admin/logs',

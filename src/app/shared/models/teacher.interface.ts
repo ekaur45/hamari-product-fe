@@ -12,6 +12,7 @@ export interface Teacher {
   monthlyRate?: number;
   teacherSubjects: TeacherSubject[];
   availabilities: AvailabilitySlot[];
+  teacherBookings: TeacherBooking[];
   user?: User;
   isVerified: boolean;
   verificationNote?: string | null;

@@ -1,0 +1,331 @@
+<div class="fixed top-0 left-0 w-full h-full backdrop-blur-sm bg-primary/5 z-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-6xl bg-white rounded-lg shadow-xl border border-gray-200 my-8">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-primary/10 to-blue-50 px-6 py-4 border-b border-gray-200 rounded-t-lg">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-gray-900">Teacher Details</h1>
+                <a [routerLink]="['/admin/teachers/list']" class="text-gray-600 hover:text-gray-700 transition text-sm cursor-pointer p-2 hover:bg-white/50 rounded-full" title="Close">
+                    <i class="fas fa-times text-xl"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        @if(isLoading()) {
+            <div class="flex items-center justify-center py-20">
+                <i class="fas fa-spinner fa-spin text-4xl text-primary"></i>
+            </div>
+        } @else if(teacher()) {
+            <div class="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-10rem)]">
+                <!-- Profile Header Section -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                        <profile-photo [user]="teacher()!.user" class="!w-24 !h-24"></profile-photo>
+                        <div class="flex-1">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900">
+                                        {{teacher()!.user?.firstName}} {{teacher()!.user?.lastName}}
+                                    </h2>
+                                    <p class="text-gray-600 mt-1">
+                                        <i class="fas fa-envelope mr-2"></i>{{teacher()!.user?.email}}
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-id-badge mr-2"></i>ID: {{teacher()!.id}}
+                                    </p>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 rounded-lg text-sm font-medium" 
+                                          [ngClass]="teacher()!.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'">
+                                        <i class="fas" [ngClass]="teacher()!.isActive ? 'fa-check-circle' : 'fa-times-circle'" class="mr-1"></i>
+                                        {{teacher()!.isActive ? 'Active' : 'Inactive'}}
+                                    </span>
+                                    <span class="px-3 py-1 rounded-lg text-sm font-medium" 
+                                          [ngClass]="teacher()!.isVerified ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'">
+                                        <i class="fas" [ngClass]="teacher()!.isVerified ? 'fa-check-circle' : 'fa-clock'" class="mr-1"></i>
+                                        {{teacher()!.isVerified ? 'Verified' : 'Pending Verification'}}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 font-medium mb-1">Total Bookings</p>
+                                <p class="text-2xl font-bold text-gray-900">{{getTotalBookings()}}</p>
+                            </div>
+                            <i class="fas fa-calendar-check text-blue-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 font-medium mb-1">Completed</p>
+                                <p class="text-2xl font-bold text-gray-900">{{getCompletedBookings()}}</p>
+                            </div>
+                            <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 font-medium mb-1">Confirmed</p>
+                                <p class="text-2xl font-bold text-gray-900">{{getPendingBookings()}}</p>
+                            </div>
+                            <i class="fas fa-clock text-yellow-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 font-medium mb-1">Cancelled</p>
+                                <p class="text-2xl font-bold text-gray-900">{{getCancelledBookings()}}</p>
+                            </div>
+                            <i class="fas fa-times-circle text-red-500 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Column -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Personal Information -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-user mr-2 text-primary"></i>Personal Information
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Phone</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{teacher()!.user?.details?.phone || 'Not provided'}}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Date of Birth</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{teacher()!.user?.details?.dateOfBirth ? (teacher()!.user!.details!.dateOfBirth | date:'mediumDate') : 'Not provided'}}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Gender</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{teacher()!.user?.details?.gender || 'Not provided'}}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Nationality</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{teacher()!.user?.details?.nationality?.name || 'Not provided'}}
+                                    </p>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="text-xs text-gray-500 font-medium">Address</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{getFullAddress() || 'Not provided'}}
+                                    </p>
+                                </div>
+                                @if(teacher()!.user?.details?.bio) {
+                                    <div class="md:col-span-2">
+                                        <label class="text-xs text-gray-500 font-medium">Bio</label>
+                                        <p class="text-sm text-gray-900 mt-1">{{teacher()!.user!.details!.bio}}</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Teacher Information -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-chalkboard-teacher mr-2 text-primary"></i>Teacher Information
+                            </h3>
+                            <div class="space-y-4">
+                                @if(teacher()!.tagline) {
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Tagline</label>
+                                        <p class="text-sm text-gray-900 mt-1 font-medium">{{teacher()!.tagline}}</p>
+                                    </div>
+                                }
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Specialization</label>
+                                        <p class="text-sm text-gray-900 mt-1">{{teacher()!.specialization || 'Not provided'}}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Years of Experience</label>
+                                        <p class="text-sm text-gray-900 mt-1">
+                                            {{teacher()!.yearsOfExperience ? teacher()!.yearsOfExperience + ' years' : 'Not provided'}}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Hourly Rate</label>
+                                        <p class="text-sm text-gray-900 mt-1 font-semibold">
+                                            {{teacher()!.hourlyRate ? '$' + teacher()!.hourlyRate : 'Not set'}}
+                                        </p>
+                                    </div>
+                                    @if(teacher()!.monthlyRate) {
+                                        <div>
+                                            <label class="text-xs text-gray-500 font-medium">Monthly Rate</label>
+                                            <p class="text-sm text-gray-900 mt-1 font-semibold">${{teacher()!.monthlyRate}}</p>
+                                        </div>
+                                    }
+                                </div>
+                                @if(teacher()!.introduction) {
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Introduction</label>
+                                        <p class="text-sm text-gray-900 mt-1">{{teacher()!.introduction}}</p>
+                                    </div>
+                                }
+                                @if(teacher()!.verificationNote) {
+                                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                                        <label class="text-xs text-orange-700 font-medium">Verification Note</label>
+                                        <p class="text-sm text-orange-900 mt-1">{{teacher()!.verificationNote}}</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Subjects -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-book mr-2 text-primary"></i>Subjects
+                            </h3>
+                            @if(teacher()!.teacherSubjects && teacher()!.teacherSubjects.length > 0) {
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    @for (ts of teacher()!.teacherSubjects; track ts.id) {
+                                        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition">
+                                            <div class="flex items-center justify-between">
+                                                <span class="font-medium text-gray-900">{{ts.subject?.name || 'Subject'}}</span>
+                                                @if(ts.hourlyRate) {
+                                                    <span class="text-sm text-primary font-semibold">${{ts.hourlyRate}}/hr</span>
+                                                }
+                                            </div>
+                                            @if(ts.monthlyRate) {
+                                                <p class="text-xs text-gray-500 mt-1">Monthly: ${{ts.monthlyRate}}</p>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            } @else {
+                                <p class="text-sm text-gray-500">No subjects assigned</p>
+                            }
+                        </div>
+
+                        <!-- Availability -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-calendar-alt mr-2 text-primary"></i>Availability
+                            </h3>
+                            @if(teacher()!.availabilities && teacher()!.availabilities.length > 0) {
+                                <div class="space-y-2">
+                                    @for (availability of getGroupedAvailability(); track $index) {
+                                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                            <span class="text-sm font-medium text-gray-900">{{availability.day}}</span>
+                                            <span class="text-sm text-gray-600">{{availability.time}}</span>
+                                        </div>
+                                    }
+                                </div>
+                            } @else {
+                                <p class="text-sm text-gray-500">No availability set</p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="space-y-6">
+                        <!-- Quick Actions -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-bolt mr-2 text-primary"></i>Quick Actions
+                            </h3>
+                            <div class="space-y-2">
+                                @if (!teacher()!.isActive) {
+                                    <button class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium" 
+                                            (click)="toggleActive(true)">
+                                        <i class="fas fa-check-circle mr-2"></i>Activate Teacher
+                                    </button>
+                                } @else {
+                                    <button class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition text-sm font-medium" 
+                                            (click)="toggleActive(false)">
+                                        <i class="fas fa-times-circle mr-2"></i>Deactivate Teacher
+                                    </button>
+                                }
+                                @if (!teacher()!.isVerified) {
+                                    <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium" 
+                                            (click)="setVerification(true)">
+                                        <i class="fas fa-check-circle mr-2"></i>Verify Teacher
+                                    </button>
+                                } @else {
+                                    <button class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium" 
+                                            (click)="setVerification(false)">
+                                        <i class="fas fa-times-circle mr-2"></i>Reject Verification
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Account Information -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-info-circle mr-2 text-primary"></i>Account Information
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Joined</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{teacher()!.createdAt | date:'mediumDate'}}
+                                    </p>
+                                    <p class="text-xs text-gray-500">{{getDaysAgo(teacher()!.createdAt)}} days ago</p>
+                                </div>
+                                @if(teacher()!.updatedAt) {
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Last Updated</label>
+                                        <p class="text-sm text-gray-900 mt-1">
+                                            {{teacher()!.updatedAt | date:'mediumDate'}}
+                                        </p>
+                                    </div>
+                                }
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Email Verified</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        <span class="px-2 py-1 rounded text-xs font-medium" 
+                                              [ngClass]="teacher()!.user?.isEmailVerified ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'">
+                                            {{teacher()!.user?.isEmailVerified ? 'Verified' : 'Not Verified'}}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Education -->
+                        @if(teacher()?.user?.educations && teacher()?.user?.educations?.length || 0 > 0) {
+                            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-graduation-cap mr-2 text-primary"></i>Education
+                                </h3>
+                                <div class="space-y-3">
+                                    @for (edu of teacher()!.user!.educations; track edu.id) {
+                                        <div class="border-l-4 border-primary pl-3">
+                                            <p class="text-sm font-medium text-gray-900">{{edu.degreeName}}</p>
+                                            <p class="text-xs text-gray-600">{{edu.instituteName}}</p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                {{edu.startedYear}} - {{edu.endedYear || (edu.isStillStudying ? 'Present' : 'N/A')}}
+                                            </p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <p-toast></p-toast>
+</div>

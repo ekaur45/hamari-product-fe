@@ -6,14 +6,21 @@ import { CommonModule } from "@angular/common";
 import { PaginatorModule } from "primeng/paginator";
 import { FormsModule } from "@angular/forms";
 import { ClassStatus } from "../../../../shared";
+import { ProfilePhoto } from "../../../../components/misc/profile-photo/profile-photo";
+import { BookingStatus } from "../../../../shared/enums";
+import { ConfirmDialogModule } from "primeng/confirmdialog";
+import { ConfirmationService } from "primeng/api";
+import { Router, RouterModule } from "@angular/router";
 
 @Component({
     selector: 'app-teacher-list',
     standalone: true,
     templateUrl: './teacher-list.html',
-    imports: [CommonModule,PaginatorModule, FormsModule],
+    imports: [CommonModule, PaginatorModule, FormsModule, ProfilePhoto,ConfirmDialogModule, RouterModule],
+    providers: [ConfirmationService],
 })
 export class TeacherList implements OnInit {
+    readonly BookingStatus = BookingStatus;
     isLoading = signal(false);
     teachers = signal<Teacher[]>([]);
     totalTeachers = signal(0);
@@ -35,7 +42,7 @@ export class TeacherList implements OnInit {
     isActiveFilter = signal<string>('');
     isVerifiedFilter = signal<string>('');
 
-    constructor(private teacherService: TeacherService) { }
+    constructor(private teacherService: TeacherService, private confirmationService: ConfirmationService, private router: Router) { }
     ngOnInit(): void {
         this.getTeachers();
     }
@@ -62,7 +69,7 @@ export class TeacherList implements OnInit {
     onPageChange(event: any): void {
         this.first.set(event.first ?? 0);
         this.rows.set(event.rows ?? 10);
-        this.pagination.set({ ...this.pagination(), page: (event?.page ?? 0) + 1 });
+        this.pagination.set({ ...this.pagination(),limit: event.rows ?? 10, page: (event?.page ?? 0) + 1 });
         this.getTeachers();
     }
 
@@ -84,16 +91,31 @@ export class TeacherList implements OnInit {
     }
 
     toggleActive(teacher: Teacher, next: boolean): void {
-        const ok = window.confirm(`Are you sure you want to ${next ? 'activate' : 'deactivate'} this teacher?`);
-        if (!ok) return;
-        this.isLoading.set(true);
-        this.teacherService.updateAdminTeacherStatus(teacher.id, next).subscribe({
-            next: () => this.getTeachers(),
-            error: (err) => {
-                console.error(err);
-                this.isLoading.set(false);
-            }
+        this.confirmationService.confirm({
+            header: next ? 'Activate Teacher' : 'Deactivate Teacher',
+            message: `Are you sure you want to ${next ? 'activate' : 'deactivate'} this teacher?`,
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Yes, Proceed',
+            rejectLabel: 'No, Cancel',
+            acceptButtonProps: {
+                severity: 'success',
+            },
+            rejectButtonProps: {
+                severity: 'danger',
+                outlined: true
+            },
+            accept: () => {
+                this.isLoading.set(true);
+                this.teacherService.updateAdminTeacherStatus(teacher.id, next).subscribe({
+                    next: () => this.getTeachers(),
+                    error: (err) => {
+                        console.error(err);
+                        this.isLoading.set(false);
+                    }
+                });
+            },
         });
+
     }
 
     setVerification(teacher: Teacher, isVerified: boolean): void {
@@ -112,5 +134,34 @@ export class TeacherList implements OnInit {
                 this.isLoading.set(false);
             }
         });
+    }
+    
+    getCompletedBookings(teacher: Teacher): number {
+        return teacher.teacherBookings.filter((b: any) => b.status === BookingStatus.COMPLETED).length;
+    }
+    getPendingBookings(teacher: Teacher): number {
+        return teacher.teacherBookings.filter((b: any) => b.status === BookingStatus.CONFIRMED).length;
+    }
+    getCancelledBookings(teacher: Teacher): number {
+        return teacher.teacherBookings.filter((b: any) => b.status === BookingStatus.CANCELLED).length;
+    }
+    getTotalBookings(teacher: Teacher): number {
+        return teacher.teacherBookings.length;
+    }
+    getDaysAgo(date: Date | string): number {
+        return Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24));
+    }
+    onTeacherClick(teacher: Teacher): void {
+        //this.router.navigate(['/admin/teachers', teacher.id]);
+        this.router.navigate([
+            'admin',
+            'teachers',
+            'list',
+            {
+              outlets: {
+                teacherDetailsOutlet: [teacher.id]
+              }
+            }
+          ]);
     }
 }
