@@ -47,7 +47,6 @@ export class TestCall implements AfterViewInit {
 
         // 3️⃣ Listen for new users
         this.socket.on('userJoined', async ({ userId }: { userId: string }) => {
-            console.log('User joined:', userId);
             if (userId === this.userId) return;
             const pc = this.createPeer(userId);
             this.peers[userId] = pc;
@@ -59,7 +58,6 @@ export class TestCall implements AfterViewInit {
 
         // 4️⃣ Listen for signals
         this.socket.on('signal', async ({ signal, userId }: { signal: any; userId: string }) => {
-            console.log('Signal received:', signal);
             if (userId === this.userId) return;
 
             let pc = this.peers[userId];

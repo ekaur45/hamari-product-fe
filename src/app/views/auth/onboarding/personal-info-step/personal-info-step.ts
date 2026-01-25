@@ -224,7 +224,14 @@ export class PersonalInfoStep implements OnInit, OnDestroy {
                 this.isSaving.set(false);
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Personal info updated successfully' });
                 this.userForm.markAsPristine();
-                this.onContinue();
+                if(this.currentUser()?.role === UserRole.TEACHER) {
+                    this.router.navigate(['/auth/onboarding/introduction-step']);
+                } else if(this.currentUser()?.role === UserRole.STUDENT) {
+                    this.router.navigate(['/auth/onboarding/education-step']);
+                }
+                else {
+                    this.router.navigate(['/auth/onboarding/final-step']);
+                }
             },
             error: (error) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message });
@@ -233,13 +240,6 @@ export class PersonalInfoStep implements OnInit, OnDestroy {
         });
     }
     onContinue(){
-        if(this.currentUser()?.role === UserRole.TEACHER) {
-            this.router.navigate(['/auth/onboarding/introduction-step']);
-        } else if(this.currentUser()?.role === UserRole.STUDENT) {
-            this.router.navigate(['/auth/onboarding/education-step']);
-        }
-        else {
-            this.router.navigate(['/auth/onboarding/final-step']);
-        }
+        this.onSaveChanges();
     }
 }

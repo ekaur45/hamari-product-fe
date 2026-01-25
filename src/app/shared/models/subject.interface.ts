@@ -6,6 +6,7 @@ export interface Subject {
   description?: string;
   academyId?: string;
   teacherSubjects?: TeacherSubject[];
+  isDeleting?: boolean;
 }
 
 export interface CreateSubjectDto {

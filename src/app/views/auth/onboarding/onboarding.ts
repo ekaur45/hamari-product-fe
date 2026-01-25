@@ -23,7 +23,7 @@ export class Onboarding {
             ,roles:[UserRole.TEACHER] 
         },
         { label: 'Education', icon: 'pi pi-building', link: '/auth/onboarding/education-step', description: 'Add your education' 
-            ,roles:[UserRole.TEACHER, UserRole.STUDENT] 
+            ,roles:[UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT, UserRole.ADMIN] 
 
         },
         { label: 'Subjects', icon: 'pi pi-book', link: '/auth/onboarding/subjects-step', description: 'Add your subjects' 
@@ -46,19 +46,13 @@ export class Onboarding {
     constructor(private router: Router, private authService: AuthService) {
     }
     ngOnInit(): void {
-        this.authService.currentUser$.subscribe(user => {
-            this.currentUser.set(user);
-            this.userDisplayName.set(user?.firstName + ' ' + user?.lastName);
-            this.userEmail.set(user?.email ?? '');
-            this.onboardingSteps.set(this.onboardingStepsData.filter(step => step.roles.includes(user?.role ?? UserRole.TEACHER)));
-            //this.router.navigate(['/auth/onboarding/profile-photo-step']);
-            // if (!user?.details?.profileImage) {
-            // } else if (!user?.details?.bio) {
-            //     this.router.navigate(['/auth/onboarding/bio-step']);
-            // } else {
-            //     this.router.navigate(['/dashboard']);
-            // }
+        this.authService.getProfile().subscribe(profile => {
+            this.currentUser.set(profile);
+            this.userDisplayName.set(profile.firstName + ' ' + profile.lastName);
+            this.userEmail.set(profile.email ?? '');
+            this.onboardingSteps.set(this.onboardingStepsData.filter(step => step.roles.includes(profile.role ?? UserRole.TEACHER)));
         });
+
     }
     onLogoutClick(): void {
         this.authService.logout().subscribe(() => {

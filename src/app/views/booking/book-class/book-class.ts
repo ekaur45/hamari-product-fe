@@ -48,7 +48,6 @@ export default class BookClass {
         }
         this.classService.bookClass(this.classId(), data).subscribe({
             next: (response) => {
-                console.log(response);
             },
             error: (error) => {
                 console.error(error);

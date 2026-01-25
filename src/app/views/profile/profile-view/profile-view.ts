@@ -4,13 +4,14 @@ import { ProfileService } from "../../../shared/services/profile.service";
 import { CommonModule } from "@angular/common";
 import { User, UserRole } from "../../../shared";
 import { environment } from "../../../../environments/environment";
+import { CurrencyPipe } from "../../../shared/pipes/currency.pipe";
 
 @Component({
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule, RouterLink, CurrencyPipe],
     standalone: true,
     selector: 'app-profile-view',
     templateUrl: './profile-view.html',
-    providers: [ProfileService]
+    providers: [ProfileService, CurrencyPipe]
 })
 export class ProfileView implements OnInit {
     assetsUrl = environment.assetsUrl;

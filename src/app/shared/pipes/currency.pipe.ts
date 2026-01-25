@@ -17,6 +17,7 @@ export class CurrencyPipe implements PipeTransform {
         if(cachedCurrency.find((c: ICurrency) => c.code === currency && c.isBase)) {
             return Number(value).toFixed(2);
         }
+        const getSelectedCurrencySymbol = cachedCurrency.find((c: ICurrency) => c.code === currency)?.symbol ?? '';
         // if the selected currency is not base currency, return the value in the selected currency
         const exchangeRate = cachedCurrency.find((c: ICurrency) => c.code === currency)?.exchangeRate ?? 1;
         return (Number(value) * exchangeRate).toFixed(2);

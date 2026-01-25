@@ -307,7 +307,7 @@
                                                 <i class="fas fa-clock text-white"></i>
                                             </div>
                                             <p class="text-xs text-gray-500 mb-2 font-semibold uppercase tracking-wide">Hourly Rate</p>
-                                            <p class="text-3xl font-bold text-blue-600">${{profile()?.teacher?.hourlyRate}}</p>
+                                            <p class="text-3xl font-bold text-blue-600">{{(profile()?.teacher?.hourlyRate || 0) | taleemiyatCurrency}}</p>
                                         </div>
                                     }
                                     @if(profile()?.teacher?.monthlyRate) {
@@ -316,7 +316,7 @@
                                                 <i class="fas fa-calendar-alt text-white"></i>
                                             </div>
                                             <p class="text-xs text-gray-500 mb-2 font-semibold uppercase tracking-wide">Monthly Rate</p>
-                                            <p class="text-3xl font-bold text-green-600">${{profile()?.teacher?.monthlyRate}}</p>
+                                            <p class="text-3xl font-bold text-green-600">{{(profile()?.teacher?.monthlyRate || 0) | taleemiyatCurrency}}</p>
                                         </div>
                                     }
                                 </div>
@@ -568,13 +568,13 @@
                                                     @if(teacherSubject.hourlyRate) {
                                                         <div class="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border-2 border-blue-200 hover:border-blue-400 transition-colors">
                                                             <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Hourly</p>
-                                                            <p class="text-xl font-bold text-blue-600">${{teacherSubject.hourlyRate}}</p>
+                                                            <p class="text-xl font-bold text-blue-600">{{teacherSubject.hourlyRate | taleemiyatCurrency}}</p>
                                                         </div>
                                                     }
                                                     @if(teacherSubject.monthlyRate) {
                                                         <div class="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border-2 border-green-200 hover:border-green-400 transition-colors">
                                                             <p class="text-xs text-gray-500 mb-1 font-semibold uppercase tracking-wide">Monthly</p>
-                                                            <p class="text-xl font-bold text-green-600">${{teacherSubject.monthlyRate}}</p>
+                                                            <p class="text-xl font-bold text-green-600">{{teacherSubject.monthlyRate | taleemiyatCurrency}}</p>
                                                         </div>
                                                     }
                                                 </div>

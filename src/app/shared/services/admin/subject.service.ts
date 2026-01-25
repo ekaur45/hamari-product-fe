@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "../../../utils";
-import { PaginatedApiResponse, PaginationDto, Subject } from "../../models";
+import { ApiResponse, PaginatedApiResponse, PaginationDto, Subject } from "../../models";
 
 @Injectable({
     providedIn: 'root'
@@ -18,5 +18,8 @@ export class SubjectService {
                 search: search
             }
         });
+    }
+    deleteAdminSubject(id: string) {
+        return this.api.delete<ApiResponse<Subject>>(`/subjects/${id}`);
     }
 }

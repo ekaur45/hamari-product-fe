@@ -5,11 +5,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginatorModule } from 'primeng/paginator';
 import { debounceSignal } from '../../../../shared/utils/misc.util';
+import { ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { Button } from "primeng/button";
 @Component({
   selector: 'app-subject-list',
-  imports: [CommonModule, FormsModule, PaginatorModule],
+  imports: [CommonModule, FormsModule, PaginatorModule, ConfirmDialogModule],
   templateUrl: './subject-list.html',
   styleUrl: './subject-list.css',
+  providers: [ConfirmationService]
 })
 export class SubjectList {
   isLoading = signal<boolean>(false);
@@ -25,7 +29,7 @@ export class SubjectList {
     hasNext: false,
     hasPrev: false
   });
-  constructor(private subjectService: SubjectService) {
+  constructor(private subjectService: SubjectService, private confirmationService: ConfirmationService) {
 
   }
   ngOnInit(): void {
@@ -57,5 +61,36 @@ export class SubjectList {
   onPageChange(event: any): void {
     this.pagination.set({ ...this.pagination(), page: (event?.page ?? 0) + 1 });
     this.getSubjects();
+  }
+  onSubjectDeleteClick(subject: Subject, event: Event): void {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      header: 'Delete Subject',
+      message: 'Are you sure you want to delete this subject?',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Yes, Proceed',
+      rejectLabel: 'No, Cancel',
+      acceptIcon: 'pi pi-check',
+      rejectIcon: 'pi pi-times',
+      acceptButtonProps: {
+        severity: 'danger'
+    },
+    rejectButtonProps: {
+        severity: 'warn',
+        outlined: true
+    },
+      accept: () => {
+        event.preventDefault();
+        subject.isDeleting = true;
+        this.onSubjectDelete(subject);
+      }
+    });
+  }
+  onSubjectDelete(subject: Subject): void {
+    this.subjectService.deleteAdminSubject(subject.id).subscribe({
+      next: () => {
+        this.getSubjects();
+      }
+    });
   }
 }

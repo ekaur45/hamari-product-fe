@@ -19,7 +19,7 @@ interface SubjectRate {
     standalone: true,
     templateUrl: './teacher-settings.html',
     imports: [CommonModule, ReactiveFormsModule, ToastModule],
-    providers: [MessageService]
+    providers: [MessageService, CurrencyPipe]
 })
 export default class TeacherSettings implements OnInit {
     profile = signal<User | null>(null);
@@ -93,7 +93,6 @@ export default class TeacherSettings implements OnInit {
         this.isLoading.set(true);
         this.profileService.getProfile().subscribe({
             next: (profile) => {
-                console.log(profile);
                 this.profile.set(profile);
                 this.isLoading.set(false);
             },
@@ -144,6 +143,7 @@ export default class TeacherSettings implements OnInit {
                     summary: 'Success',
                     detail: 'Overall rates updated successfully'
                 });
+                this.loadProfile();
             },
             error: (error) => {
                 this.isSavingOverallRates.set(false);
@@ -212,6 +212,7 @@ export default class TeacherSettings implements OnInit {
                     summary: 'Success',
                     detail: 'Subject rates updated successfully'
                 });
+                this.loadProfile();
             },
             error: (error) => {
                 this.isSavingSubjectRates.set(false);

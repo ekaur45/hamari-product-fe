@@ -19,7 +19,12 @@ export class CurrencyService {
 
 
     getSelectedCurrency() {
-        return document.cookie.split('; currency=')?.pop()?.split(';').shift() ?? 'USD';
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; currency=`);
+        let currencyFromCookie = "USD";
+        if (parts.length === 2) 
+            currencyFromCookie = parts.pop()?.split(';').shift() ?? "USD";
+        return currencyFromCookie;
     }
     getCachedCurrency(code: string) {
         this.getCurrencies().subscribe((currencies) => {

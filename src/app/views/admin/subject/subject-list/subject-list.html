@@ -1,3 +1,4 @@
+<p-confirmdialog></p-confirmdialog>
 <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
     <div class="bg-white rounded-lg shadow-md p-5">
         <div class="flex items-center justify-between mb-2">
@@ -55,7 +56,11 @@
             </thead>
             <tbody class="divide-y divide-gray-200">
                 @for (subject of subjects(); track subject.id) {
-                <tr>
+                <tr 
+                [ngClass]="{
+                    'cursor-not-allowed pointer-events-none bg-gray-200 animate-pulse motion-reduce:animate-none text-gray-500': subject.isDeleting
+                }"
+                >
                     <td class="py-3 px-4">{{ subject.name }}</td>
                     <td class="py-3 px-4">{{ subject?.teacherSubjects?.length }} {{
                         subject?.teacherSubjects?.length == 1 ? 'Teacher' : 'Teachers' }}
@@ -66,7 +71,9 @@
                             <em class="fas fa-edit text-sm"></em>
                         </button>
                         <button
-                            class="w-8 h-8 flex items-center justify-center hover:bg-red-500/20 text-red-500 rounded-full cursor-pointer transition-all duration-200 ease-in-out">
+                            class="w-8 h-8 flex items-center justify-center hover:bg-red-500/20 text-red-500 rounded-full cursor-pointer transition-all duration-200 ease-in-out"
+                            title="Delete"
+                            (click)="onSubjectDeleteClick(subject, $event)">
                             <em class="fas fa-trash text-sm"></em>
                         </button>
                     </td>

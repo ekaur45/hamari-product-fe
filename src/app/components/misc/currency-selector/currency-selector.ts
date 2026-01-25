@@ -21,25 +21,31 @@ export class CurrencySelector {
         this.getCurrencies();
         this.listenToCurrencyChange();
     }
+    ngOnInit() {
+        this.getCurrencies();
+        this.listenToCurrencyChange();
+    }
     getCurrencies() {
         this.currencyService.getCurrencies().subscribe({
             next: (currencies) => {
                 this.currencies.set(currencies.data);
-                const dd = document.cookie.split('; currency=')
-                const currencyFromCookie = dd.pop()?.split(';').shift() ?? 'USD';
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                let currencyFromCookie = "USD";
+                if (parts.length === 2) 
+                    currencyFromCookie = parts.pop()?.split(';').shift() ?? "USD";
                 this.selectedCurrency.set(currencyFromCookie);
-                localStorage.setItem('currencies', JSON.stringify(currencies.data));
+                console.log('currencyFromCookie', this.selectedCurrency());
             },
             error: (error) => {
                 console.error(error);
             },
             complete: () => {
-                console.log('complete');
             }
         });
     }
     onCurrencyChange(event: any) {
-        document.cookie = `currency=${event}; path=/; ${ environment.production ? `domain=.taleemiyat.com; secure; httpOnly` : ``};  samesite=Lax;`;
+        document.cookie = `currency=${event}; path=/; ${ environment.production ? `domain=.taleemiyat.com; secure; ` : ``}  samesite=Lax;`;
     }
 
 
