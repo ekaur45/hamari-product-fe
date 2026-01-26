@@ -25,4 +25,7 @@ export class ProfilePhoto {
             }
         });
     }
+    onImageError(event: Event): void {
+        this.profileImage.set(null);
+    }
 }

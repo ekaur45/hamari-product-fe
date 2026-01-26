@@ -1,0 +1,378 @@
+<div class="fixed top-0 left-0 w-full h-full backdrop-blur-sm bg-primary/5 z-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-6xl bg-white rounded-lg shadow-xl border border-gray-200 my-8">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-primary/10 to-blue-50 px-6 py-4 border-b border-gray-200 rounded-t-lg">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-gray-900">Student Details</h1>
+                <a [routerLink]="['/admin/students/list']" class="text-gray-600 hover:text-gray-700 transition text-sm cursor-pointer p-2 hover:bg-white/50 rounded-full" title="Close">
+                    <i class="fas fa-times text-xl"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        @if(isLoading()) {
+            <div class="flex items-center justify-center py-20">
+                <i class="fas fa-spinner fa-spin text-4xl text-primary"></i>
+            </div>
+        } @else if(student()) {
+            <div class="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-100px)]">
+                <!-- Profile Header Section -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                        <profile-photo [user]="student()!.user" class="!w-24 !h-24"></profile-photo>
+                        <div class="flex-1">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900">
+                                        {{student()?.user?.firstName}} {{student()?.user?.lastName}}
+                                    </h2>
+                                    <p class="text-gray-600 mt-1">
+                                        <i class="fas fa-envelope mr-2"></i>{{student()?.user?.email}}
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-id-badge mr-2"></i>ID: {{student()!.id}}
+                                    </p>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 rounded-lg text-sm font-medium" 
+                                          [ngClass]="student()?.user?.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'">
+                                        <i class="fa fa-solid" [ngClass]="student()?.user?.isActive ? 'fa-solid fa-check-circle' : 'fa-solid fa-times-circle'" class="mr-1"></i>
+                                        {{student()?.user?.isActive ? 'Active' : 'Inactive'}}
+                                    </span>
+                                    @if(student()!.isDeleted) {
+                                        <span class="px-3 py-1 rounded-lg text-sm font-medium bg-red-100 text-red-700">
+                                            <i class="fas fa-trash mr-1"></i>Deleted
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 font-medium mb-1">Total Bookings</p>
+                                <p class="text-2xl font-bold text-gray-900">{{getTotalBookings()}}</p>
+                            </div>
+                            <i class="fas fa-calendar-check text-blue-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 font-medium mb-1">Completed</p>
+                                <p class="text-2xl font-bold text-gray-900">{{getCompletedBookings()}}</p>
+                            </div>
+                            <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 font-medium mb-1">Confirmed</p>
+                                <p class="text-2xl font-bold text-gray-900">{{getConfirmedBookings()}}</p>
+                            </div>
+                            <i class="fas fa-clock text-yellow-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 font-medium mb-1">Class Bookings</p>
+                                <p class="text-2xl font-bold text-gray-900">{{getTotalClassBookings()}}</p>
+                            </div>
+                            <i class="fas fa-chalkboard text-purple-500 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Column -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Personal Information -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-user mr-2 text-primary"></i>Personal Information
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Phone</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{student()?.user?.details?.phone || 'Not provided'}}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Date of Birth</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{student()?.user?.details?.dateOfBirth ? (student()?.user?.details?.dateOfBirth | date:'mediumDate') : 'Not provided'}}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Gender</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{student()?.user?.details?.gender || 'Not provided'}}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Nationality</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{student()?.user?.details?.nationality?.name || 'Not provided'}}
+                                    </p>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="text-xs text-gray-500 font-medium">Address</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{getFullAddress() || 'Not provided'}}
+                                    </p>
+                                </div>
+                                @if(student()?.user?.details?.bio) {
+                                    <div class="md:col-span-2">
+                                        <label class="text-xs text-gray-500 font-medium">Bio</label>
+                                        <p class="text-sm text-gray-900 mt-1">{{student()!.user!.details!.bio}}</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Student Information -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-user-graduate mr-2 text-primary"></i>Student Information
+                            </h3>
+                            <div class="space-y-4">
+                                @if(student()!.tagline) {
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Tagline</label>
+                                        <p class="text-sm text-gray-900 mt-1 font-medium">{{student()!.tagline}}</p>
+                                    </div>
+                                }
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Grade</label>
+                                        <p class="text-sm text-gray-900 mt-1">
+                                            @if(student()!.grade) {
+                                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium">
+                                                    Grade {{student()!.grade}}
+                                                </span>
+                                            } @else {
+                                                Not provided
+                                            }
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Section</label>
+                                        <p class="text-sm text-gray-900 mt-1">{{student()!.section || 'Not provided'}}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Roll Number</label>
+                                        <p class="text-sm text-gray-900 mt-1">{{student()!.rollNumber || 'Not provided'}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Parent Information -->
+                        @if(student()!.parent) {
+                            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-users mr-2 text-primary"></i>Parent Information
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Name</label>
+                                        <p class="text-sm text-gray-900 mt-1 font-medium">
+                                            {{student()!.parent!.user?.firstName}} {{student()!.parent!.user?.lastName}}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Email</label>
+                                        <p class="text-sm text-gray-900 mt-1">{{student()!.parent!.user?.email || 'Not provided'}}</p>
+                                    </div>
+                                    @if(student()!.parent!.user?.details?.phone) {
+                                        <div>
+                                            <label class="text-xs text-gray-500 font-medium">Phone</label>
+                                            <p class="text-sm text-gray-900 mt-1">{{student()!.parent!.user!.details!.phone}}</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Teacher Bookings -->
+                        @if(student()!.teacherBookings && student()!.teacherBookings.length > 0) {
+                            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-book mr-2 text-primary"></i>Teacher Bookings
+                                </h3>
+                                <div class="space-y-3">
+                                    @for (booking of student()!.teacherBookings.slice(0, 5); track booking.id) {
+                                        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">
+                                                        {{booking?.teacher?.user?.firstName}} {{booking?.teacher?.user?.lastName}}
+                                                    </p>
+                                                    <p class="text-xs text-gray-600">{{booking?.teacherSubject?.subject?.name}}</p>
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        {{booking?.bookingDate | date:'mediumDate'}}
+                                                    </p>
+                                                </div>
+                                                <span class="px-2 py-1 rounded-lg text-xs font-medium"
+                                                      [ngClass]="{
+                                                        'bg-green-100 text-green-700': booking.status === BookingStatus.COMPLETED,
+                                                        'bg-blue-100 text-blue-700': booking.status === BookingStatus.CONFIRMED,
+                                                        'bg-red-100 text-red-700': booking.status === BookingStatus.CANCELLED,
+                                                        'bg-yellow-100 text-yellow-700': booking.status === BookingStatus.PENDING
+                                                      }">
+                                                    {{booking.status}}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                    @if(student()!.teacherBookings.length > 5) {
+                                        <p class="text-xs text-gray-500 text-center">+{{student()!.teacherBookings.length - 5}} more bookings</p>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Class Bookings -->
+                        @if(student()?.classBookings && student()?.classBookings?.length || 0 > 0) {
+                            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-chalkboard mr-2 text-primary"></i>Class Bookings
+                                </h3>
+                                <div class="space-y-3">
+                                    @for (booking of student()?.classBookings?.slice(0, 5); track booking.id) {
+                                        <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">{{booking?.class?.subject?.name || 'Class'}}</p>
+                                                    <p class="text-xs text-gray-600">{{booking?.month}} {{booking?.year}}</p>
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        {{booking?.bookingDate | date:'mediumDate'}}
+                                                    </p>
+                                                </div>
+                                                <span class="px-2 py-1 rounded-lg text-xs font-medium"
+                                                      [ngClass]="booking?.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'">
+                                                    {{booking?.isActive ? 'Active' : 'Inactive'}}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                    @if(student()?.classBookings?.length || 0 > 5) {
+                                        <p class="text-xs text-gray-500 text-center">+{{student()?.classBookings?.length || 0 - 5}} more class bookings</p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="space-y-6">
+                        <!-- Quick Actions -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-bolt mr-2 text-primary"></i>Quick Actions
+                            </h3>
+                            <div class="space-y-2">
+                                @if (!student()?.user?.isActive) {
+                                    <button class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium" 
+                                            (click)="toggleActive(true)">
+                                        <i class="fas fa-check-circle mr-2"></i>Activate Student
+                                    </button>
+                                } @else {
+                                    <button class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition text-sm font-medium" 
+                                            (click)="toggleActive(false)">
+                                        <i class="fas fa-times-circle mr-2"></i>Deactivate Student
+                                    </button>
+                                }
+                                @if (!student()!.isDeleted) {
+                                    <button class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium" 
+                                            (click)="toggleDeletion(true)">
+                                        <i class="fas fa-trash mr-2"></i>Delete Student
+                                    </button>
+                                } @else {
+                                    <button class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm font-medium" 
+                                            (click)="toggleDeletion(false)">
+                                        <i class="fas fa-undo mr-2"></i>Restore Student
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Account Information -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-info-circle mr-2 text-primary"></i>Account Information
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Enrolled</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        {{student()!.createdAt | date:'mediumDate'}}
+                                    </p>
+                                    <p class="text-xs text-gray-500">{{getDaysAgo(student()!.createdAt)}} days ago</p>
+                                </div>
+                                @if(student()!.updatedAt) {
+                                    <div>
+                                        <label class="text-xs text-gray-500 font-medium">Last Updated</label>
+                                        <p class="text-sm text-gray-900 mt-1">
+                                            {{student()!.updatedAt | date:'mediumDate'}}
+                                        </p>
+                                    </div>
+                                }
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Email Verified</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        <span class="px-2 py-1 rounded text-xs font-medium" 
+                                              [ngClass]="student()?.user?.isEmailVerified ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'">
+                                            {{student()?.user?.isEmailVerified ? 'Verified' : 'Not Verified'}}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500 font-medium">Profile Completed</label>
+                                    <p class="text-sm text-gray-900 mt-1">
+                                        <span class="px-2 py-1 rounded text-xs font-medium" 
+                                              [ngClass]="student()?.user?.hasCompletedProfile ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'">
+                                            {{student()?.user?.hasCompletedProfile ? 'Completed' : 'Incomplete'}}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Education -->
+                        @if(student()?.user?.educations && student()?.user?.educations!.length > 0) {
+                            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-graduation-cap mr-2 text-primary"></i>Education
+                                </h3>
+                                <div class="space-y-3">
+                                    @for (edu of student()!.user!.educations; track edu.id) {
+                                        <div class="border-l-4 border-primary pl-3">
+                                            <p class="text-sm font-medium text-gray-900">{{edu.degreeName}}</p>
+                                            <p class="text-xs text-gray-600">{{edu.instituteName}}</p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                {{edu.startedYear}} - {{edu.endedYear || (edu.isStillStudying ? 'Present' : 'N/A')}}
+                                            </p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+</div>

@@ -1,11 +1,4 @@
 import { Routes } from "@angular/router";
-import { StudentDashboard } from "./student-dashboard/student-dashboard";
-import { StudentSchedule } from "./student-schedule/student-schedule";
-import StudentClasses from "./student-classes/student-classes";
-import { StudentAssignments } from "./student-assignments/student-assignments";
-import { StudentBookings } from "./student-bookings/student-bookings";
-import { StudentPerformance } from "./student-performance/student-performance";
-import { StudentReviews } from "./student-reviews/student-reviews";
 
 export const studentRoutes: Routes = [
     {
@@ -15,30 +8,34 @@ export const studentRoutes: Routes = [
     },
     {
         path: 'dashboard',
-        component: StudentDashboard
+        loadComponent: () => import('./student-dashboard/student-dashboard').then(m => m.StudentDashboard)
     },
     {
         path: 'schedule',
-        component: StudentSchedule
+        loadComponent: () => import('./student-schedule/student-schedule').then(m => m.StudentSchedule)
     },
     {
         path: 'classes',
-        component: StudentClasses
+        loadComponent: () => import('./student-classes/student-classes').then(m => m.StudentClasses)
     },
     {
         path: 'assignments',
-        component: StudentAssignments
+        loadComponent: () => import('./student-assignments/student-assignments').then(m => m.StudentAssignments)
     },
     {
         path: 'bookings',
-        component: StudentBookings
+        loadComponent: () => import('./student-bookings/student-bookings').then(m => m.StudentBookings)
     },
     {
         path: 'performance',
-        component: StudentPerformance
+        loadComponent: () => import('./student-performance/student-performance').then(m => m.StudentPerformance)
     },
     {
         path: 'reviews/:teacherId',
-        component: StudentReviews
+        loadComponent: () => import('./student-reviews/student-reviews').then(m => m.StudentReviews)
+    },
+    {
+        path: 'chat',
+        loadComponent: () => import('./student-chat/student-chat').then(m => m.StudentChat)
     }
 ];

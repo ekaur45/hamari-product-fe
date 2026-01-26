@@ -4,14 +4,19 @@ import { StudentService } from '../../../../shared/services/student.service';
 import { CommonModule } from '@angular/common';
 import { PaginatorModule } from 'primeng/paginator';
 import { FormsModule } from '@angular/forms';
+import { ProfilePhoto } from '../../../../components/misc/profile-photo/profile-photo';
+import { Router, RouterModule } from '@angular/router';
+import { BookingStatus } from '../../../../shared/enums';
+import TeacherBooking from '../../../../shared/models/teacher.interface';
 
 @Component({
   selector: 'app-student-list',
-  imports: [CommonModule, PaginatorModule, FormsModule],
+  imports: [CommonModule, PaginatorModule, FormsModule, ProfilePhoto, RouterModule],
   templateUrl: './student-list.html',
   styleUrl: './student-list.css',
 })
 export class StudentList implements OnInit {
+  readonly BookingStatus = BookingStatus;
   isLoading = signal(false);
   students = signal<Student[]>([]);
   totalStudents = signal(0);
@@ -30,7 +35,7 @@ export class StudentList implements OnInit {
   rows = signal<number>(10);
   search = signal('');
   isActiveFilter = signal<string>('');
-  constructor(private studentService: StudentService) {
+  constructor(private studentService: StudentService, private router: Router) {
   }
   ngOnInit(): void {
     this.getStudents();
@@ -92,5 +97,23 @@ export class StudentList implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  getCompletedBookings(student: Student): number {
+    return student.teacherBookings?.filter((b: TeacherBooking) => b.status === BookingStatus.COMPLETED).length || 0;
+  }
+
+  getConfirmedBookings(student: Student): number {
+    return student.teacherBookings?.filter((b: TeacherBooking) => b.status === BookingStatus.CONFIRMED).length || 0;
+  }
+
+  getDaysAgo(date: Date | string): number {
+    return Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  onStudentClick(student: Student): void {
+    // Navigate to student details - implement routing if needed
+    // this.router.navigate(['/admin/students', student.id]);
+    this.router.navigate(['/admin/students/list', { outlets: { studentDetailsOutlet: [student.id] } }]);
   }
 }

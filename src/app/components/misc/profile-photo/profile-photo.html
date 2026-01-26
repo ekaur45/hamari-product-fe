@@ -1,6 +1,8 @@
-<div [class]="'rounded-full flex items-center justify-center text-white font-semibold bg-primary/10 border border-1 border-primary' + class() + ' ' + (class()?.includes('w-') ? '' : 'w-10') + ' ' + (class()?.includes('h-') ? '' : 'h-10')">
+<div [class]="'rounded-full flex items-center justify-center text-white font-semibold bg-primary/10 border border-1 border-primary ' + class() + ' ' + (class()?.includes('h-') ? '' : 'w-10 h-10')">
     @if(profileImage()){
-    <img [class]="'w-full h-full rounded-full object-cover '" [src]="profileImage()" alt="avatar" />
+    <img [class]="'w-full h-full rounded-full object-cover '" [src]="profileImage()" alt="avatar" 
+    (error)="onImageError($event)"
+    />
     }
     @else{
     <span class="text-primary">{{ userDisplayName() | uppercase }}</span>

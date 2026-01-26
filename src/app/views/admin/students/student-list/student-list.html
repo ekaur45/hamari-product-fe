@@ -72,47 +72,139 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="text-left py-3 px-4 font-medium text-gray-700">Student</th>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">Student ID</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Nationality</th>
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">Bookings</th>
                         <th class="text-left py-3 px-4 font-medium text-gray-700">Parent</th>
                         <th class="text-left py-3 px-4 font-medium text-gray-700">Grade/Class</th>
                         <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
                         <th class="text-left py-3 px-4 font-medium text-gray-700">Enrolled</th>
-                        <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                        <th class="py-3 px-4 font-medium text-gray-700 text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     @for (student of students(); track student.id) {
-                    <tr class="hover:bg-gray-50 transition">
+                    <tr class="hover:bg-gray-50 transition cursor-pointer" (click)="onStudentClick(student)">
                         <td class="py-3 px-4">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold"
-                                [ngClass]="{'bg-primary text-white': student.isActive, 'bg-gray-200 text-gray-500': !student.isActive}"
-                                >{{student.user.firstName.charAt(0)}}{{student.user.lastName.charAt(0)}}</div>
+                                <profile-photo [user]="student.user"></profile-photo>
                                 <div class="ml-3">
                                     <p class="text-sm font-medium text-gray-900">{{student.user.firstName}} {{student.user.lastName}}</p>
-                                    <p class="text-xs text-gray-500">{{student.user.email}}</p>
+                                    <p class="text-xs text-gray-700 font-medium">{{student.user.email}}</p>
+                                    <p class="text-xs text-gray-500">{{student.id}}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">{{student.id}}</td>
-                        @if (student.parent) {
-                            <td class="py-3 px-4 text-sm text-gray-700">{{student.parent.user?.firstName}} {{student.parent.user?.lastName}}</td>
-                        } @else {
-                            <td class="py-3 px-4 text-sm text-gray-700">N/A</td>
-                        }
-                        <td class="py-3 px-4 text-sm text-gray-700">{{student.grade ?? 'N/A'}}</td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-1 rounded-lg text-xs font-medium" [ngClass]="student.user.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'">
-                                {{student.user.isActive ? 'Active' : 'Inactive'}}
-                            </span>
+                        <td class="py-3 px-4 text-sm text-gray-700">
+                            @if(student?.user?.details?.nationality) {
+                                {{student?.user?.details?.nationality?.name}}
+                            } @else {
+                                <span class="text-xs text-gray-500 font-medium">Not provided</span>
+                            }
                         </td>
-                        <td class="py-3 px-4 text-sm text-gray-700">{{student.createdAt | date:'dd/MM/yyyy'}}</td>
                         <td class="py-3 px-4">
-                            <div class="flex items-center space-x-2">
-                                    <button class="text-green-600 hover:text-green-700 transition text-sm" (click)="toggleActive(student, true)" [disabled]="student.user.isActive">Activate</button>
-                                    <button class="text-orange-600 hover:text-orange-700 transition text-sm" (click)="toggleActive(student, false)" [disabled]="!student.user.isActive">Deactivate</button>
-                                    <button class="text-red-600 hover:text-red-700 transition text-sm" (click)="toggleDeletion(student, true)">Delete</button>
-                                    <button class="text-gray-600 hover:text-gray-700 transition text-sm" (click)="toggleDeletion(student, false)">Restore</button>
+                            <div class="flex flex-col gap-2">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-1.5">
+                                        <i class="fas fa-check-circle text-green-500 text-xs"></i>
+                                        <span class="text-xs text-gray-600 font-medium">Completed</span>
+                                    </div>
+                                    <span class="text-sm font-semibold text-green-600">{{getCompletedBookings(student)}}</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-1.5">
+                                        <i class="fas fa-clock text-blue-500 text-xs"></i>
+                                        <span class="text-xs text-gray-600 font-medium">Confirmed</span>
+                                    </div>
+                                    <span class="text-sm font-semibold text-blue-600">{{getConfirmedBookings(student)}}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">
+                            @if (student.parent) {
+                                <div class="flex flex-col">
+                                    <span class="font-medium">{{student.parent.user?.firstName}} {{student.parent.user?.lastName}}</span>
+                                    @if(student.parent.user?.email) {
+                                        <span class="text-xs text-gray-500">{{student.parent.user?.email}}</span>
+                                    }
+                                </div>
+                            } @else {
+                                <span class="text-xs text-gray-500 font-medium">Not assigned</span>
+                            }
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">
+                            <div class="flex flex-col gap-1">
+                                @if(student.grade) {
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium inline-block w-fit">
+                                        Grade {{student.grade}}
+                                    </span>
+                                }
+                                @if(student.section) {
+                                    <span class="text-xs text-gray-600">Section: {{student.section}}</span>
+                                }
+                                @if(student.rollNumber) {
+                                    <span class="text-xs text-gray-600">Roll: {{student.rollNumber}}</span>
+                                }
+                                @if(!student.grade && !student.section && !student.rollNumber) {
+                                    <span class="text-xs text-gray-500 font-medium">Not provided</span>
+                                }
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex flex-col gap-1">
+                                <span class="px-2 py-1 rounded-lg text-xs font-medium" 
+                                      [ngClass]="student.user.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'">
+                                    {{student.user.isActive ? 'Active' : 'Inactive'}}
+                                </span>
+                                @if(student.isDeleted) {
+                                    <span class="px-2 py-1 rounded-lg text-xs font-medium bg-red-100 text-red-700">
+                                        Deleted
+                                    </span>
+                                }
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-700">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-medium">
+                                    {{student.createdAt | date:'mediumDate'}}
+                                </span>
+                                <span class="text-xs text-gray-500">
+                                    {{getDaysAgo(student.createdAt)}} days ago
+                                </span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 align-middle h-full">
+                            <div class="flex justify-center items-center space-x-2 h-full">
+                                <button class="text-gray-600 hover:text-gray-700 transition text-sm cursor-pointer" title="View" (click)="onStudentClick(student); $event.stopPropagation()">
+                                    <i class="fas fa-eye text-lg"></i>
+                                </button>
+                                @if (!student.user.isActive) {
+                                    <button class="text-green-600 hover:text-green-700 transition text-sm cursor-pointer" 
+                                            title="Activate" 
+                                            (click)="toggleActive(student, true); $event.stopPropagation()" 
+                                            [disabled]="student.user.isActive">
+                                        <i class="fas fa-check-circle text-lg"></i>
+                                    </button>
+                                } @else {
+                                    <button class="text-orange-600 hover:text-orange-700 transition text-sm cursor-pointer" 
+                                            title="Deactivate" 
+                                            (click)="toggleActive(student, false); $event.stopPropagation()" 
+                                            [disabled]="!student.user.isActive">
+                                        <i class="fas fa-times-circle text-lg"></i>
+                                    </button>
+                                }
+                                @if (!student.isDeleted) {
+                                    <button class="text-red-600 hover:text-red-700 transition text-sm cursor-pointer" 
+                                            title="Delete" 
+                                            (click)="toggleDeletion(student, true); $event.stopPropagation()">
+                                        <i class="fas fa-trash text-lg"></i>
+                                    </button>
+                                } @else {
+                                    <button class="text-gray-600 hover:text-gray-700 transition text-sm cursor-pointer" 
+                                            title="Restore" 
+                                            (click)="toggleDeletion(student, false); $event.stopPropagation()">
+                                        <i class="fas fa-undo text-lg"></i>
+                                    </button>
+                                }
                             </div>
                         </td>
                     </tr>
@@ -129,3 +221,6 @@
             [rowsPerPageOptions]="[5,10, 20, 50]" (onPageChange)="onPageChange($event)"></p-paginator>
         </div>
     </div>
+
+    <router-outlet name="addStudentOutlet"></router-outlet>
+    <router-outlet name="studentDetailsOutlet"></router-outlet>

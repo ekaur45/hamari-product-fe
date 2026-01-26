@@ -13,13 +13,16 @@ import { ClassRoomSocket } from "../../shared/models/class-room.interface";
 import { Student } from "../../shared";
 import { StreamDirective } from "../../components/stream.directive";
 import { ProfilePhoto } from "../../components/misc/profile-photo/profile-photo";
-
+import { ConfirmationService, MessageService } from "primeng/api";
+import { ConfirmDialogModule } from "primeng/confirmdialog";
+import { ToastModule } from "primeng/toast";
 @Component({
     selector: 'app-class-room',
     standalone: true,
     templateUrl: './class-room.html',
     styleUrls: ['./class-room.css'],
-    imports: [CommonModule, RouterModule, FormsModule, StreamDirective, ProfilePhoto],
+    imports: [CommonModule, RouterModule, FormsModule, StreamDirective, ProfilePhoto, ConfirmDialogModule, ToastModule],
+    providers: [MessageService, ConfirmationService],
 })
 export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
     socket!: Socket;
@@ -38,7 +41,13 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
     booking = signal<TeacherBooking | null>(null);
     UserRole = UserRole;
 
-    constructor(private route: ActivatedRoute, private authService: AuthService, private router: Router, private teacherService: TeacherService) {
+    constructor(private route: ActivatedRoute, 
+        private authService: AuthService, 
+        private router: Router, 
+        private teacherService: TeacherService,
+        private messageService: MessageService,
+        private confirmationService: ConfirmationService,
+    ) {
         this.dashboardLink.set(ROUTES_MAP[this.authService.getCurrentUser()!.role]['SCHEDULE']);
         this.route.params.subscribe(params => {
             this.bookingId.set(params['bookingId']);
@@ -48,7 +57,7 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
 
     ngOnInit(): void {
         this.getBookingDetails();
-        navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then((stream) => {
+        navigator.mediaDevices.getUserMedia({ video: false, audio: false }).then((stream) => {
             this.localStream = stream;
         });
     }
@@ -87,9 +96,26 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
         }
     }
     leaveSession(): void {
-        if (confirm('Are you sure you want to leave the session?')) {
-            this.router.navigate([this.dashboardLink()]);
-        }
+        this.confirmationService.confirm({
+            header: 'Leave Session',
+            message: 'Are you sure you want to leave the session?',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Yes, Proceed',
+            rejectLabel: 'No, Cancel',
+            acceptIcon: 'pi pi-check',
+            rejectIcon: 'pi pi-times',
+            acceptButtonProps: {
+                severity: 'danger',
+                outlined: false
+            },
+            rejectButtonProps: {
+                severity: 'warn',
+                outlined: true
+            },
+            accept: () => {
+                this.router.navigate([this.dashboardLink()]);
+            }
+        });
     }
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: MouseEvent): void {
@@ -339,6 +365,55 @@ export default class ClassRoom implements AfterViewInit, OnDestroy, OnInit {
         return {
             audio: audioTrack,
             video: videoTrack
+        };
+    }
+
+    getRemainingTime(): { isTimeRemaining: boolean, hours: string, minutes: string, seconds: string } {
+        return { isTimeRemaining: false, hours: '00', minutes: '00', seconds: '00' };
+        if (!this.booking()?.bookingDate || !this.booking()?.availability.startTime) {
+            return { isTimeRemaining: false, hours: '00', minutes: '00', seconds: '00' };
+        }
+
+        const bookingDate = new Date(this.booking()!.bookingDate);
+        const [hours, minutes] = this.booking()!.availability.startTime.split(':').map(Number);
+        bookingDate.setHours(hours, minutes, 0, 0);
+
+        const now = new Date();
+        const diffMs = bookingDate.getTime() - now.getTime();
+
+        if (diffMs < 0) {
+            // Booking has already started or passed
+            const endDate = new Date(bookingDate);
+            const [endHours, endMinutes] = this.booking()!.availability.endTime.split(':').map(Number);
+            endDate.setHours(endHours, endMinutes, 0, 0);
+
+            if (now.getTime() < endDate.getTime()) {
+                return { isTimeRemaining: true, hours: '00', minutes: '00', seconds: '00' };
+            } else {
+                return { isTimeRemaining: false, hours: '00', minutes: '00', seconds: '00' };
+            }
+        }
+
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMinutes / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffDays > 0) {
+            return { isTimeRemaining: true, hours: diffDays.toString(), minutes: '00', seconds: '00' };
+        } else if (diffHours > 0) {
+            const remainingMinutes = diffMinutes % 60;
+            if (remainingMinutes > 0) {
+                return { isTimeRemaining: true, hours: String(diffHours).padStart(2, '0'), minutes: String(remainingMinutes).padStart(2, '0'), seconds: '00' };
+            }
+            return { isTimeRemaining: true, hours: String(diffHours).padStart(2, '0'), minutes: '00', seconds: '00' };
+        } else {
+            return { isTimeRemaining: true, hours: '00', minutes: String(diffMinutes).padStart(2, '0'), seconds: '00' };
+        }
+        return {
+            isTimeRemaining: false,
+            hours: '00',
+            minutes: '00',
+            seconds: '00'
         };
     }
 

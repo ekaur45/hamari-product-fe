@@ -66,6 +66,11 @@ export class StudentBookings implements OnInit {
   }
 
   onPageChange(event: any): void {
+    this.pagination.set({
+      ...this.pagination(),
+      page: event.page + 1,
+      limit: event.rows
+    });
     this.loadBookings(event.page + 1);
   }
 

@@ -27,6 +27,7 @@ export const API_ENDPOINTS = {
     TEACHERS: '/admin/teachers',
     TEACHER_DETAILS: (teacherId: string) => `/admin/teachers/${teacherId}/details`,
     STUDENTS: '/admin/students',
+    STUDENT_DETAILS: (studentId:string) => `/admin/students/${studentId}/details`,
     CLASSES: '/admin/classes',
     LOGS: '/admin/logs',
     REVIEWS: '/admin/reviews',

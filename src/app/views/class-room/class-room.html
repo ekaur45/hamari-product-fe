@@ -1,3 +1,5 @@
+<p-toast />
+<p-confirmDialog />
 <div class="bg-gray-900 grid">
     <header
         class="bg-gray-800 text-white px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between border-b border-gray-700">
@@ -25,19 +27,36 @@
             </div>
         </div>
     </header>
-
-    <div class="flex flex-col md:flex-row h-[calc(100vh-146px)] overflow-hidden">
-        <!-- Main Video Area -->
+    @if(getRemainingTime().isTimeRemaining) {
+    <div class="bg-gradient-to-r from-primary/10 to-primary/10 text-white px-2 sm:px-4 py-2 sm:py-3 flex flex-col md:flex-row h-[calc(100vh-146px)] overflow-hidden border-b border-gray-700">
+        <div class="flex flex-col items-center justify-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+            <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                <i class="fas fa-hourglass-half text-primary text-lg animate-pulse"></i>
+            </div>
+            <h2 class="text-sm sm:text-lg font-semibold truncate">This session will start in</h2>
+            <div class="flex items-center space-x-2">
+                <div class="text-2xl sm:text-8xl font-semibold truncate">
+                    <span>
+                        {{ getRemainingTime().hours }} <span class="text-sm sm:text-base text-gray-400">Hours</span>
+                    </span>
+                    <span>
+                        {{ getRemainingTime().minutes }} <span class="text-sm sm:text-base text-gray-400">Minutes</span>
+                    </span>
+                    <span>
+                        {{ getRemainingTime().seconds }} <span class="text-sm sm:text-base text-gray-400">Seconds</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    }@else {
+    <div class="flex flex-col md:flex-row h-[calc(100vh-146px)] overflow-hidden">        
         <div class="flex-1 flex flex-col p-2 sm:p-4 space-y-2 sm:space-y-4 overflow-y-auto">
-            <!-- Teacher/Shared Screen Area (Main) -->
             <div class="flex-1 video-container">
-                <!-- Video View -->
                 <div #videoView class="w-full h-full flex items-center justify-center bg-gray-950">
-                    <!-- Video or Screen Share -->
                     <video #videoElement [class.hidden]="!localStream" [srcObject]="localStream"
                         class="w-full h-full flex items-center justify-center" autoplay playsinline muted
                         style="transform: scaleX(-1);"></video>
-                    <!-- Video Overlay Info -->
                     <div class="video-overlay">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-2">
@@ -54,7 +73,6 @@
                 </div>
             </div>
 
-            <!-- Students Video Grid -->
             @if(remoteStreams.length>0){
             <div class="bg-gray-800 rounded-lg p-3">
                 <div class="flex items-center justify-between mb-2">
@@ -96,7 +114,6 @@
 
 
 
-                    <!-- Empty slot for grid alignment -->
                     <div class="video-container aspect-video border-2 border-dashed border-gray-600 hidden">
                         <div class="w-full h-full flex items-center justify-center">
                             <i class="fas fa-user-plus text-gray-500 text-xl"></i>
@@ -107,10 +124,10 @@
             }
         </div>
     </div>
+}
     <div class="sticky bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 px-2 sm:px-4 md:px-6 py-2 sm:py-4 pb-safe z-40"
         style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
         <div class="flex items-center justify-between max-w-7xl mx-auto flex-wrap gap-2">
-            <!-- Left Controls -->
             <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center sm:justify-start">
                 <button (click)="onToggleMic()" [class.bg-green-600]="getStreamController(localStream).audio"
                     [class.hover:bg-green-700]="getStreamController(localStream).audio"
@@ -146,7 +163,6 @@
                 </span> -->
             </div>
 
-            <!-- Center Controls -->
             <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center">
                 <button
                     class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm hidden sm:flex items-center">
@@ -162,7 +178,6 @@
                 </button>
             </div>
 
-            <!-- Right Controls -->
             <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center sm:justify-end">
                 <button id="toggleParticipants"
                     class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm hidden md:flex items-center">

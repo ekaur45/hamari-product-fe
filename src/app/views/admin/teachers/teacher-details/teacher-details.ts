@@ -9,12 +9,13 @@ import { ToastModule } from "primeng/toast";
 import { ConfirmDialogModule } from "primeng/confirmdialog";
 import { BookingStatus } from "../../../../shared/enums";
 import { ProfilePhoto } from "../../../../components/misc/profile-photo/profile-photo";
+import { SafePipe } from "../../../../shared/pipes/safe.pipe";
 
 @Component({
     selector: 'app-teacher-details',
     templateUrl: './teacher-details.html',
     standalone: true,
-    imports: [CommonModule, RouterModule, ToastModule, ConfirmDialogModule, ProfilePhoto],
+    imports: [CommonModule, RouterModule, ToastModule, ConfirmDialogModule, ProfilePhoto, SafePipe],
     providers: [MessageService, ConfirmationService],
 })
 export class TeacherDetails implements OnInit {
@@ -87,7 +88,7 @@ export class TeacherDetails implements OnInit {
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         
         return availabilities.map(av => ({
-            day: dayNames[parseInt(av.dayOfWeek)] || `Day ${av.dayOfWeek}`,
+            day: dayNames[parseInt(av.dayOfWeek)] || `${av.dayOfWeek}`,
             time: `${av.startTime} - ${av.endTime}`
         }));
     }
@@ -166,5 +167,28 @@ export class TeacherDetails implements OnInit {
                 });
             }
         });
+    }
+    getYouTubeEmbedUrl(url: string): string {
+        if (!url) return '';
+  
+        // Extract the video ID from any YouTube URL
+        const match = url.match(
+          /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+        );
+      
+        if (!match) return '';
+      
+        const videoId = match[1];
+        return `https://www.youtube.com/embed/${videoId}?autoplay=0`;
+    }
+    getVideoUrl(url: string): string {
+        return url;
+    }
+    extractYouTubeId(url: string): string {
+        const videoId = url.split('v=')[1];
+        return videoId;
+    }
+    isYouTubeUrl(url: string): boolean {
+        return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//.test(url);
     }
 }

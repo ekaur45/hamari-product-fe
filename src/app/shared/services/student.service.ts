@@ -29,6 +29,13 @@ export class StudentService {
     );
   }
 
+  getStudentDetails(studentId: string): Observable<Student> {
+    return this.apiService.get<Student>(`${API_ENDPOINTS.ADMIN.STUDENT_DETAILS(studentId)}`).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+
   getStudentSchedule(studentId: string): Observable<StudentScheduleDto> {
     return this.apiService.get<StudentScheduleDto>(API_ENDPOINTS.STUDENTS.SCHEDULE(studentId)).pipe(
       map(r => r.data),

@@ -9,7 +9,7 @@ import { AuthService, StudentBookingDto, StudentService } from "../../../shared"
     standalone: true,
     imports: [CommonModule, RouterModule],
 })
-export default class StudentClasses implements OnInit {
+export class StudentClasses implements OnInit {
     studentId = signal<string>('');
     studentBookings = signal<StudentBookingDto[]>([]);
     isLoading = signal(false);

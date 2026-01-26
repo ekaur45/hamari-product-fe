@@ -175,22 +175,22 @@
                             </td>
                             <td class="py-3 px-4 align-middle h-full">
                                 <div class="flex justify-center items-center space-x-2 h-full">
-                                    <button class="text-gray-600 hover:text-gray-700 transition text-sm cursor-pointer" title="Edit">
+                                    <button class="text-gray-600 hover:text-gray-700 transition text-sm cursor-pointer" title="Edit" (click)="$event.stopPropagation()">
                                         <i class="fas fa-edit text-lg"></i>
                                     </button>
                                     <button class="text-primary hover:text-primary-700 transition text-sm cursor-pointer" title="View">
                                         <i class="fas fa-eye text-lg"></i>
                                     </button>
                                     @if (!teacher.isActive) {
-                                        <button class="text-green-600 hover:text-green-700 transition text-sm cursor-pointer" title="Activate" (click)="toggleActive(teacher, true)" [disabled]="teacher.isActive">
+                                        <button class="text-green-600 hover:text-green-700 transition text-sm cursor-pointer" title="Activate" (click)="$event.stopPropagation(); toggleActive(teacher, true)" [disabled]="teacher.isActive">
                                             <i class="fas fa-check-circle text-lg"></i>
                                         </button>
                                     }@else {
-                                        <button class="text-orange-600 hover:text-orange-700 transition text-sm cursor-pointer" title="Deactivate" (click)="toggleActive(teacher, false)" [disabled]="!teacher.isActive">
+                                        <button class="text-orange-600 hover:text-orange-700 transition text-sm cursor-pointer" title="Deactivate" (click)="$event.stopPropagation(); toggleActive(teacher, false)" [disabled]="!teacher.isActive">
                                             <i class="fas fa-times-circle text-lg"></i>
                                         </button>
                                     }
-                                    <button class="text-red-600 hover:text-red-700 transition text-sm cursor-pointer" title="Delete">
+                                    <button class="text-red-600 hover:text-red-700 transition text-sm cursor-pointer" title="Delete" (click)="$event.stopPropagation()">
                                         <i class="fas fa-trash text-lg"></i>
                                     </button>
                                 </div>
