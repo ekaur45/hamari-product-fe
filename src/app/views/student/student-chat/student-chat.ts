@@ -442,4 +442,34 @@ export class StudentChat implements OnInit {
     getInitials(name: string): string {
         return name.split(' ').map(n => n[0]).join('').toUpperCase();
     }
+
+    handleEnterKey(event: KeyboardEvent): void {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            this.sendMessage();
+        }
+        // Shift+Enter will allow new line (default behavior)
+    }
+
+    autoResizeTextarea(event: Event): void {
+        const textarea = event.target as HTMLTextAreaElement;
+        // Reset height to auto to get the correct scrollHeight
+        textarea.style.height = 'auto';
+        // Set height to scrollHeight, but cap at max-h-32 (128px)
+        const maxHeight = 128; // 32 * 4px = 128px
+        const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+        textarea.style.height = `${newHeight}px`;
+    }
+
+    undeleteMessage(messageId: string): void {
+        const conversation = this.selectedConversation();
+        if (!conversation) return;
+
+        const message = conversation.messages.find(m => m.id === messageId);
+        if (message && message.isDeleted) {
+            message.isDeleted = false;
+            this.conversations.set([...this.conversations()]);
+            this.selectedConversation.set({ ...conversation });
+        }
+    }
 }
