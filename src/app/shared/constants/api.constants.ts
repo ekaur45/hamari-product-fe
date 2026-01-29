@@ -319,6 +319,7 @@ export const REQUEST_METHODS = {
 export const SOCKET = {
   NAMESPACE: {
     CHAT: 'chat',
+    MAIN: 'main'
   },
   EVENTS: {
     CHAT: {

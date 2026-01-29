@@ -122,4 +122,7 @@ export class TopBar {
 			command: () => this.signOut.emit()
 		}
 	];
+	filterNotifications(type: NotificationType): void {
+		//this.filterNotifications.emit(type);
+	}
 }

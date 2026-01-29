@@ -7,6 +7,7 @@ import { AuthService, PaginatedApiResponse, User, ApiResponse, UserRole } from "
 import { environment } from "../../../../environments/environment";
 import { ChatService } from "../../../shared/services/chat.service";
 import { Chat, ChatResource, ChatUser, Conversation } from "../../../shared/models/chat.interface";
+import { MainSocketService } from "../../../shared/services/main-socket.service";
 
 interface ChatFile {
     id: string;
@@ -43,18 +44,37 @@ export class SharedChat implements OnInit {
     @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
     timeoutRef: any;
 
-    constructor(private chatService: ChatService,public authService: AuthService, private route: ActivatedRoute, private router: Router) {
+
+    constructor(private chatService: ChatService,public authService: AuthService, private route: ActivatedRoute, private router: Router,
+        private mainSocketService: MainSocketService
+
+    ) {
 
         this.route.params.subscribe(params => {
-            this.selectedConversationId.set(params['selectedConversationId']);
-            this.joinChat();
-            this.selectedConversation.set(this.conversations()[0]);
-            this.getChatMessages();
+            const conversationId = params['selectedConversationId'];
+            this.selectedConversationId.set(conversationId);
+            if (conversationId) {
+                this.joinChat();
+                this.selectedConversation.set(this.conversations().find(conversation => conversation.id === conversationId)!);
+                this.getChatMessages();
+            } else {
+            }
         });
      }
 
     ngOnInit(): void {
+        this.mainSocketService.connectToSocket();
         this.getChaUsers();
+        this.mainSocketService.onlineUsers$.subscribe((onlineUsers) => {
+            console.log('✅ Online users', onlineUsers);
+            this.conversations.update((conversations) => conversations.map(conversation => {
+                const other = this.getOtherParticipant(conversation);
+                return {
+                    ...conversation,
+                    isOnline: !!onlineUsers[other.id]
+                }
+            }));
+        });
     }
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['selectedConversationId']) {
@@ -63,6 +83,19 @@ export class SharedChat implements OnInit {
     }
     ngAfterViewInit(): void {
         this.scrollToBottom();
+    }
+    listenToUser(userId: string) {
+        this.mainSocketService.listenToUserStatus(userId).subscribe(status => {
+            this.conversations.update(convs =>
+                convs.map(conv => {
+                    const other = this.getOtherParticipant(conv);
+                    if (other.id === userId) {
+                        return { ...conv, isOnline: status.isOnline };
+                    }
+                    return conv;
+                })
+            );
+        });
     }
     joinChat(): void {
         this.chatService.joinChat(this.selectedConversationId()!).subscribe({
@@ -110,10 +143,25 @@ export class SharedChat implements OnInit {
     selectConversation(conversation: Conversation): void {
         this.selectedConversation.set(conversation);
         this.selectedConversationId.set(conversation.id);
+        console.log('✅ Selected conversation', this.selectedConversation()?.name);
         if(this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
             this.router.navigate(['/student/chat', conversation.id]);
         } else {
             this.router.navigate(['/teacher/chat', conversation.id]);
+        }
+    }
+
+    toggleSidebar(): void {
+        
+    }
+
+    goBackToSidebar(): void {        
+        this.selectedConversation.set(null);
+        this.selectedConversationId.set(null);
+        if(this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
+            this.router.navigate(['/student/chat']);
+        } else {
+            this.router.navigate(['/teacher/chat']);
         }
     }
     getChatMessages(){
@@ -314,8 +362,12 @@ export class SharedChat implements OnInit {
     }
     scrollToBottom(): void {
         setTimeout(() => {
-            const chatContainer = this.chatContainer.nativeElement;
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            if(this.chatContainer) {
+                const chatContainer = this.chatContainer.nativeElement;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
         }, 100);
     }
+
+    
 }

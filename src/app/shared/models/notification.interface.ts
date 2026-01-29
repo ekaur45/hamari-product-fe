@@ -13,9 +13,11 @@ export interface Notification {
 }
 
 export enum NotificationType {
+    ALL = 'all',
     CHAT = 'chat',
     MESSAGE = 'message',
     BOOKING = 'booking',
     PAYMENT = 'payment',
+    BOOKING_CONFIRMED = 'booking_confirmed',
     OTHER = 'other',
   }

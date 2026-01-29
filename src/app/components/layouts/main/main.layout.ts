@@ -10,6 +10,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { Notification } from '../../../shared/models/notification.interface';
+import { MainSocketService } from '../../../shared/services/main-socket.service';
 
 @Component({
   selector: 'main-layout',
@@ -38,16 +39,18 @@ export class MainLayout implements AfterViewInit, OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private mainSocketService: MainSocketService
   ) { }
 
   ngOnInit(): void {
     this.loadUserData();
     this.getNotifications();
+    this.mainSocketService.connectToSocket();
   }
 
   ngAfterViewInit() {
-    this.checkScreenSize();
+    this.checkScreenSize();    
   }
 getNotifications(): void {
   this.notificationService.getNotifications(1, 10).subscribe(res => {

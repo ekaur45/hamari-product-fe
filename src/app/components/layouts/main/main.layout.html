@@ -31,7 +31,7 @@
     [notifications]="notifications()" [isUserMenuOpen]="isUserMenuOpen()" [user]="currentUser() ?? null" [userDisplayName]="getUserDisplayName()" [userEmail]="getUserEmail()" [userAvatar]="currentUser()?.details?.profileImage" (toggleMobileMenu)="toggleMobileMenu()" (toggleUserMenu)="toggleUserMenu()" (profile)="onProfileClick()" (settings)="onSettingsClick()" (signOut)="onSignOutClick()"></app-top-bar>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto p-6">
+    <main class="flex-1 overflow-y-auto md:p-6">
       <router-outlet></router-outlet>
     </main>
   </div>
