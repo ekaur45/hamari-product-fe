@@ -79,15 +79,15 @@ export class AuthService {
    * Register new user
    */
   register(userData: RegisterDto): Observable<User> {
-    return this.apiService.post<{ user: User; token: string }>(API_ENDPOINTS.AUTH.REGISTER, userData)
+    return this.apiService.post<User & { access_token: string }>(API_ENDPOINTS.AUTH.REGISTER, userData)
       .pipe(
         map(response => {
           if ((response.statusCode === 200 || response.statusCode === 201) && response.data) {
-            const { user, token } = response.data;
-            this.setToken(token);
-            this.setCurrentUser(user);
+            const { access_token , ...user } = response.data;
+            this.setToken(access_token);
+            this.setCurrentUser(user as User);
             this.isAuthenticatedSubject.next(true);
-            return user;
+            return user as User;
           }
           throw new Error(response.message);
         }),

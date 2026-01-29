@@ -101,7 +101,7 @@ export class Register implements OnInit {
             if(response.isEmailVerified) {
               this.router.navigate(['/auth/login']);
             } else {
-              this.router.navigate(['/auth/otp', response.email]);
+              this.router.navigate(['/auth/otp', btoa(response.email)]);
             }
           }, 1000);
         },

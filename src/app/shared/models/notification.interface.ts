@@ -18,6 +18,7 @@ export enum NotificationType {
     MESSAGE = 'message',
     BOOKING = 'booking',
     PAYMENT = 'payment',
+    NEW_REGISTER = 'new_register',
     BOOKING_CONFIRMED = 'booking_confirmed',
     OTHER = 'other',
   }

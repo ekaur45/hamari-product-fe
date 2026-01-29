@@ -33,9 +33,8 @@
         #notificationsMenu 
         [model]="notifications" 
         [popup]="true" 
-        [appendTo]="'body'" 
         [baseZIndex]="1000"
-        styleClass="notification-menu w-96 shadow-xl border border-gray-200 rounded-lg overflow-hidden">
+        styleClass="notification-menu w-96 shadow-xl border border-gray-200 rounded-lg overflow-hidden max-h-[400px] overflow-y-auto">
         <!-- Header -->
         <ng-template pTemplate="start">
           <div class="flex flex-col gap-2">
@@ -91,7 +90,6 @@
             </div>
           }
         </ng-template>
-
         <!-- Notification Items -->
         <ng-template pTemplate="item" let-item>
           <div 
@@ -125,6 +123,11 @@
               @else if(item.type === NotificationType.BOOKING_CONFIRMED){
                 <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                   <i class="fas fa-check-circle text-green-600 text-sm"></i>
+                </div>
+              }
+              @else if(item.type === NotificationType.NEW_REGISTER){
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <i class="fas fa-user-plus text-red-600 text-sm"></i>
                 </div>
               }
               @else{

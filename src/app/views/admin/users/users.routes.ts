@@ -6,7 +6,7 @@ import { UserList } from './user-list/user-list';
 export const usersRoutes: Routes = [
     {
         path: '',
-        redirectTo: '/list',
+        redirectTo: 'list',
         pathMatch: 'full'
     },
     {

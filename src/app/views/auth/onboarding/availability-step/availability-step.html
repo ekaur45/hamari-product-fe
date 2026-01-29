@@ -41,7 +41,7 @@
                                 class="w-full" 
                                 size="large"
                                 placeholder="Select a day"
-                                [style]="{'padding-left': '2.75rem'}">
+                               >
                             </p-select>
                         </div>
                         @if (availabilityForm.get('dayOfWeek')?.invalid && availabilityForm.get('dayOfWeek')?.touched) {
@@ -88,7 +88,7 @@
                                 class="w-full" 
                                 size="large"
                                 (onChange)="onStartDateChange($event)"
-                                [style]="{'padding-left': '2.75rem'}">
+                                >
                             </p-select>
                         </div>
                     </div>

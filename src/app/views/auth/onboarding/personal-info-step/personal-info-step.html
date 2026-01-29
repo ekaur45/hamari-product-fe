@@ -1,377 +1,367 @@
 <p-toast />
 @if(isOtpScreen()) {
-    <div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl">
-            <!-- Header -->
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-envelope text-primary text-3xl"></i>
-                </div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
-                <p class="text-gray-600 mb-1">
-                    We've sent a verification code to
-                </p>
-                <p class="text-gray-900 font-semibold">
-                    {{ currentUser()?.email || 'your email' }}
-                </p>
-                <p class="text-sm text-gray-500 mt-2">
-                    Please enter the 6-digit code below to verify your email address.
-                </p>
+<div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-envelope text-primary text-3xl"></i>
             </div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
+            <p class="text-gray-600 mb-1">
+                We've sent a verification code to
+            </p>
+            <p class="text-gray-900 font-semibold">
+                {{ currentUser()?.email || 'your email' }}
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+                Please enter the 6-digit code below to verify your email address.
+            </p>
+        </div>
 
-            <!-- Error Message -->
-            @if (errorMessage()) {
-                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                    <i class="fas fa-exclamation-circle text-red-500"></i>
-                    <p class="text-sm text-red-700">{{ errorMessage() }}</p>
-                </div>
-            }
+        <!-- Error Message -->
+        @if (errorMessage()) {
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+            <i class="fas fa-exclamation-circle text-red-500"></i>
+            <p class="text-sm text-red-700">{{ errorMessage() }}</p>
+        </div>
+        }
 
-            <!-- OTP Input -->
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-800 mb-3 text-center">
-                    Verification Code
-                </label>
-                <div class="flex justify-center">
-                    <p-inputotp
-                        [(ngModel)]="otpValue"
-                        (ngModelChange)="onOtpChange()"
-                        inputmode="numeric"
-                        [length]="6"
-                        [disabled]="isVerifying()"
-                        styleClass="w-full"
-                    ></p-inputotp>
-                </div>
+        <!-- OTP Input -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-800 mb-3 text-center">
+                Verification Code
+            </label>
+            <div class="flex justify-center">
+                <p-inputotp [(ngModel)]="otpValue" (ngModelChange)="onOtpChange()" inputmode="numeric" [length]="6"
+                    [disabled]="isVerifying()" styleClass="w-full"></p-inputotp>
             </div>
+        </div>
 
-            <!-- Info Box -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-                <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                <div class="text-sm text-blue-700">
-                    <p class="font-semibold mb-1">Mock Mode:</p>
-                    <p class="text-blue-600">Use code <span class="font-mono font-bold">123456</span> to verify (for testing only)</p>
-                </div>
+        <!-- Info Box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+            <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+            <div class="text-sm text-blue-700">
+                <p class="font-semibold mb-1">Mock Mode:</p>
+                <p class="text-blue-600">Use code <span class="font-mono font-bold">123456</span> to verify (for testing
+                    only)</p>
             </div>
+        </div>
 
-            <!-- Verify Button -->
-            <div class="mb-4">
-                <button
-                    type="button"
-                    (click)="verifyOtp()"
-                    [disabled]="otpValue.length !== 6 || isVerifying()"
-                    [ngClass]="{
+        <!-- Verify Button -->
+        <div class="mb-4">
+            <button type="button" (click)="verifyOtp()" [disabled]="otpValue.length !== 6 || isVerifying()" [ngClass]="{
                         'bg-gray-400 cursor-not-allowed': otpValue.length !== 6 || isVerifying(),
                         'bg-primary hover:bg-primary/90 active:scale-95': otpValue.length === 6 && !isVerifying()
                     }"
-                    class="w-full px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50">
-                    @if (isVerifying()) {
-                        <i class="fas fa-spinner fa-spin mr-2"></i>
-                        <span>Verifying...</span>
-                    } @else {
-                        <i class="fas fa-check-circle mr-2"></i>
-                        <span>Verify Email</span>
-                    }
-                </button>
-            </div>
-
-            <!-- Resend Section -->
-            <div class="text-center pt-4 border-t border-gray-200">
-                <p class="text-sm text-gray-600 mb-3">
-                    Didn't receive the code?
-                </p>
-                @if (resendTimer() > 0) {
-                    <p class="text-sm text-gray-500">
-                        Resend code in <span class="font-mono font-semibold text-primary">{{ getFormattedTimer() }}</span>
-                    </p>
+                class="w-full px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50">
+                @if (isVerifying()) {
+                <i class="fas fa-spinner fa-spin mr-2"></i>
+                <span>Verifying...</span>
                 } @else {
-                    <button
-                        type="button"
-                        (click)="resendOtp()"
-                        [disabled]="isLoading() || !canResend()"
-                        class="text-primary hover:text-primary/80 font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                        @if (isLoading()) {
-                            <i class="fas fa-spinner fa-spin mr-2"></i>
-                            <span>Sending...</span>
-                        } @else {
-                            <i class="fas fa-redo mr-2"></i>
-                            <span>Resend Code</span>
-                        }
-                    </button>
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>Verify Email</span>
                 }
-            </div>
+            </button>
+        </div>
+
+        <!-- Resend Section -->
+        <div class="text-center pt-4 border-t border-gray-200">
+            <p class="text-sm text-gray-600 mb-3">
+                Didn't receive the code?
+            </p>
+            @if (resendTimer() > 0) {
+            <p class="text-sm text-gray-500">
+                Resend code in <span class="font-mono font-semibold text-primary">{{ getFormattedTimer() }}</span>
+            </p>
+            } @else {
+            <button type="button" (click)="resendOtp()" [disabled]="isLoading() || !canResend()"
+                class="text-primary hover:text-primary/80 font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                @if (isLoading()) {
+                <i class="fas fa-spinner fa-spin mr-2"></i>
+                <span>Sending...</span>
+                } @else {
+                <i class="fas fa-redo mr-2"></i>
+                <span>Resend Code</span>
+                }
+            </button>
+            }
         </div>
     </div>
+</div>
 } @else {
-    <div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl">
-            <!-- <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+<div class="min-h-screen-minus-header bg-gray-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl">
+        <!-- <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-check-circle text-green-500 text-3xl"></i>
             </div>
             <h2 class="text-3xl font-bold text-gray-900 mb-2">Email Verified!</h2>
             <p class="text-gray-600 hidden">Your email has been successfully verified. You can now continue with the onboarding process.</p> -->
-            <div>
-                <form id="profileForm" class="space-y-6" [formGroup]="userForm">
-                    <div class="">
-                        <!-- Header -->
-                        <div class="mb-4">
-                            <h4 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                <i class="fas fa-id-card text-primary"></i>
-                                <span>Personal Information</span>
-                            </h4>
-                            <p class="text-sm text-gray-500 mt-1">
-                                Keep your profile details up to date so students can contact and recognize you easily.
-                            </p>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-user mr-2"></i>First Name
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative">
-                                    <input type="text"
+        <div>
+            <form id="profileForm" class="space-y-6" [formGroup]="userForm">
+                <div class="">
+                    <!-- Header -->
+                    <div class="mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-id-card text-primary"></i>
+                            <span>Personal Information</span>
+                        </h4>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Keep your profile details up to date so students can contact and recognize you easily.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user mr-2"></i>First Name
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text"
                                     [ngClass]="{'border-2 border-red-500': userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched}"
-                                        class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
-                                        name="firstName" formControlName="firstName">
-                                </div>
-                                @if(userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched) {
-                                <p class="mt-1 text-xs text-red-500">
-                                    <i class="fas fa-exclamation-circle mr-1"></i>
-                                    First name is required
-                                </p>
-                                }
+                                    class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
+                                    name="firstName" formControlName="firstName">
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-user mr-2"></i>Last Name
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative">
-                                    <input type="text"
+                            @if(userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched) {
+                            <p class="mt-1 text-xs text-red-500">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                First name is required
+                            </p>
+                            }
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user mr-2"></i>Last Name
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text"
                                     [ngClass]="{'border-2 border-red-500': userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched}"
-                                        class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
-                                        name="lastName" formControlName="lastName">
-                                </div>
-                                @if(userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched) {
-                                <p class="mt-1 text-xs text-red-500">
-                                    <i class="fas fa-exclamation-circle mr-1"></i>
-                                    Last name is required
-                                </p>
-                                }
+                                    class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
+                                    name="lastName" formControlName="lastName">
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-envelope mr-2"></i>Email Address
-                                </label>
-                                <div class="relative">
-                                    <input type="email" readonly [value]="user()?.email ?? ''"
+                            @if(userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched) {
+                            <p class="mt-1 text-xs text-red-500">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                Last name is required
+                            </p>
+                            }
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-envelope mr-2"></i>Email Address
+                            </label>
+                            <div class="relative">
+                                <input type="email" readonly [value]="user()?.email ?? ''"
                                     [ngClass]="{'border-2 border-red-500': userForm.get('email')?.invalid && userForm.get('email')?.touched}"
-                                        class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none transition bg-gray-200 readonly">
-                                </div>
+                                    class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none transition bg-gray-200 readonly">
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-phone mr-2"></i>Phone Number
-                                </label>
-                                <div class="relative">
-                                    <ngx-intl-tel-input name="phone" formControlName="phone"
-                                        [preferredCountries]="[CountryISO.Pakistan, CountryISO.UnitedStates]"
-                                        [enableAutoCountrySelect]="true" [enablePlaceholder]="true" [searchCountryFlag]="true"
-                                        [searchCountryField]="[
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-phone mr-2"></i>Phone Number
+                            </label>
+                            <div class="relative">
+                                <ngx-intl-tel-input name="phone" formControlName="phone"
+                                    [preferredCountries]="[CountryISO.Pakistan, CountryISO.UnitedStates]"
+                                    [enableAutoCountrySelect]="true" [enablePlaceholder]="true"
+                                    [searchCountryFlag]="true" [searchCountryField]="[
                           SearchCountryField.Iso2,
                           SearchCountryField.Name
                         ]" [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.Pakistan" [maxLength]="15"
-                                        [phoneValidation]="true" [separateDialCode]="true" [numberFormat]="PhoneNumberFormat.National"
-                                        name="phone" formControlName="phone"
-                                        
-                                        [cssClass]="'w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white '
+                                    [phoneValidation]="true" [separateDialCode]="true"
+                                    [numberFormat]="PhoneNumberFormat.National" name="phone" formControlName="phone"
+                                    [cssClass]="'w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white '
                                         + (userForm.get('phone')?.invalid && userForm.get('phone')?.touched ? 'border-2 border-red-500' : '')
                                         "></ngx-intl-tel-input>
-                                </div>
-                                @if(userForm.get('phone')?.invalid && userForm.get('phone')?.touched) {
-                                <p class="mt-1 text-xs text-red-500">
-                                    <i class="fas fa-exclamation-circle mr-1"></i>
-                                    Please enter a valid phone number
-                                </p>
-                                }
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-globe mr-2"></i>
-                                    Nationality
-                                </label>
-                                <div class="relative">
-                                    <p-select [options]="nationalities()" formControlName="nationalityId"
-                                        [class]="'w-full px-1 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white '
+                            @if(userForm.get('phone')?.invalid && userForm.get('phone')?.touched) {
+                            <p class="mt-1 text-xs text-red-500">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                Please enter a valid phone number
+                            </p>
+                            }
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-globe mr-2"></i>
+                                Nationality
+                            </label>
+                            <div class="relative">
+                                <p-select [options]="nationalities()" formControlName="nationalityId" [class]="'w-full px-1 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white '
                                         + (userForm.get('nationalityId')?.invalid && userForm.get('nationalityId')?.touched ? 'border-2 border-red-500' : '')
-                                        "
-                                        optionLabel="name" optionValue="id" placeholder="Select a country" filter="true"></p-select>
-                                </div>
-                                @if(userForm.get('nationalityId')?.invalid && userForm.get('nationalityId')?.touched) {
-                                    <p class="mt-1 text-xs text-red-500">
-                                        <i class="fas fa-exclamation-circle mr-1"></i>
-                                        Please select a nationality
-                                    </p>
-                                    }
+                                        " optionLabel="name" optionValue="id" placeholder="Select a country"
+                                    filter="true"></p-select>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-calendar mr-2"></i>
-                                    Date of Birth
-                                </label>
-                                <div class="relative">
-                                    <p-date-picker formControlName="dateOfBirth"
-                                    
-                                        [inputStyleClass]="'w-full px-1 py-3 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white '
+                            @if(userForm.get('nationalityId')?.invalid && userForm.get('nationalityId')?.touched) {
+                            <p class="mt-1 text-xs text-red-500">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                Please select a nationality
+                            </p>
+                            }
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-calendar mr-2"></i>
+                                Date of Birth
+                            </label>
+                            <div class="relative">
+                                <p-date-picker formControlName="dateOfBirth" 
+                                placeholder="dd/mm/yyyy"
+                                [inputStyleClass]="'w-full px-1 py-3 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white '
                                         + (userForm.get('dateOfBirth')?.invalid && userForm.get('dateOfBirth')?.touched ? 'border-2 border-red-500' : '')
-                                        "
-                                        [appendTo]="'body'" size="large" fluid="false" class="w-full"></p-date-picker>
-                                </div>
-                                @if(userForm.get('dateOfBirth')?.invalid && userForm.get('dateOfBirth')?.touched) {
-                                    <p class="mt-1 text-xs text-red-500">
-                                        <i class="fas fa-exclamation-circle mr-1"></i>
-                                        Please select a date of birth
-                                    </p>
-                                    }
+                                        " [appendTo]="'body'" size="large" fluid="false"
+                                    class="w-full"></p-date-picker>
                             </div>
-                
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-genderless mr-2"></i>
-                                    Gender
-                                </label>
-                                <div class="relative">
-                                    <p-select [options]="[
+                            @if(userForm.get('dateOfBirth')?.invalid && userForm.get('dateOfBirth')?.touched) {
+                            <p class="mt-1 text-xs text-red-500">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                Please select a date of birth
+                            </p>
+                            }
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-genderless mr-2"></i>
+                                Gender
+                            </label>
+                            <div class="relative">
+                                <p-select [options]="[
                                         {name: 'Male', code: 'male'},
                                         {name: 'Female', code: 'female'},
                                         {name: 'Other', code: 'other'}
                                     ]" optionValue="code" formControlName="gender"
                                     [ngClass]="{'border-2 border-red-500': userForm.get('gender')?.invalid && userForm.get('gender')?.touched}"
-                                        class="w-full px-1 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
-                                        optionLabel="name" optionValue="code" placeholder="Select a gender"></p-select>
-                                </div>
-                                @if(userForm.get('gender')?.invalid && userForm.get('gender')?.touched) {
-                                    <p class="mt-1 text-xs text-red-500">
-                                        <i class="fas fa-exclamation-circle mr-1"></i>
-                                        Please select a gender
-                                    </p>
-                                    }
+                                    class="w-full px-1 py-1 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"
+                                    optionLabel="name" optionValue="code" placeholder="Select a gender"></p-select>
                             </div>
-                            <div class="col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-map-marker-alt mr-2"></i>
-                                    Address
-                                </label>
-                                <div class="relative">
-                                    <textarea name="address" formControlName="address" rows="3"
+                            @if(userForm.get('gender')?.invalid && userForm.get('gender')?.touched) {
+                            <p class="mt-1 text-xs text-red-500">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                Please select a gender
+                            </p>
+                            }
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                Address
+                            </label>
+                            <div class="relative">
+                                <textarea name="address" formControlName="address" rows="3"
                                     [ngClass]="{'border-2 border-red-500': userForm.get('address')?.invalid && userForm.get('address')?.touched}"
-                                        class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"></textarea>
-                                </div>
-                                @if(userForm.get('address')?.invalid && userForm.get('address')?.touched) {
+                                    class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white"></textarea>
+                            </div>
+                            @if(userForm.get('address')?.invalid && userForm.get('address')?.touched) {
+                            <p class="mt-1 text-xs text-red-500">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                Please enter an address
+                            </p>
+                            }
+                        </div>
+                        <div class="col-span-2 ">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-city mr-2"></i>
+                                        City
+                                    </label>
+                                    <div class="relative">
+                                        <input type="text" name="city" formControlName="city"
+                                            [ngClass]="{'border-2 border-red-500': userForm.get('city')?.invalid && userForm.get('city')?.touched}"
+                                            class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                                    </div>
+                                    @if(userForm.get('city')?.invalid && userForm.get('city')?.touched) {
                                     <p class="mt-1 text-xs text-red-500">
                                         <i class="fas fa-exclamation-circle mr-1"></i>
-                                        Please enter an address
+                                        Please enter a city
                                     </p>
                                     }
-                            </div>
-                            <div class="col-span-2 ">
-                                <div class="grid grid-cols-2 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                                            <i class="fas fa-city mr-2"></i>
-                                            City
-                                        </label>
-                                        <div class="relative">
-                                            <input type="text" name="city" formControlName="city"
-                                            [ngClass]="{'border-2 border-red-500': userForm.get('city')?.invalid && userForm.get('city')?.touched}"
-                                                class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
-                                        </div>
-                                        @if(userForm.get('city')?.invalid && userForm.get('city')?.touched) {
-                                            <p class="mt-1 text-xs text-red-500">
-                                                <i class="fas fa-exclamation-circle mr-1"></i>
-                                                Please enter a city
-                                            </p>
-                                            }
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                                            <i class="fas fa-state mr-2"></i>
-                                            State
-                                        </label>
-                                        <div class="relative">
-                                            <input type="text" name="state" formControlName="state"
-                                            [ngClass]="{'border-2 border-red-500': userForm.get('state')?.invalid && userForm.get('state')?.touched}"
-                                                class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
-                                        </div>
-                                        @if(userForm.get('state')?.invalid && userForm.get('state')?.touched) {
-                                            <p class="mt-1 text-xs text-red-500">
-                                                <i class="fas fa-exclamation-circle mr-1"></i>
-                                                Please enter a state
-                                            </p>
-                                            }
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                                            <i class="fas fa-zip mr-2"></i>
-                                            Zip Code
-                                        </label>
-                                        <div class="relative">
-                                            <input type="text" name="zipCode" formControlName="zipCode"
-                                            [ngClass]="{'border-2 border-red-500': userForm.get('zipCode')?.invalid && userForm.get('zipCode')?.touched}"
-                                                class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
-                                        </div>
-                                        @if(userForm.get('zipCode')?.invalid && userForm.get('zipCode')?.touched) {
-                                            <p class="mt-1 text-xs text-red-500">
-                                                <i class="fas fa-exclamation-circle mr-1"></i>
-                                                Please enter a zip code
-                                            </p>
-                                            }
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                                            <i class="fas fa-globe mr-2"></i>
-                                            Country
-                                        </label>
-                                        <div class="relative">
-                                            <input type="text" name="country" formControlName="country"
-                                            [ngClass]="{'border-2 border-red-500': userForm.get('country')?.invalid && userForm.get('country')?.touched}"
-                                                class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
-                                        </div>
-                                        @if(userForm.get('country')?.invalid && userForm.get('country')?.touched) {
-                                            <p class="mt-1 text-xs text-red-500">
-                                                <i class="fas fa-exclamation-circle mr-1"></i>
-                                                Please enter a country
-                                            </p>
-                                            }
-                                    </div>
                                 </div>
-                            </div>
-                            <hr class="my-4 w-full border-gray-200 col-span-2">
-                            <div class="flex w-full justify-between col-span-2">
-                                <button type="button"
-                                    [ngClass]="{'bg-gray-400': !hasChanges,'bg-primary hover:bg-orange-600':hasChanges}"
-                                    class="px-6 py-2 rounded-lg font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm  text-white  shadow-lg hover:shadow-xl"
-                                    [disabled]="!hasChanges" (click)="onSaveChanges()">
-                                    <i class="fas mr-2"
-                                        [ngClass]="{'fa-spinner fa-spin animate-spin': isSaving(),'fa-save': !isSaving()}"></i>
-                                    @if(isSaving()) {
-                                    <span>Saving...</span>
-                                    } @else {
-                                    <span>Save Changes</span>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-state mr-2"></i>
+                                        State
+                                    </label>
+                                    <div class="relative">
+                                        <input type="text" name="state" formControlName="state"
+                                            [ngClass]="{'border-2 border-red-500': userForm.get('state')?.invalid && userForm.get('state')?.touched}"
+                                            class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                                    </div>
+                                    @if(userForm.get('state')?.invalid && userForm.get('state')?.touched) {
+                                    <p class="mt-1 text-xs text-red-500">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        Please enter a state
+                                    </p>
                                     }
-                                </button>
-                                <button class="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-                    
-                                hover:shadow-lg hover:shadow-gray-200"
-                (click)="onContinue()">
-                    Continue
-                    <i class="fas fa-arrow-right ml-2"></i>
-                </button>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-zip mr-2"></i>
+                                        Zip Code
+                                    </label>
+                                    <div class="relative">
+                                        <input type="text" name="zipCode" formControlName="zipCode"
+                                            [ngClass]="{'border-2 border-red-500': userForm.get('zipCode')?.invalid && userForm.get('zipCode')?.touched}"
+                                            class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                                    </div>
+                                    @if(userForm.get('zipCode')?.invalid && userForm.get('zipCode')?.touched) {
+                                    <p class="mt-1 text-xs text-red-500">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        Please enter a zip code
+                                    </p>
+                                    }
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-globe mr-2"></i>
+                                        Country
+                                    </label>
+                                    <div class="relative">
+                                        <input type="text" name="country" formControlName="country"
+                                            [ngClass]="{'border-2 border-red-500': userForm.get('country')?.invalid && userForm.get('country')?.touched}"
+                                            class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition bg-white">
+                                    </div>
+                                    @if(userForm.get('country')?.invalid && userForm.get('country')?.touched) {
+                                    <p class="mt-1 text-xs text-red-500">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        Please enter a country
+                                    </p>
+                                    }
+                                </div>
                             </div>
                         </div>
+                        <hr class="my-4 w-full border-gray-200 col-span-2">
+                        <div class="flex w-full justify-between col-span-2">
+                            <button class="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                            
+                            hover:shadow-lg hover:shadow-gray-200">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Profile
+                            
+                        </button>
+                        <button type="button"
+                            [ngClass]="{'bg-gray-400': !hasChanges,'bg-primary hover:bg-orange-600':hasChanges}"
+                            class="px-6 py-2 rounded-lg font-semibold flex items-center justify-center transition disabled:cursor-not-allowed shadow-sm  text-white  shadow-lg hover:shadow-xl"
+                            [disabled]="!hasChanges" (click)="onSaveChanges()">
+                            @if(isSaving()) {
+                            <i class="fas fa-spinner fa-spin"></i>
+                            } 
+                            @if(isSaving()) {
+                            <span>Saving...</span>
+                            } @else {
+                            <span>Continue</span>
+                            }
+                            @if(!isSaving()) {
+                            <i class="fas fa-arrow-right ml-2"></i>
+                            }
+                        </button>
+                        </div>
                     </div>
-                </form> 
-            </div>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 }

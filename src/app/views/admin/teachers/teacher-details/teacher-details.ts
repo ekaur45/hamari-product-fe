@@ -10,6 +10,7 @@ import { ConfirmDialogModule } from "primeng/confirmdialog";
 import { BookingStatus } from "../../../../shared/enums";
 import { ProfilePhoto } from "../../../../components/misc/profile-photo/profile-photo";
 import { SafePipe } from "../../../../shared/pipes/safe.pipe";
+import { environment } from "../../../../../environments/environment";
 
 @Component({
     selector: 'app-teacher-details',
@@ -23,7 +24,7 @@ export class TeacherDetails implements OnInit {
     isLoading = signal<boolean>(true);
     teacher = signal<Teacher | null>(null);
     teacherId = signal<string>('');
-    
+    assetsUrl = environment.assetsUrl;
     constructor(
         private teacherService: TeacherService, 
         private route: ActivatedRoute, 
@@ -182,7 +183,7 @@ export class TeacherDetails implements OnInit {
         return `https://www.youtube.com/embed/${videoId}?autoplay=0`;
     }
     getVideoUrl(url: string): string {
-        return url;
+        return this.assetsUrl + url;
     }
     extractYouTubeId(url: string): string {
         const videoId = url.split('v=')[1];

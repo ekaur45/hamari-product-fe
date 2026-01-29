@@ -114,6 +114,8 @@ export class Otp implements OnInit, OnDestroy {
         // Call API to verify OTP
         this.verifyEmail(this.email(), this.otpValue).subscribe({
             next: (response: any) => {
+                this.isVerifying.set(false);
+                
                 if (response.statusCode !== 200) {
                     this.errorMessage.set(response.message);
                     this.messageService.add({
