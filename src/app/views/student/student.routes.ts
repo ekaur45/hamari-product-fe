@@ -37,5 +37,9 @@ export const studentRoutes: Routes = [
     {
         path: 'chat',
         loadComponent: () => import('./student-chat/student-chat').then(m => m.StudentChat)
+    },
+    {
+        path: 'chat/:selectedConversationId',
+        loadComponent: () => import('./student-chat/student-chat').then(m => m.StudentChat)
     }
 ];

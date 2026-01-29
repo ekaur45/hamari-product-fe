@@ -9,6 +9,7 @@ import { AssignmentSubmissions } from "./teacher-assignments/assignment-submissi
 import { TeacherStudents } from "./teacher-students/teacher-students";
 import { TeacherPerformance } from "./teacher-performance/teacher-performance";
 import { TeacherReviews } from "./teacher-reviews/teacher-reviews";
+import { TeacherChat } from "./teacher-chat/teacher-chat";
 
 export const teacherRoutes: Routes = [
     {
@@ -59,5 +60,13 @@ export const teacherRoutes: Routes = [
     {
         path: 'reviews',
         component: TeacherReviews
+    },
+    {
+        path: 'chat',
+        component: TeacherChat
+    },
+    {
+        path: 'chat/:selectedConversationId',
+        component: TeacherChat
     }
 ];

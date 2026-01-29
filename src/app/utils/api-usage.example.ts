@@ -72,10 +72,10 @@ export class ApiUsageExampleComponent implements OnInit {
   loadProducts(page: number = 1, limit: number = 10) {
     this.apiService.getPaginated<Product>('/products', page, limit)
       .subscribe({
-        next: (response: PaginatedApiResponse<Product>) => {
+        next: (response: ApiResponse<PaginatedApiResponse<Product>>) => {
           if (ApiHelper.isSuccess(response)) {
-            this.products = ApiHelper.extractData(response);
-            this.pagination = ApiHelper.getPaginationInfo(response);
+            this.products = response.data.data || [];
+            this.pagination = ApiHelper.getPaginationInfo(response.data);
             this.error = null;
           } else {
             this.error = ApiHelper.getErrorMessage(response);

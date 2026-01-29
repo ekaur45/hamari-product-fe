@@ -209,7 +209,7 @@ export class ApiService {
     page: number = 1,
     limit: number = 10,
     options?: RequestOptions
-  ): Observable<PaginatedApiResponse<T>> {
+  ): Observable<ApiResponse<PaginatedApiResponse<T>>> {
     let params: HttpParams | { [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean> };
 
     if (options?.params instanceof HttpParams) {
@@ -227,7 +227,7 @@ export class ApiService {
       params
     };
 
-    return this.request<PaginatedApiResponse<T>>('GET', endpoint, undefined, paginatedOptions) as unknown as Observable<PaginatedApiResponse<T>>;
+    return this.request<ApiResponse<PaginatedApiResponse<T>>>('GET', endpoint, undefined, paginatedOptions) as unknown as Observable<ApiResponse<PaginatedApiResponse<T>>>;
   }
 
   /**

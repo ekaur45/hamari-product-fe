@@ -70,7 +70,7 @@ export default class BrowseAndBook implements OnInit {
         this.isLoadingSubjects.set(true);
         this.subjectService.getSubjects(1, 100).subscribe((subjects) => {
             this.isLoadingSubjects.set(false);
-            this.subjects.set(subjects.data);
+            this.subjects.set(subjects.data.data || []);
         });
     }
 

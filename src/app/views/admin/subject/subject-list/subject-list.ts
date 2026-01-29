@@ -41,7 +41,7 @@ export class SubjectList {
     this.subjectService.getSubjects(this.search(), this.pagination()).subscribe({
       next: (subjects) => {
         if (subjects.statusCode == 200) {
-          this.subjects.set(subjects.data.data);
+          this.subjects.set(subjects.data.data || []);
           this.pagination.set(subjects.data.pagination);
           this.totalSubjects.set(subjects.data.pagination.total);
         }

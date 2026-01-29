@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnInit, signal, ViewChild, ElementRef, SimpleChanges } from "@angular/core";
+import { Component, OnInit, signal, ViewChild, ElementRef } from "@angular/core";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { ProfilePhoto } from "../../../components/misc/profile-photo/profile-photo";
@@ -17,26 +17,14 @@ interface ChatFile {
     thumbnail?: string;
 }
 
-interface ChatMessage {
-    id: string;
-    text?: string;
-    timestamp: Date;
-    isSent: boolean;
-    senderName?: string;
-    senderId?: string;
-    files?: ChatFile[];
-    isRead?: boolean;
-    isDeleted?: boolean;
-}
 
 @Component({
-    selector: 'app-student-chat',
-    templateUrl: './student-chat.html',
+    selector: 'app-teacher-chat',
+    templateUrl: './teacher-chat.html',
     standalone: true,
     imports: [CommonModule, RouterModule, FormsModule, ProfilePhoto],
 })
-export class StudentChat implements OnInit {
-    @ViewChild('chatContainer') private chatContainer!: ElementRef;
+export class TeacherChat implements OnInit {
     chats = signal<Chat[]>([]);
     selectedConversationId = signal<string | null>(null);
     selectedConversation = signal<Conversation | null>(null);
@@ -55,8 +43,8 @@ export class StudentChat implements OnInit {
 
         this.route.params.subscribe(params => {
             this.selectedConversationId.set(params['selectedConversationId']);
-            this.joinChat();
             this.selectedConversation.set(this.conversations()[0]);
+            this.joinChat();
             this.getChatMessages();
         });
      }
@@ -64,19 +52,19 @@ export class StudentChat implements OnInit {
     ngOnInit(): void {
         this.getChaUsers();
     }
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['selectedConversationId']) {
-            this.scrollToBottom();
-        }
-    }
-    ngAfterViewInit(): void {
-        this.scrollToBottom();
-    }
     joinChat(): void {
         this.chatService.joinChat(this.selectedConversationId()!).subscribe({
             next: (res: any) => {
                 this.getChatMessages();
-                this.listenTyping();
+            },
+            error: (err) => {
+                console.error(err);
+            }
+        });
+    }
+    onTyping(): void {
+        this.chatService.sendTyping(this.selectedConversationId()!,this.authService.getCurrentUser()?.id!).subscribe({
+            next: (res: any) => {
             },
             error: (err) => {
                 console.error(err);
@@ -91,9 +79,6 @@ export class StudentChat implements OnInit {
                     this.typing.set(false);
                 }, 1000);
             },
-            error: (err) => {
-                console.error(err);
-            }
         });
     }
     getChaUsers(): void {
@@ -117,7 +102,7 @@ export class StudentChat implements OnInit {
     selectConversation(conversation: Conversation): void {
         this.selectedConversation.set(conversation);
         this.selectedConversationId.set(conversation.id);
-        this.router.navigate(['/student/chat', conversation.id]);
+        this.router.navigate(['/teacher/chat', conversation.id]);
     }
     getChatMessages(){
         this.chatService.getChatMessages(this.selectedConversationId()!).subscribe({
@@ -155,29 +140,19 @@ export class StudentChat implements OnInit {
             type: file.type,
             url: URL.createObjectURL(file) // For preview, in real app this would be uploaded to server
         }));
-
-        const newMsg: ChatMessage = {
-            id: Date.now().toString(),
-            text: message || undefined,
-            timestamp: new Date(),
-            isSent: true,
-            files: chatFiles.length > 0 ? chatFiles : undefined,
-            isRead: false
-        };
         const receiverId = this.getOtherParticipant(this.selectedConversation()!).id;
         this.chatService.sendMessage(this.selectedConversationId()!,receiverId,message,[]).subscribe({
             next: (res: ApiResponse<Chat>) => {
                 if (res.statusCode === 200 && res.data) {
-                    this.chatMessages.set([...this.chatMessages(), res.data]);
                     this.newMessage.set('');
                     this.selectedFiles.set([]);
+                    this.chatMessages.set([...this.chatMessages(), res.data]);
                 }
             },
             error: (err) => {
                 console.error(err);
             }
         });
-
 
     }
 
@@ -281,15 +256,7 @@ export class StudentChat implements OnInit {
         }
         // Shift+Enter will allow new line (default behavior)
     }
-    onTyping(): void {
-        this.chatService.sendTyping(this.selectedConversationId()!,this.authService.getCurrentUser()?.id!).subscribe({
-            next: (res: any) => {
-            },
-            error: (err) => {
-                console.error(err);
-            }
-        });
-    }
+
     autoResizeTextarea(event: Event): void {
         this.onTyping();
         const textarea = event.target as HTMLTextAreaElement;
@@ -305,11 +272,5 @@ export class StudentChat implements OnInit {
     }
     getOtherParticipant(conversation: Conversation): User {
         return conversation.participants.find(participant => participant.id !== this.authService.getCurrentUser()?.id)!;
-    }
-    scrollToBottom(): void {
-        setTimeout(() => {
-            const chatContainer = this.chatContainer.nativeElement;
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 100);
     }
 }

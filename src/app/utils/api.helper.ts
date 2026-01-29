@@ -47,7 +47,7 @@ export class ApiHelper {
   /**
    * Check if response has pagination
    */
-  static isPaginated<T>(response: ApiResponse<any>): response is PaginatedApiResponse<T> {
+  static isPaginated<T>(response: ApiResponse<PaginatedApiResponse<T>>): response is ApiResponse<PaginatedApiResponse<T>> {
     return 'pagination' in response;
   }
 

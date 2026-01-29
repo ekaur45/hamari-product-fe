@@ -36,8 +36,8 @@ export interface Pagination {
   hasPrev: boolean;
 }
 
-export interface PaginatedApiResponse<T = any> extends ApiResponse<T[]> {
-  data: T[];
+export interface PaginatedApiResponse<T = any>{
+  data: T[] | null;
   pagination: Pagination;
 }
 

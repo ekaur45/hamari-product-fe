@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { Subject, CreateSubjectDto, UpdateSubjectDto, PaginatedApiResponse } from '../models';
+import { Subject, CreateSubjectDto, UpdateSubjectDto, PaginatedApiResponse, ApiResponse } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class SubjectService {
@@ -15,7 +15,7 @@ export class SubjectService {
         catchError(e => throwError(() => e))
       );
   }
-  getSubjects(page: number = 1, limit: number = 10, search?: string): Observable<PaginatedApiResponse<Subject>> {
+  getSubjects(page: number = 1, limit: number = 10, search?: string): Observable<ApiResponse<PaginatedApiResponse<Subject>>> {
     const params: any = { page, limit };
     if (search) {
       params.search = search;

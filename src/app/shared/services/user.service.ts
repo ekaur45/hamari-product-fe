@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse, EducationItem, UpsertEducationDto, UpdateAvailabilityDto, UpdateUserDetailsDto, TeacherSubject, AdminUsersListDto } from '../models';
+import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse, EducationItem, UpsertEducationDto, UpdateAvailabilityDto, UpdateUserDetailsDto, TeacherSubject, AdminUsersListDto, ApiResponse } from '../models';
 
 /**
  * User Service
@@ -42,7 +42,7 @@ export class UserService {
     search?: string,
     role?: string,
     isActive?: boolean
-  ): Observable<PaginatedApiResponse<User>> {
+  ): Observable<ApiResponse<PaginatedApiResponse<User>>> {
     const params: any = { page, limit };
     if (search) params.search = search;
     if (role) params.role = role;
@@ -154,7 +154,7 @@ export class UserService {
   /**
    * Search users
    */
-  searchUsers(query: string, page: number = 1, limit: number = 10): Observable<PaginatedApiResponse<User>> {
+  searchUsers(query: string, page: number = 1, limit: number = 10): Observable<ApiResponse<PaginatedApiResponse<User>>> {
     return this.apiService.getPaginated<User>(API_ENDPOINTS.USERS.SEARCH, page, limit, {
       params: { q: query }
     }).pipe(
@@ -168,7 +168,7 @@ export class UserService {
   /**
    * Get users by role
    */
-  getUsersByRole(role: string, page: number = 1, limit: number = 10): Observable<PaginatedApiResponse<User>> {
+  getUsersByRole(role: string, page: number = 1, limit: number = 10): Observable<ApiResponse<PaginatedApiResponse<User>>> {
     return this.apiService.getPaginated<User>(API_ENDPOINTS.USERS.BASE, page, limit, {
       params: { role }
     }).pipe(

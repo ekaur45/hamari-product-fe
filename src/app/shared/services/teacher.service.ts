@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { Teacher, CreateTeacherDto, UpdateTeacherDto, PaginatedApiResponse, CreateTeacherDirectDto, TeacherDirectResponse, TeacherListDto, Class, Subject, CreateClassDto, Student, TeacherStudentsListDto, StudentPerformanceDto, TeacherReviewsListDto } from '../models';
+import { Teacher, CreateTeacherDto, UpdateTeacherDto, PaginatedApiResponse, CreateTeacherDirectDto, TeacherDirectResponse, TeacherListDto, Class, Subject, CreateClassDto, Student, TeacherStudentsListDto, StudentPerformanceDto, TeacherReviewsListDto, ApiResponse } from '../models';
 import TeacherBooking from '../models/teacher.interface';
 
 /**
@@ -31,7 +31,7 @@ export class TeacherService {
     );
   }
 
-  getTeachersWithPagination(page: number = 1, limit: number = 10, filters: { search?: string, subject?: string, maxPrice?: number } = {}): Observable<PaginatedApiResponse<Teacher>> {
+  getTeachersWithPagination(page: number = 1, limit: number = 10, filters: { search?: string, subject?: string, maxPrice?: number } = {}): Observable<ApiResponse<PaginatedApiResponse<Teacher>>> {
     const params: any = { page, limit, ...filters };
     return this.apiService.getPaginated<Teacher>(API_ENDPOINTS.TEACHERS.BASE + '/search', page, limit, { params }).pipe(
       map(r => r),

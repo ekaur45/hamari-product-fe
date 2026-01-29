@@ -7,6 +7,13 @@
  */
 export const API_ENDPOINTS = {
   // Upload
+  CHATS: {
+    BASE: '/chats',
+    USERS: '/chats/users',
+    SEND: '/chats/send',
+    BY_ID: (id: string) => `/chats/${id}`,
+    SEARCH: '/chats/search'
+  },
   FILES: {
     UPLOAD: '/files/upload'
   },
@@ -301,4 +308,19 @@ export const REQUEST_METHODS = {
   DELETE: 'DELETE',
   HEAD: 'HEAD',
   OPTIONS: 'OPTIONS'
+} as const;
+
+
+export const SOCKET = {
+  NAMESPACE: {
+    CHAT: 'chat',
+  },
+  EVENTS: {
+    CHAT: {
+      JOIN: 'join-conversation',
+      MESSAGE: (conversationId: string) => `message_${conversationId}`,
+      SEND_TYPING:`typing`,
+      TYPING: (conversationId: string,senderId: string) => `typing_${conversationId}_${senderId}`
+    }
+  }
 } as const;
