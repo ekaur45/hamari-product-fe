@@ -23,9 +23,11 @@
                     @for(conversation of getFilteredConversations(); track `${conversation.createdAt}-${conversation.id}`) {
                         <button
                             (click)="selectConversation(conversation)"
-                            [class.bg-primary/5]="selectedConversationId() === conversation.id"
-                            [class.border-l-4]="selectedConversationId() === conversation.id"
-                            [class.border-primary]="selectedConversationId() === conversation.id"
+                            [ngClass]="{
+                                'bg-primary/5': selectedConversationId() === conversation.id,
+                                'border-l-4 border-primary': selectedConversationId() === conversation.id,
+                                'border-gray-100': selectedConversationId() !== conversation.id
+                            }"
                             class="w-full p-4 hover:bg-gray-50 transition-colors border-gray-100 text-left flex items-center gap-3 relative">
                             <!-- Avatar with Profile Photo -->
                             <div class="relative flex-shrink-0">

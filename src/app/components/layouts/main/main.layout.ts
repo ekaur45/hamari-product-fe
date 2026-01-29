@@ -8,6 +8,8 @@ import { TopBar } from '../navs/topbar/top-bar';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { NotificationService } from '../../../shared/services/notification.service';
+import { Notification } from '../../../shared/models/notification.interface';
 
 @Component({
   selector: 'main-layout',
@@ -30,27 +32,44 @@ export class MainLayout implements AfterViewInit, OnInit {
   // User menu state
   isUserMenuOpen = signal(false);
 
-
-
-  // Screen size tracking
-
-
-  // User state
+  notifications = signal<Notification[]>([]);
   currentUser = signal<User | null>(null);
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
     this.loadUserData();
+    this.getNotifications();
   }
 
   ngAfterViewInit() {
     this.checkScreenSize();
   }
-
+getNotifications(): void {
+  this.notificationService.getNotifications(1, 10).subscribe(res => {
+    if(res.statusCode === 200) {
+      this.notifications.set(res.data.data || []);
+    }
+  });
+}
+markAllAsRead(): void {
+  this.notificationService.markAllAsRead().subscribe(res => {
+    if(res.statusCode === 200) {
+      this.getNotifications();
+    }
+  });
+}
+markAsRead(notification: Notification): void {
+  this.notificationService.markAsRead(notification.id).subscribe(res => {
+    if(res.statusCode === 200) {
+      this.getNotifications();
+    }
+  });
+}
   private loadUserData(): void {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser.set(user);

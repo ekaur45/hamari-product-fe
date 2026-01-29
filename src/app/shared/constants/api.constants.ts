@@ -7,6 +7,11 @@
  */
 export const API_ENDPOINTS = {
   // Upload
+  NOTIFICATIONS: {
+    GET_NOTIFICATIONS: '/notifications',
+    MARK_ALL_AS_READ: '/notifications/read',
+    MARK_AS_READ: (notificationId: string) => `/notifications/${notificationId}/read`
+  },
   CHATS: {
     BASE: '/chats',
     USERS: '/chats/users',
