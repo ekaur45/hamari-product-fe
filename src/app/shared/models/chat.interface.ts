@@ -14,6 +14,8 @@ export interface Conversation {
     chats?: Chat[];
     createdAt: Date;
     updatedAt: Date;
+    lastMessageChat: Chat;
+    isOnline: boolean;
 }
 
 export interface Chat {

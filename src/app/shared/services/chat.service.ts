@@ -23,6 +23,18 @@ export class ChatService {
     sendMessage(conversationId: string, receiverId: string, message: string, resources: ChatResource[] = []): Observable<ApiResponse<Chat>> {
         return this.apiService.post<Chat>(API_ENDPOINTS.CHATS.SEND, { conversationId: conversationId, receiverId: receiverId, message: message, resources: resources });
     }
+    uploadFile(file: File): Observable<ApiResponse<{url: string}>> {
+        return this.apiService.uploadFile<{url: string}>(API_ENDPOINTS.FILES.UPLOAD, file);
+    }
+
+
+
+
+
+
+
+
+    
     private checkSocketConnection(): void {
         if (!this.socket) {
             const socketUrl = environment.socketUrl.endsWith('/')

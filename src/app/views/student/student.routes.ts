@@ -36,10 +36,10 @@ export const studentRoutes: Routes = [
     },
     {
         path: 'chat',
-        loadComponent: () => import('./student-chat/student-chat').then(m => m.StudentChat)
+        loadComponent: () => import('../shared/shared-chat/shared-chat').then(m => m.SharedChat)
     },
     {
         path: 'chat/:selectedConversationId',
-        loadComponent: () => import('./student-chat/student-chat').then(m => m.StudentChat)
+        loadComponent: () => import('../shared/shared-chat/shared-chat').then(m => m.SharedChat)
     }
 ];

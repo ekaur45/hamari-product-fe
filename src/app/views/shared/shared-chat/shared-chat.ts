@@ -3,39 +3,30 @@ import { Component, OnInit, signal, ViewChild, ElementRef, SimpleChanges } from 
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { ProfilePhoto } from "../../../components/misc/profile-photo/profile-photo";
-import { AuthService, PaginatedApiResponse, User, ApiResponse } from "../../../shared";
+import { AuthService, PaginatedApiResponse, User, ApiResponse, UserRole } from "../../../shared";
 import { environment } from "../../../../environments/environment";
 import { ChatService } from "../../../shared/services/chat.service";
-import { Chat, ChatUser, Conversation } from "../../../shared/models/chat.interface";
+import { Chat, ChatResource, ChatUser, Conversation } from "../../../shared/models/chat.interface";
 
 interface ChatFile {
     id: string;
-    name: string;
-    size: number;
-    type: string;
-    url?: string;
-    thumbnail?: string;
+    file: File;
+    isUploaded: boolean;
+    isUploading: boolean;
+    filePath: string;
+    fileSize: number;
+    mimeType: string;
+    fileName: string;
 }
 
-interface ChatMessage {
-    id: string;
-    text?: string;
-    timestamp: Date;
-    isSent: boolean;
-    senderName?: string;
-    senderId?: string;
-    files?: ChatFile[];
-    isRead?: boolean;
-    isDeleted?: boolean;
-}
 
 @Component({
-    selector: 'app-student-chat',
-    templateUrl: './student-chat.html',
+    selector: 'app-shared-chat',
+    templateUrl: './shared-chat.html',
     standalone: true,
     imports: [CommonModule, RouterModule, FormsModule, ProfilePhoto],
 })
-export class StudentChat implements OnInit {
+export class SharedChat implements OnInit {
     @ViewChild('chatContainer') private chatContainer!: ElementRef;
     chats = signal<Chat[]>([]);
     selectedConversationId = signal<string | null>(null);
@@ -43,13 +34,14 @@ export class StudentChat implements OnInit {
     chatMessages = signal<Chat[]>([]);
     newMessage = signal<string>('');
     searchQuery = signal<string>('');
-    selectedFiles = signal<File[]>([]);
+    selectedFiles = signal<ChatFile[]>([]);
     showFileInput = signal(false);
     hoveredMessageId = signal<string | null>(null);
     conversations = signal<Conversation[]>([]);
     readonly assetsUrl = environment.assetsUrl;
     typing = signal<boolean>(false);
     @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+    timeoutRef: any;
 
     constructor(private chatService: ChatService,public authService: AuthService, private route: ActivatedRoute, private router: Router) {
 
@@ -87,7 +79,8 @@ export class StudentChat implements OnInit {
         this.chatService.listenTyping(this.selectedConversationId()!,this.getOtherParticipant(this.selectedConversation()!).id).subscribe({
             next: (res: any) => {
                 this.typing.set(true);
-                setTimeout(() => {
+                clearTimeout(this.timeoutRef);
+                this.timeoutRef = setTimeout(() => {
                     this.typing.set(false);
                 }, 1000);
             },
@@ -117,7 +110,11 @@ export class StudentChat implements OnInit {
     selectConversation(conversation: Conversation): void {
         this.selectedConversation.set(conversation);
         this.selectedConversationId.set(conversation.id);
-        this.router.navigate(['/student/chat', conversation.id]);
+        if(this.authService.getCurrentUser()?.role === UserRole.STUDENT) {
+            this.router.navigate(['/student/chat', conversation.id]);
+        } else {
+            this.router.navigate(['/teacher/chat', conversation.id]);
+        }
     }
     getChatMessages(){
         this.chatService.getChatMessages(this.selectedConversationId()!).subscribe({
@@ -147,25 +144,18 @@ export class StudentChat implements OnInit {
             return;
         }
 
-        // Convert File objects to ChatFile objects
-        const chatFiles: ChatFile[] = files.map((file, index) => ({
-            id: `file-${Date.now()}-${index}`,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            url: URL.createObjectURL(file) // For preview, in real app this would be uploaded to server
-        }));
 
-        const newMsg: ChatMessage = {
-            id: Date.now().toString(),
-            text: message || undefined,
-            timestamp: new Date(),
-            isSent: true,
-            files: chatFiles.length > 0 ? chatFiles : undefined,
-            isRead: false
-        };
         const receiverId = this.getOtherParticipant(this.selectedConversation()!).id;
-        this.chatService.sendMessage(this.selectedConversationId()!,receiverId,message,[]).subscribe({
+        const resources = this.selectedFiles().map(file => {
+            return {
+                id: file.id,
+                mimeType: file.mimeType,
+                fileName: file.fileName,
+                filePath: file.filePath,
+                fileSize: file.fileSize
+            } as ChatResource;
+        });
+        this.chatService.sendMessage(this.selectedConversationId()!,receiverId,message,resources).subscribe({
             next: (res: ApiResponse<Chat>) => {
                 if (res.statusCode === 200 && res.data) {
                     this.chatMessages.set([...this.chatMessages(), res.data]);
@@ -185,12 +175,28 @@ export class StudentChat implements OnInit {
         const input = event.target as HTMLInputElement;
         if (input.files && input.files.length > 0) {
             const files = Array.from(input.files);
-            this.selectedFiles.set([...this.selectedFiles(), ...files]);
+            for(const file of files) {
+                const chatFile: ChatFile = {id: Date.now().toString(), file: file, isUploaded: false, isUploading: true, filePath: '', fileSize: file.size, mimeType: file.type, fileName: file.name};
+                this.selectedFiles.set( [...this.selectedFiles(), chatFile]);
+                this.uploadFile(chatFile);
+            }
         }
         // Reset input
         if (this.fileInput) {
             this.fileInput.nativeElement.value = '';
         }
+    }
+    uploadFile(file: ChatFile): void {
+        this.chatService.uploadFile(file.file).subscribe({
+            next: (res: ApiResponse<{url: string}>) => {
+                file.isUploaded = true;
+                file.isUploading = false;                
+                file.filePath = res.data.url;
+            },
+            error: (err) => {
+                console.error(err);
+            }
+        });
     }
 
     removeFile(index: number): void {
