@@ -13,6 +13,7 @@ import {
   AssignmentStatus,
   Class,
   Teacher,
+  TeacherBookingDto,
 } from "../../../../shared";
 import TeacherBooking from "../../../../shared/models/teacher.interface";
 
@@ -27,7 +28,7 @@ import TeacherBooking from "../../../../shared/models/teacher.interface";
 export class CreateAssignment implements OnInit {
   isLoading = signal(false);
   classes = signal<Class[]>([]);
-  bookings = signal<TeacherBooking[]>([]);
+  bookings = signal<TeacherBookingDto[]>([]);
   currentTeacher = signal<Teacher | null>(null);
   assignmentType = signal<'class' | 'booking'>('class');
   

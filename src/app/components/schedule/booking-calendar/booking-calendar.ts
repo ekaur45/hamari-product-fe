@@ -1,12 +1,12 @@
 import { CommonModule } from "@angular/common";
 import { Component, computed, HostListener, input, output, signal } from "@angular/core";
-import TeacherBooking from "../../../shared/models/teacher.interface";
 import CalendarDay from "../../../shared/models/calendar.interface";
 import { DialogModule } from "primeng/dialog";
 import BookingModal from "../booking-modal/booking-modal";
+import { AuthService, TeacherBookingDto } from "../../../shared";
 interface ScheduleCalendarDay extends CalendarDay {
     hasBooking: boolean;
-    bookings: TeacherBooking[];
+    bookings: TeacherBookingDto[];
 }
 @Component({
     selector: 'taleemiyat-booking-calendar',
@@ -18,11 +18,11 @@ export default class BookingCalendar {
     currentMonth = signal(new Date());
     selectedDate = signal<Date | null>(null);
     showMonthPicker = signal(false);
-    bookings = input<TeacherBooking[]>([]);
+    bookings = input<TeacherBookingDto[]>([]);
     showBookingDialog = signal(false);
-    selectedDateBookings = signal<TeacherBooking[]>([]);
+    selectedDateBookings = signal<TeacherBookingDto[]>([]);
     onJoinClass = output<{bookingId: string}>();
-    constructor(){}
+    constructor(private authService: AuthService){}
     previousMonth(): void {
         const current = this.currentMonth();
         this.currentMonth.set(new Date(current.getFullYear(), current.getMonth() - 1, 1));
@@ -76,7 +76,7 @@ export default class BookingCalendar {
         const mondayBasedDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
         
         // Create date to bookings mapping
-        const bookingMap: Record<string, TeacherBooking[]> = {};
+        const bookingMap: Record<string, TeacherBookingDto[]> = {};
         bookings.forEach(booking => {
             if (booking.bookingDate) {
                 const bookingDate = new Date(booking.bookingDate);

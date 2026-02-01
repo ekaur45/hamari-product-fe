@@ -1,24 +1,26 @@
 import { CommonModule } from "@angular/common";
 import { Component, input, output } from "@angular/core";
 import { DialogModule } from "primeng/dialog";
-import TeacherBooking from "../../../shared/models/teacher.interface";
+import { AuthService, TeacherBookingDto, UserRole } from "../../../shared";
+import { ProfilePhoto } from "../../misc/profile-photo/profile-photo";
 
 @Component({
     selector: 'taleemiyat-booking-modal',
     templateUrl: './booking-modal.html',
     standalone: true,
-    imports: [CommonModule, DialogModule],
+    imports: [CommonModule, DialogModule, ProfilePhoto],
 })
 export default class BookingModal {
-    selectedDateBookings = input<TeacherBooking[]>([]);
+    readonly UserRole = UserRole;
+    selectedDateBookings = input<TeacherBookingDto[]>([]);
     onJoinClass = output<{bookingId: string}>();
-    constructor(){}
+    constructor(public authService: AuthService){}
 
     joinClass(bookingId: string): void {
         this.onJoinClass.emit({bookingId});
     }
 
-    getTimeRemaining(booking: TeacherBooking): string {
+    getTimeRemaining(booking: TeacherBookingDto): string {
         if (!booking.bookingDate || !booking.availability.startTime) {
             return '';
         }

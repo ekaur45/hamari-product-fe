@@ -5,6 +5,7 @@ import CalendarDay from "../../../shared/models/calendar.interface";
 import { DialogModule } from "primeng/dialog";
 import { Router } from "@angular/router";
 import moment from "moment";
+import BookingCalendar from "../../../components/schedule/booking-calendar/booking-calendar";
 
 interface ScheduleCalendarDay extends CalendarDay {
     hasBooking: boolean;
@@ -15,7 +16,7 @@ interface ScheduleCalendarDay extends CalendarDay {
     selector: 'app-student-schedule',
     templateUrl: './student-schedule.html',
     standalone: true,
-    imports: [CommonModule, DialogModule]
+    imports: [CommonModule, DialogModule, BookingCalendar]
 })
 export class StudentSchedule implements OnInit {
     studentSchedule = signal<TeacherBookingDto[]>([]);

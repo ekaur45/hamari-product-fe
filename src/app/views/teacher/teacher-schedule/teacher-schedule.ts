@@ -2,7 +2,7 @@ import { CommonModule } from "@angular/common";
 import { Component, computed, effect, HostListener, OnInit, signal } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
 import { ToastModule } from "primeng/toast";
-import { AuthService, TeacherService, User } from "../../../shared";
+import { AuthService, TeacherBookingDto, TeacherService, User } from "../../../shared";
 import { DialogModule } from "primeng/dialog";
 import TeacherBooking from "../../../shared/models/teacher.interface";
 import CalendarDay from "../../../shared/models/calendar.interface";
@@ -21,7 +21,7 @@ interface ScheduleCalendarDay extends CalendarDay {
 })
 export default class TeacherSchedule implements OnInit {
     currentUser = signal<User | null>(null);
-    bookings = signal<TeacherBooking[]>([]);
+    bookings = signal<TeacherBookingDto[]>([]);
     isLoading = signal(false);
 
     constructor(
@@ -31,8 +31,8 @@ export default class TeacherSchedule implements OnInit {
     ) {
     }
     ngOnInit(): void {
-            this.currentUser.set(this.authService.getCurrentUser());
-            this.getBookings();
+        this.currentUser.set(this.authService.getCurrentUser());
+        this.getBookings();
     }
     getBookings(): void {
         this.isLoading.set(true);

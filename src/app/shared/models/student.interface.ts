@@ -71,6 +71,7 @@ export interface TeacherBookingDto {
   bookingDate: Date;
   totalAmount: number;
   paidAmount: number;
+  student: Student;
 }
 
 export interface StudentBookingDto {
