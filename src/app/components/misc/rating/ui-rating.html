@@ -1,30 +1,131 @@
-<div class="border border-gray-300 rounded-lg p-2 shadow-md mb-2">
-    <label class="block text-sm font-medium text-gray-700 mb-2">{{ title() }} 
+<div class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 mb-3">
+    <label class="block text-sm sm:text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <span>{{ title() }}</span>
         @if(rating()) {
-            <span class="text-sm font-bold text-gray-700">({{ rating() | titlecase }})</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold" 
+                  [ngClass]="{
+                      'bg-green-100 text-green-800': rating() === 'excellent',
+                      'bg-yellow-100 text-yellow-800': rating() === 'good' || rating() === 'average',
+                      'bg-red-100 text-red-800': rating() === 'poor' || rating() === 'very poor'
+                  }">
+                {{ rating() | titlecase }}
+            </span>
         }
     </label>
-    <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center flex-col gap-2" (click)="onRatingChangeHandler('excellent')">
-            <span class="text-sm font-medium text-gray-700" [ngClass]="{'text-green-700': rating() === 'excellent'}">Excellent</span>
-            <em class="fa fa-smile text-green-300 text-4xl cursor-pointer hover:text-green-500" [ngClass]="{'text-green-700': rating() === 'excellent'}"></em>
-        </div>
-        <div class="flex items-center flex-col gap-2" (click)="onRatingChangeHandler('good')">
-            <span class="text-sm font-medium text-gray-700" [ngClass]="{'text-yellow-700': rating() === 'good'}">Good</span>
-            <em class="fa fa-smile text-yellow-300 text-4xl cursor-pointer hover:text-yellow-500" [ngClass]="{'text-yellow-700': rating() === 'good'}"></em>
-        </div>
+    <div class="flex items-center justify-between gap-1 sm:gap-2">
+        <!-- Excellent -->
+        <button 
+            type="button"
+            (click)="onRatingChangeHandler('excellent')"
+            class="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl transition-all duration-300 flex-1 group"
+            [ngClass]="{
+                'bg-green-50 border-2 border-green-400 shadow-md scale-105': rating() === 'excellent',
+                'bg-white border-2 border-transparent hover:bg-green-50 hover:border-green-200 hover:shadow-sm': rating() !== 'excellent'
+            }">
+            <em class="fa fa-smile text-3xl sm:text-4xl transition-all duration-300" 
+                [ngClass]="{
+                    'text-green-600 scale-125': rating() === 'excellent',
+                    'text-green-300 group-hover:text-green-500 group-hover:scale-110': rating() !== 'excellent'
+                }"></em>
+            <span class="text-xs sm:text-sm font-medium transition-colors duration-300" 
+                  [ngClass]="{
+                      'text-green-700 font-bold': rating() === 'excellent',
+                      'text-gray-600 group-hover:text-green-700': rating() !== 'excellent'
+                  }">
+                Excellent
+            </span>
+        </button>
 
-        <div class="flex items-center flex-col gap-2" (click)="onRatingChangeHandler('average')">
-            <span class="text-sm font-medium text-gray-700" [ngClass]="{'text-yellow-700': rating() === 'average'}">Average</span>
-            <em class="fa fa-meh text-yellow-300 text-4xl cursor-pointer hover:text-yellow-500" [ngClass]="{'text-yellow-700': rating() === 'average'}"></em>
-        </div>
-        <div class="flex items-center flex-col gap-2" (click)="onRatingChangeHandler('poor')">
-            <span class="text-sm font-medium text-gray-700" [ngClass]="{'text-red-700': rating() === 'poor'}">Poor</span>
-            <em class="fa fa-frown text-red-300 text-4xl cursor-pointer hover:text-red-500" [ngClass]="{'text-red-700': rating() === 'poor'}"></em>
-        </div>
-        <div class="flex items-center flex-col gap-2" (click)="onRatingChangeHandler('very poor')">
-            <span class="text-sm font-medium text-gray-700" [ngClass]="{'text-red-700': rating() === 'very poor'}">Very Poor</span>
-            <em class="fa fa-angry text-red-300 text-4xl cursor-pointer hover:text-red-500" [ngClass]="{'text-red-700': rating() === 'very poor'}"></em>
-        </div>
+        <!-- Good -->
+        <button 
+            type="button"
+            (click)="onRatingChangeHandler('good')"
+            class="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl transition-all duration-300 flex-1 group"
+            [ngClass]="{
+                'bg-yellow-50 border-2 border-yellow-400 shadow-md scale-105': rating() === 'good',
+                'bg-white border-2 border-transparent hover:bg-yellow-50 hover:border-yellow-200 hover:shadow-sm': rating() !== 'good'
+            }">
+            <em class="fa fa-smile text-3xl sm:text-4xl transition-all duration-300" 
+                [ngClass]="{
+                    'text-yellow-600 scale-125': rating() === 'good',
+                    'text-yellow-300 group-hover:text-yellow-500 group-hover:scale-110': rating() !== 'good'
+                }"></em>
+            <span class="text-xs sm:text-sm font-medium transition-colors duration-300" 
+                  [ngClass]="{
+                      'text-yellow-700 font-bold': rating() === 'good',
+                      'text-gray-600 group-hover:text-yellow-700': rating() !== 'good'
+                  }">
+                Good
+            </span>
+        </button>
+
+        <!-- Average -->
+        <button 
+            type="button"
+            (click)="onRatingChangeHandler('average')"
+            class="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl transition-all duration-300 flex-1 group"
+            [ngClass]="{
+                'bg-amber-50 border-2 border-amber-400 shadow-md scale-105': rating() === 'average',
+                'bg-white border-2 border-transparent hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm': rating() !== 'average'
+            }">
+            <em class="fa fa-meh text-3xl sm:text-4xl transition-all duration-300" 
+                [ngClass]="{
+                    'text-amber-600 scale-125': rating() === 'average',
+                    'text-amber-300 group-hover:text-amber-500 group-hover:scale-110': rating() !== 'average'
+                }"></em>
+            <span class="text-xs sm:text-sm font-medium transition-colors duration-300" 
+                  [ngClass]="{
+                      'text-amber-700 font-bold': rating() === 'average',
+                      'text-gray-600 group-hover:text-amber-700': rating() !== 'average'
+                  }">
+                Average
+            </span>
+        </button>
+
+        <!-- Poor -->
+        <button 
+            type="button"
+            (click)="onRatingChangeHandler('poor')"
+            class="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl transition-all duration-300 flex-1 group"
+            [ngClass]="{
+                'bg-red-50 border-2 border-red-400 shadow-md scale-105': rating() === 'poor',
+                'bg-white border-2 border-transparent hover:bg-red-50 hover:border-red-200 hover:shadow-sm': rating() !== 'poor'
+            }">
+            <em class="fa fa-frown text-3xl sm:text-4xl transition-all duration-300" 
+                [ngClass]="{
+                    'text-red-600 scale-125': rating() === 'poor',
+                    'text-red-300 group-hover:text-red-500 group-hover:scale-110': rating() !== 'poor'
+                }"></em>
+            <span class="text-xs sm:text-sm font-medium transition-colors duration-300" 
+                  [ngClass]="{
+                      'text-red-700 font-bold': rating() === 'poor',
+                      'text-gray-600 group-hover:text-red-700': rating() !== 'poor'
+                  }">
+                Poor
+            </span>
+        </button>
+
+        <!-- Very Poor -->
+        <button 
+            type="button"
+            (click)="onRatingChangeHandler('very poor')"
+            class="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl transition-all duration-300 flex-1 group"
+            [ngClass]="{
+                'bg-red-50 border-2 border-red-500 shadow-md scale-105': rating() === 'very poor',
+                'bg-white border-2 border-transparent hover:bg-red-50 hover:border-red-200 hover:shadow-sm': rating() !== 'very poor'
+            }">
+            <em class="fa fa-angry text-3xl sm:text-4xl transition-all duration-300" 
+                [ngClass]="{
+                    'text-red-700 scale-125': rating() === 'very poor',
+                    'text-red-300 group-hover:text-red-500 group-hover:scale-110': rating() !== 'very poor'
+                }"></em>
+            <span class="text-xs sm:text-sm font-medium transition-colors duration-300 text-center leading-tight" 
+                  [ngClass]="{
+                      'text-red-800 font-bold': rating() === 'very poor',
+                      'text-gray-600 group-hover:text-red-700': rating() !== 'very poor'
+                  }">
+                Very Poor
+            </span>
+        </button>
     </div>
 </div>
