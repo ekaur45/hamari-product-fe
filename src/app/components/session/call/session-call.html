@@ -121,22 +121,22 @@
                             <div class="flex items-center space-x-2">
                                 <!-- Audio Status -->
                                 <div class="px-2 py-1 rounded-lg" [ngClass]="{
-                                    'bg-green-500/20 text-green-400': remoteParticipant()?.isAudioOn,
-                                    'bg-red-500/20 text-red-400': !remoteParticipant()?.isAudioOn
+                                    'bg-green-500/20 text-green-400': remoteAudioOn(),
+                                    'bg-red-500/20 text-red-400': !remoteAudioOn()
                                 }">
                                     <i class="fas" [ngClass]="{
-                                        'fa-microphone': remoteParticipant()?.isAudioOn,
-                                        'fa-microphone-slash': !remoteParticipant()?.isAudioOn
+                                        'fa-microphone': remoteAudioOn(),
+                                        'fa-microphone-slash': !remoteAudioOn()
                                     }"></i>
                                 </div>
                                 <!-- Video Status -->
                                 <div class="px-2 py-1 rounded-lg" [ngClass]="{
-                                    'bg-green-500/20 text-green-400': remoteParticipant()?.isVideoOn,
-                                    'bg-red-500/20 text-red-400': !remoteParticipant()?.isVideoOn
+                                    'bg-green-500/20 text-green-400': remoteVideoOn(),
+                                    'bg-red-500/20 text-red-400': !remoteVideoOn()
                                 }">
                                     <i class="fas" [ngClass]="{
-                                        'fa-video': remoteParticipant()?.isVideoOn,
-                                        'fa-video-slash': !remoteParticipant()?.isVideoOn
+                                        'fa-video': remoteVideoOn(),
+                                        'fa-video-slash': !remoteVideoOn()
                                     }"></i>
                                 </div>
                             </div>
