@@ -10,7 +10,7 @@ import { MONTH_MAP, MONTHS } from "../../../shared/constants/months";
     standalone: true,
     imports: [CommonModule, RouterModule],
 })
-export default class BookClass {
+export class BookClass {
     classId = signal<string>('');
     class = signal<Class | null>(null);
     isLoading = signal(false);

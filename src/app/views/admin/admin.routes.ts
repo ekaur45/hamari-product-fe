@@ -3,7 +3,6 @@ import { Routes } from '@angular/router';
 
 import { RoleGuard } from '../../shared/guards/auth.guard';
 import { UserRole } from '../../shared/models';
-import { Dashboard } from '../dashboard/dashboard';
 
 export const adminRoutes: Routes = [
     {
@@ -15,7 +14,7 @@ export const adminRoutes: Routes = [
         path: 'dashboard',
         canActivate: [RoleGuard],
         data: { roles: [UserRole.ADMIN] },
-        component: Dashboard
+        loadComponent: () => import('../dashboard/dashboard').then(m => m.Dashboard)
     },
     {
         path: 'users',

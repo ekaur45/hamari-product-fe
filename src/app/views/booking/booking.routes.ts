@@ -1,10 +1,4 @@
 import { Routes } from "@angular/router";
-import BrowseAndBook from "./browse-and-book/browse-and-book";
-import BookClass from "./book-class/book-class";
-import BookSession from "./book-session/book-session";
-import BookTeacher from "./book-teacher/book-teacher";
-import Checkout from "./checkout/checkout";
-import TestPayment from "./test-payment/test-payment";
 
 export const bookingRoutes: Routes = [
     {
@@ -14,26 +8,26 @@ export const bookingRoutes: Routes = [
     },
     {
         path: ':viewMode',
-        component: BrowseAndBook        
+        loadComponent: () => import('./browse-and-book/browse-and-book').then(m => m.BrowseAndBook)        
     },
     {
         path:':id/session',
-        component: BookSession
+        loadComponent: () => import('./book-session/book-session').then(m => m.BookSession)
     },
     {
         path:':id/class',
-        component: BookClass
+        loadComponent: () => import('./book-class/book-class').then(m => m.BookClass)
     },
     {
         path:':id/teacher',
-        component: BookTeacher
+        loadComponent: () => import('./book-teacher/book-teacher').then(m => m.BookTeacher)
     },
     {
         path:':subjectId/teacher/:teacherId/checkout',
-        component: Checkout
+        loadComponent: () => import('./checkout/checkout').then(m => m.Checkout)
     },
     {
         path:':bookingId/test-payment',
-        component: TestPayment
+        loadComponent: () => import('./test-payment/test-payment').then(m => m.TestPayment)
     }
 ]

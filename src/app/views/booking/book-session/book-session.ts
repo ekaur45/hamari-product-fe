@@ -14,7 +14,7 @@ import { ProfilePhoto } from "../../../components/misc/profile-photo/profile-pho
     templateUrl: './book-session.html',
     imports: [CommonModule, RouterModule, BookingCalendar, ProfilePhoto],
 })
-export default class BookSession {
+export class BookSession {
     subjectId = signal<string>('');
     subject = signal<Subject | null>(null);
     selectedTeacher = signal<TeacherSubject | null>(null);

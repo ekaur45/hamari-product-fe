@@ -9,15 +9,15 @@ export const parentRoutes: Routes = [
         children: [
             {
                 path: 'dashboard',
-                component: ParentDashboard
+                loadComponent: () => import('./parent-dashboard/parent-dashboard').then(m => m.ParentDashboard)
             },
             {
                 path: 'children',
-                component: ParentChildrenComponent
+                loadComponent: () => import('./parent-children/parent-children').then(m => m.ParentChildrenComponent)
             },
             {
                 path: 'children/:childId',
-                component: ChildDetail
+                loadComponent: () => import('./child-detail/child-detail').then(m => m.ChildDetail)
             },
             {
                 path: '',

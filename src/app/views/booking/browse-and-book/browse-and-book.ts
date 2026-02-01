@@ -12,7 +12,7 @@ import { FormsModule } from "@angular/forms";
     imports: [CommonModule, RouterModule, ProfilePhoto, FormsModule],
     providers: [SubjectService]
 })
-export default class BrowseAndBook implements OnInit {
+export class BrowseAndBook implements OnInit {
     subjects = signal<Subject[]>([]);
     isLoading = signal(false);
     isLoadingSubjects = signal(false);

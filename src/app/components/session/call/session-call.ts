@@ -1,5 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, computed, input, OnInit, OnDestroy, signal, ViewChild, ElementRef } from "@angular/core";
+import { Router } from "@angular/router";
+import { DialogModule } from "primeng/dialog";
 import SessionCallSettings from "../call-settings/call-settings";
 import SessionChat from "../chat/session.chat";
 import { UserRole, User } from "../../../shared/models/user.interface";
@@ -9,12 +11,13 @@ import { ProfilePhoto } from "../../misc/profile-photo/profile-photo";
 import { io, Socket } from "socket.io-client";
 import { environment } from "../../../../environments/environment";
 import { WhiteBoard } from "../../white-board/white-board";
+import { RatingModule } from "primeng/rating";
 
 @Component({
     selector: 'taleemiyat-session-call',
     templateUrl: './session-call.html',
     standalone: true,
-    imports: [CommonModule, SessionCallSettings, SessionChat, StreamDirective, ProfilePhoto, WhiteBoard],
+    imports: [CommonModule, DialogModule, SessionCallSettings, SessionChat, StreamDirective, ProfilePhoto, WhiteBoard, RatingModule],
 })
 export default class SessionCall implements OnInit, OnDestroy {
     @ViewChild('localVideo') localVideoElement?: ElementRef<HTMLVideoElement>;
@@ -29,6 +32,8 @@ export default class SessionCall implements OnInit, OnDestroy {
     showChat = signal<boolean>(false);
     showCallSettings = signal<boolean>(false);
     showWhiteboard = signal<boolean>(false);
+    showLeaveDialog = signal<boolean>(false);
+    showRateAndReviewDialog = signal<boolean>(false);
     userType = signal<UserRole>(UserRole.STUDENT);
     
     // Socket and WebRTC
@@ -82,7 +87,8 @@ export default class SessionCall implements OnInit, OnDestroy {
     };
     
     constructor(
-        private authService: AuthService
+        private authService: AuthService,
+        private router: Router
     ){
         this.userType.set((this.authService.getCurrentUser()?.role as UserRole) ?? UserRole.STUDENT);
     }
@@ -144,8 +150,15 @@ export default class SessionCall implements OnInit, OnDestroy {
         try {
             // Try to get both video and audio
             this.localStream = await navigator.mediaDevices.getUserMedia({ 
-                video: true, 
-                audio: true 
+                video: {
+                    facingMode:"user"
+                }, 
+                audio: {
+                    noiseSuppression: true,
+                    echoCancellation: true,
+                    autoGainControl: true,
+
+                } 
             });
             
             // Update local video element if available
@@ -159,8 +172,14 @@ export default class SessionCall implements OnInit, OnDestroy {
             try {
                 // Fallback: try audio only
                 this.localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: false, 
-                    audio: true 
+                    video: {
+                        facingMode:"environment"
+                    }, 
+                    audio: {
+                        noiseSuppression: true,
+                        echoCancellation: true,
+                        autoGainControl: true,
+                    } 
                 });
                 this.updateStreamState();
                 console.log('✅ Local stream initialized with audio only');
@@ -169,8 +188,14 @@ export default class SessionCall implements OnInit, OnDestroy {
                 try {
                     // Fallback: try video only
                     this.localStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: true, 
-                        audio: false 
+                        video: {
+                            facingMode:"environment"                            
+                        }, 
+                        audio: {
+                            noiseSuppression: true,
+                            echoCancellation: true,
+                            autoGainControl: true,
+                        } 
                     });
                     this.updateStreamState();
                     console.log('✅ Local stream initialized with video only');
@@ -707,7 +732,7 @@ export default class SessionCall implements OnInit, OnDestroy {
             // Video track doesn't exist, create one
             console.log('📹 No video track, requesting new one...');
             try {
-                const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const newStream = await navigator.mediaDevices.getUserMedia({ video: {facingMode:"user"} });
                 videoTrack = newStream.getVideoTracks()[0];
                 this.localStream.addTrack(videoTrack);
                 
@@ -772,6 +797,12 @@ export default class SessionCall implements OnInit, OnDestroy {
     }
     
     leaveCall(): void {
+        // Show confirmation dialog
+        this.showLeaveDialog.set(true);
+    }
+    
+    confirmLeaveCall(): void {
+        // Actually leave the call
         this.isConnected.set(false);
         if (this.socket) {
             this.socket.disconnect();
@@ -779,6 +810,21 @@ export default class SessionCall implements OnInit, OnDestroy {
         if (this.peer) {
             this.peer.close();
         }
+        this.showLeaveDialog.set(false);
+        if(this.userType() === UserRole.TEACHER) {
+            this.router.navigate(['/teacher/dashboard']);
+        } else {
+            this.router.navigate(['/student/dashboard']);
+        }
+    }
+    
+    cancelLeaveCall(): void {
+        // Cancel leaving - just close the dialog
+        this.showLeaveDialog.set(false);
+    }
+    
+    isTeacher(): boolean {
+        return this.userType() === UserRole.TEACHER;
     }
     
     private startCallTimer(): void {
@@ -843,4 +889,12 @@ export default class SessionCall implements OnInit, OnDestroy {
         }
         return false;
     });
+    rateAndReview(): void {
+        this.showLeaveDialog.set(false);
+        this.showRateAndReviewDialog.set(true);
+    }
+    cancelRateAndReview(): void {
+        this.showRateAndReviewDialog.set(false);
+        this.showLeaveDialog.set(true);
+    }
 }

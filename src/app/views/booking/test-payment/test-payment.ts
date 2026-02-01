@@ -7,7 +7,7 @@ import { RouterModule } from "@angular/router";
     standalone: true,
     imports: [CommonModule, RouterModule]
 })
-export default class TestPayment implements OnInit {
+export class TestPayment implements OnInit {
     constructor() {
     }
     ngOnInit(): void {

@@ -1,15 +1,4 @@
 import { Routes } from "@angular/router";
-import { TeacherDashboard } from "./teacher-dashboard/teacher-dashboard";
-import TeacherSettings from "./teacher-settings/teacher-settings";
-import TeacherSchedule from "./teacher-schedule/teacher-schedule";
-import TeacherClass from "./teacher-class/teacher-class";
-import { AssignmentList } from "./teacher-assignments/assignment-list/assignment-list";
-import { CreateAssignment } from "./teacher-assignments/create-assignment/create-assignment";
-import { AssignmentSubmissions } from "./teacher-assignments/assignment-submissions/assignment-submissions";
-import { TeacherStudents } from "./teacher-students/teacher-students";
-import { TeacherPerformance } from "./teacher-performance/teacher-performance";
-import { TeacherReviews } from "./teacher-reviews/teacher-reviews";
-import { SharedChat } from "../shared/shared-chat/shared-chat";
 
 export const teacherRoutes: Routes = [
     {
@@ -19,54 +8,54 @@ export const teacherRoutes: Routes = [
     },
     {
         path: 'dashboard',
-        component: TeacherDashboard
+        loadComponent: () => import('./teacher-dashboard/teacher-dashboard').then(m => m.TeacherDashboard)
     },
     {
         path:'settings',
-        component: TeacherSettings
+        loadComponent: () => import('./teacher-settings/teacher-settings').then(m => m.TeacherSettings)
     },
     {
         path: 'schedule',
-        component: TeacherSchedule
+        loadComponent: () => import('./teacher-schedule/teacher-schedule').then(m => m.TeacherSchedule)
     },
     {
         path: 'class',
-        component: TeacherClass
+        loadComponent: () => import('./teacher-class/teacher-class').then(m => m.TeacherClass)
     },
     {
         path: 'assignments',
-        component: AssignmentList
+        loadComponent: () => import('./teacher-assignments/assignment-list/assignment-list').then(m => m.AssignmentList)
     },
     {
         path: 'assignments/create',
-        component: CreateAssignment
+        loadComponent: () => import('./teacher-assignments/create-assignment/create-assignment').then(m => m.CreateAssignment)
     },
     {
         path: 'assignments/:assignmentId/submissions',
-        component: AssignmentSubmissions
+        loadComponent: () => import('./teacher-assignments/assignment-submissions/assignment-submissions').then(m => m.AssignmentSubmissions)
     },
     {
         path: 'students',
-        component: TeacherStudents
+        loadComponent: () => import('./teacher-students/teacher-students').then(m => m.TeacherStudents)
     },
     {
         path: 'performance',
-        component: TeacherPerformance
+        loadComponent: () => import('./teacher-performance/teacher-performance').then(m => m.TeacherPerformance)
     },
     {
         path: 'performance/:studentId',
-        component: TeacherPerformance
+        loadComponent: () => import('./teacher-performance/teacher-performance').then(m => m.TeacherPerformance)
     },
     {
         path: 'reviews',
-        component: TeacherReviews
+        loadComponent: () => import('./teacher-reviews/teacher-reviews').then(m => m.TeacherReviews)
     },
     {
         path: 'chat',
-        component: SharedChat
+        loadComponent: () => import('../shared/shared-chat/shared-chat').then(m => m.SharedChat)
     },
     {
         path: 'chat/:selectedConversationId',
-        component: SharedChat
+        loadComponent: () => import('../shared/shared-chat/shared-chat').then(m => m.SharedChat)
     }
 ];

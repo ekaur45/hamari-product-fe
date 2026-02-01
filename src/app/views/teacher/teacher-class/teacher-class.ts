@@ -19,7 +19,7 @@ import { ButtonModule } from "primeng/button";
     providers: [MessageService],
     encapsulation: ViewEncapsulation.None
 })
-export default class TeacherClass implements OnInit {
+export class TeacherClass implements OnInit {
     currentUser = signal<User | null>(null);
     classes = signal<Class[]>([]);
     isLoading = signal(false);

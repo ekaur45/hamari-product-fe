@@ -19,7 +19,7 @@ interface ScheduleCalendarDay extends CalendarDay {
     templateUrl: './teacher-schedule.html',
     imports: [CommonModule, ReactiveFormsModule, ToastModule, DialogModule, RouterModule, BookingCalendar]
 })
-export default class TeacherSchedule implements OnInit {
+export class TeacherSchedule implements OnInit {
     currentUser = signal<User | null>(null);
     bookings = signal<TeacherBookingDto[]>([]);
     isLoading = signal(false);

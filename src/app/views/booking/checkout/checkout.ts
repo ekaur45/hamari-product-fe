@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
     standalone: true,
     imports: [DatePipe, RouterModule, DialogModule, FormsModule, CommonModule],
 })
-export default class Checkout implements OnInit {
+export class Checkout implements OnInit {
     subjectId = signal<string>('');
     teacherId = signal<string>('');
     slot = signal<AvailabilitySlot | null>(null);

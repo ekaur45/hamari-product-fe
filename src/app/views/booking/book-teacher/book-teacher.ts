@@ -11,7 +11,7 @@ import BookingCalendar from "../../../components/misc/booking-calendar/booking-c
     templateUrl: './book-teacher.html',
     imports: [CommonModule, RouterModule, BookingCalendar],
 })
-export default class BookTeacher {
+export class BookTeacher {
     teacherId = signal<string>('');
     isLoading = signal(false);
     teacher = signal<Teacher | null>(null);

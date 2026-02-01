@@ -21,7 +21,7 @@ interface SubjectRate {
     imports: [CommonModule, ReactiveFormsModule, ToastModule],
     providers: [MessageService, CurrencyPipe]
 })
-export default class TeacherSettings implements OnInit {
+export class TeacherSettings implements OnInit {
     profile = signal<User | null>(null);
     subjects = signal<SubjectRate[]>([]);
     isLoading = signal(false);
