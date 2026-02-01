@@ -1,0 +1,48 @@
+<div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
+    <!-- Permission Status Indicator -->
+    <div class="flex items-center gap-2 px-2 py-1 rounded" 
+         [ngClass]="{
+             'bg-green-100 text-green-700': isEditable(),
+             'bg-yellow-100 text-yellow-700': !isEditable() && currentRole() === UserRole.TEACHER,
+             'bg-gray-100 text-gray-700': !isEditable() && currentRole() === UserRole.STUDENT
+         }">
+        <i class="fas" 
+           [ngClass]="{
+               'fa-edit': isEditable(),
+               'fa-lock': !isEditable() && currentRole() === UserRole.TEACHER,
+               'fa-eye': !isEditable() && currentRole() === UserRole.STUDENT
+           }"></i>
+        <span class="text-xs font-medium">
+            @if(isEditable()) {
+                Editing Enabled
+            } @else if(currentRole() === UserRole.TEACHER) {
+                Locked
+            } @else {
+                View Only
+            }
+        </span>
+    </div>
+
+    <!-- Teacher Controls -->
+    @if(currentRole() === UserRole.TEACHER) {
+        <div class="w-px h-6 bg-gray-300"></div>
+        <button 
+            (click)="toggleLock()"
+            [class.bg-red-500]="isEditable()"
+            [class.bg-green-500]="!isEditable()"
+            class="px-3 py-1.5 text-white rounded text-xs font-medium hover:opacity-90 transition flex items-center gap-1.5"
+            [title]="isEditable() ? 'Lock whiteboard for students' : 'Unlock whiteboard for students'">
+            <i class="fas" [ngClass]="isEditable() ? 'fa-lock' : 'fa-unlock'"></i>
+            <span>{{ isEditable() ? 'Lock' : 'Unlock' }}</span>
+        </button>
+        
+        <button 
+            (click)="clearStudentDrawings()"
+            class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded text-xs font-medium transition flex items-center gap-1.5"
+            title="Clear all student drawings">
+            <i class="fas fa-eraser"></i>
+            <span>Clear Students</span>
+        </button>
+    }
+</div>
+

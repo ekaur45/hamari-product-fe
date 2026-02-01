@@ -1,0 +1,125 @@
+<div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
+    <!-- Page Navigation -->
+    <button 
+        (click)="goToPrevious()"
+        [disabled]="currentPageIndex() === 0"
+        class="p-1.5 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+        title="Previous page">
+        <i class="fas fa-chevron-left text-gray-700 text-sm"></i>
+    </button>
+    
+    <!-- Current Page Info -->
+    <div class="flex items-center gap-2 px-2">
+        <span class="text-xs text-gray-700 font-medium">
+            Page {{ currentPageIndex() + 1 }} of {{ totalPages() }}
+        </span>
+        @if(currentPage()) {
+            <span class="text-xs text-gray-500">({{ currentPage()!.name }})</span>
+        }
+    </div>
+    
+    <button 
+        (click)="goToNext()"
+        [disabled]="currentPageIndex() === totalPages() - 1"
+        class="p-1.5 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+        title="Next page">
+        <i class="fas fa-chevron-right text-gray-700 text-sm"></i>
+    </button>
+    
+    <div class="w-px h-6 bg-gray-300"></div>
+    
+    <!-- Page Management -->
+    <button 
+        (click)="showPageManager.set(!showPageManager())"
+        class="px-2 py-1 hover:bg-gray-100 rounded text-xs text-gray-700 flex items-center gap-1"
+        title="Manage pages">
+        <i class="fas fa-th"></i>
+        <span>Pages</span>
+    </button>
+    
+    <button 
+        (click)="addNewPage()"
+        class="px-2 py-1 bg-primary hover:bg-blue-600 text-white rounded text-xs font-medium flex items-center gap-1"
+        title="Add new page">
+        <i class="fas fa-plus"></i>
+        <span>New</span>
+    </button>
+</div>
+
+<!-- Page Manager Modal -->
+@if(showPageManager()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" (click)="showPageManager.set(false)">
+        <div class="bg-white rounded-lg p-4 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Manage Pages</h3>
+                <button (click)="showPageManager.set(false)" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Page Thumbnails Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
+                @for(page of pages(); track page.id) {
+                    @if(currentPage(); as current) {
+                        <div 
+                            (click)="selectPage(page.id)"
+                            [class.border-blue-500]="page.id === current.id"
+                            [class.border-2]="page.id === current.id"
+                            class="border border-gray-300 rounded-lg p-2 cursor-pointer hover:border-blue-400 transition">
+                            <div class="aspect-video bg-gray-100 rounded mb-2 flex items-center justify-center overflow-hidden">
+                                @if(page.thumbnail) {
+                                    <img [src]="page.thumbnail" [alt]="page.name" class="w-full h-full object-cover">
+                                } @else {
+                                    <i class="fas fa-file text-gray-400 text-2xl"></i>
+                                }
+                            </div>
+                            <div class="text-xs text-gray-700 font-medium truncate">{{ page.name }}</div>
+                            @if(page.id === current.id) {
+                                <div class="text-xs text-blue-600 mt-1">Current</div>
+                            }
+                        </div>
+                    } @else {
+                        <div 
+                            (click)="selectPage(page.id)"
+                            class="border border-gray-300 rounded-lg p-2 cursor-pointer hover:border-blue-400 transition">
+                            <div class="aspect-video bg-gray-100 rounded mb-2 flex items-center justify-center overflow-hidden">
+                                @if(page.thumbnail) {
+                                    <img [src]="page.thumbnail" [alt]="page.name" class="w-full h-full object-cover">
+                                } @else {
+                                    <i class="fas fa-file text-gray-400 text-2xl"></i>
+                                }
+                            </div>
+                            <div class="text-xs text-gray-700 font-medium truncate">{{ page.name }}</div>
+                        </div>
+                    }
+                }
+            </div>
+            
+            <!-- Page Actions -->
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div class="flex items-center gap-2">
+                    <button 
+                        (click)="addNewPage()"
+                        class="px-3 py-1.5 bg-primary hover:bg-blue-600 text-white rounded text-xs font-medium flex items-center gap-1">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Page</span>
+                    </button>
+                    <button 
+                        (click)="duplicateCurrentPage()"
+                        [disabled]="!currentPage()"
+                        class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs font-medium flex items-center gap-1 disabled:opacity-50">
+                        <i class="fas fa-copy"></i>
+                        <span>Duplicate</span>
+                    </button>
+                </div>
+                <button 
+                    (click)="deleteCurrentPage()"
+                    [disabled]="totalPages() <= 1 || !currentPage()"
+                    class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded text-xs font-medium flex items-center gap-1 disabled:opacity-50">
+                    <i class="fas fa-trash"></i>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+    </div>
+}

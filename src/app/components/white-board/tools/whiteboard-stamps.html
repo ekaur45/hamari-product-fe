@@ -1,0 +1,74 @@
+<div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1 relative">
+    <button 
+        (click)="showStamps.set(!showStamps())"
+        [class.active]="isActive()"
+        class="p-2 hover:bg-gray-100 rounded tool-btn"
+        title="Stamps">
+        <i class="fas fa-stamp text-gray-700 text-sm"></i>
+    </button>
+    
+    <!-- Stamps Dropdown -->
+    @if(showStamps()) {
+        <div class="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-3 z-50 min-w-[250px] max-h-[400px] overflow-y-auto">
+            <div class="text-xs font-semibold text-gray-700 mb-3">Stamps & Markers</div>
+            
+            <!-- Feedback Stamps -->
+            <div class="mb-4">
+                <div class="text-xs text-gray-600 mb-2 font-medium">Feedback</div>
+                <div class="grid grid-cols-4 gap-2">
+                    @for(stamp of getStampsByCategory('feedback'); track stamp.id) {
+                        <button 
+                            (click)="selectStamp(stamp.id)"
+                            class="p-2 border border-gray-300 rounded hover:border-blue-500 hover:bg-blue-50 transition flex flex-col items-center gap-1">
+                            @if(stamp.emoji) {
+                                <span class="text-2xl">{{ stamp.emoji }}</span>
+                            } @else {
+                                <i [class]="stamp.icon" class="text-gray-600 text-lg"></i>
+                            }
+                            <span class="text-xs text-gray-600">{{ stamp.name }}</span>
+                        </button>
+                    }
+                </div>
+            </div>
+            
+            <!-- Marks -->
+            <div class="mb-4">
+                <div class="text-xs text-gray-600 mb-2 font-medium">Marks</div>
+                <div class="grid grid-cols-4 gap-2">
+                    @for(stamp of getStampsByCategory('marks'); track stamp.id) {
+                        <button 
+                            (click)="selectStamp(stamp.id)"
+                            class="p-2 border border-gray-300 rounded hover:border-blue-500 hover:bg-blue-50 transition flex flex-col items-center gap-1">
+                            @if(stamp.emoji) {
+                                <span class="text-2xl">{{ stamp.emoji }}</span>
+                            } @else {
+                                <i [class]="stamp.icon" class="text-gray-600 text-lg"></i>
+                            }
+                            <span class="text-xs text-gray-600">{{ stamp.name }}</span>
+                        </button>
+                    }
+                </div>
+            </div>
+            
+            <!-- Symbols -->
+            <div class="mb-4">
+                <div class="text-xs text-gray-600 mb-2 font-medium">Symbols</div>
+                <div class="grid grid-cols-4 gap-2">
+                    @for(stamp of getStampsByCategory('symbols'); track stamp.id) {
+                        <button 
+                            (click)="selectStamp(stamp.id)"
+                            class="p-2 border border-gray-300 rounded hover:border-blue-500 hover:bg-blue-50 transition flex flex-col items-center gap-1">
+                            @if(stamp.emoji) {
+                                <span class="text-2xl">{{ stamp.emoji }}</span>
+                            } @else {
+                                <i [class]="stamp.icon" class="text-gray-600 text-lg"></i>
+                            }
+                            <span class="text-xs text-gray-600">{{ stamp.name }}</span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

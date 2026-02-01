@@ -1,0 +1,31 @@
+<div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
+    <div class="text-xs text-gray-600 font-medium">Active Users:</div>
+    
+    <div class="flex items-center gap-1">
+        @for(user of activeUsers(); track user.userId) {
+            <div 
+                class="relative"
+                [title]="user.userName + (user.role === 'teacher' ? ' (Teacher)' : '')">
+                <div class="w-8 h-8 rounded-full border-2 overflow-hidden"
+                     [ngClass]="{
+                         'border-blue-500': user.role === 'teacher',
+                         'border-green-500': user.role === 'student',
+                         'ring-2 ring-blue-400': user.isActive
+                     }">
+                    <profile-photo 
+                        [user]="null"
+                        [class]="'w-full h-full'">
+                    </profile-photo>
+                </div>
+                @if(user.isActive) {
+                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                }
+            </div>
+        }
+    </div>
+    
+    <div class="text-xs text-gray-500">
+        {{ activeUsers().length }} {{ activeUsers().length === 1 ? 'user' : 'users' }}
+    </div>
+</div>
+

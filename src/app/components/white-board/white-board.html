@@ -1,101 +1,176 @@
-<div #whiteboardView [class.hidden]="!whiteboardOpen()" class="fixed inset-0 bg-white flex flex-col z-50">
+<div #whiteboardView [class.hidden]="!whiteboardOpen()" class="fixed inset-0 bg-gradient-to-b from-gray-50 to-white flex flex-col z-50">
     <!-- Whiteboard Toolbar -->
-    <div class="bg-gray-100 border-b border-gray-300 relative z-10">
+    <div class="bg-white border-b border-gray-200 shadow-sm relative z-10">
         <!-- Desktop/Tablet Layout -->
         <div class="hidden sm:block">
+            <!-- Top Row: Permissions & Presence -->
+            <div class="px-3 sm:px-6 py-2 flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-50/50">
+                <app-whiteboard-permissions
+                    [currentRole]="currentUserRole()"
+                    [isEditable]="isEditable()"
+                    [isLocked]="isLocked()"
+                    (toggleLockEvent)="onToggleLock($event)"
+                    (clearStudentsEvent)="onClearStudentDrawings()">
+                </app-whiteboard-permissions>
+                
+                <app-whiteboard-presence
+                    [activeUsers]="activeUsers()">
+                </app-whiteboard-presence>
+            </div>
+            
             <!-- Main Toolbar Row -->
-            <div class="px-2 sm:px-4 py-2 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2">
-                <!-- Left Group: Drawing Tools -->
-                <div class="flex items-center flex-wrap gap-2 flex-1 min-w-0">
-                    <!-- Drawing Tools Group -->
-                    <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
-                        <button id="penTool" (click)="selectTool('penTool')" [class.active]="currentTool() === 'pen'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Pen">
-                            <i class="fas fa-pen text-gray-700 text-sm"></i>
-                        </button>
-                        <button id="highlighterTool" (click)="selectTool('highlighterTool')" [class.active]="currentTool() === 'highlighter'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Highlighter">
-                            <i class="fas fa-highlighter text-gray-700 text-sm"></i>
-                        </button>
-                        <button id="eraserTool" (click)="selectTool('eraserTool')" [class.active]="currentTool() === 'eraser'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Eraser">
-                            <i class="fas fa-eraser text-gray-700 text-sm"></i>
-                        </button>
-                        <div class="w-px h-6 bg-gray-300 mx-1"></div>
-                        <button id="shapeTool" (click)="selectTool('shapeTool')" [class.active]="currentTool() === 'rectangle'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Rectangle">
-                            <i class="fas fa-square text-gray-700 text-sm"></i>
-                        </button>
-                        <button id="circleTool" (click)="selectTool('circleTool')" [class.active]="currentTool() === 'circle'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Circle">
-                            <i class="far fa-circle text-gray-700 text-sm"></i>
-                        </button>
-                        <button id="arrowTool" (click)="selectTool('arrowTool')" [class.active]="currentTool() === 'arrow'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Arrow">
-                            <i class="fas fa-arrow-right text-gray-700 text-sm"></i>
-                        </button>
-                        <button id="lineTool" (click)="selectTool('lineTool')" [class.active]="currentTool() === 'line'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Line">
-                            <i class="fas fa-minus text-gray-700 text-sm"></i>
-                        </button>
-                        <button id="textTool" (click)="selectTool('textTool')" [class.active]="currentTool() === 'text'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Text">
-                            <i class="fas fa-font text-gray-700 text-sm"></i>
-                        </button>
-                        <button id="imageTool" (click)="selectTool('imageTool')" [class.active]="currentTool() === 'image'" class="p-2 hover:bg-gray-100 rounded tool-btn" title="Upload Image">
-                            <i class="fas fa-image text-gray-700 text-sm"></i>
-                        </button>
+            <div class="px-3 sm:px-6 py-3 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3">
+                <!-- Left Group: Core Tools -->
+                <div class="flex items-center flex-wrap gap-2.5 flex-1 min-w-0">
+                    <!-- Page Management -->
+                    <app-whiteboard-pages
+                        [pages]="pages()"
+                        [currentPageIndex]="currentPageIndex()"
+                        (pageChangeEvent)="onPageChange($event)"
+                        (addPageEvent)="onAddPage()"
+                        (deletePageEvent)="onDeletePage($event)"
+                        (duplicatePageEvent)="onDuplicatePage($event)">
+                    </app-whiteboard-pages>
+                    
+                    <!-- Select Tool -->
+                    <app-whiteboard-select-tool
+                        [isActive]="currentTool() === 'select'"
+                        [hasSelection]="hasSelection()"
+                        [hasClipboard]="hasClipboard()"
+                        (activateEvent)="selectTool('selectTool')"
+                        (copyEvent)="onCopySelection()"
+                        (cutEvent)="onCutSelection()"
+                        (pasteEvent)="onPasteSelection()"
+                        (alignEvent)="onAlignSelection($event)"
+                        (layerEvent)="onLayerChange($event)"
+                        (deleteEvent)="onDeleteSelection()">
+                    </app-whiteboard-select-tool>
+                    
+                    <!-- Drawing Tools Group - Enhanced -->
+                    <div class="bg-white rounded-xl p-1.5 border border-gray-200 shadow-sm flex items-center gap-1">
+                        <!-- Freehand Tools -->
+                        <div class="flex items-center gap-0.5 pr-1 border-r border-gray-200">
+                            <button id="penTool" (click)="selectTool('penTool')" [class.active]="currentTool() === 'pen'" [class.bg-blue-50]="currentTool() === 'pen'" [class.text-blue-600]="currentTool() === 'pen'" class="p-2.5 hover:bg-gray-50 rounded-lg tool-btn transition-all" title="Pen Tool">
+                                <i class="fas fa-pen text-sm"></i>
+                            </button>
+                            <button id="highlighterTool" (click)="selectTool('highlighterTool')" [class.active]="currentTool() === 'highlighter'" [class.bg-blue-50]="currentTool() === 'highlighter'" [class.text-blue-600]="currentTool() === 'highlighter'" class="p-2.5 hover:bg-gray-50 rounded-lg tool-btn transition-all" title="Highlighter">
+                                <i class="fas fa-highlighter text-sm"></i>
+                            </button>
+                            <button id="eraserTool" (click)="selectTool('eraserTool')" [class.active]="currentTool() === 'eraser'" [class.bg-blue-50]="currentTool() === 'eraser'" [class.text-blue-600]="currentTool() === 'eraser'" class="p-2.5 hover:bg-gray-50 rounded-lg tool-btn transition-all" title="Eraser">
+                                <i class="fas fa-eraser text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Shapes -->
+                        <div class="flex items-center gap-0.5 px-1 border-r border-gray-200">
+                            <button id="shapeTool" (click)="selectTool('shapeTool')" [class.active]="currentTool() === 'rectangle'" [class.bg-blue-50]="currentTool() === 'rectangle'" [class.text-blue-600]="currentTool() === 'rectangle'" class="p-2.5 hover:bg-gray-50 rounded-lg tool-btn transition-all" title="Rectangle">
+                                <i class="fas fa-square text-sm"></i>
+                            </button>
+                            <button id="circleTool" (click)="selectTool('circleTool')" [class.active]="currentTool() === 'circle'" [class.bg-blue-50]="currentTool() === 'circle'" [class.text-blue-600]="currentTool() === 'circle'" class="p-2.5 hover:bg-gray-50 rounded-lg tool-btn transition-all" title="Circle">
+                                <i class="far fa-circle text-sm"></i>
+                            </button>
+                            <button id="arrowTool" (click)="selectTool('arrowTool')" [class.active]="currentTool() === 'arrow'" [class.bg-blue-50]="currentTool() === 'arrow'" [class.text-blue-600]="currentTool() === 'arrow'" class="p-2.5 hover:bg-gray-50 rounded-lg tool-btn transition-all" title="Arrow">
+                                <i class="fas fa-arrow-right text-sm"></i>
+                            </button>
+                            <button id="lineTool" (click)="selectTool('lineTool')" [class.active]="currentTool() === 'line'" [class.bg-blue-50]="currentTool() === 'line'" [class.text-blue-600]="currentTool() === 'line'" class="p-2.5 hover:bg-gray-50 rounded-lg tool-btn transition-all" title="Line">
+                                <i class="fas fa-minus text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Content Tools -->
+                        <div class="flex items-center gap-0.5 pl-1">
+                            <button id="textTool" (click)="selectTool('textTool')" [class.active]="currentTool() === 'text'" [class.bg-blue-50]="currentTool() === 'text'" [class.text-blue-600]="currentTool() === 'text'" class="p-2.5 hover:bg-gray-50 rounded-lg tool-btn transition-all" title="Text">
+                                <i class="fas fa-font text-sm"></i>
+                            </button>
+                            <button id="imageTool" (click)="selectTool('imageTool')" [class.active]="currentTool() === 'image'" [class.bg-blue-50]="currentTool() === 'image'" [class.text-blue-600]="currentTool() === 'image'" class="p-2.5 hover:bg-gray-50 rounded-lg tool-btn transition-all" title="Upload Image">
+                                <i class="fas fa-image text-sm"></i>
+                            </button>
+                        </div>
                         <input #imageUpload type="file" (change)="onImageUpload($event)" accept="image/*" class="hidden">
                     </div>
 
-                    <!-- Style Options Group -->
-                    <div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
-                        <button id="fillToggle" (click)="onToggleFill()" class="px-2 py-1 hover:bg-gray-100 rounded text-xs text-gray-700 flex items-center" title="Fill Shapes">
-                            <i class="fas fa-fill-drip mr-1"></i>Fill: <span>{{ getFillStatus() }}</span>
+                    <!-- Style Options Group - Enhanced -->
+                    <div class="bg-white rounded-xl p-2 border border-gray-200 shadow-sm flex items-center gap-2.5">
+                        <button id="fillToggle" (click)="onToggleFill()" [class.bg-blue-50]="fillShapes()" [class.text-blue-600]="fillShapes()" class="px-3 py-1.5 hover:bg-gray-50 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all" title="Fill Shapes">
+                            <i class="fas fa-fill-drip"></i>
+                            <span>Fill</span>
+                            <span class="text-xs font-semibold">{{ getFillStatus() }}</span>
                         </button>
-                        <div class="w-px h-4 bg-gray-300"></div>
-                        <div class="flex items-center gap-0.5">
-                            <button id="lineStyleSolid" (click)="onLineStyleChange('solid')" [class.active]="lineStyle() === 'solid'" class="px-1.5 py-1 hover:bg-gray-100 rounded line-style-btn" title="Solid">
-                                <div class="w-6 h-0.5 bg-gray-700"></div>
+                        <div class="w-px h-5 bg-gray-200"></div>
+                        <div class="flex items-center gap-1">
+                            <span class="text-xs text-gray-500 font-medium mr-1">Style:</span>
+                            <button id="lineStyleSolid" (click)="onLineStyleChange('solid')" [class.active]="lineStyle() === 'solid'" [class.bg-blue-50]="lineStyle() === 'solid'" class="px-2 py-1.5 hover:bg-gray-50 rounded-lg line-style-btn transition-all" title="Solid Line">
+                                <div class="w-7 h-0.5 bg-gray-700"></div>
                             </button>
-                            <button id="lineStyleDashed" (click)="onLineStyleChange('dashed')" [class.active]="lineStyle() === 'dashed'" class="px-1.5 py-1 hover:bg-gray-100 rounded line-style-btn" title="Dashed">
-                                <div class="w-6 h-0.5 border-t border-dashed border-gray-700"></div>
+                            <button id="lineStyleDashed" (click)="onLineStyleChange('dashed')" [class.active]="lineStyle() === 'dashed'" [class.bg-blue-50]="lineStyle() === 'dashed'" class="px-2 py-1.5 hover:bg-gray-50 rounded-lg line-style-btn transition-all" title="Dashed Line">
+                                <div class="w-7 h-0.5 border-t-2 border-dashed border-gray-700"></div>
                             </button>
-                            <button id="lineStyleDotted" (click)="onLineStyleChange('dotted')" [class.active]="lineStyle() === 'dotted'" class="px-1.5 py-1 hover:bg-gray-100 rounded line-style-btn" title="Dotted">
-                                <div class="w-6 h-1 flex space-x-0.5 justify-center">
-                                    <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                    <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                    <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
+                            <button id="lineStyleDotted" (click)="onLineStyleChange('dotted')" [class.active]="lineStyle() === 'dotted'" [class.bg-blue-50]="lineStyle() === 'dotted'" class="px-2 py-1.5 hover:bg-gray-50 rounded-lg line-style-btn transition-all" title="Dotted Line">
+                                <div class="w-7 h-1 flex space-x-1 justify-center items-center">
+                                    <div class="w-1 h-1 bg-gray-700 rounded-full"></div>
+                                    <div class="w-1 h-1 bg-gray-700 rounded-full"></div>
+                                    <div class="w-1 h-1 bg-gray-700 rounded-full"></div>
                                 </div>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Color & Size Group -->
-                    <div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
-                        <div class="flex items-center gap-1.5">
-                            <label class="text-xs text-gray-700">Color:</label>
-                            <input type="color" [value]="currentColor()" (input)="onColorChange($any($event.target).value)" class="w-8 h-8 rounded border border-gray-300 cursor-pointer">
-                            <div class="flex space-x-0.5">
-                                <button (click)="onColorChange('#000000')" [class.active]="currentColor() === '#000000'" class="color-btn w-5 h-5 rounded border border-gray-300 bg-black" title="Black"></button>
-                                <button (click)="onColorChange('#ef4444')" [class.active]="currentColor() === '#ef4444'" class="color-btn w-5 h-5 rounded border border-gray-300 bg-red-500" title="Red"></button>
-                                <button (click)="onColorChange('#3b82f6')" [class.active]="currentColor() === '#3b82f6'" class="color-btn w-5 h-5 rounded border border-gray-300 bg-blue-500" title="Blue"></button>
-                                <button (click)="onColorChange('#10b981')" [class.active]="currentColor() === '#10b981'" class="color-btn w-5 h-5 rounded border border-gray-300 bg-green-500" title="Green"></button>
+                    <!-- Color & Size Group - Enhanced -->
+                    <div class="bg-white rounded-xl p-2 border border-gray-200 shadow-sm flex items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-gray-600 font-medium">Color</label>
+                            <input type="color" [value]="currentColor()" (input)="onColorChange($any($event.target).value)" class="w-9 h-9 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition-all" title="Color Picker">
+                            <div class="flex space-x-1">
+                                <button (click)="onColorChange('#000000')" [class.active]="currentColor() === '#000000'" [class.ring-2]="currentColor() === '#000000'" [class.ring-blue-400]="currentColor() === '#000000'" class="color-btn w-6 h-6 rounded-lg border-2 border-gray-200 bg-black hover:scale-110 transition-transform" title="Black"></button>
+                                <button (click)="onColorChange('#ef4444')" [class.active]="currentColor() === '#ef4444'" [class.ring-2]="currentColor() === '#ef4444'" [class.ring-blue-400]="currentColor() === '#ef4444'" class="color-btn w-6 h-6 rounded-lg border-2 border-gray-200 bg-red-500 hover:scale-110 transition-transform" title="Red"></button>
+                                <button (click)="onColorChange('#3b82f6')" [class.active]="currentColor() === '#3b82f6'" [class.ring-2]="currentColor() === '#3b82f6'" [class.ring-blue-400]="currentColor() === '#3b82f6'" class="color-btn w-6 h-6 rounded-lg border-2 border-gray-200 bg-blue-500 hover:scale-110 transition-transform" title="Blue"></button>
+                                <button (click)="onColorChange('#10b981')" [class.active]="currentColor() === '#10b981'" [class.ring-2]="currentColor() === '#10b981'" [class.ring-blue-400]="currentColor() === '#10b981'" class="color-btn w-6 h-6 rounded-lg border-2 border-gray-200 bg-green-500 hover:scale-110 transition-transform" title="Green"></button>
                             </div>
-                            <button class="px-1.5 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded" id="moreColorsBtn" title="More Colors">
+                            <button (click)="onToggleMoreColors(false)" [class.bg-blue-50]="showMoreColors()" class="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded-lg transition-all" title="More Colors">
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
                         </div>
-                        <div id="additionalColors" class="hidden flex items-center gap-0.5 ml-1">
-                            <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-yellow-500" data-color="#eab308" title="Yellow"></button>
-                            <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-purple-500" data-color="#a855f7" title="Purple"></button>
-                            <button class="color-btn w-5 h-5 rounded border border-gray-300 bg-pink-500" data-color="#ec4899" title="Pink"></button>
+                        <div [class.hidden]="!showMoreColors()" class="flex items-center gap-1 ml-1 pl-2 border-l border-gray-200">
+                            <button (click)="onColorChange('#eab308')" [class.active]="currentColor() === '#eab308'" [class.ring-2]="currentColor() === '#eab308'" [class.ring-blue-400]="currentColor() === '#eab308'" class="color-btn w-6 h-6 rounded-lg border-2 border-gray-200 bg-yellow-500 hover:scale-110 transition-transform" title="Yellow"></button>
+                            <button (click)="onColorChange('#a855f7')" [class.active]="currentColor() === '#a855f7'" [class.ring-2]="currentColor() === '#a855f7'" [class.ring-blue-400]="currentColor() === '#a855f7'" class="color-btn w-6 h-6 rounded-lg border-2 border-gray-200 bg-purple-500 hover:scale-110 transition-transform" title="Purple"></button>
+                            <button (click)="onColorChange('#ec4899')" [class.active]="currentColor() === '#ec4899'" [class.ring-2]="currentColor() === '#ec4899'" [class.ring-blue-400]="currentColor() === '#ec4899'" class="color-btn w-6 h-6 rounded-lg border-2 border-gray-200 bg-pink-500 hover:scale-110 transition-transform" title="Pink"></button>
                         </div>
-                        <div class="w-px h-4 bg-gray-300"></div>
-                        <div class="flex items-center gap-1.5">
-                            <label class="text-xs text-gray-700">Size:</label>
-                            <input type="range" [value]="currentLineWidth()" (input)="onLineWidthChange(+$any($event.target).value)" min="1" max="30" class="w-20">
-                            <span class="text-xs text-gray-700 w-6">{{ currentLineWidth() }}</span>
+                        <div class="w-px h-6 bg-gray-200"></div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-gray-600 font-medium">Size</label>
+                            <input type="range" [value]="currentLineWidth()" (input)="onLineWidthChange(+$any($event.target).value)" min="1" max="30" class="w-24 accent-blue-500">
+                            <span class="text-xs text-gray-700 font-semibold w-8 text-center">{{ currentLineWidth() }}px</span>
                         </div>
                     </div>
 
-                    <!-- Canvas Options Group -->
-                    <div class="bg-white rounded-lg p-1.5 border border-gray-300 flex items-center gap-2">
-                        <div class="flex items-center gap-1.5 hidden md:flex">
-                            <label class="text-xs text-gray-700">BG:</label>
-                            <select (change)="onBackgroundColorChange($any($event.target).value)" class="px-1.5 py-1 bg-white border border-gray-300 rounded text-xs">
+                    <!-- Educational Tools Group - Enhanced -->
+                    <div class="flex items-center gap-2">
+                        <app-whiteboard-templates
+                            [templates]="templates()"
+                            (templateSelectEvent)="onTemplateSelect($event)">
+                        </app-whiteboard-templates>
+                        
+                        <app-whiteboard-stamps
+                            [isActive]="currentTool() === 'stamp'"
+                            (stampSelectEvent)="onStampSelect($event)">
+                        </app-whiteboard-stamps>
+                        
+                        <app-whiteboard-sticky-notes
+                            [isActive]="currentTool() === 'stickyNote'"
+                            (activateEvent)="selectTool('stickyNoteTool')"
+                            (addNoteEvent)="onAddStickyNote($event)">
+                        </app-whiteboard-sticky-notes>
+                        
+                        <app-whiteboard-math-tools
+                            (toolActivateEvent)="onMathToolActivate($event)">
+                        </app-whiteboard-math-tools>
+                    </div>
+                    
+                    <!-- Canvas Options Group - Enhanced -->
+                    <div class="bg-white rounded-xl p-2 border border-gray-200 shadow-sm flex items-center gap-2">
+                        <div class="flex items-center gap-2 hidden md:flex">
+                            <label class="text-xs text-gray-600 font-medium">Background</label>
+                            <select (change)="onBackgroundColorChange($any($event.target).value)" class="px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
                                 <option value="#ffffff">White</option>
                                 <option value="#f9fafb">Gray</option>
                                 <option value="#fef3c7">Yellow</option>
@@ -105,47 +180,53 @@
                                 <option value="#d1fae5">Green</option>
                             </select>
                         </div>
-                        <button id="gridToggle" (click)="onToggleGridVisible()" class="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100 text-xs text-gray-700 flex items-center" title="Toggle Grid">
-                            <i class="fas fa-th mr-1"></i>Grid: <span>{{ getGridStatus() }}</span>
+                        <button id="gridToggle" (click)="onToggleGridVisible()" [class.bg-blue-50]="gridVisible()" [class.text-blue-600]="gridVisible()" class="px-3 py-1.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-xs font-medium flex items-center gap-1.5 transition-all" title="Toggle Grid">
+                            <i class="fas fa-th"></i>
+                            <span>Grid</span>
+                            <span class="text-xs font-semibold">{{ getGridStatus() }}</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Right Group: Actions & Zoom -->
-                <div class="flex items-center gap-2 flex-wrap justify-end w-full lg:w-auto">
-                    <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-0.5">
-                        <button id="undoBtn" (click)="onUndo()" class="p-1.5 hover:bg-gray-100 rounded" title="Undo">
+                <!-- Right Group: Actions & Zoom - Enhanced -->
+                <div class="flex items-center gap-2.5 flex-wrap justify-end w-full xl:w-auto">
+                    <div class="bg-white rounded-xl p-1.5 border border-gray-200 shadow-sm flex items-center gap-1">
+                        <button id="undoBtn" (click)="onUndo()" class="p-2 hover:bg-gray-50 rounded-lg transition-all" title="Undo (Ctrl+Z)">
                             <i class="fas fa-undo text-gray-700 text-sm"></i>
                         </button>
-                        <button id="redoBtn" (click)="onRedo()" class="p-1.5 hover:bg-gray-100 rounded" title="Redo">
+                        <button id="redoBtn" (click)="onRedo()" class="p-2 hover:bg-gray-50 rounded-lg transition-all" title="Redo (Ctrl+Y)">
                             <i class="fas fa-redo text-gray-700 text-sm"></i>
                         </button>
                     </div>
-                    <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
-                        <button id="zoomOut" (click)="onZoomOut()" class="px-2 py-1 hover:bg-gray-100 rounded" title="Zoom Out">
-                            <i class="fas fa-search-minus text-gray-700 text-xs"></i>
+                    <div class="bg-white rounded-xl p-1.5 border border-gray-200 shadow-sm flex items-center gap-1.5">
+                        <button id="zoomOut" (click)="onZoomOut()" class="p-2 hover:bg-gray-50 rounded-lg transition-all" title="Zoom Out">
+                            <i class="fas fa-search-minus text-gray-700 text-sm"></i>
                         </button>
-                        <span class="px-2 text-xs text-gray-700 min-w-[3rem] text-center">{{ getZoomLevel() }}</span>
-                        <button id="zoomIn" (click)="onZoomIn()" class="px-2 py-1 hover:bg-gray-100 rounded" title="Zoom In">
-                            <i class="fas fa-search-plus text-gray-700 text-xs"></i>
+                        <span class="px-3 py-1 text-xs text-gray-700 font-semibold min-w-[3.5rem] text-center bg-gray-50 rounded-lg">{{ getZoomLevel() }}</span>
+                        <button id="zoomIn" (click)="onZoomIn()" class="p-2 hover:bg-gray-50 rounded-lg transition-all" title="Zoom In">
+                            <i class="fas fa-search-plus text-gray-700 text-sm"></i>
                         </button>
-                        <button id="zoomReset" (click)="onZoomReset()" class="px-1.5 py-1 hover:bg-gray-100 rounded text-xs text-gray-700" title="Reset">
+                        <button id="zoomReset" (click)="onZoomReset()" class="px-2.5 py-1.5 hover:bg-gray-50 rounded-lg text-xs text-gray-700 font-medium transition-all" title="Reset Zoom">
                             Reset
                         </button>
                     </div>
-                    <div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
-                        <button id="clearBtn" (click)="onClear()" class="px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-xs flex items-center" title="Clear">
-                            <i class="fas fa-trash mr-1"></i>Clear
+                    <div class="bg-white rounded-xl p-1.5 border border-gray-200 shadow-sm flex items-center gap-1">
+                        <button id="clearBtn" (click)="onClear()" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm" title="Clear Canvas">
+                            <i class="fas fa-trash"></i>
+                            <span>Clear</span>
                         </button>
-                        <button id="saveWhiteboardBtn" (click)="onSaveWhiteboard()" class="px-2 py-1 bg-primary hover:bg-blue-600 text-white rounded text-xs flex items-center" title="Save">
-                            <i class="fas fa-download mr-1"></i>Save
+                        <button id="saveWhiteboardBtn" (click)="onSaveWhiteboard()" class="px-3 py-1.5 bg-primary hover:bg-blue-600 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm" title="Save Whiteboard">
+                            <i class="fas fa-download"></i>
+                            <span>Save</span>
                         </button>
-                        <button id="exportPDFBtn" (click)="onExportPDF()" class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs flex items-center" title="Export PDF">
-                            <i class="fas fa-file-pdf mr-1"></i>PDF
+                        <button id="exportPDFBtn" (click)="onExportPDF()" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm" title="Export as PDF">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>PDF</span>
                         </button>
                     </div>
-                    <button #exitWhiteboardFullscreen (click)="_onExitWhiteboard()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm flex items-center flex-shrink-0">
-                        <i class="fas fa-times mr-1.5"></i>Exit
+                    <button #exitWhiteboardFullscreen (click)="_onExitWhiteboard()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all text-sm font-medium flex items-center gap-2 flex-shrink-0 shadow-md hover:shadow-lg">
+                        <i class="fas fa-times"></i>
+                        <span>Exit</span>
                     </button>
                 </div>
             </div>
@@ -154,212 +235,237 @@
         <!-- Mobile Layout -->
         <div class="sm:hidden">
             <!-- Top Row: Essential Tools & Exit -->
-            <div class="px-3 py-2 flex items-center justify-between gap-2 border-b border-gray-300">
+            <div class="px-3 py-2.5 flex items-center justify-between gap-2 border-b border-gray-200 bg-gray-50/50">
                 <!-- Tools Scroll -->
-                <div class="flex-1 overflow-x-auto mobile-toolbar-scroll">
+                <div class="flex-1 overflow-x-auto mobile-toolbar-scroll scrollbar-hide">
                     <div class="flex items-center gap-2 min-w-max">
-                        <button id="penToolMobile" (click)="selectTool('penToolMobile')" [class.border-blue-500]="currentTool() === 'pen'" [class.border-2]="currentTool() === 'pen'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Pen">
-                            <i [class.text-blue-600]="currentTool() === 'pen'" [class.text-gray-700]="currentTool() !== 'pen'" class="fas fa-pen"></i>
+                        <button id="penToolMobile" (click)="selectTool('penToolMobile')" [class.border-blue-500]="currentTool() === 'pen'" [class.bg-blue-50]="currentTool() === 'pen'" [class.border-2]="currentTool() === 'pen'" class="mobile-tool-btn p-3 bg-white rounded-xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-sm transition-all" title="Pen">
+                            <i [class.text-blue-600]="currentTool() === 'pen'" [class.text-gray-700]="currentTool() !== 'pen'" class="fas fa-pen text-base"></i>
                         </button>
-                        <button id="highlighterToolMobile" (click)="selectTool('highlighterToolMobile')" [class.border-blue-500]="currentTool() === 'highlighter'" [class.border-2]="currentTool() === 'highlighter'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Highlighter">
-                            <i [class.text-blue-600]="currentTool() === 'highlighter'" [class.text-gray-700]="currentTool() !== 'highlighter'" class="fas fa-highlighter"></i>
+                        <button id="highlighterToolMobile" (click)="selectTool('highlighterToolMobile')" [class.border-blue-500]="currentTool() === 'highlighter'" [class.bg-blue-50]="currentTool() === 'highlighter'" [class.border-2]="currentTool() === 'highlighter'" class="mobile-tool-btn p-3 bg-white rounded-xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-sm transition-all" title="Highlighter">
+                            <i [class.text-blue-600]="currentTool() === 'highlighter'" [class.text-gray-700]="currentTool() !== 'highlighter'" class="fas fa-highlighter text-base"></i>
                         </button>
-                        <button id="eraserToolMobile" (click)="selectTool('eraserToolMobile')" [class.border-blue-500]="currentTool() === 'eraser'" [class.border-2]="currentTool() === 'eraser'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Eraser">
-                            <i [class.text-blue-600]="currentTool() === 'eraser'" [class.text-gray-700]="currentTool() !== 'eraser'" class="fas fa-eraser"></i>
+                        <button id="eraserToolMobile" (click)="selectTool('eraserToolMobile')" [class.border-blue-500]="currentTool() === 'eraser'" [class.bg-blue-50]="currentTool() === 'eraser'" [class.border-2]="currentTool() === 'eraser'" class="mobile-tool-btn p-3 bg-white rounded-xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-sm transition-all" title="Eraser">
+                            <i [class.text-blue-600]="currentTool() === 'eraser'" [class.text-gray-700]="currentTool() !== 'eraser'" class="fas fa-eraser text-base"></i>
                         </button>
-                        <button id="shapeToolMobile" (click)="selectTool('shapeToolMobile')" [class.border-blue-500]="currentTool() === 'rectangle'" [class.border-2]="currentTool() === 'rectangle'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Rectangle">
-                            <i [class.text-blue-600]="currentTool() === 'rectangle'" [class.text-gray-700]="currentTool() !== 'rectangle'" class="fas fa-square"></i>
+                        <button id="shapeToolMobile" (click)="selectTool('shapeToolMobile')" [class.border-blue-500]="currentTool() === 'rectangle'" [class.bg-blue-50]="currentTool() === 'rectangle'" [class.border-2]="currentTool() === 'rectangle'" class="mobile-tool-btn p-3 bg-white rounded-xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-sm transition-all" title="Rectangle">
+                            <i [class.text-blue-600]="currentTool() === 'rectangle'" [class.text-gray-700]="currentTool() !== 'rectangle'" class="fas fa-square text-base"></i>
                         </button>
-                        <button id="circleToolMobile" (click)="selectTool('circleToolMobile')" [class.border-blue-500]="currentTool() === 'circle'" [class.border-2]="currentTool() === 'circle'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Circle">
-                            <i [class.text-blue-600]="currentTool() === 'circle'" [class.text-gray-700]="currentTool() !== 'circle'" class="far fa-circle"></i>
+                        <button id="circleToolMobile" (click)="selectTool('circleToolMobile')" [class.border-blue-500]="currentTool() === 'circle'" [class.bg-blue-50]="currentTool() === 'circle'" [class.border-2]="currentTool() === 'circle'" class="mobile-tool-btn p-3 bg-white rounded-xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-sm transition-all" title="Circle">
+                            <i [class.text-blue-600]="currentTool() === 'circle'" [class.text-gray-700]="currentTool() !== 'circle'" class="far fa-circle text-base"></i>
                         </button>
-                        <button id="arrowToolMobile" (click)="selectTool('arrowToolMobile')" [class.border-blue-500]="currentTool() === 'arrow'" [class.border-2]="currentTool() === 'arrow'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Arrow">
-                            <i [class.text-blue-600]="currentTool() === 'arrow'" [class.text-gray-700]="currentTool() !== 'arrow'" class="fas fa-arrow-right"></i>
+                        <button id="arrowToolMobile" (click)="selectTool('arrowToolMobile')" [class.border-blue-500]="currentTool() === 'arrow'" [class.bg-blue-50]="currentTool() === 'arrow'" [class.border-2]="currentTool() === 'arrow'" class="mobile-tool-btn p-3 bg-white rounded-xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-sm transition-all" title="Arrow">
+                            <i [class.text-blue-600]="currentTool() === 'arrow'" [class.text-gray-700]="currentTool() !== 'arrow'" class="fas fa-arrow-right text-base"></i>
                         </button>
-                        <button id="lineToolMobile" (click)="selectTool('lineToolMobile')" [class.border-blue-500]="currentTool() === 'line'" [class.border-2]="currentTool() === 'line'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Line">
-                            <i [class.text-blue-600]="currentTool() === 'line'" [class.text-gray-700]="currentTool() !== 'line'" class="fas fa-minus"></i>
+                        <button id="lineToolMobile" (click)="selectTool('lineToolMobile')" [class.border-blue-500]="currentTool() === 'line'" [class.bg-blue-50]="currentTool() === 'line'" [class.border-2]="currentTool() === 'line'" class="mobile-tool-btn p-3 bg-white rounded-xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-sm transition-all" title="Line">
+                            <i [class.text-blue-600]="currentTool() === 'line'" [class.text-gray-700]="currentTool() !== 'line'" class="fas fa-minus text-base"></i>
                         </button>
-                        <button id="textToolMobile" (click)="selectTool('textToolMobile')" [class.border-blue-500]="currentTool() === 'text'" [class.border-2]="currentTool() === 'text'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Text">
-                            <i [class.text-blue-600]="currentTool() === 'text'" [class.text-gray-700]="currentTool() !== 'text'" class="fas fa-font"></i>
+                        <button id="textToolMobile" (click)="selectTool('textToolMobile')" [class.border-blue-500]="currentTool() === 'text'" [class.bg-blue-50]="currentTool() === 'text'" [class.border-2]="currentTool() === 'text'" class="mobile-tool-btn p-3 bg-white rounded-xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-sm transition-all" title="Text">
+                            <i [class.text-blue-600]="currentTool() === 'text'" [class.text-gray-700]="currentTool() !== 'text'" class="fas fa-font text-base"></i>
                         </button>
-                        <button id="imageToolMobile" (click)="selectTool('imageToolMobile')" [class.border-blue-500]="currentTool() === 'image'" [class.border-2]="currentTool() === 'image'" class="mobile-tool-btn p-2.5 bg-white rounded-lg border border-gray-300 tool-btn flex items-center justify-center" title="Image">
-                            <i [class.text-blue-600]="currentTool() === 'image'" [class.text-gray-700]="currentTool() !== 'image'" class="fas fa-image"></i>
+                        <button id="imageToolMobile" (click)="selectTool('imageToolMobile')" [class.border-blue-500]="currentTool() === 'image'" [class.bg-blue-50]="currentTool() === 'image'" [class.border-2]="currentTool() === 'image'" class="mobile-tool-btn p-3 bg-white rounded-xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-sm transition-all" title="Image">
+                            <i [class.text-blue-600]="currentTool() === 'image'" [class.text-gray-700]="currentTool() !== 'image'" class="fas fa-image text-base"></i>
                         </button>
                         <input #imageUploadMobile type="file" (change)="onImageUpload($event)" accept="image/*" class="hidden">
                     </div>
                 </div>
-                <button #exitWhiteboardFullscreenMobile (click)="_onExitWhiteboard()" class="p-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-times"></i>
+                <button #exitWhiteboardFullscreenMobile (click)="_onExitWhiteboard()" class="p-3 bg-red-600 hover:bg-red-700 text-white rounded-xl flex items-center justify-center flex-shrink-0 shadow-md transition-all">
+                    <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
 
             <!-- Collapsible Sections -->
             <!-- Color & Size Section -->
-            <div class="border-b border-gray-300">
-                <button (click)="toggleCollapsible('colorSizePanelMobile', 'colorSizeChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-palette text-gray-700"></i>
-                        <span class="text-sm font-medium text-gray-700">Color &amp; Size</span>
-                    </div>
-                    <i #colorSizeChevron class="fas fa-chevron-down text-gray-500 transition-transform"></i>
-                </button>
-                <div #colorSizePanelMobile class="hidden px-3 py-2 border-t border-gray-200">
+            <div class="border-b border-gray-200">
+                <button (click)="toggleCollapsible('colorSizePanelMobile', 'colorSizeChevron')" class="w-full px-4 py-3 flex items-center justify-between bg-white hover:bg-gray-50 transition-all">
                     <div class="flex items-center gap-3">
-                        <!-- Color Picker -->
-                        <div class="flex items-center gap-2 bg-white rounded-lg px-2 py-2 border border-gray-300">
-                            <input type="color" [value]="currentColor()" (input)="onColorChange($any($event.target).value)" class="w-10 h-10 rounded border-0 cursor-pointer p-0" style="appearance: none; -webkit-appearance: none;">
-                            <div class="flex space-x-1.5">
-                                <button (click)="onColorChange('#000000')" [class.active]="currentColor() === '#000000'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-black" title="Black"></button>
-                                <button (click)="onColorChange('#ef4444')" [class.active]="currentColor() === '#ef4444'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-red-500" title="Red"></button>
-                                <button (click)="onColorChange('#3b82f6')" [class.active]="currentColor() === '#3b82f6'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-blue-500" title="Blue"></button>
-                                <button (click)="onColorChange('#10b981')" [class.active]="currentColor() === '#10b981'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-green-500" title="Green"></button>
-                            </div>
-                            <button class="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded" id="moreColorsBtnMobile" title="More Colors">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <i class="fas fa-palette text-blue-600"></i>
                         </div>
-                        <!-- Additional Colors (Hidden by default) -->
-                        <div id="additionalColorsMobile" class="hidden flex items-center gap-1.5">
-                            <button (click)="onColorChange('#eab308')" [class.active]="currentColor() === '#eab308'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-yellow-500" title="Yellow"></button>
-                            <button (click)="onColorChange('#a855f7')" [class.active]="currentColor() === '#a855f7'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-purple-500" title="Purple"></button>
-                            <button (click)="onColorChange('#ec4899')" [class.active]="currentColor() === '#ec4899'" class="color-btn w-7 h-7 rounded border-2 border-gray-300 bg-pink-500" title="Pink"></button>
+                        <span class="text-sm font-semibold text-gray-800">Color &amp; Size</span>
+                    </div>
+                    <i #colorSizeChevron class="fas fa-chevron-down text-gray-400 transition-transform duration-200"></i>
+                </button>
+                <div #colorSizePanelMobile class="hidden px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+                    <div class="space-y-3">
+                        <!-- Color Picker -->
+                        <div class="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+                            <div class="flex items-center gap-3 mb-3">
+                                <input type="color" [value]="currentColor()" (input)="onColorChange($any($event.target).value)" class="w-12 h-12 rounded-xl border-2 border-gray-200 cursor-pointer" style="appearance: none; -webkit-appearance: none;">
+                                <div class="flex space-x-2 flex-1">
+                                    <button (click)="onColorChange('#000000')" [class.active]="currentColor() === '#000000'" [class.ring-2]="currentColor() === '#000000'" [class.ring-blue-400]="currentColor() === '#000000'" class="color-btn w-9 h-9 rounded-xl border-2 border-gray-200 bg-black transition-all" title="Black"></button>
+                                    <button (click)="onColorChange('#ef4444')" [class.active]="currentColor() === '#ef4444'" [class.ring-2]="currentColor() === '#ef4444'" [class.ring-blue-400]="currentColor() === '#ef4444'" class="color-btn w-9 h-9 rounded-xl border-2 border-gray-200 bg-red-500 transition-all" title="Red"></button>
+                                    <button (click)="onColorChange('#3b82f6')" [class.active]="currentColor() === '#3b82f6'" [class.ring-2]="currentColor() === '#3b82f6'" [class.ring-blue-400]="currentColor() === '#3b82f6'" class="color-btn w-9 h-9 rounded-xl border-2 border-gray-200 bg-blue-500 transition-all" title="Blue"></button>
+                                    <button (click)="onColorChange('#10b981')" [class.active]="currentColor() === '#10b981'" [class.ring-2]="currentColor() === '#10b981'" [class.ring-blue-400]="currentColor() === '#10b981'" class="color-btn w-9 h-9 rounded-xl border-2 border-gray-200 bg-green-500 transition-all" title="Green"></button>
+                                </div>
+                                <button (click)="onToggleMoreColors(true)" [class.bg-blue-50]="showMoreColorsMobile()" class="px-3 py-2 text-xs text-gray-600 hover:bg-gray-100 rounded-lg transition-all" title="More Colors">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                            <!-- Additional Colors -->
+                            <div [class.hidden]="!showMoreColorsMobile()" class="flex items-center gap-2 pt-2 border-t border-gray-200">
+                                <span class="text-xs text-gray-500 font-medium">More:</span>
+                                <button (click)="onColorChange('#eab308')" [class.active]="currentColor() === '#eab308'" [class.ring-2]="currentColor() === '#eab308'" [class.ring-blue-400]="currentColor() === '#eab308'" class="color-btn w-9 h-9 rounded-xl border-2 border-gray-200 bg-yellow-500 transition-all" title="Yellow"></button>
+                                <button (click)="onColorChange('#a855f7')" [class.active]="currentColor() === '#a855f7'" [class.ring-2]="currentColor() === '#a855f7'" [class.ring-blue-400]="currentColor() === '#a855f7'" class="color-btn w-9 h-9 rounded-xl border-2 border-gray-200 bg-purple-500 transition-all" title="Purple"></button>
+                                <button (click)="onColorChange('#ec4899')" [class.active]="currentColor() === '#ec4899'" [class.ring-2]="currentColor() === '#ec4899'" [class.ring-blue-400]="currentColor() === '#ec4899'" class="color-btn w-9 h-9 rounded-xl border-2 border-gray-200 bg-pink-500 transition-all" title="Pink"></button>
+                            </div>
                         </div>
                         <!-- Line Width -->
-                        <div class="flex-1 bg-white rounded-lg px-3 py-2 border border-gray-300 flex items-center gap-2">
-                            <label class="text-xs text-gray-700 font-medium">Size:</label>
-                            <input type="range" [value]="currentLineWidth()" (input)="onLineWidthChange(+$any($event.target).value)" min="1" max="30" class="flex-1">
-                            <span class="text-xs text-gray-700 font-semibold w-8 text-center">{{ currentLineWidth() }}</span>
+                        <div class="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <label class="text-xs text-gray-600 font-semibold min-w-[3rem]">Size:</label>
+                                <input type="range" [value]="currentLineWidth()" (input)="onLineWidthChange(+$any($event.target).value)" min="1" max="30" class="flex-1 accent-blue-500">
+                                <span class="text-sm text-gray-800 font-bold w-10 text-center bg-gray-50 px-2 py-1 rounded-lg">{{ currentLineWidth() }}px</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Style Options Section -->
-            <div class="border-b border-gray-300">
-                <button (click)="toggleCollapsible('styleOptionsPanelMobile', 'styleOptionsChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-sliders-h text-gray-700"></i>
-                        <span class="text-sm font-medium text-gray-700">Style Options</span>
+            <div class="border-b border-gray-200">
+                <button (click)="toggleCollapsible('styleOptionsPanelMobile', 'styleOptionsChevron')" class="w-full px-4 py-3 flex items-center justify-between bg-white hover:bg-gray-50 transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                            <i class="fas fa-sliders-h text-purple-600"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-800">Style Options</span>
                     </div>
-                    <i #styleOptionsChevron class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                    <i #styleOptionsChevron class="fas fa-chevron-down text-gray-400 transition-transform duration-200"></i>
                 </button>
-                <div #styleOptionsPanelMobile class="hidden px-3 py-2 border-t border-gray-200 space-y-2">
-                    <div class="flex items-center gap-2">
-                        <!-- Fill Toggle -->
-                        <button id="fillToggleMobile" (click)="onToggleFill()" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Fill Shapes">
-                            <i class="fas fa-fill-drip text-gray-700"></i>
-                            <span class="text-xs text-gray-700 font-medium">Fill: </span>
-                            <span class="text-xs text-gray-700 font-semibold">{{ getFillStatus() }}</span>
-                        </button>
-                        <!-- Line Style -->
-                        <div class="flex-1 bg-white rounded-lg px-2 py-2 border border-gray-300 flex items-center justify-center gap-2">
-                            <span class="text-xs text-gray-700 font-medium">Style:</span>
-                            <div class="flex items-center gap-1">
-                                <button id="lineStyleSolidMobile" (click)="onLineStyleChange('solid')" [class.active]="lineStyle() === 'solid'" class="px-2 py-1 hover:bg-gray-100 rounded line-style-btn" title="Solid">
-                                    <div class="w-6 h-0.5 bg-gray-700"></div>
-                                </button>
-                                <button id="lineStyleDashedMobile" (click)="onLineStyleChange('dashed')" [class.active]="lineStyle() === 'dashed'" class="px-2 py-1 hover:bg-gray-100 rounded line-style-btn" title="Dashed">
-                                    <div class="w-6 h-0.5 border-t border-dashed border-gray-700"></div>
-                                </button>
-                                <button id="lineStyleDottedMobile" (click)="onLineStyleChange('dotted')" [class.active]="lineStyle() === 'dotted'" class="px-2 py-1 hover:bg-gray-100 rounded line-style-btn" title="Dotted">
-                                    <div class="w-6 h-1 flex space-x-0.5 justify-center">
-                                        <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                        <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                        <div class="w-0.5 h-0.5 bg-gray-700 rounded-full"></div>
-                                    </div>
-                                </button>
+                <div #styleOptionsPanelMobile class="hidden px-4 py-3 border-t border-gray-100 bg-gray-50/50 space-y-3">
+                    <div class="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <!-- Fill Toggle -->
+                            <button id="fillToggleMobile" (click)="onToggleFill()" [class.bg-blue-50]="fillShapes()" [class.text-blue-600]="fillShapes()" class="flex-1 px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center gap-2 transition-all" title="Fill Shapes">
+                                <i class="fas fa-fill-drip"></i>
+                                <span class="text-xs font-semibold">Fill: </span>
+                                <span class="text-xs font-bold">{{ getFillStatus() }}</span>
+                            </button>
+                            <!-- Line Style -->
+                            <div class="flex-1 bg-white border-2 border-gray-200 rounded-xl px-3 py-2.5 flex items-center justify-center gap-2">
+                                <span class="text-xs text-gray-600 font-medium">Style:</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="lineStyleSolidMobile" (click)="onLineStyleChange('solid')" [class.active]="lineStyle() === 'solid'" [class.bg-blue-50]="lineStyle() === 'solid'" class="px-2.5 py-1.5 hover:bg-gray-50 rounded-lg line-style-btn transition-all" title="Solid">
+                                        <div class="w-7 h-0.5 bg-gray-700"></div>
+                                    </button>
+                                    <button id="lineStyleDashedMobile" (click)="onLineStyleChange('dashed')" [class.active]="lineStyle() === 'dashed'" [class.bg-blue-50]="lineStyle() === 'dashed'" class="px-2.5 py-1.5 hover:bg-gray-50 rounded-lg line-style-btn transition-all" title="Dashed">
+                                        <div class="w-7 h-0.5 border-t-2 border-dashed border-gray-700"></div>
+                                    </button>
+                                    <button id="lineStyleDottedMobile" (click)="onLineStyleChange('dotted')" [class.active]="lineStyle() === 'dotted'" [class.bg-blue-50]="lineStyle() === 'dotted'" class="px-2.5 py-1.5 hover:bg-gray-50 rounded-lg line-style-btn transition-all" title="Dotted">
+                                        <div class="w-7 h-1 flex space-x-1 justify-center items-center">
+                                            <div class="w-1 h-1 bg-gray-700 rounded-full"></div>
+                                            <div class="w-1 h-1 bg-gray-700 rounded-full"></div>
+                                            <div class="w-1 h-1 bg-gray-700 rounded-full"></div>
+                                        </div>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <!-- Background Color -->
-                        <select (change)="onBackgroundColorChange($any($event.target).value)" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs">
-                            <option value="#ffffff">White BG</option>
-                            <option value="#f9fafb">Gray BG</option>
-                            <option value="#fef3c7">Yellow BG</option>
-                            <option value="#dbeafe">Blue BG</option>
-                            <option value="#fce7f3">Pink BG</option>
-                            <option value="#e0e7ff">Purple BG</option>
-                            <option value="#d1fae5">Green BG</option>
-                        </select>
-                        <!-- Grid Toggle -->
-                        <button id="gridToggleMobile" (click)="onToggleGridVisible()" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Toggle Grid">
-                            <i class="fas fa-th text-gray-700"></i>
-                            <span class="text-xs text-gray-700 font-medium">Grid: </span>
-                            <span class="text-xs text-gray-700 font-semibold">{{ getGridStatus() }}</span>
-                        </button>
+                    <div class="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <!-- Background Color -->
+                            <select (change)="onBackgroundColorChange($any($event.target).value)" class="flex-1 px-3 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-xs font-medium focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                <option value="#ffffff">White Background</option>
+                                <option value="#f9fafb">Gray Background</option>
+                                <option value="#fef3c7">Yellow Background</option>
+                                <option value="#dbeafe">Blue Background</option>
+                                <option value="#fce7f3">Pink Background</option>
+                                <option value="#e0e7ff">Purple Background</option>
+                                <option value="#d1fae5">Green Background</option>
+                            </select>
+                            <!-- Grid Toggle -->
+                            <button id="gridToggleMobile" (click)="onToggleGridVisible()" [class.bg-blue-50]="gridVisible()" [class.text-blue-600]="gridVisible()" class="flex-1 px-3 py-2.5 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center gap-2 transition-all" title="Toggle Grid">
+                                <i class="fas fa-th"></i>
+                                <span class="text-xs font-semibold">Grid: </span>
+                                <span class="text-xs font-bold">{{ getGridStatus() }}</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Zoom Controls Section -->
-            <div class="border-b border-gray-300">
-                <button (click)="toggleCollapsible('zoomPanelMobile', 'zoomChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-search-plus text-gray-700"></i>
-                        <span class="text-sm font-medium text-gray-700">Zoom</span>
+            <div class="border-b border-gray-200">
+                <button (click)="toggleCollapsible('zoomPanelMobile', 'zoomChevron')" class="w-full px-4 py-3 flex items-center justify-between bg-white hover:bg-gray-50 transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+                            <i class="fas fa-search-plus text-green-600"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-800">Zoom Controls</span>
                     </div>
-                    <i #zoomChevron class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                    <i #zoomChevron class="fas fa-chevron-down text-gray-400 transition-transform duration-200"></i>
                 </button>
-                <div #zoomPanelMobile class="hidden px-3 py-2 border-t border-gray-200">
-                    <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-gray-300">
-                        <button id="zoomOutMobile" (click)="onZoomOut()" class="p-2 hover:bg-gray-100 rounded" title="Zoom Out">
-                            <i class="fas fa-search-minus text-gray-700"></i>
-                        </button>
-                        <span class="flex-1 text-center text-xs text-gray-700 font-semibold">{{ getZoomLevel() }}</span>
-                        <button id="zoomInMobile" (click)="onZoomIn()" class="p-2 hover:bg-gray-100 rounded" title="Zoom In">
-                            <i class="fas fa-search-plus text-gray-700"></i>
-                        </button>
-                        <button id="zoomResetMobile" (click)="onZoomReset()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-xs text-gray-700 font-medium" title="Reset">
-                            Reset
-                        </button>
+                <div #zoomPanelMobile class="hidden px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+                    <div class="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <button id="zoomOutMobile" (click)="onZoomOut()" class="p-3 hover:bg-gray-50 rounded-xl transition-all" title="Zoom Out">
+                                <i class="fas fa-search-minus text-gray-700 text-base"></i>
+                            </button>
+                            <span class="flex-1 text-center text-sm text-gray-800 font-bold bg-gray-50 px-4 py-2.5 rounded-xl">{{ getZoomLevel() }}</span>
+                            <button id="zoomInMobile" (click)="onZoomIn()" class="p-3 hover:bg-gray-50 rounded-xl transition-all" title="Zoom In">
+                                <i class="fas fa-search-plus text-gray-700 text-base"></i>
+                            </button>
+                            <button id="zoomResetMobile" (click)="onZoomReset()" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs text-gray-700 font-semibold transition-all" title="Reset Zoom">
+                                Reset
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Actions Section -->
-            <div class="border-b border-gray-300">
-                <button (click)="toggleCollapsible('actionsPanelMobile', 'actionsChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-history text-gray-700"></i>
-                        <span class="text-sm font-medium text-gray-700">History &amp; Actions</span>
+            <div class="border-b border-gray-200">
+                <button (click)="toggleCollapsible('actionsPanelMobile', 'actionsChevron')" class="w-full px-4 py-3 flex items-center justify-between bg-white hover:bg-gray-50 transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center">
+                            <i class="fas fa-history text-orange-600"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-800">History &amp; Actions</span>
                     </div>
-                    <i #actionsChevron class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                    <i #actionsChevron class="fas fa-chevron-down text-gray-400 transition-transform duration-200"></i>
                 </button>
-                <div #actionsPanelMobile class="hidden px-3 py-2 border-t border-gray-200 flex items-center gap-2">
-                    <button id="undoBtnMobile" (click)="onUndo()" class="flex-1 px-3 py-2.5 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Undo">
-                        <i class="fas fa-undo text-gray-700"></i>
-                        <span class="text-xs text-gray-700 font-medium">Undo</span>
-                    </button>
-                    <button id="redoBtnMobile" (click)="onRedo()" class="flex-1 px-3 py-2.5 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Redo">
-                        <i class="fas fa-redo text-gray-700"></i>
-                        <span class="text-xs text-gray-700 font-medium">Redo</span>
-                    </button>
-                    <button id="clearBtnMobile" (click)="onClear()" class="flex-1 px-3 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center justify-center gap-2" title="Clear">
-                        <i class="fas fa-trash"></i>
-                        <span class="text-xs font-medium">Clear</span>
-                    </button>
+                <div #actionsPanelMobile class="hidden px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+                    <div class="flex items-center gap-2">
+                        <button id="undoBtnMobile" (click)="onUndo()" class="flex-1 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm" title="Undo">
+                            <i class="fas fa-undo text-gray-700"></i>
+                            <span class="text-xs text-gray-700 font-semibold">Undo</span>
+                        </button>
+                        <button id="redoBtnMobile" (click)="onRedo()" class="flex-1 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm" title="Redo">
+                            <i class="fas fa-redo text-gray-700"></i>
+                            <span class="text-xs text-gray-700 font-semibold">Redo</span>
+                        </button>
+                        <button id="clearBtnMobile" (click)="onClear()" class="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl flex items-center justify-center gap-2 transition-all shadow-md" title="Clear Canvas">
+                            <i class="fas fa-trash"></i>
+                            <span class="text-xs font-semibold">Clear</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Save & Export Section -->
-            <div class="border-b border-gray-300">
-                <button (click)="toggleCollapsible('saveExportPanelMobile', 'saveExportChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-download text-gray-700"></i>
-                        <span class="text-sm font-medium text-gray-700">Save &amp; Export</span>
+            <div class="border-b border-gray-200">
+                <button (click)="toggleCollapsible('saveExportPanelMobile', 'saveExportChevron')" class="w-full px-4 py-3 flex items-center justify-between bg-white hover:bg-gray-50 transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
+                            <i class="fas fa-download text-indigo-600"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-800">Save &amp; Export</span>
                     </div>
-                    <i #saveExportChevron class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                    <i #saveExportChevron class="fas fa-chevron-down text-gray-400 transition-transform duration-200"></i>
                 </button>
-                <div #saveExportPanelMobile class="hidden px-3 py-2 border-t border-gray-200 flex items-center gap-2">
-                    <button id="saveWhiteboardBtnMobile" (click)="onSaveWhiteboard()" class="flex-1 px-3 py-2.5 bg-primary hover:bg-blue-600 text-white rounded-lg flex items-center justify-center gap-2" title="Save">
-                        <i class="fas fa-download"></i>
-                        <span class="text-xs font-medium">Save</span>
-                    </button>
-                    <button id="exportPDFBtnMobile" (click)="onExportPDF()" class="flex-1 px-3 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-2" title="Export PDF">
-                        <i class="fas fa-file-pdf"></i>
-                        <span class="text-xs font-medium">Export PDF</span>
-                    </button>
+                <div #saveExportPanelMobile class="hidden px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+                    <div class="flex items-center gap-2">
+                        <button id="saveWhiteboardBtnMobile" (click)="onSaveWhiteboard()" class="flex-1 px-4 py-3 bg-primary hover:bg-blue-600 text-white rounded-xl flex items-center justify-center gap-2 transition-all shadow-md" title="Save Whiteboard">
+                            <i class="fas fa-download"></i>
+                            <span class="text-xs font-semibold">Save</span>
+                        </button>
+                        <button id="exportPDFBtnMobile" (click)="onExportPDF()" class="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl flex items-center justify-center gap-2 transition-all shadow-md" title="Export as PDF">
+                            <i class="fas fa-file-pdf"></i>
+                            <span class="text-xs font-semibold">Export PDF</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

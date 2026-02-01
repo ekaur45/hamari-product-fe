@@ -1,0 +1,28 @@
+<div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
+    <button 
+        (click)="activateStickyNoteTool()"
+        [class.active]="isActive()"
+        class="p-2 hover:bg-gray-100 rounded tool-btn"
+        title="Add Sticky Note">
+        <i class="fas fa-sticky-note text-gray-700 text-sm"></i>
+    </button>
+    
+    @if(isActive()) {
+        <div class="w-px h-6 bg-gray-300 mx-1"></div>
+        
+        <!-- Color Picker for Notes -->
+        <div class="flex items-center gap-1">
+            @for(color of noteColors; track color) {
+                <button 
+                    (click)="selectColor(color)"
+                    [class.border-2]="selectedColor() === color"
+                    [class.border-blue-500]="selectedColor() === color"
+                    class="w-6 h-6 rounded border border-gray-300"
+                    [style.background-color]="color"
+                    [title]="color">
+                </button>
+            }
+        </div>
+    }
+</div>
+

@@ -282,6 +282,14 @@
                     [title]="isScreenSharing() ? 'Stop sharing' : 'Share screen'">
                     <i class="fas fa-desktop text-sm sm:text-base"></i>
                 </button>
+
+                <!-- Whiteboard -->
+                <button
+                    (click)="showWhiteboard.set(true)"
+                    class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-700 hover:bg-gray-600 text-white rounded-full flex items-center justify-center transition flex-shrink-0 hidden sm:flex"
+                    [title]="showWhiteboard() ? 'Hide whiteboard' : 'Show whiteboard'">
+                    <i class="fas fa-pen-nib text-sm sm:text-base"></i>
+                </button>
                 
                 <!-- View Mode Toggle (Split/PIP) -->
                 <button
