@@ -1,0 +1,52 @@
+<div class="absolute top-0 right-0 w-1/4 h-full bg-gray-600 z-50 shadow-xl shadow-white grid grid-rows-[auto_1fr_auto] slide-in-right-5000ms slide-out-right-5000ms">
+    <header
+        class="bg-gray-800 text-white px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0">
+                <profile-photo [user]="chatMessages()[0].sender"></profile-photo>
+            </div>
+            <div class="flex flex-col">
+                <h3 class="text-sm sm:text-lg font-semibold truncate">{{'John Doe'}}</h3>
+                <p class="text-xs sm:text-sm text-gray-400 truncate">{{'Online'}}</p>
+            </div>
+        </div>
+        <div class="flex items-center justify-end space-x-2 sm:space-x-4 flex-1 min-w-0">
+            <button (click)="closeChat.emit(false)" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-full">
+                <i class="fas fa-close text-sm sm:text-base"></i>
+            </button>
+        </div>
+    </header>
+    <div class="overflow-y-auto">
+        <div class="p-4">
+            @for(message of chatMessages(); track message.id) {
+            <div class="w-full flex justify-start">
+                <div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0 max-w-2/3 mb-2">
+                    <div class="flex flex-col bg-gray-100 rounded-lg p-2">
+                        <p class="text-xs sm:text-sm text-gray-800">{{'Hello, how are you? This is a long message to test the chat message layout.'}}</p>
+                        <div class="flex items-center space-x-2 sm:space-x-4 justify-between">
+                            <p class="text-xs sm:text-sm text-gray-400">{{'12:00 PM'}}</p>                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full flex justify-end">
+                <div class="flex items-center justify-end space-x-2 sm:space-x-4 flex-1 min-w-0 max-w-2/3 mb-2">
+                    <div class="flex flex-col bg-primary/50 rounded-lg p-2">
+                        <p class="text-xs sm:text-sm text-white">{{'Hello, how are you? This is a long message to test the chat message layout.'}}</p>
+                        <div class="flex items-center space-x-2 sm:space-x-4 justify-between">
+                            <p class="text-xs sm:text-sm text-gray-400">{{'12:00 PM'}}</p>
+                            <i class="fas fa-check-double text-green-500"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        </div>
+    </div>
+    <div class="flex items-center justify-between space-x-2 sm:space-x-4 w-full bg-gray-100">
+        <textarea placeholder="Message" class="flex-1 resize-none m-0 focus:outline-none ps-2 placeholder-gray-400 focus:ring-0 focus:ring-offset-0 focus:placeholder-transparent transition-all duration-200"></textarea>
+        <button class="bg-primary text-white px-4 py-2 rounded-md flex-shrink-0">
+            <i class="fas fa-paper-plane text-sm sm:text-base"></i>
+        </button>
+    </div>
+</div>

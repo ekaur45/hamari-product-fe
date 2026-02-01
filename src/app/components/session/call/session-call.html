@@ -1,0 +1,349 @@
+<div class="bg-gray-900 grid h-screen grid-rows-[auto_1fr_auto] overflow-hidden">
+    <!-- Header -->
+    <header class="bg-gray-800 text-white px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between border-b border-gray-700 z-10">
+        <div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+            <div class="min-w-0 flex-1">
+                <h2 class="text-sm sm:text-lg font-semibold truncate">One-to-One Call</h2>
+                <p class="text-xs sm:text-sm text-gray-400 truncate hidden sm:block">
+                    @if(remoteParticipant()) {
+                        {{ remoteParticipant()!.name }}
+                    } @else {
+                        Connecting...
+                    }
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+            <!-- Connection Status -->
+            @if(isConnected()) {
+                <div class="flex items-center space-x-1 sm:space-x-2 bg-green-600 px-2 sm:px-3 py-1 rounded-lg">
+                    <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                    <span class="text-xs sm:text-sm font-medium">LIVE</span>
+                </div>
+            } @else if(isConnecting()) {
+                <div class="flex items-center space-x-1 sm:space-x-2 bg-yellow-600 px-2 sm:px-3 py-1 rounded-lg">
+                    <i class="fas fa-spinner fa-spin text-xs"></i>
+                    <span class="text-xs sm:text-sm font-medium">CONNECTING</span>
+                </div>
+            }
+            
+            <!-- Call Duration -->
+            <div class="text-xs sm:text-sm text-gray-300">
+                <i class="far fa-clock mr-1"></i>
+                <span>{{ callDuration() }}</span>
+            </div>
+            
+            <!-- Connection Quality Indicator -->
+            @if(isConnected()) {
+                <div class="hidden sm:flex items-center space-x-1 px-2 py-1 rounded-lg bg-gray-700/50">
+                    <i class="fas fa-wifi text-xs" [ngClass]="{
+                        'text-green-400': connectionQuality() === 'excellent',
+                        'text-green-500': connectionQuality() === 'good',
+                        'text-yellow-500': connectionQuality() === 'fair',
+                        'text-red-500': connectionQuality() === 'poor'
+                    }"></i>
+                    <span class="text-xs text-gray-300 capitalize">{{ connectionQuality() }}</span>
+                </div>
+            }
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 relative overflow-hidden bg-gray-950">
+        @if(isConnecting()) {
+            <!-- Connecting State -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center bg-gray-950 z-20">
+                <div class="text-center space-y-4">
+                    <div class="relative">
+                        <div class="w-24 h-24 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <profile-photo [user]="currentUser() ?? null" [class]="'w-16 h-16'"></profile-photo>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Connecting...</h3>
+                        <p class="text-gray-400 text-sm">Please wait while we connect you</p>
+                    </div>
+                </div>
+            </div>
+        } @else if(isConnected()) {
+            <!-- Connected State - Video Layout -->
+            <div class="h-full w-full relative" [ngClass]="{
+                'flex flex-col md:flex-row': viewMode() === 'split',
+                '': viewMode() === 'pip'
+            }">
+                <!-- Remote Video (Main) -->
+                <div class="relative flex-1 bg-gray-900 overflow-hidden" [ngClass]="{
+                    'h-1/2 md:h-full': viewMode() === 'split',
+                    'h-full': viewMode() === 'pip'
+                }">
+                    @if(remoteStream()) {
+                        <video 
+                            #remoteVideo
+                            [appStream]="remoteStream()"
+                            autoplay 
+                            playsinline 
+                            class="w-full h-full object-cover"
+                            [class.hidden]="!remoteParticipant()?.isVideoOn">
+                        </video>
+                    }
+                    
+                    <!-- Remote Video Placeholder -->
+                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900" 
+                         [class.hidden]="remoteParticipant()?.isVideoOn && remoteStream()">
+                        <div class="text-center space-y-4">
+                            <div class="w-32 h-32 mx-auto">
+                                <profile-photo [user]="remoteParticipant()?.user" [class]="'w-32 h-32 text-4xl'"></profile-photo>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-white mb-1">
+                                    {{ remoteParticipant()?.name || 'Waiting for participant...' }}
+                                </h3>
+                                <p class="text-gray-400 text-sm">{{ remoteParticipant()?.role || '' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Remote Video Overlay -->
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent p-3 sm:p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex items-center space-x-2">
+                                    <profile-photo [user]="remoteParticipant()?.user" [class]="'w-8 h-8 sm:w-10 sm:h-10'"></profile-photo>
+                                    <div>
+                                        <p class="text-white font-medium text-sm sm:text-base">
+                                            {{ remoteParticipant()?.name || 'Remote Participant' }}
+                                        </p>
+                                        <p class="text-gray-300 text-xs">{{ remoteParticipant()?.role || '' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <!-- Audio Status -->
+                                <div class="px-2 py-1 rounded-lg" [ngClass]="{
+                                    'bg-green-500/20 text-green-400': remoteParticipant()?.isAudioOn,
+                                    'bg-red-500/20 text-red-400': !remoteParticipant()?.isAudioOn
+                                }">
+                                    <i class="fas" [ngClass]="{
+                                        'fa-microphone': remoteParticipant()?.isAudioOn,
+                                        'fa-microphone-slash': !remoteParticipant()?.isAudioOn
+                                    }"></i>
+                                </div>
+                                <!-- Video Status -->
+                                <div class="px-2 py-1 rounded-lg" [ngClass]="{
+                                    'bg-green-500/20 text-green-400': remoteParticipant()?.isVideoOn,
+                                    'bg-red-500/20 text-red-400': !remoteParticipant()?.isVideoOn
+                                }">
+                                    <i class="fas" [ngClass]="{
+                                        'fa-video': remoteParticipant()?.isVideoOn,
+                                        'fa-video-slash': !remoteParticipant()?.isVideoOn
+                                    }"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Local Video (Self View) -->
+                <div class="bg-gray-900 overflow-hidden border-t md:border-t-0 md:border-l border-gray-700"
+                     [ngClass]="{
+                         'h-1/2 md:h-full md:w-80 lg:w-96': viewMode() === 'split',
+                         'absolute top-4 right-4 w-48 h-36 md:w-64 md:h-48 rounded-lg border-2 border-white shadow-2xl z-10': viewMode() === 'pip'
+                     }">
+                    @if(localStream) {
+                        <video 
+                            #localVideo
+                            [srcObject]="localStream"
+                            autoplay 
+                            playsinline 
+                            muted
+                            class="w-full h-full object-cover"
+                            style="transform: scaleX(-1);"
+                            [class.hidden]="isVideoOff()">
+                        </video>
+                    }
+                    
+                    <!-- Local Video Placeholder -->
+                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-gray-800" 
+                         [class.hidden]="!isVideoOff() && localStream">
+                        <div class="text-center space-y-2">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto">
+                                <profile-photo [user]="currentUser() ?? null" [class]="'w-full h-full text-2xl'"></profile-photo>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium text-sm">
+                                    {{ currentUser()?.firstName }} {{ currentUser()?.lastName }}
+                                </p>
+                                <p class="text-gray-400 text-xs">You</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Local Video Overlay -->
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent p-2 sm:p-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <profile-photo [user]="currentUser() ?? null" [class]="'w-6 h-6 sm:w-8 sm:h-8'"></profile-photo>
+                                <div>
+                                    <p class="text-white font-medium text-xs sm:text-sm">You</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <!-- Audio Status -->
+                                <div class="px-1.5 py-1 rounded" [ngClass]="{
+                                    'bg-green-500/20 text-green-400': !isMuted(),
+                                    'bg-red-500/20 text-red-400': isMuted()
+                                }">
+                                    <i class="fas text-xs" [ngClass]="{
+                                        'fa-microphone': !isMuted(),
+                                        'fa-microphone-slash': isMuted()
+                                    }"></i>
+                                </div>
+                                <!-- Video Status -->
+                                <div class="px-1.5 py-1 rounded" [ngClass]="{
+                                    'bg-green-500/20 text-green-400': !isVideoOff(),
+                                    'bg-red-500/20 text-red-400': isVideoOff()
+                                }">
+                                    <i class="fas text-xs" [ngClass]="{
+                                        'fa-video': !isVideoOff(),
+                                        'fa-video-slash': isVideoOff()
+                                    }"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Screen Share Indicator -->
+                    @if(isScreenSharing()) {
+                        <div class="absolute top-2 left-2 px-2 py-1 bg-primary/90 text-white rounded-lg text-xs flex items-center space-x-1">
+                            <i class="fas fa-desktop"></i>
+                            <span class="hidden sm:inline">Sharing Screen</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        } @else {
+            <!-- Not Connected State -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center bg-gray-950">
+                <div class="text-center space-y-4">
+                    <div class="w-24 h-24 mx-auto">
+                        <profile-photo [user]="currentUser() ?? null" [class]="'w-24 h-24 text-3xl'"></profile-photo>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Ready to start</h3>
+                        <p class="text-gray-400 text-sm">Waiting for call to begin</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Footer Controls -->
+    <footer class="bg-gray-800 text-white px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between border-t border-gray-700 sticky bottom-0 left-0 right-0 z-10">
+        <div class="flex items-center justify-between w-full mx-auto flex-wrap gap-2">
+            <!-- Left Controls -->
+            <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center sm:justify-start">
+                <!-- Mute/Unmute -->
+                <button
+                    (click)="toggleMute()"
+                    [class.bg-green-600]="!isMuted()"
+                    [class.hover:bg-green-700]="!isMuted()"
+                    [class.bg-red-600]="isMuted()"
+                    [class.hover:bg-red-700]="isMuted()"
+                    class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0"
+                    [title]="isMuted() ? 'Unmute' : 'Mute'">
+                    <i [class.fa-microphone]="!isMuted()"
+                       [class.fa-microphone-slash]="isMuted()"
+                       class="fas text-sm sm:text-base"></i>
+                </button>
+                
+                <!-- Video On/Off -->
+                <button
+                    (click)="toggleVideo()"
+                    [class.bg-green-600]="!isVideoOff()"
+                    [class.hover:bg-green-700]="!isVideoOff()"
+                    [class.bg-red-600]="isVideoOff()"
+                    [class.hover:bg-red-700]="isVideoOff()"
+                    class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0"
+                    [title]="isVideoOff() ? 'Turn on video' : 'Turn off video'">
+                    <i [class.fa-video]="!isVideoOff()"
+                       [class.fa-video-slash]="isVideoOff()"
+                       class="fas text-sm sm:text-base"></i>
+                </button>
+                
+                <!-- Screen Share -->
+                <button
+                    (click)="toggleScreenShare()"
+                    [class.bg-primary]="isScreenSharing()"
+                    [class.hover:bg-blue-600]="isScreenSharing()"
+                    [class.bg-gray-700]="!isScreenSharing()"
+                    [class.hover:bg-gray-600]="!isScreenSharing()"
+                    class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0 hidden sm:flex"
+                    [title]="isScreenSharing() ? 'Stop sharing' : 'Share screen'">
+                    <i class="fas fa-desktop text-sm sm:text-base"></i>
+                </button>
+                
+                <!-- View Mode Toggle (Split/PIP) -->
+                <button
+                    (click)="toggleViewMode()"
+                    class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-700 hover:bg-gray-600 text-white rounded-full flex items-center justify-center transition flex-shrink-0 hidden sm:flex"
+                    [title]="viewMode() === 'split' ? 'Picture-in-Picture' : 'Split View'">
+                    <i class="fas" [ngClass]="{
+                        'fa-th': viewMode() === 'split',
+                        'fa-compress': viewMode() === 'pip'
+                    }" class="text-sm sm:text-base"></i>
+                </button>
+            </div>
+
+            <!-- Center Controls -->
+            <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center">
+                <!-- Leave Call -->
+                <button
+                    (click)="leaveCall()"
+                    class="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-xs sm:text-sm flex items-center flex-shrink-0">
+                    <i class="fas fa-phone-slash sm:mr-2"></i>
+                    <span class="hidden sm:inline">Leave</span>
+                </button>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="flex items-center space-x-1 sm:space-x-3 flex-1 justify-center sm:justify-end">
+                <!-- Settings -->
+                <button
+                    (click)="showCallSettings.set(!showCallSettings())"
+                    class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm hidden sm:flex items-center"
+                    title="Settings">
+                    <i class="fas fa-cog sm:mr-2"></i>
+                    <span class="hidden md:inline">Settings</span>
+                </button>
+                
+                <!-- Chat Toggle (Mobile) -->
+                <button
+                    (click)="showChat.set(!showChat())"
+                    class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm flex items-center md:hidden"
+                    title="Chat">
+                    <i class="fas fa-comments"></i>
+                </button>
+                
+                <!-- Chat Toggle (Desktop) -->
+                <button
+                    (click)="showChat.set(!showChat())"
+                    class="px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition text-xs sm:text-sm hidden md:flex items-center"
+                    [class.bg-primary]="showChat()"
+                    [class.hover:bg-blue-600]="showChat()"
+                    title="Chat">
+                    <i class="fas fa-comments sm:mr-2"></i>
+                    <span class="hidden md:inline">Chat</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- Settings Modal -->
+<taleemiyat-session-call-settings [visible]="showCallSettings()" (closeCallSettings)="showCallSettings.set(false)"></taleemiyat-session-call-settings>
+
+<!-- Chat Panel -->
+@if(showChat()) {
+    <taleemiyat-session-chat (closeChat)="showChat.set(false)"></taleemiyat-session-chat>
+}
