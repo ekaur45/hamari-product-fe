@@ -1,0 +1,30 @@
+<div class="border border-gray-300 rounded-lg p-2 shadow-md mb-2">
+    <label class="block text-sm font-medium text-gray-700 mb-2">{{ title() }} 
+        @if(rating()) {
+            <span class="text-sm font-bold text-gray-700">({{ rating() | titlecase }})</span>
+        }
+    </label>
+    <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center flex-col gap-2" (click)="onRatingChangeHandler('excellent')">
+            <span class="text-sm font-medium text-gray-700" [ngClass]="{'text-green-700': rating() === 'excellent'}">Excellent</span>
+            <em class="fa fa-smile text-green-300 text-4xl cursor-pointer hover:text-green-500" [ngClass]="{'text-green-700': rating() === 'excellent'}"></em>
+        </div>
+        <div class="flex items-center flex-col gap-2" (click)="onRatingChangeHandler('good')">
+            <span class="text-sm font-medium text-gray-700" [ngClass]="{'text-yellow-700': rating() === 'good'}">Good</span>
+            <em class="fa fa-smile text-yellow-300 text-4xl cursor-pointer hover:text-yellow-500" [ngClass]="{'text-yellow-700': rating() === 'good'}"></em>
+        </div>
+
+        <div class="flex items-center flex-col gap-2" (click)="onRatingChangeHandler('average')">
+            <span class="text-sm font-medium text-gray-700" [ngClass]="{'text-yellow-700': rating() === 'average'}">Average</span>
+            <em class="fa fa-meh text-yellow-300 text-4xl cursor-pointer hover:text-yellow-500" [ngClass]="{'text-yellow-700': rating() === 'average'}"></em>
+        </div>
+        <div class="flex items-center flex-col gap-2" (click)="onRatingChangeHandler('poor')">
+            <span class="text-sm font-medium text-gray-700" [ngClass]="{'text-red-700': rating() === 'poor'}">Poor</span>
+            <em class="fa fa-frown text-red-300 text-4xl cursor-pointer hover:text-red-500" [ngClass]="{'text-red-700': rating() === 'poor'}"></em>
+        </div>
+        <div class="flex items-center flex-col gap-2" (click)="onRatingChangeHandler('very poor')">
+            <span class="text-sm font-medium text-gray-700" [ngClass]="{'text-red-700': rating() === 'very poor'}">Very Poor</span>
+            <em class="fa fa-angry text-red-300 text-4xl cursor-pointer hover:text-red-500" [ngClass]="{'text-red-700': rating() === 'very poor'}"></em>
+        </div>
+    </div>
+</div>

@@ -40,39 +40,46 @@ export class MainLayout implements AfterViewInit, OnInit {
     private authService: AuthService,
     private router: Router,
     private notificationService: NotificationService,
-    private mainSocketService: MainSocketService
+    private mainSocketService: MainSocketService,
+    private messageService: MessageService
   ) { }
 
   ngOnInit(): void {
     this.loadUserData();
     this.getNotifications();
     this.mainSocketService.connectToSocket();
+    this.mainSocketService.listenToEventsFromServer(`notification_${this.currentUser()?.id}`).subscribe(res => {
+if(res.notification) {
+      //this.messageService.add({severity: 'info', summary: 'Notification', detail: res.notification.message});
+      this.getNotifications();
+}
+    });
   }
 
   ngAfterViewInit() {
-    this.checkScreenSize();    
+    this.checkScreenSize();
   }
-getNotifications(): void {
-  this.notificationService.getNotifications(1, 10).subscribe(res => {
-    if(res.statusCode === 200) {
-      this.notifications.set(res.data.data || []);
-    }
-  });
-}
-markAllAsRead(): void {
-  this.notificationService.markAllAsRead().subscribe(res => {
-    if(res.statusCode === 200) {
-      this.getNotifications();
-    }
-  });
-}
-markAsRead(notification: Notification): void {
-  this.notificationService.markAsRead(notification.id).subscribe(res => {
-    if(res.statusCode === 200) {
-      this.getNotifications();
-    }
-  });
-}
+  getNotifications(): void {
+    this.notificationService.getNotifications(1, 10).subscribe(res => {
+      if (res.statusCode === 200) {
+        this.notifications.set(res.data.data || []);
+      }
+    });
+  }
+  markAllAsRead(): void {
+    this.notificationService.markAllAsRead().subscribe(res => {
+      if (res.statusCode === 200) {
+        this.getNotifications();
+      }
+    });
+  }
+  markAsRead(notification: Notification): void {
+    this.notificationService.markAsRead(notification.id).subscribe(res => {
+      if (res.statusCode === 200) {
+        this.getNotifications();
+      }
+    });
+  }
   private loadUserData(): void {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser.set(user);

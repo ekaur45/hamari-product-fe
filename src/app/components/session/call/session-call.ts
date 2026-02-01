@@ -12,12 +12,13 @@ import { io, Socket } from "socket.io-client";
 import { environment } from "../../../../environments/environment";
 import { WhiteBoard } from "../../white-board/white-board";
 import { RatingModule } from "primeng/rating";
+import { UIRating } from "../../misc/rating/ui-rating";
 
 @Component({
     selector: 'taleemiyat-session-call',
     templateUrl: './session-call.html',
     standalone: true,
-    imports: [CommonModule, DialogModule, SessionCallSettings, SessionChat, StreamDirective, ProfilePhoto, WhiteBoard, RatingModule],
+    imports: [CommonModule, DialogModule, SessionCallSettings, SessionChat, StreamDirective, ProfilePhoto, WhiteBoard, RatingModule, UIRating],
 })
 export default class SessionCall implements OnInit, OnDestroy {
     @ViewChild('localVideo') localVideoElement?: ElementRef<HTMLVideoElement>;
@@ -35,7 +36,7 @@ export default class SessionCall implements OnInit, OnDestroy {
     showLeaveDialog = signal<boolean>(false);
     showRateAndReviewDialog = signal<boolean>(false);
     userType = signal<UserRole>(UserRole.STUDENT);
-    
+    rating = signal<'excellent' | 'good' | 'average' | 'poor' | 'very poor'>('excellent');
     // Socket and WebRTC
     socket!: Socket;
     peer: RTCPeerConnection | null = null;
@@ -73,6 +74,8 @@ export default class SessionCall implements OnInit, OnDestroy {
         UNMUTE: 'unmute',
         MUTE_VIDEO: 'mute-video',
         UNMUTE_VIDEO: 'unmute-video',
+        LEAVE_CALL: 'leave-call',
+        END_CALL: 'end-call',
     };
     
     private readonly LISTENERS = {
@@ -84,6 +87,8 @@ export default class SessionCall implements OnInit, OnDestroy {
         UNMUTE: 'unmute',
         MUTE_VIDEO: 'mute-video',
         UNMUTE_VIDEO: 'unmute-video',
+        TEACHER_LEFT: 'teacher-left',
+        CALL_ENDED: 'call-ended',
     };
     
     constructor(
@@ -124,6 +129,7 @@ export default class SessionCall implements OnInit, OnDestroy {
         
         // Initialize socket connection
         this.initializeSocket();
+        
     }
     
     private async initializeLocalStream(): Promise<void> {
@@ -289,6 +295,19 @@ export default class SessionCall implements OnInit, OnDestroy {
         
         this.socket.on(this.LISTENERS.DISCONNECT, () => {
             console.log('❌ Disconnected from call server');
+            
+            // Check if remote participant (teacher) disconnected
+            const remoteParticipant = this.remoteParticipant();
+            if (remoteParticipant && remoteParticipant.role === UserRole.TEACHER && this.userType() === UserRole.STUDENT) {
+                // Teacher disconnected - show rating dialog after a short delay
+                setTimeout(() => {
+                    if (!this.isConnected() && this.userType() === UserRole.STUDENT) {
+                        this.showLeaveDialog.set(false);
+                        this.showRateAndReviewDialog.set(true);
+                    }
+                }, 2000);
+            }
+            
             // Don't immediately set isConnected to false - wait to see if it's a reconnection
             // This prevents the UI from showing "Waiting for call to begin" when the other user refreshes
             if (this.disconnectTimeout) {
@@ -541,6 +560,19 @@ export default class SessionCall implements OnInit, OnDestroy {
             }
             console.log('✅ Updated remote participant video state to unmuted');
         });
+        
+        // Listen for when teacher leaves the call
+        this.socket.on(this.LISTENERS.CALL_ENDED, (data: { userId: string, role: string }) => {
+            console.log('👋 Teacher left the call:', data.userId);
+            
+            // Only show rating dialog if current user is a student
+            if (this.userType() === UserRole.STUDENT) {
+                // Close any open dialogs first
+                this.showLeaveDialog.set(false);
+                // Show rating dialog
+                this.showRateAndReviewDialog.set(true);
+            }
+        });
     }
     
     private createPeer(userId: string): RTCPeerConnection {
@@ -619,12 +651,24 @@ export default class SessionCall implements OnInit, OnDestroy {
                 this.connectionQuality.set('fair');
                 console.log('⚠️ ICE connection disconnected, waiting for potential reconnect...');
                 // Don't set isConnected to false immediately - give it time to reconnect
-            } else if (pc.iceConnectionState === 'failed') {
-                // Failed is permanent - mark as disconnected
+            } else if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'closed') {
+                // Failed or closed is permanent - mark as disconnected
                 this.connectionQuality.set('poor');
-                console.log('❌ ICE connection failed');
+                console.log('❌ ICE connection failed or closed');
                 this.isConnected.set(false);
                 this.isConnecting.set(true); // Show connecting state while waiting for reconnection
+                
+                // Check if teacher disconnected and show rating dialog for students
+                const remoteParticipant = this.remoteParticipant();
+                if (remoteParticipant && remoteParticipant.role === UserRole.TEACHER && this.userType() === UserRole.STUDENT) {
+                    // Wait a bit to see if it's just a temporary disconnection
+                    setTimeout(() => {
+                        if (!this.isConnected() && this.userType() === UserRole.STUDENT) {
+                            this.showLeaveDialog.set(false);
+                            this.showRateAndReviewDialog.set(true);
+                        }
+                    }, 2000);
+                }
             }
         };
         
@@ -802,6 +846,17 @@ export default class SessionCall implements OnInit, OnDestroy {
     }
     
     confirmLeaveCall(): void {
+        const sessionId = this.bookingId() || this.sessionId();
+        
+        // If teacher is leaving, emit event to notify students
+        if (this.userType() === UserRole.TEACHER && this.socket && sessionId) {
+            this.socket.emit(this.EMITTERS.END_CALL, {
+                bookingId: sessionId,
+                userId: this.authService.getCurrentUser()?.id,
+                role: UserRole.TEACHER
+            });
+        }
+        
         // Actually leave the call
         this.isConnected.set(false);
         if (this.socket) {
@@ -811,6 +866,7 @@ export default class SessionCall implements OnInit, OnDestroy {
             this.peer.close();
         }
         this.showLeaveDialog.set(false);
+        
         if(this.userType() === UserRole.TEACHER) {
             this.router.navigate(['/teacher/dashboard']);
         } else {
