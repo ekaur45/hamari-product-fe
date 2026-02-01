@@ -196,14 +196,14 @@
             <!-- Collapsible Sections -->
             <!-- Color & Size Section -->
             <div class="border-b border-gray-300">
-                <button id="toggleColorSizeMobile" (click)="toggleCollapsible('colorSizePanelMobile', 'colorSizeChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
+                <button (click)="toggleCollapsible('colorSizePanelMobile', 'colorSizeChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-palette text-gray-700"></i>
                         <span class="text-sm font-medium text-gray-700">Color &amp; Size</span>
                     </div>
-                    <i class="fas fa-chevron-down text-gray-500 transition-transform" id="colorSizeChevron"></i>
+                    <i #colorSizeChevron class="fas fa-chevron-down text-gray-500 transition-transform"></i>
                 </button>
-                <div id="colorSizePanelMobile" class="hidden px-3 py-2 border-t border-gray-200">
+                <div #colorSizePanelMobile class="hidden px-3 py-2 border-t border-gray-200">
                     <div class="flex items-center gap-3">
                         <!-- Color Picker -->
                         <div class="flex items-center gap-2 bg-white rounded-lg px-2 py-2 border border-gray-300">
@@ -236,14 +236,14 @@
 
             <!-- Style Options Section -->
             <div class="border-b border-gray-300">
-                <button id="toggleStyleOptionsMobile" (click)="toggleCollapsible('styleOptionsPanelMobile', 'styleOptionsChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
+                <button (click)="toggleCollapsible('styleOptionsPanelMobile', 'styleOptionsChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-sliders-h text-gray-700"></i>
                         <span class="text-sm font-medium text-gray-700">Style Options</span>
                     </div>
-                    <i class="fas fa-chevron-down text-gray-500 transition-transform" id="styleOptionsChevron"></i>
+                    <i #styleOptionsChevron class="fas fa-chevron-down text-gray-500 transition-transform"></i>
                 </button>
-                <div id="styleOptionsPanelMobile" class="hidden px-3 py-2 border-t border-gray-200 space-y-2">
+                <div #styleOptionsPanelMobile class="hidden px-3 py-2 border-t border-gray-200 space-y-2">
                     <div class="flex items-center gap-2">
                         <!-- Fill Toggle -->
                         <button id="fillToggleMobile" (click)="onToggleFill()" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Fill Shapes">
@@ -294,14 +294,14 @@
 
             <!-- Zoom Controls Section -->
             <div class="border-b border-gray-300">
-                <button id="toggleZoomMobile" (click)="toggleCollapsible('zoomPanelMobile', 'zoomChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
+                <button (click)="toggleCollapsible('zoomPanelMobile', 'zoomChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-search-plus text-gray-700"></i>
                         <span class="text-sm font-medium text-gray-700">Zoom</span>
                     </div>
-                    <i class="fas fa-chevron-down text-gray-500 transition-transform" id="zoomChevron"></i>
+                    <i #zoomChevron class="fas fa-chevron-down text-gray-500 transition-transform"></i>
                 </button>
-                <div id="zoomPanelMobile" class="hidden px-3 py-2 border-t border-gray-200">
+                <div #zoomPanelMobile class="hidden px-3 py-2 border-t border-gray-200">
                     <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-gray-300">
                         <button id="zoomOutMobile" (click)="onZoomOut()" class="p-2 hover:bg-gray-100 rounded" title="Zoom Out">
                             <i class="fas fa-search-minus text-gray-700"></i>
@@ -319,14 +319,14 @@
 
             <!-- Actions Section -->
             <div class="border-b border-gray-300">
-                <button id="toggleActionsMobile" (click)="toggleCollapsible('actionsPanelMobile', 'actionsChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
+                <button (click)="toggleCollapsible('actionsPanelMobile', 'actionsChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-history text-gray-700"></i>
                         <span class="text-sm font-medium text-gray-700">History &amp; Actions</span>
                     </div>
-                    <i class="fas fa-chevron-down text-gray-500 transition-transform" id="actionsChevron"></i>
+                    <i #actionsChevron class="fas fa-chevron-down text-gray-500 transition-transform"></i>
                 </button>
-                <div id="actionsPanelMobile" class="hidden px-3 py-2 border-t border-gray-200 flex items-center gap-2">
+                <div #actionsPanelMobile class="hidden px-3 py-2 border-t border-gray-200 flex items-center gap-2">
                     <button id="undoBtnMobile" (click)="onUndo()" class="flex-1 px-3 py-2.5 bg-white border border-gray-300 rounded-lg flex items-center justify-center gap-2" title="Undo">
                         <i class="fas fa-undo text-gray-700"></i>
                         <span class="text-xs text-gray-700 font-medium">Undo</span>
@@ -344,14 +344,14 @@
 
             <!-- Save & Export Section -->
             <div class="border-b border-gray-300">
-                <button id="toggleSaveExportMobile" (click)="toggleCollapsible('saveExportPanelMobile', 'saveExportChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
+                <button (click)="toggleCollapsible('saveExportPanelMobile', 'saveExportChevron')" class="w-full px-3 py-2.5 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-download text-gray-700"></i>
                         <span class="text-sm font-medium text-gray-700">Save &amp; Export</span>
                     </div>
-                    <i class="fas fa-chevron-down text-gray-500 transition-transform" id="saveExportChevron"></i>
+                    <i #saveExportChevron class="fas fa-chevron-down text-gray-500 transition-transform"></i>
                 </button>
-                <div id="saveExportPanelMobile" class="hidden px-3 py-2 border-t border-gray-200 flex items-center gap-2">
+                <div #saveExportPanelMobile class="hidden px-3 py-2 border-t border-gray-200 flex items-center gap-2">
                     <button id="saveWhiteboardBtnMobile" (click)="onSaveWhiteboard()" class="flex-1 px-3 py-2.5 bg-primary hover:bg-blue-600 text-white rounded-lg flex items-center justify-center gap-2" title="Save">
                         <i class="fas fa-download"></i>
                         <span class="text-xs font-medium">Save</span>

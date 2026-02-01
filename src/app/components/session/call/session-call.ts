@@ -8,13 +8,13 @@ import { StreamDirective } from "../../stream.directive";
 import { ProfilePhoto } from "../../misc/profile-photo/profile-photo";
 import { io, Socket } from "socket.io-client";
 import { environment } from "../../../../environments/environment";
-import TeacherBooking from "../../../shared/models/teacher.interface";
+import { WhiteBoard } from "../../white-board/white-board";
 
 @Component({
     selector: 'taleemiyat-session-call',
     templateUrl: './session-call.html',
     standalone: true,
-    imports: [CommonModule, SessionCallSettings, SessionChat, StreamDirective, ProfilePhoto],
+    imports: [CommonModule, SessionCallSettings, SessionChat, StreamDirective, ProfilePhoto, WhiteBoard],
 })
 export default class SessionCall implements OnInit, OnDestroy {
     @ViewChild('localVideo') localVideoElement?: ElementRef<HTMLVideoElement>;
@@ -28,6 +28,7 @@ export default class SessionCall implements OnInit, OnDestroy {
     
     showChat = signal<boolean>(false);
     showCallSettings = signal<boolean>(false);
+    showWhiteboard = signal<boolean>(false);
     userType = signal<UserRole>(UserRole.STUDENT);
     
     // Socket and WebRTC

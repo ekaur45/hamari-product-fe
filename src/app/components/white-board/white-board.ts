@@ -33,12 +33,23 @@ export class WhiteBoard implements OnInit {
      @ViewChild('exitWhiteboardFullscreenMobile') exitWhiteboardFullscreenMobile?: ElementRef<HTMLButtonElement>;
      @ViewChild('imageUploadMobile') imageUploadMobile?: ElementRef<HTMLInputElement>;
      @ViewChild('imageUpload') imageUpload?: ElementRef<HTMLInputElement>;
+     
+     // Collapsible panels for mobile
+     @ViewChild('colorSizePanelMobile') colorSizePanelMobile?: ElementRef<HTMLDivElement>;
+     @ViewChild('styleOptionsPanelMobile') styleOptionsPanelMobile?: ElementRef<HTMLDivElement>;
+     @ViewChild('zoomPanelMobile') zoomPanelMobile?: ElementRef<HTMLDivElement>;
+     @ViewChild('actionsPanelMobile') actionsPanelMobile?: ElementRef<HTMLDivElement>;
+     @ViewChild('saveExportPanelMobile') saveExportPanelMobile?: ElementRef<HTMLDivElement>;
+     
+     // Chevrons for mobile
+     @ViewChild('colorSizeChevron') colorSizeChevron?: ElementRef<HTMLElement>;
+     @ViewChild('styleOptionsChevron') styleOptionsChevron?: ElementRef<HTMLElement>;
+     @ViewChild('zoomChevron') zoomChevron?: ElementRef<HTMLElement>;
+     @ViewChild('actionsChevron') actionsChevron?: ElementRef<HTMLElement>;
+     @ViewChild('saveExportChevron') saveExportChevron?: ElementRef<HTMLElement>;
 
      private canvasContext?: CanvasRenderingContext2D;
      private gridContext?: CanvasRenderingContext2D;
-     private mainContentArea?: HTMLElement;
-     private header?: HTMLElement;
-     private bottomControls?: HTMLElement;
 
     constructor() {
         effect(()=>{
@@ -102,11 +113,6 @@ export class WhiteBoard implements OnInit {
             this.resizeCanvas();
             window.addEventListener('resize', () => this.resizeCanvas());
         }
-        
-        // Find main content elements
-        this.mainContentArea = document.querySelector('.flex.flex-col.md\\:flex-row.h-\\[calc\\(100vh-64px\\)\\]') as HTMLElement;
-        this.header = document.querySelector('header') as HTMLElement;
-        this.bottomControls = document.querySelector('.fixed.bottom-0') as HTMLElement;
     }
     
     private resizeCanvas(): void {
@@ -356,19 +362,60 @@ export class WhiteBoard implements OnInit {
     }
     // Mobile Collapsible Sections
     toggleCollapsible(panelId: string, chevronId: string): void {
-        const panel = document.getElementById(panelId);
-        const chevron = document.getElementById(chevronId);
+        let panel: ElementRef<HTMLDivElement> | undefined;
+        let chevron: ElementRef<HTMLElement> | undefined;
         
-        if (panel && chevron) {
-            const isHidden = panel.classList.contains('hidden');
+        // Get panel reference
+        switch (panelId) {
+            case 'colorSizePanelMobile':
+                panel = this.colorSizePanelMobile;
+                break;
+            case 'styleOptionsPanelMobile':
+                panel = this.styleOptionsPanelMobile;
+                break;
+            case 'zoomPanelMobile':
+                panel = this.zoomPanelMobile;
+                break;
+            case 'actionsPanelMobile':
+                panel = this.actionsPanelMobile;
+                break;
+            case 'saveExportPanelMobile':
+                panel = this.saveExportPanelMobile;
+                break;
+        }
+        
+        // Get chevron reference
+        switch (chevronId) {
+            case 'colorSizeChevron':
+                chevron = this.colorSizeChevron;
+                break;
+            case 'styleOptionsChevron':
+                chevron = this.styleOptionsChevron;
+                break;
+            case 'zoomChevron':
+                chevron = this.zoomChevron;
+                break;
+            case 'actionsChevron':
+                chevron = this.actionsChevron;
+                break;
+            case 'saveExportChevron':
+                chevron = this.saveExportChevron;
+                break;
+        }
+        
+        if (panel?.nativeElement && chevron?.nativeElement) {
+            const panelEl = panel.nativeElement;
+            const chevronEl = chevron.nativeElement;
+            const isHidden = panelEl.classList.contains('hidden');
+            
             if (isHidden) {
-                panel.classList.remove('hidden');
-                chevron.classList.remove('rotate-0');
-                chevron.classList.add('rotate-180');
+                panelEl.classList.remove('hidden');
+                chevronEl.classList.remove('rotate-0');
+                chevronEl.classList.add('rotate-180');
             } else {
-                panel.classList.add('hidden');
-                chevron.classList.remove('rotate-180');
-                chevron.classList.add('rotate-0');
+                panelEl.classList.add('hidden');
+                chevronEl.classList.remove('rotate-180');
+                chevronEl.classList.add('rotate-0');
             }
         }
     }
