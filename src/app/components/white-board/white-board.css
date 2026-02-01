@@ -16,6 +16,17 @@
 
 .line-style-btn.active {
     background-color: #e5e7eb;
+    border-color: #3b82f6 !important;
+}
+
+/* Enhanced scrollbar for mobile */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
 }
 
 .mobile-toolbar-scroll {

@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ElementRef, EventEmitter, OnDestroy, Output, signal, ViewChild, input } from "@angular/core";
+import { Component, AfterViewInit, ElementRef, EventEmitter, OnDestroy, Output, signal, ViewChild, input, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { WhiteboardPermissions } from "./permissions/whiteboard-permissions";
 import { WhiteboardPages, WhiteboardPage } from "./pages/whiteboard-pages";
@@ -8,7 +8,8 @@ import { WhiteboardTemplates, WhiteboardTemplate } from "./tools/whiteboard-temp
 import { WhiteboardStamps } from "./tools/whiteboard-stamps";
 import { WhiteboardMathTools } from "./tools/whiteboard-math-tools";
 import { WhiteboardPresence, WhiteboardUser } from "./collaboration/whiteboard-presence";
-import { UserRole } from "../../shared";
+import { UserRole, AuthService } from "../../shared";
+import { Socket } from "socket.io-client";
 
 @Component({
     selector: 'app-white-board',
@@ -33,6 +34,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     // Inputs
     currentUserRole = input<UserRole>(UserRole.STUDENT);
     sessionId = input<string>('');
+    socket = input<Socket | undefined>(undefined); // Optional socket for real-time collaboration
     
     // Whiteboard
     whiteboardOpen = signal<boolean>(true);
@@ -90,15 +92,36 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
 
      private canvasContext?: CanvasRenderingContext2D;
      private gridContext?: CanvasRenderingContext2D;
-
-    constructor() {
-    }
+     
+     // Socket events for whiteboard
+     private readonly WHITEBOARD_EMITTERS = {
+         DRAWING: 'whiteboard-drawing',
+         CLEAR: 'whiteboard-clear',
+         PAGE_CHANGE: 'whiteboard-page-change',
+         LOCK_TOGGLE: 'whiteboard-lock-toggle',
+         PRESENCE: 'whiteboard-presence',
+         SYNC_REQUEST: 'whiteboard-sync-request'
+     };
+     
+     private readonly WHITEBOARD_LISTENERS = {
+         DRAWING: 'whiteboard-drawing',
+         CLEAR: 'whiteboard-clear',
+         PAGE_CHANGE: 'whiteboard-page-change',
+         LOCK_TOGGLE: 'whiteboard-lock-toggle',
+         PRESENCE: 'whiteboard-presence',
+         SYNC: 'whiteboard-sync'
+     };
+     
+     private pageStorage: Map<string, string> = new Map(); // Store page canvas data
+     private isReceivingRemoteUpdate = false; // Prevent feedback loops
+     private authService = inject(AuthService);
 
     ngAfterViewInit(): void {
         // Initialize after view is ready
         setTimeout(() => {
             this.initializeWhiteboard();
             this.initializeTemplates();
+            this.initializeSocket();
         }, 0);
     }
 
@@ -109,6 +132,115 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         if (this.resizeHandler) {
             window.removeEventListener('resize', this.resizeHandler);
         }
+        this.cleanupSocket();
+    }
+    
+    // Socket Integration
+    private initializeSocket(): void {
+        const socket = this.socket();
+        if (!socket || !socket.connected) {
+            console.warn('⚠️ Socket not available for whiteboard collaboration');
+            return;
+        }
+        
+        const sessionId = this.sessionId();
+        if (!sessionId) {
+            console.warn('⚠️ Session ID not available for whiteboard collaboration');
+            return;
+        }
+        
+        console.log('✅ Initializing whiteboard socket integration');
+        
+        // Listen for remote drawing events
+        socket.on(this.WHITEBOARD_LISTENERS.DRAWING, (data: { 
+            userId: string, 
+            pageId: string, 
+            canvasData: string,
+            tool: string,
+            color: string,
+            lineWidth: number
+        }) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return;
+            this.handleRemoteDrawing(data);
+        });
+        
+        // Listen for remote clear events
+        socket.on(this.WHITEBOARD_LISTENERS.CLEAR, (data: { userId: string, pageId: string }) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return;
+            if (data.pageId === this.pages()[this.currentPageIndex()]?.id) {
+                this.isReceivingRemoteUpdate = true;
+                this.onClear();
+                this.isReceivingRemoteUpdate = false;
+            }
+        });
+        
+        // Listen for page changes
+        socket.on(this.WHITEBOARD_LISTENERS.PAGE_CHANGE, (data: { userId: string, pageId: string }) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return;
+            this.onPageChange(data.pageId);
+        });
+        
+        // Listen for lock toggle
+        socket.on(this.WHITEBOARD_LISTENERS.LOCK_TOGGLE, (data: { userId: string, isLocked: boolean }) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return;
+            this.isLocked.set(data.isLocked);
+            this.isEditable.set(!data.isLocked);
+        });
+        
+        // Listen for presence updates
+        socket.on(this.WHITEBOARD_LISTENERS.PRESENCE, (data: { users: WhiteboardUser[] }) => {
+            this.activeUsers.set(data.users);
+        });
+        
+        // Request initial sync
+        socket.emit(this.WHITEBOARD_EMITTERS.SYNC_REQUEST, { 
+            sessionId,
+            pageId: this.pages()[this.currentPageIndex()]?.id 
+        });
+    }
+    
+    private handleRemoteDrawing(data: { pageId: string, canvasData: string }): void {
+        if (data.pageId !== this.pages()[this.currentPageIndex()]?.id) return;
+        
+        this.isReceivingRemoteUpdate = true;
+        const img = new Image();
+        img.onload = () => {
+            if (this.canvasContext && this.whiteboardCanvas) {
+                this.canvasContext.drawImage(img, 0, 0);
+            }
+            this.isReceivingRemoteUpdate = false;
+        };
+        img.src = data.canvasData;
+    }
+    
+    private cleanupSocket(): void {
+        const socket = this.socket();
+        if (!socket) return;
+        
+        socket.off(this.WHITEBOARD_LISTENERS.DRAWING);
+        socket.off(this.WHITEBOARD_LISTENERS.CLEAR);
+        socket.off(this.WHITEBOARD_LISTENERS.PAGE_CHANGE);
+        socket.off(this.WHITEBOARD_LISTENERS.LOCK_TOGGLE);
+        socket.off(this.WHITEBOARD_LISTENERS.PRESENCE);
+    }
+    
+    private emitDrawing(): void {
+        const socket = this.socket();
+        if (!socket || !socket.connected || this.isReceivingRemoteUpdate) return;
+        
+        const currentPage = this.pages()[this.currentPageIndex()];
+        if (!currentPage || !this.whiteboardCanvas) return;
+        
+        const canvasData = this.whiteboardCanvas.nativeElement.toDataURL();
+        socket.emit(this.WHITEBOARD_EMITTERS.DRAWING, {
+            sessionId: this.sessionId(),
+            userId: this.authService.getCurrentUser()?.id,
+            pageId: currentPage.id,
+            canvasData,
+            tool: this.currentTool(),
+            color: this.currentColor(),
+            lineWidth: this.currentLineWidth()
+        });
     }
 
      // Tool Selection
@@ -484,14 +616,27 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     }
     
     onClear(): void {
-        if (confirm('Clear the whiteboard? This action cannot be undone.')) {
-            if (this.canvasContext && this.whiteboardCanvas) {
-                const canvas = this.whiteboardCanvas.nativeElement;
-                this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-                // Reset history
-                this.history = [];
-                this.historyStep = -1;
-                this.saveState();
+        if (!this.isReceivingRemoteUpdate && !confirm('Clear the whiteboard? This action cannot be undone.')) {
+            return;
+        }
+        
+        if (this.canvasContext && this.whiteboardCanvas) {
+            const canvas = this.whiteboardCanvas.nativeElement;
+            this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+            // Reset history
+            this.history = [];
+            this.historyStep = -1;
+            this.saveState();
+            
+            // Emit clear event via socket
+            const socket = this.socket();
+            if (socket && socket.connected && !this.isReceivingRemoteUpdate) {
+                const currentPage = this.pages()[this.currentPageIndex()];
+                socket.emit(this.WHITEBOARD_EMITTERS.CLEAR, {
+                    sessionId: this.sessionId(),
+                    userId: this.authService.getCurrentUser()?.id,
+                    pageId: currentPage?.id
+                });
             }
         }
     }
@@ -646,24 +791,41 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             this.canvasContext.beginPath();
             this.canvasContext.moveTo(pos.x, pos.y);
         } else if (tool === 'rectangle' || tool === 'circle' || tool === 'arrow' || tool === 'line') {
+            // Redraw canvas to show preview without affecting the base
             this.redrawCanvas();
             
+            // Set drawing properties
             this.canvasContext.strokeStyle = this.currentColor();
             this.canvasContext.fillStyle = this.currentColor();
             this.canvasContext.lineWidth = this.currentLineWidth();
-            this.canvasContext.globalAlpha = tool === 'line' || tool === 'arrow' ? 1 : 0.5;
+            this.canvasContext.globalAlpha = 1; // Always use full opacity for preview
             this.setLineStyle(this.canvasContext);
             
             if (tool === 'rectangle') {
+                // Calculate proper rectangle dimensions (handle negative values)
+                const width = pos.x - this.startX;
+                const height = pos.y - this.startY;
+                const x = width < 0 ? pos.x : this.startX;
+                const y = height < 0 ? pos.y : this.startY;
+                const absWidth = Math.abs(width);
+                const absHeight = Math.abs(height);
+                
+                this.canvasContext.beginPath();
                 if (this.fillShapes()) {
-                    this.canvasContext.fillRect(this.startX, this.startY, pos.x - this.startX, pos.y - this.startY);
+                    this.canvasContext.fillRect(x, y, absWidth, absHeight);
                 } else {
-                    this.canvasContext.strokeRect(this.startX, this.startY, pos.x - this.startX, pos.y - this.startY);
+                    this.canvasContext.strokeRect(x, y, absWidth, absHeight);
                 }
             } else if (tool === 'circle') {
-                const radius = Math.sqrt(Math.pow(pos.x - this.startX, 2) + Math.pow(pos.y - this.startY, 2));
+                // Calculate center and radius for circle (from corner to corner like rectangle)
+                const width = pos.x - this.startX;
+                const height = pos.y - this.startY;
+                const centerX = this.startX + width / 2;
+                const centerY = this.startY + height / 2;
+                const radius = Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2));
+                
                 this.canvasContext.beginPath();
-                this.canvasContext.arc(this.startX, this.startY, radius, 0, 2 * Math.PI);
+                this.canvasContext.arc(centerX, centerY, radius, 0, 2 * Math.PI);
                 if (this.fillShapes()) {
                     this.canvasContext.fill();
                 } else {
@@ -717,16 +879,31 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         this.setLineStyle(this.canvasContext);
         
         if (tool === 'rectangle') {
+            // Calculate proper rectangle dimensions (handle negative values)
+            const width = pos.x - this.startX;
+            const height = pos.y - this.startY;
+            const x = width < 0 ? pos.x : this.startX;
+            const y = height < 0 ? pos.y : this.startY;
+            const absWidth = Math.abs(width);
+            const absHeight = Math.abs(height);
+            
+            this.canvasContext.beginPath();
             if (this.fillShapes()) {
-                this.canvasContext.fillRect(this.startX, this.startY, pos.x - this.startX, pos.y - this.startY);
+                this.canvasContext.fillRect(x, y, absWidth, absHeight);
             } else {
-                this.canvasContext.strokeRect(this.startX, this.startY, pos.x - this.startX, pos.y - this.startY);
+                this.canvasContext.strokeRect(x, y, absWidth, absHeight);
             }
             this.saveState();
         } else if (tool === 'circle') {
-            const radius = Math.sqrt(Math.pow(pos.x - this.startX, 2) + Math.pow(pos.y - this.startY, 2));
+            // Calculate center and radius for circle (from corner to corner like rectangle)
+            const width = pos.x - this.startX;
+            const height = pos.y - this.startY;
+            const centerX = this.startX + width / 2;
+            const centerY = this.startY + height / 2;
+            const radius = Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2));
+            
             this.canvasContext.beginPath();
-            this.canvasContext.arc(this.startX, this.startY, radius, 0, 2 * Math.PI);
+            this.canvasContext.arc(centerX, centerY, radius, 0, 2 * Math.PI);
             if (this.fillShapes()) {
                 this.canvasContext.fill();
             } else {
@@ -820,6 +997,15 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             this.history.shift();
             this.historyStep--;
         }
+        
+        // Save current page state
+        const currentPage = this.pages()[this.currentPageIndex()];
+        if (currentPage) {
+            this.pageStorage.set(currentPage.id, this.whiteboardCanvas.nativeElement.toDataURL());
+        }
+        
+        // Emit drawing update via socket
+        this.emitDrawing();
     }
     
     private redrawCanvas(): void {
@@ -845,21 +1031,63 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     onToggleLock(isLocked: boolean): void {
         this.isLocked.set(isLocked);
         this.isEditable.set(!isLocked);
-        // TODO: Emit socket event for real-time sync
+        
+        // Emit socket event for real-time sync
+        const socket = this.socket();
+        if (socket && socket.connected) {
+            socket.emit(this.WHITEBOARD_EMITTERS.LOCK_TOGGLE, {
+                sessionId: this.sessionId(),
+                userId: this.authService.getCurrentUser()?.id,
+                isLocked
+            });
+        }
     }
     
     onClearStudentDrawings(): void {
-        // TODO: Clear only student drawings, keep teacher's
-        // Implementation depends on tracking user IDs for each drawing
+        // For now, clear entire canvas (full implementation would require user tracking per drawing)
+        if (confirm('Clear all student drawings? This will clear the entire whiteboard.')) {
+            this.onClear();
+        }
     }
     
     // Pages
     onPageChange(pageId: string): void {
         const index = this.pages().findIndex(p => p.id === pageId);
         if (index >= 0) {
+            // Save current page before switching
+            const currentPage = this.pages()[this.currentPageIndex()];
+            if (currentPage && this.whiteboardCanvas) {
+                this.pageStorage.set(currentPage.id, this.whiteboardCanvas.nativeElement.toDataURL());
+            }
+            
             this.currentPageIndex.set(index);
-            // TODO: Load page content from storage
-            this.redrawCanvas();
+            
+            // Load page content from storage
+            const savedData = this.pageStorage.get(pageId);
+            if (savedData && this.canvasContext && this.whiteboardCanvas) {
+                const img = new Image();
+                img.onload = () => {
+                    this.canvasContext!.clearRect(0, 0, this.whiteboardCanvas!.nativeElement.width, this.whiteboardCanvas!.nativeElement.height);
+                    this.canvasContext!.drawImage(img, 0, 0);
+                };
+                img.src = savedData;
+            } else {
+                // Clear canvas if no saved data
+                if (this.canvasContext && this.whiteboardCanvas) {
+                    const canvas = this.whiteboardCanvas.nativeElement;
+                    this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+            
+            // Emit page change via socket
+            const socket = this.socket();
+            if (socket && socket.connected) {
+                socket.emit(this.WHITEBOARD_EMITTERS.PAGE_CHANGE, {
+                    sessionId: this.sessionId(),
+                    userId: this.authService.getCurrentUser()?.id,
+                    pageId
+                });
+            }
         }
     }
     

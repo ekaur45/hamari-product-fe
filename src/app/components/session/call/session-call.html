@@ -356,5 +356,10 @@
     <taleemiyat-session-chat (closeChat)="showChat.set(false)"></taleemiyat-session-chat>
 }
 @if(showWhiteboard()) {
-    <app-white-board (onExitWhiteboard)="showWhiteboard.set(false)"></app-white-board>
+    <app-white-board 
+        [sessionId]="bookingId() || sessionId()"
+        [currentUserRole]="userType()"
+        [socket]="socket"
+        (onExitWhiteboard)="showWhiteboard.set(false)">
+    </app-white-board>
 }
