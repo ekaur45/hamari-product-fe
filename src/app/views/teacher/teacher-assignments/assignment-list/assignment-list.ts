@@ -11,14 +11,20 @@ import { MessageService, ConfirmationService } from "primeng/api";
 import { AssignmentService } from "../../../../shared/services/assignment.service";
 import { AuthService } from "../../../../shared/services/auth.service";
 import {
+  ApiResponse,
   Assignment,
   AssignmentListDto,
   AssignmentStatus,
   AssignmentType,
   Class,
+  CreateAssignmentDto,
+  HTTP_STATUS,
+  PaginatedApiResponse,
   Teacher,
 } from "../../../../shared";
 import { TeacherService } from "../../../../shared/services/teacher.service";
+import { CreateAssignment } from "../create-assignment/create-assignment";
+import { ProfilePhoto } from "../../../../components/misc/profile-photo/profile-photo";
 
 @Component({
   selector: 'app-assignment-list',
@@ -32,6 +38,8 @@ import { TeacherService } from "../../../../shared/services/teacher.service";
     ButtonModule,
     ToastModule,
     ConfirmDialogModule,
+    CreateAssignment,
+    ProfilePhoto,
   ],
   templateUrl: './assignment-list.html',
   styleUrls: ['./assignment-list.css'],
@@ -58,7 +66,7 @@ export class AssignmentList implements OnInit {
   readonly statuses = Object.values(AssignmentStatus);
   readonly AssignmentStatus = AssignmentStatus;
   readonly AssignmentType = AssignmentType;
-
+  showCreateAssignmentDialog = signal(false);
   constructor(
     private assignmentService: AssignmentService,
     private teacherService: TeacherService,
@@ -96,36 +104,27 @@ export class AssignmentList implements OnInit {
   }
 
   fetchAssignments(): void {
-    const teacherId = this.currentTeacher()?.id;
-    if (!teacherId) {
-      const userId = this.authService.getCurrentUser()?.id;
-      if (userId) {
-        this.teacherService.getTeacherById(userId).subscribe({
-          next: (teacher) => {
-            this.currentTeacher.set(teacher);
-            this.loadAssignments(teacher.id);
-          },
-        });
-      }
-      return;
-    }
-    this.loadAssignments(teacherId);
+    this.loadAssignments();
+    
   }
 
-  loadAssignments(teacherId: string): void {
+  loadAssignments(): void {
     this.isLoading.set(true);
     this.assignmentService
-      .getAssignments(teacherId, this.pagination().page, this.pagination().limit, {
+      .getAssignments(this.authService.getCurrentUser()?.id || '', this.pagination().page, this.pagination().limit, {
         classId: this.classFilter() || undefined,
         status: this.statusFilter() || undefined,
       })
       .subscribe({
-        next: (result: AssignmentListDto) => {
-          this.assignments.set(result.assignments || []);
+        next: (result: PaginatedApiResponse<Assignment>) => {
+          this.isLoading.set(false);          
+          this.assignments.set(result.data || []);
           this.pagination.set(result.pagination);
           this.first.set((result.pagination.page - 1) * result.pagination.limit);
           this.rows.set(result.pagination.limit);
-          this.isLoading.set(false);
+          // this.pagination.set(result.pagination);
+          // this.first.set((result.pagination.page - 1) * result.pagination.limit);
+          // this.rows.set(result.pagination.limit);
         },
         error: (err) => {
           console.error(err);
@@ -204,6 +203,25 @@ export class AssignmentList implements OnInit {
 
   getTypeLabel(type: AssignmentType): string {
     return type.charAt(0).toUpperCase() + type.slice(1);
+  }
+
+
+  onCreatedAssignment(assignment: CreateAssignmentDto): void {
+    this.assignmentService.createAssignment(this.authService.getCurrentUser()?.id || '', assignment).subscribe({
+      next: (resp:ApiResponse) => {
+        if(resp.statusCode === HTTP_STATUS.CREATED || resp.statusCode === HTTP_STATUS.OK) {
+          this.assignments.set([...this.assignments(), resp.data]);
+          this.showCreateAssignmentDialog.set(false);
+        }else{
+
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: resp.message || 'Failed to create assignment',
+          });
+        }
+      },
+    });
   }
 }
 

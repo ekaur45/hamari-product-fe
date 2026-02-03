@@ -1,0 +1,196 @@
+<form [formGroup]="formData" (ngSubmit)="formData.valid && onSubmit()" class="space-y-6">
+
+    <!-- Class/Booking Selection -->
+
+    <div class="border border-gray-300 rounded-lg p-4 relative">
+        @if(onRemoveBooking) {
+        <button type="button" (click)="onRemoveBooking.emit()"
+            class="text-gray-500 hover:text-gray-700 absolute top-2 right-2">
+            <i class="fas fa-times"></i>
+        </button>
+        }
+        <div class="flex gap-2">
+            <profile-photo [user]="selectedBooking()!.student!.user!" />
+            <div class="flex flex-col gap-1">
+                <div class="text-sm font-medium text-gray-900">
+                    {{selectedBooking()!.student!.user!.firstName}} {{selectedBooking()!.student!.user!.lastName}} -
+                    {{selectedBooking()!.teacherSubject!.subject!.name}}
+                </div>
+                <div class="text-sm text-gray-500">
+                    <span class="text-gray-500 font-medium">
+                        {{selectedBooking()!.bookingDate | date:'MMM d, y'}}
+                    </span>
+                    <span class="text-gray-500">|</span>
+                    <span class="text-gray-500">
+                        {{selectedBooking()!.availability!.startTime}} -
+                        {{selectedBooking()!.availability!.endTime}}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Title -->
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+        <input type="text" formControlName="title" name="title"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition"
+            [ngClass]="{'border-red-500': formData.get('title')?.invalid && formData.get('title')?.touched}"
+            required>
+            @if(formData.get('title')?.invalid && formData.get('title')?.touched) {
+            <small class="text-red-500">Title is required</small>
+            }
+    </div>
+
+    <!-- Description -->
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+        <textarea formControlName="description" name="description" rows="4"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition"
+            [ngClass]="{'border-red-500': formData.get('description')?.invalid && formData.get('description')?.touched}">
+                </textarea>
+            @if(formData.get('description')?.invalid && formData.get('description')?.touched) {
+            <small class="text-red-500">Description is required</small>
+            }
+    </div>
+
+    <!-- Type and Max Score -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Assignment Type *</label>
+            <p-select [options]="types" formControlName="type" name="type" class="w-full" required>
+                <ng-template #selectedItem let-selectedOption>
+                    <span class="text-sm font-medium text-gray-900">{{selectedOption | titlecase}}</span>
+                </ng-template>
+            </p-select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Max Score *</label>
+            <input type="number" formControlName="maxScore" name="maxScore" min="0"
+                name="maxScore" min="0"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required>
+        </div>
+    </div>
+
+    <!-- Due Date and Submission Date -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
+            <p-date-picker formControlName="dueDate" showIcon="true" class="w-full" [classList]="'w-full'" [ngClass]="{'border-red-500': formData.get('dueDate')?.invalid && formData.get('dueDate')?.touched}" required>
+            </p-date-picker>
+            @if(formData.get('dueDate')?.invalid && formData.get('dueDate')?.touched) {
+            <small class="text-red-500">Due Date is required</small>
+            }
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Last Submission Date</label>
+            <p-date-picker formControlName="submissionDate" showIcon="true" class="w-full" [classList]="'w-full'"
+                [ngClass]="{'border-red-500': formData.get('submissionDate')?.invalid && formData.get('submissionDate')?.touched}" required>
+            </p-date-picker>
+            @if(formData.get('submissionDate')?.invalid && formData.get('submissionDate')?.touched) {
+            <small class="text-red-500">Submission Date is required</small>
+            }
+        </div>
+    </div>
+
+    <!-- Weight and Late Penalty -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Weight (%)</label>
+            <input type="number" formControlName="weight" name="weight" min="0" max="100"
+                [ngClass]="{'border-red-500': formData.get('weight')?.invalid && formData.get('weight')?.touched}"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition">
+            @if(formData.get('weight')?.invalid && formData.get('weight')?.touched) {
+            <small class="text-red-500">Weight is required</small>
+            }
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Late Penalty (% per day)</label>
+            <input type="number" formControlName="latePenalty" name="latePenalty" min="0" max="100"
+                [ngClass]="{'border-red-500': formData.get('latePenalty')?.invalid && formData.get('latePenalty')?.touched}"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition">
+            @if(formData.get('latePenalty')?.invalid && formData.get('latePenalty')?.touched) {
+            <small class="text-red-500">Late Penalty is required</small>
+            }
+        </div>
+    </div>
+
+    <!-- Allow Late Submission -->
+    <div>
+        <label class="flex items-center">
+            <p-toggle-switch formControlName="allowLateSubmission" [inputId]="'allowLateSubmission'"
+                [ngClass]="{'border-red-500': formData.get('allowLateSubmission')?.invalid && formData.get('allowLateSubmission')?.touched}" name="allowLateSubmission"
+                class="mr-2">
+            </p-toggle-switch>
+            <label for="allowLateSubmission" class="text-sm font-medium text-gray-700">Allow Late Submission</label>
+        </label>
+        @if(formData.get('allowLateSubmission')?.invalid && formData.get('allowLateSubmission')?.touched) {
+        <small class="text-red-500">Allow Late Submission is required</small>
+        }
+    </div>
+
+    <!-- Instructions -->
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Instructions</label>
+        <textarea formControlName="instructions" name="instructions" rows="4"
+            [ngClass]="{'border-red-500': formData.get('instructions')?.invalid && formData.get('instructions')?.touched}"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-primary focus:border-primary transition">
+        </textarea>
+        @if(formData.get('instructions')?.invalid && formData.get('instructions')?.touched) {
+        <small class="text-red-500">Instructions is required</small>
+        }
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
+        <input type="file" #attachmentsInput (change)="onAttachmentsChange($event)" name="attachments" multiple
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2" />
+        <div class="flex flex-wrap gap-1.5 md:gap-2">
+            @for(chatFile of selectedFiles(); track $index) {
+            <div
+                class="group relative flex items-center gap-1.5 md:gap-2.5 p-1.5 md:p-2.5 bg-white border border-gray-200 rounded-lg md:rounded-xl shadow-sm hover:shadow-md hover:border-primary/30 transition-all">
+                @if(chatFile.isUploading) {
+                <div
+                    class="animate-pulse absolute top-0 left-0 w-full h-full flex-shrink-0 bg-primary/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-spinner fa-spin text-gray-400 text-sm md:text-lg"></i>
+                </div>
+                }
+                <div
+                    class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <i [class]="'fas ' + getFileIcon(chatFile.file.type) + ' text-primary text-sm md:text-lg'"></i>
+                </div>
+                <div class="flex-1 min-w-0 max-w-[150px] md:max-w-[220px]">
+                    <p class="text-[10px] md:text-xs font-semibold text-gray-900 truncate mb-0.5">
+                        {{chatFile.file.name}}
+                    </p>
+                    <p class="text-[10px] md:text-xs text-gray-500">{{formatFileSize(chatFile.file.size)}}
+                    </p>
+                </div>
+                <button (click)="removeFile($index)"
+                    class="flex-shrink-0 p-1 md:p-1.5 hover:bg-red-50 rounded-full transition group-hover:bg-red-50 w-5 h-5 md:w-6 md:h-6 flex items-center justify-center z-100"
+                    title="Remove file">
+                    <i
+                        class="fas fa-times text-gray-400 group-hover:text-red-500 text-[10px] md:text-xs transition"></i>
+                </button>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Submit Buttons -->
+    <div class="flex gap-4">
+        <button type="submit" [disabled]="isLoading()"
+            class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (isLoading()) {
+            <i class="fas fa-spinner fa-spin mr-2"></i>
+            Creating...
+            } @else {
+            Create Assignment
+            }
+        </button>
+        <button type="button" (click)="onCancelClick()"
+            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+            Cancel
+        </button>
+    </div>
+</form>

@@ -73,8 +73,8 @@ export class Login implements OnInit {
           }
         },
         error: (error) => {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: ApiHelper.formatErrorMessage(error) });
-          this.errorMessage.set(ApiHelper.formatErrorMessage(error));
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message });
+          this.errorMessage.set(error.message);
           this.isLoading.set(false);
         }
       });

@@ -77,6 +77,9 @@ export class ApiService {
       if (error.error && error.error.message) {
         errorMessage = error.error.message;
         errorCode = error.error.code || 'SERVER_ERROR';
+      } else if(error.message){
+        errorMessage = error.message;
+        errorCode = 'SERVER_ERROR';
       } else {
         errorMessage = `Server Error: ${error.status} - ${error.statusText}`;
         errorCode = `HTTP_${error.status}`;
@@ -155,6 +158,9 @@ export class ApiService {
           this.router.navigate(['/auth/login']);
           throw new Error('Unauthorized');
         }else{
+          if(response.statusCode !== HTTP_STATUS.OK && response.statusCode !== HTTP_STATUS.CREATED) {
+            throw new Error(response.message);
+          }
           return response;
         }
       }),

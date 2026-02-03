@@ -99,10 +99,14 @@ export default interface TeacherBooking {
 }
 
 // Re-export related interfaces
-import { AvailabilitySlot, User } from './user.interface';
+import { AvailabilitySlot, PaginationDto, User } from './user.interface';
 import { Academy } from './academy.interface';
 import { Class } from './class.interface';
 import { Performance } from './performance.interface';import { Subject } from './subject.interface';
-import { Student } from './student.interface';
+import { Student, TeacherBookingDto } from './student.interface';
 import { BookingStatus } from '../enums';
 
+export interface TeacherSessionDto {
+  sessions:TeacherBookingDto[]
+  pagination:PaginationDto
+}

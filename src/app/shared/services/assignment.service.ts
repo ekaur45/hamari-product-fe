@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
-import { API_ENDPOINTS } from '../constants';
+import { API_ENDPOINTS, HTTP_STATUS } from '../constants';
 import {
   Assignment,
   AssignmentListDto,
@@ -12,6 +12,8 @@ import {
   GradeSubmissionDto,
   AssignmentStatus,
   SubmissionStatus,
+  ApiResponse,
+  PaginatedApiResponse,
 } from '../models';
 
 @Injectable({
@@ -23,9 +25,9 @@ export class AssignmentService {
   /**
    * Create a new assignment
    */
-  createAssignment(teacherId: string, dto: CreateAssignmentDto): Observable<Assignment> {
+  createAssignment(teacherId: string, dto: CreateAssignmentDto): Observable<ApiResponse<Assignment>> {
     return this.apiService.post<Assignment>(API_ENDPOINTS.TEACHERS.ASSIGNMENTS(teacherId), dto).pipe(
-      map(r => r.data),
+      map(r => r),
       catchError(e => throwError(() => e))
     );
   }
@@ -38,13 +40,13 @@ export class AssignmentService {
     page: number = 1,
     limit: number = 10,
     filters?: { classId?: string; status?: AssignmentStatus }
-  ): Observable<AssignmentListDto> {
+  ): Observable<PaginatedApiResponse<Assignment>> {
     const params: any = { page, limit };
     if (filters?.classId) params.classId = filters.classId;
     if (filters?.status) params.status = filters.status;
 
-    return this.apiService.get<AssignmentListDto>(API_ENDPOINTS.TEACHERS.ASSIGNMENTS(teacherId), { params }).pipe(
-      map(r => r.data),
+    return this.apiService.getPaginated<Assignment>(API_ENDPOINTS.TEACHERS.ASSIGNMENTS(teacherId), page, limit, { params }).pipe(
+      map(r => { if(r.statusCode === HTTP_STATUS.OK) return r.data; else throw Error(r.message)}),
       catchError(e => throwError(() => e))
     );
   }

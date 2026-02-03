@@ -2,6 +2,7 @@ import { Class } from './class.interface';
 import { Teacher } from './teacher.interface';
 import TeacherBooking from './teacher.interface';
 import { Student } from './student.interface';
+import { User } from './user.interface';
 
 export enum AssignmentType {
   HOMEWORK = 'homework',
@@ -50,6 +51,8 @@ export interface Assignment {
   updatedAt: Date | string;
   isDeleted: boolean;
   submissions?: AssignmentSubmission[];
+  studentUserId?: string;
+  studentUser?: User;
 }
 
 export interface AssignmentSubmission {
@@ -79,6 +82,7 @@ export interface CreateAssignmentDto {
   description?: string;
   classId?: string;
   teacherBookingId?: string;
+  studentUserId?: string;
   type: AssignmentType;
   maxScore: number;
   weight?: number;
@@ -87,8 +91,13 @@ export interface CreateAssignmentDto {
   allowLateSubmission?: boolean;
   latePenalty?: number;
   instructions?: string;
-  attachments?: string[];
   rubric?: any;
+  attachments?: {
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  }[];
 }
 
 export interface UpdateAssignmentDto {
@@ -114,7 +123,7 @@ export interface GradeSubmissionDto {
 }
 
 export interface AssignmentListDto {
-  assignments: Assignment[];
+  data: Assignment[];
   total: number;
   pagination: {
     page: number;

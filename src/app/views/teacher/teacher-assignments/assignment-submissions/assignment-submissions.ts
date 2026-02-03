@@ -82,24 +82,14 @@ export class AssignmentSubmissions implements OnInit {
     const userId = this.authService.getCurrentUser()?.id;
     if (!userId) return;
 
-    this.teacherService.getTeacherById(userId).subscribe({
-      next: (teacher) => {
-        this.currentTeacher.set(teacher);
-        this.teacherId = teacher.id;
-        this.loadAssignment();
-        this.loadSubmissions();
-      },
-      error: (err) => {
-        console.error('Failed to load teacher:', err);
-      },
-    });
+    this.loadAssignment();
+    this.loadSubmissions();
   }
 
   loadAssignment(): void {
-    if (!this.teacherId || !this.assignmentId) return;
 
     this.isLoading.set(true);
-    this.assignmentService.getAssignmentById(this.teacherId, this.assignmentId).subscribe({
+    this.assignmentService.getAssignmentById(this.authService.getCurrentUser()?.id || '', this.assignmentId).subscribe({
       next: (assignment) => {
         this.assignment.set(assignment);
         this.isLoading.set(false);
@@ -117,12 +107,11 @@ export class AssignmentSubmissions implements OnInit {
   }
 
   loadSubmissions(): void {
-    if (!this.teacherId || !this.assignmentId) return;
 
     this.isLoading.set(true);
     this.assignmentService
       .getSubmissions(
-        this.teacherId,
+        this.authService.getCurrentUser()?.id || '',
         this.assignmentId,
         this.pagination().page,
         this.pagination().limit,
@@ -166,7 +155,7 @@ export class AssignmentSubmissions implements OnInit {
   }
 
   submitGrade(): void {
-    if (!this.teacherId || !this.assignmentId || !this.selectedSubmission()) return;
+    if (!this.assignmentId || !this.selectedSubmission()) return;
 
     const data = this.gradeData();
     if (data.score < 0 || data.score > (data.maxScore || 100)) {
@@ -179,8 +168,9 @@ export class AssignmentSubmissions implements OnInit {
     }
 
     this.isLoading.set(true);
+    data.maxScore = Number(data.maxScore || "0");
     this.assignmentService
-      .gradeSubmission(this.teacherId, this.assignmentId, this.selectedSubmission()!.id, data)
+      .gradeSubmission(this.authService.getCurrentUser()?.id || '', this.assignmentId, this.selectedSubmission()!.id, data)
       .subscribe({
         next: () => {
           this.messageService.add({

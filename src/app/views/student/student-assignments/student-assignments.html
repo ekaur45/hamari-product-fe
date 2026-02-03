@@ -74,7 +74,9 @@
                                     <div class="flex-1 min-w-0">
                                         <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Due Date</p>
                                         <p class="text-sm text-gray-700" [class.text-red-600]="isPastDue(assignment)" [class.font-semibold]="isPastDue(assignment)">
-                                            {{formatDate(assignment.dueDate)}}
+                                            {{formatDate(assignment.dueDate)}} @if(isPastDue(assignment) && assignment.allowLateSubmission) {
+                                                <span class="text-xs text-gray-500 ml-2">(Late submission allowed, penalty: {{assignment.latePenalty}}%) ({{assignment.submissionDate}}% deduction per day)</span>
+                                            }
                                         </p>
                                     </div>
                                 </div>

@@ -57,5 +57,9 @@ export const teacherRoutes: Routes = [
     {
         path: 'chat/:selectedConversationId',
         loadComponent: () => import('../shared/shared-chat/shared-chat').then(m => m.SharedChat)
+    },
+    {
+        path: 'sessions',
+        loadComponent: () => import('./teacher-sessions/teacher-sessions').then(m => m.TeacherSessions)
     }
 ];

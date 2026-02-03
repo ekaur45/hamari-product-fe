@@ -64,10 +64,10 @@ export class StudentService {
   }
 
   // Student Assignments
-  getMyAssignments(studentId: string, page: number = 1, limit: number = 10, classId?: string): Observable<AssignmentListDto> {
+  getMyAssignments(studentId: string, page: number = 1, limit: number = 10, classId?: string): Observable<PaginatedApiResponse<Assignment>> {
     const params: any = { page, limit };
     if (classId) params.classId = classId;
-    return this.apiService.get<AssignmentListDto>(`${API_ENDPOINTS.STUDENTS.BASE}/${studentId}/assignments`, { params }).pipe(
+    return this.apiService.getPaginated<Assignment>(`${API_ENDPOINTS.STUDENTS.BASE}/${studentId}/assignments`, page, limit, { params }).pipe(
       map(r => r.data),
       catchError(e => throwError(() => e))
     );

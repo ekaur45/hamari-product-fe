@@ -7,7 +7,7 @@ import { DialogModule } from "primeng/dialog";
 import { ButtonModule } from "primeng/button";
 import { ToastModule } from "primeng/toast";
 import { MessageService } from "primeng/api";
-import { StudentService, AuthService, Assignment, AssignmentListDto, AssignmentSubmission, SubmissionStatus } from "../../../shared";
+import { StudentService, AuthService, Assignment, AssignmentListDto, AssignmentSubmission, SubmissionStatus, PaginatedApiResponse } from "../../../shared";
 
 @Component({
   selector: 'app-student-assignments',
@@ -57,8 +57,8 @@ export class StudentAssignments implements OnInit {
   loadAssignments(page: number = 1): void {
     this.isLoading.set(true);
     this.studentService.getMyAssignments(this.studentId(), page, this.pagination().limit).subscribe({
-      next: (result: AssignmentListDto) => {
-        this.assignments.set(result.assignments);
+      next: (result: PaginatedApiResponse<Assignment>) => {
+        this.assignments.set(result.data || []);
         this.pagination.set(result.pagination);
         this.isLoading.set(false);
       },
@@ -121,7 +121,7 @@ export class StudentAssignments implements OnInit {
   }
 
   getSubmissionStatus(assignment: Assignment): { status: string; submission: AssignmentSubmission | null } {
-    const submission = assignment.submissions?.find(s => s.studentId === this.studentId());
+    const submission = assignment.submissions && assignment.submissions.length > 0 ? assignment.submissions[0] : null;
     if (!submission) {
       return { status: 'not_submitted', submission: null };
     }

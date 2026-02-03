@@ -49,7 +49,7 @@ export class MainLayout implements AfterViewInit, OnInit {
     this.getNotifications();
     this.mainSocketService.connectToSocket();
     this.mainSocketService.listenToEventsFromServer(`notification_${this.currentUser()?.id}`).subscribe(res => {
-if(res.notification) {
+if(res?.notification) {
       //this.messageService.add({severity: 'info', summary: 'Notification', detail: res.notification.message});
       this.getNotifications();
 }
