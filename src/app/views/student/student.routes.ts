@@ -41,5 +41,9 @@ export const studentRoutes: Routes = [
     {
         path: 'chat/:selectedConversationId',
         loadComponent: () => import('../shared/shared-chat/shared-chat').then(m => m.SharedChat)
+    },
+    {
+        path: 'notifications',
+        loadComponent: () => import('./student-notifications/student-notifications').then(m => m.StudentNotifications)
     }
 ];

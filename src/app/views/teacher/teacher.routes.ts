@@ -61,5 +61,9 @@ export const teacherRoutes: Routes = [
     {
         path: 'sessions',
         loadComponent: () => import('./teacher-sessions/teacher-sessions').then(m => m.TeacherSessions)
+    },
+    {
+        path: 'notifications',
+        loadComponent: () => import('./teacher-notifications/teacher-notifications').then(m => m.TeacherNotifications)
     }
 ];

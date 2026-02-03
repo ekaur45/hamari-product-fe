@@ -1,0 +1,218 @@
+<!-- Header with Actions -->
+<div class="mb-4 space-y-3 border-b border-gray-200 pb-4 rounded-lg p-4 shadow-sm bg-white">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div class="flex items-center gap-2">
+            <h2 class="text-lg font-semibold text-gray-900">Notifications</h2>
+            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                {{ unreadCount() }} unread
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+
+                <button 
+                    type="button"
+                    class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    [disabled]=" unreadCount() === 0 || isMarkingAllAsRead()"
+                    (click)=" unreadCount() > 0 && markAllAsRead()">
+                    @if(isMarkingAllAsRead()) {
+                        <i class="fas fa-spinner fa-spin text-xs"></i>
+                        <span class="hidden sm:inline">Marking...</span>
+                    } @else {
+                        <i class="fas fa-check-double text-xs"></i>
+                        <span class="hidden sm:inline">Mark all as read</span>
+                    }
+                </button>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Type Filter -->
+        <div>
+            <div class="flex flex-wrap gap-2">
+                <label
+                class="inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 cursor-pointer whitespace-nowrap"
+                [class.bg-primary]="selectedTypeFilters().size === 0"
+                [class.text-white]="selectedTypeFilters().size === 0"
+                [class.bg-white]="selectedTypeFilters().size !== 0"
+                [class.text-gray-700]="selectedTypeFilters().size !== 0"
+                [class.border]="selectedTypeFilters().size !== 0"
+                [class.border-gray-300]="selectedTypeFilters().size !== 0"
+                [class.hover:bg-gray-50]="selectedTypeFilters().size !== 0">
+                <input
+                    type="checkbox"
+                    class="sr-only"
+                    [checked]="selectedTypeFilters().size === 0"
+                    (change)="toggleTypeFilter(NotificationType.ALL)">
+                <span class="flex items-center gap-1.5">
+                    @if(selectedTypeFilters().size === 0) {
+                        <i class="fas fa-check text-[10px]"></i>
+                    }
+                    All
+                </span>
+            </label>
+                @for(option of getNotificationTypeOptions(); track option.value) {
+                    <label
+                        class="inline-flex items-center px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 cursor-pointer whitespace-nowrap"
+                        [class.bg-primary]="isTypeFilterSelected(option.value)"
+                        [class.text-white]="isTypeFilterSelected(option.value)"
+                        [class.bg-white]="!isTypeFilterSelected(option.value)"
+                        [class.text-gray-700]="!isTypeFilterSelected(option.value)"
+                        [class.border]="!isTypeFilterSelected(option.value)"
+                        [class.border-gray-300]="!isTypeFilterSelected(option.value)"
+                        [class.hover:bg-gray-50]="!isTypeFilterSelected(option.value)">
+                        <input
+                            type="checkbox"
+                            class="sr-only"
+                            [checked]="isTypeFilterSelected(option.value)"
+                            (change)="toggleTypeFilter(option.value)">
+                        <span class="flex items-center gap-1.5">
+                            @if(isTypeFilterSelected(option.value)) {
+                                <i class="fas fa-check text-[10px]"></i>
+                            }
+                            {{ option.label }}
+                        </span>
+                    </label>
+                }
+            </div>
+        </div>
+        <!-- Read Status Filter -->
+        <div>
+            <div class="flex flex-wrap gap-2">
+                @for(option of getReadStatusOptions(); track option.value) {
+                    <button
+                        type="button"
+                        class="px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 whitespace-nowrap"
+                        [class.bg-primary]="selectedReadStatusFilter() === option.value"
+                        [class.text-white]="selectedReadStatusFilter() === option.value"
+                        [class.bg-white]="selectedReadStatusFilter() !== option.value"
+                        [class.text-gray-700]="selectedReadStatusFilter() !== option.value"
+                        [class.border]="selectedReadStatusFilter() !== option.value"
+                        [class.border-gray-300]="selectedReadStatusFilter() !== option.value"
+                        [class.hover:bg-gray-50]="selectedReadStatusFilter() !== option.value"
+                        (click)="onReadStatusFilterChange(option.value)">
+                        {{ option.label }}
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if(isLoading() && notifications().length === 0) {
+    <!-- Loading State -->
+    <div class="flex items-center justify-center h-full min-h-[400px]">
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin text-primary text-3xl mb-3"></i>
+            <p class="text-gray-500 text-sm">Loading notifications...</p>
+        </div>
+    </div>
+} @else if(notifications().length > 0) {
+    <!-- Notifications List -->
+    <div class="flex flex-col gap-3 h-[calc(100dvh-315px)] overflow-y-auto">
+        @for(notification of notifications(); track notification.id) {
+            <div 
+                role="button"
+                tabindex="0"
+                [attr.aria-label]="notification.title"
+                [attr.aria-describedby]="'notification-' + notification.id"
+                class="group flex items-start gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 border-l-4 shadow-sm hover:shadow-md active:scale-[0.98]"
+                [class.border-blue-500]="!notification.isRead"
+                [class.border-transparent]="notification.isRead"
+                [class.bg-blue-50]="!notification.isRead"
+                [class.bg-white]="notification.isRead"
+                [class.opacity-60]="markingAsRead().has(notification.id)"
+                (click)="onNotificationClick(notification, $event)"
+                (keydown.enter)="onNotificationClick(notification, $event)"
+                (keydown.space)="onNotificationClick(notification, $event); $event.preventDefault()">
+                
+                <!-- Icon -->
+                <div class="flex-shrink-0 mt-0.5">
+                    <div class="w-11 h-11 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
+                         [ngClass]="getNotificationIconConfig(notification.type).bgColor">
+                        <i class="fas text-base"
+                           [ngClass]="[getNotificationIconConfig(notification.type).icon, getNotificationIconConfig(notification.type).iconColor]"></i>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 min-w-0" [id]="'notification-' + notification.id">
+                    <div class="flex items-start justify-between gap-2 mb-1.5">
+                        <h3 class="text-sm font-semibold text-gray-900 truncate transition-all duration-200" 
+                            [class.font-bold]="!notification.isRead"
+                            [class.text-gray-700]="notification.isRead">
+                            {{ notification.title }}
+                        </h3>
+                        @if(!notification.isRead){
+                            <span class="flex-shrink-0 mt-1.5 h-2.5 w-2.5 bg-blue-500 rounded-full animate-pulse" 
+                                  aria-label="Unread notification"></span>
+                        }
+                    </div>
+                    
+                    @if(notification.message){
+                        <p class="text-xs text-gray-600 line-clamp-2 mb-2 leading-relaxed" 
+                           [innerHTML]="notification.message">
+                        </p>
+                    }
+                    
+                    <div class="flex items-center gap-2">
+                        @if(notification.createdAt){
+                            <p class="text-xs text-gray-400 flex items-center gap-1">
+                                <i class="fas fa-clock text-[10px]"></i>
+                                <span>{{ formatTimeAgo(notification.createdAt) }}</span>
+                            </p>
+                        }
+                        @if(markingAsRead().has(notification.id)){
+                            <span class="text-xs text-gray-400 flex items-center gap-1">
+                                <i class="fas fa-spinner fa-spin text-[10px]"></i>
+                                <span>Marking as read...</span>
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    <!-- Load More Button -->
+    @if(pagination().hasNext) {
+        <div class="flex justify-center mt-6">
+            <button 
+                type="button"
+                class="px-6 py-2.5 bg-primary text-white rounded-lg font-medium text-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                [disabled]="isLoadingMore()"
+                (click)="loadMore()">
+                @if(isLoadingMore()) {
+                    <i class="fas fa-spinner fa-spin text-sm"></i>
+                    <span>Loading...</span>
+                } @else {
+                    <i class="fas fa-chevron-down text-xs"></i>
+                    <span>Load More</span>
+                }
+            </button>
+        </div>
+    }
+} @else {
+    <!-- Empty State -->
+    <div class="flex items-center justify-center h-full min-h-[400px]">
+        <div class="text-center max-w-sm mx-auto px-4">
+            @if(notifications().length > 0 && (selectedTypeFilters().size > 0 || selectedReadStatusFilter() !== 'all')) {
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-filter text-gray-400 text-2xl"></i>
+                </div>
+                <h3 class="text-gray-700 font-semibold text-base mb-2">No notifications match your filters</h3>
+                <p class="text-gray-500 text-sm mb-4">Try adjusting your filter criteria.</p>
+                <button 
+                    type="button"
+                    class="px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors duration-200"
+                    (click)="clearFilters()">
+                    Clear Filters
+                </button>
+            } @else {
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-bell-slash text-gray-400 text-2xl"></i>
+                </div>
+                <h3 class="text-gray-700 font-semibold text-base mb-2">No notifications yet</h3>
+                <p class="text-gray-500 text-sm">We'll notify you when something important happens.</p>
+            }
+        </div>
+    </div>
+}
