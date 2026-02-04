@@ -1,5 +1,6 @@
 import { Component, AfterViewInit, ElementRef, EventEmitter, OnDestroy, Output, signal, ViewChild, input, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { Canvas, Rect, Circle, Line, Text, Image, Path, ActiveSelection, FabricObject } from 'fabric';
 import { WhiteboardPermissions } from "./permissions/whiteboard-permissions";
 import { WhiteboardPage } from "./pages/whiteboard-pages";
 import { WhiteboardSelectTool } from "./tools/whiteboard-select-tool";
@@ -16,6 +17,8 @@ import { WhiteboardCanvasOptions } from "./toolbar/whiteboard-canvas-options";
 import { WhiteboardZoomControls } from "./toolbar/whiteboard-zoom-controls";
 import { WhiteboardActionButtons } from "./toolbar/whiteboard-action-buttons";
 import { WhiteboardUndoRedo } from "./toolbar/whiteboard-undo-redo";
+import { WhiteboardMobileToolbar } from "./toolbar/whiteboard-mobile-toolbar";
+import { WhiteboardMobileCollapsible } from "./toolbar/whiteboard-mobile-collapsible";
 import { UserRole, AuthService } from "../../shared";
 import { Socket } from "socket.io-client";
 import { getToolFromId, isImageTool, clampZoom } from "./utils/whiteboard-helpers";
@@ -40,7 +43,9 @@ import { getToolFromId, isImageTool, clampZoom } from "./utils/whiteboard-helper
         WhiteboardCanvasOptions,
         WhiteboardZoomControls,
         WhiteboardActionButtons,
-        WhiteboardUndoRedo
+        WhiteboardUndoRedo,
+        WhiteboardMobileToolbar,
+        WhiteboardMobileCollapsible
     ],
     standalone: true,
 })
@@ -51,7 +56,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     // Inputs
     currentUserRole = input<UserRole>(UserRole.STUDENT);
     sessionId = input<string>('');
-    socket = input<Socket | undefined>(undefined); // Optional socket for real-time collaboration
+    socket = input<Socket | undefined>(undefined);
     
     // Whiteboard
     whiteboardOpen = signal<boolean>(true);
@@ -65,7 +70,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     showMoreColors = signal<boolean>(false);
     showMoreColorsMobile = signal<boolean>(false);
     
-    // New Features
+    // Features
     isEditable = signal<boolean>(true);
     isLocked = signal<boolean>(false);
     pages = signal<WhiteboardPage[]>([{ id: '1', name: 'Page 1' }]);
@@ -75,66 +80,43 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     activeUsers = signal<WhiteboardUser[]>([]);
     templates = signal<WhiteboardTemplate[]>([]);
     
-     // Whiteboard Drawing State
-     private isDrawing = false;
-     private startX = 0;
-     private startY = 0;
-     private history: string[] = [];
-     private historyStep = -1;
-     private resizeObserver?: ResizeObserver;
-     private resizeHandler?: () => void;
-     @ViewChild('whiteboardActive') whiteboardActive?: ElementRef<HTMLSpanElement>;
-     @ViewChild('whiteboardCanvas') whiteboardCanvas?: ElementRef<HTMLCanvasElement>;
-     @ViewChild('gridCanvas') gridCanvas?: ElementRef<HTMLCanvasElement>;
-     @ViewChild('canvasWrapper') canvasWrapper?: ElementRef<HTMLDivElement>;
-     @ViewChild('canvasContainer') canvasContainer?: ElementRef<HTMLDivElement>;
-     @ViewChild('exitWhiteboardFullscreen') exitWhiteboardFullscreen?: ElementRef<HTMLButtonElement>;
-     @ViewChild('exitWhiteboardFullscreenMobile') exitWhiteboardFullscreenMobile?: ElementRef<HTMLButtonElement>;
-     @ViewChild('imageUploadMobile') imageUploadMobile?: ElementRef<HTMLInputElement>;
-     @ViewChild('imageUpload') imageUpload?: ElementRef<HTMLInputElement>;
-     
-     // Collapsible panels for mobile
-     @ViewChild('colorSizePanelMobile') colorSizePanelMobile?: ElementRef<HTMLDivElement>;
-     @ViewChild('styleOptionsPanelMobile') styleOptionsPanelMobile?: ElementRef<HTMLDivElement>;
-     @ViewChild('zoomPanelMobile') zoomPanelMobile?: ElementRef<HTMLDivElement>;
-     @ViewChild('actionsPanelMobile') actionsPanelMobile?: ElementRef<HTMLDivElement>;
-     @ViewChild('saveExportPanelMobile') saveExportPanelMobile?: ElementRef<HTMLDivElement>;
-     
-     // Chevrons for mobile
-     @ViewChild('colorSizeChevron') colorSizeChevron?: ElementRef<HTMLElement>;
-     @ViewChild('styleOptionsChevron') styleOptionsChevron?: ElementRef<HTMLElement>;
-     @ViewChild('zoomChevron') zoomChevron?: ElementRef<HTMLElement>;
-     @ViewChild('actionsChevron') actionsChevron?: ElementRef<HTMLElement>;
-     @ViewChild('saveExportChevron') saveExportChevron?: ElementRef<HTMLElement>;
-
-     private canvasContext?: CanvasRenderingContext2D;
-     private gridContext?: CanvasRenderingContext2D;
-     
-     // Socket events for whiteboard
-     private readonly WHITEBOARD_EMITTERS = {
-         DRAWING: 'whiteboard-drawing',
-         CLEAR: 'whiteboard-clear',
-         PAGE_CHANGE: 'whiteboard-page-change',
-         LOCK_TOGGLE: 'whiteboard-lock-toggle',
-         PRESENCE: 'whiteboard-presence',
-         SYNC_REQUEST: 'whiteboard-sync-request'
-     };
-     
-     private readonly WHITEBOARD_LISTENERS = {
-         DRAWING: 'whiteboard-drawing',
-         CLEAR: 'whiteboard-clear',
-         PAGE_CHANGE: 'whiteboard-page-change',
-         LOCK_TOGGLE: 'whiteboard-lock-toggle',
-         PRESENCE: 'whiteboard-presence',
-         SYNC: 'whiteboard-sync'
-     };
-     
-     private pageStorage: Map<string, string> = new Map(); // Store page canvas data
-     private isReceivingRemoteUpdate = false; // Prevent feedback loops
-     private authService = inject(AuthService);
+    @ViewChild('whiteboardCanvas') whiteboardCanvas?: ElementRef<HTMLCanvasElement>;
+    @ViewChild('gridCanvas') gridCanvas?: ElementRef<HTMLCanvasElement>;
+    @ViewChild('canvasContainer') canvasContainer?: ElementRef<HTMLDivElement>;
+    @ViewChild('canvasWrapper') canvasWrapper?: ElementRef<HTMLDivElement>;
+    
+    private fabricCanvas?: Canvas;
+    private gridContext?: CanvasRenderingContext2D;
+    private resizeObserver?: ResizeObserver;
+    private resizeHandler?: () => void;
+    private isDrawing = false;
+    private currentPath?: Path;
+    private history: string[] = [];
+    private historyStep = -1;
+    private clipboardObjects: FabricObject[] = [];
+    private pageStorage: Map<string, string> = new Map();
+    private isReceivingRemoteUpdate = false;
+    private authService = inject(AuthService);
+    
+    private readonly WHITEBOARD_EMITTERS = {
+        DRAWING: 'whiteboard-drawing',
+        CLEAR: 'whiteboard-clear',
+        PAGE_CHANGE: 'whiteboard-page-change',
+        LOCK_TOGGLE: 'whiteboard-lock-toggle',
+        PRESENCE: 'whiteboard-presence',
+        SYNC_REQUEST: 'whiteboard-sync-request'
+    };
+    
+    private readonly WHITEBOARD_LISTENERS = {
+        DRAWING: 'whiteboard-drawing',
+        CLEAR: 'whiteboard-clear',
+        PAGE_CHANGE: 'whiteboard-page-change',
+        LOCK_TOGGLE: 'whiteboard-lock-toggle',
+        PRESENCE: 'whiteboard-presence',
+        SYNC: 'whiteboard-sync'
+    };
 
     ngAfterViewInit(): void {
-        // Initialize after view is ready
         setTimeout(() => {
             this.initializeWhiteboard();
             this.initializeTemplates();
@@ -149,155 +131,33 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         if (this.resizeHandler) {
             window.removeEventListener('resize', this.resizeHandler);
         }
+        if (this.fabricCanvas) {
+            this.fabricCanvas.dispose();
+        }
         this.cleanupSocket();
     }
     
-    // Socket Integration
-    private initializeSocket(): void {
-        const socket = this.socket();
-        if (!socket || !socket.connected) {
-            console.warn('⚠️ Socket not available for whiteboard collaboration');
-            return;
-        }
-        
-        const sessionId = this.sessionId();
-        if (!sessionId) {
-            console.warn('⚠️ Session ID not available for whiteboard collaboration');
-            return;
-        }
-        
-        console.log('✅ Initializing whiteboard socket integration');
-        
-        // Listen for remote drawing events
-        socket.on(this.WHITEBOARD_LISTENERS.DRAWING, (data: { 
-            userId: string, 
-            pageId: string, 
-            canvasData: string,
-            tool: string,
-            color: string,
-            lineWidth: number
-        }) => {
-            if (data.userId === this.authService.getCurrentUser()?.id) return;
-            this.handleRemoteDrawing(data);
-        });
-        
-        // Listen for remote clear events
-        socket.on(this.WHITEBOARD_LISTENERS.CLEAR, (data: { userId: string, pageId: string }) => {
-            if (data.userId === this.authService.getCurrentUser()?.id) return;
-            if (data.pageId === this.pages()[this.currentPageIndex()]?.id) {
-                this.isReceivingRemoteUpdate = true;
-                this.onClear();
-                this.isReceivingRemoteUpdate = false;
-            }
-        });
-        
-        // Listen for page changes
-        socket.on(this.WHITEBOARD_LISTENERS.PAGE_CHANGE, (data: { userId: string, pageId: string }) => {
-            if (data.userId === this.authService.getCurrentUser()?.id) return;
-            this.onPageChange(data.pageId);
-        });
-        
-        // Listen for lock toggle
-        socket.on(this.WHITEBOARD_LISTENERS.LOCK_TOGGLE, (data: { userId: string, isLocked: boolean }) => {
-            if (data.userId === this.authService.getCurrentUser()?.id) return;
-            this.isLocked.set(data.isLocked);
-            this.isEditable.set(!data.isLocked);
-        });
-        
-        // Listen for presence updates
-        socket.on(this.WHITEBOARD_LISTENERS.PRESENCE, (data: { users: WhiteboardUser[] }) => {
-            this.activeUsers.set(data.users);
-        });
-        
-        // Request initial sync
-        socket.emit(this.WHITEBOARD_EMITTERS.SYNC_REQUEST, { 
-            sessionId,
-            pageId: this.pages()[this.currentPageIndex()]?.id 
-        });
-    }
-    
-    private handleRemoteDrawing(data: { pageId: string, canvasData: string }): void {
-        if (data.pageId !== this.pages()[this.currentPageIndex()]?.id) return;
-        
-        this.isReceivingRemoteUpdate = true;
-        const img = new Image();
-        img.onload = () => {
-            if (this.canvasContext && this.whiteboardCanvas) {
-                this.canvasContext.drawImage(img, 0, 0);
-            }
-            this.isReceivingRemoteUpdate = false;
-        };
-        img.src = data.canvasData;
-    }
-    
-    private cleanupSocket(): void {
-        const socket = this.socket();
-        if (!socket) return;
-        
-        socket.off(this.WHITEBOARD_LISTENERS.DRAWING);
-        socket.off(this.WHITEBOARD_LISTENERS.CLEAR);
-        socket.off(this.WHITEBOARD_LISTENERS.PAGE_CHANGE);
-        socket.off(this.WHITEBOARD_LISTENERS.LOCK_TOGGLE);
-        socket.off(this.WHITEBOARD_LISTENERS.PRESENCE);
-    }
-    
-    private emitDrawing(): void {
-        const socket = this.socket();
-        if (!socket || !socket.connected || this.isReceivingRemoteUpdate) return;
-        
-        const currentPage = this.pages()[this.currentPageIndex()];
-        if (!currentPage || !this.whiteboardCanvas) return;
-        
-        const canvasData = this.whiteboardCanvas.nativeElement.toDataURL();
-        socket.emit(this.WHITEBOARD_EMITTERS.DRAWING, {
-            sessionId: this.sessionId(),
-            userId: this.authService.getCurrentUser()?.id,
-            pageId: currentPage.id,
-            canvasData,
-            tool: this.currentTool(),
-            color: this.currentColor(),
-            lineWidth: this.currentLineWidth()
-        });
-    }
-
-     // Tool Selection
-     selectTool(toolId: string): void {
-        const tool = getToolFromId(toolId);
-        if (!tool) return;
-        
-        if (isImageTool(toolId)) {
-            const uploadInput = toolId.includes('Mobile') ? this.imageUploadMobile : this.imageUpload;
-            if (uploadInput) {
-                uploadInput.nativeElement.click();
-            }
-            return;
-        }
-        
-        this.currentTool.set(tool);
-    }
-    
-    onToolSelect(toolId: string): void {
-        this.selectTool(toolId);
-    }
-
-    // Whiteboard Functionality
     private initializeWhiteboard(): void {
         if (!this.whiteboardCanvas || !this.gridCanvas || !this.canvasContainer) {
             return;
         }
         
-        const canvas = this.whiteboardCanvas.nativeElement;
-        const gridCanvas = this.gridCanvas.nativeElement;
+        const canvasEl = this.whiteboardCanvas.nativeElement;
+        const gridCanvasEl = this.gridCanvas.nativeElement;
+        const container = this.canvasContainer.nativeElement;
         
-        this.canvasContext = canvas.getContext('2d', { willReadFrequently: true }) || undefined;
-        this.gridContext = gridCanvas.getContext('2d') || undefined;
+        // Initialize Fabric.js canvas
+        this.fabricCanvas = new Canvas(canvasEl, {
+            backgroundColor: '#ffffff',
+            selection: true,
+            preserveObjectStacking: true
+        });
         
-        if (this.canvasContext) {
-            canvas.style.backgroundColor = '#ffffff';
-            // Set initial canvas properties
-            this.canvasContext.lineCap = 'round';
-            this.canvasContext.lineJoin = 'round';
-        }
+        // Initialize grid canvas context
+        this.gridContext = gridCanvasEl.getContext('2d') || undefined;
+        
+        // Setup Fabric.js event handlers
+        this.setupFabricEvents();
         
         // Initial resize
         this.resizeCanvas();
@@ -305,21 +165,47 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         // Save initial empty state
         this.saveState();
         
-        // Setup resize observer for better performance
+        // Setup resize observer
         if (this.canvasContainer) {
             this.resizeObserver = new ResizeObserver(() => {
                 this.resizeCanvas();
             });
-            this.resizeObserver.observe(this.canvasContainer.nativeElement);
+            this.resizeObserver.observe(container);
         }
         
-        // Fallback resize handler
         this.resizeHandler = () => this.resizeCanvas();
         window.addEventListener('resize', this.resizeHandler);
     }
     
+    private setupFabricEvents(): void {
+        if (!this.fabricCanvas) return;
+        
+        // Handle selection changes
+        this.fabricCanvas.on('selection:created', () => {
+            this.hasSelection.set(true);
+        });
+        
+        this.fabricCanvas.on('selection:updated', () => {
+            this.hasSelection.set(true);
+        });
+        
+        this.fabricCanvas.on('selection:cleared', () => {
+            this.hasSelection.set(false);
+        });
+        
+        // Handle object modifications
+        this.fabricCanvas.on('object:modified', () => {
+            this.saveState();
+        });
+        
+        // Handle path creation for free drawing
+        this.fabricCanvas.on('path:created', () => {
+            this.saveState();
+        });
+    }
+    
     private resizeCanvas(): void {
-        if (!this.canvasContext || !this.gridContext || !this.whiteboardCanvas || !this.gridCanvas || !this.canvasWrapper || !this.canvasContainer) {
+        if (!this.fabricCanvas || !this.gridCanvas || !this.canvasContainer || !this.canvasWrapper) {
             return;
         }
         
@@ -328,60 +214,38 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         const baseHeight = Math.max(1, container.clientHeight);
         const zoom = this.zoomLevel();
         
-        const canvas = this.whiteboardCanvas.nativeElement;
-        const gridCanvas = this.gridCanvas.nativeElement;
-        
-        // Store current state as image before resize
-        let currentImage: HTMLImageElement | null = null;
-        if (canvas.width > 0 && canvas.height > 0) {
-            const dataUrl = canvas.toDataURL();
-            if (dataUrl && dataUrl !== 'data:,') {
-                currentImage = new Image();
-                currentImage.src = dataUrl;
-            }
-        }
-        
-        // Set new dimensions
         const newWidth = baseWidth * zoom;
         const newHeight = baseHeight * zoom;
         
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-        gridCanvas.width = newWidth;
-        gridCanvas.height = newHeight;
+        // Resize Fabric.js canvas
+        this.fabricCanvas.setDimensions({
+            width: newWidth,
+            height: newHeight
+        });
         
-        // Restore canvas properties
-        this.canvasContext.lineCap = 'round';
-        this.canvasContext.lineJoin = 'round';
+        // Resize grid canvas
+        const gridCanvasEl = this.gridCanvas.nativeElement;
+        gridCanvasEl.width = newWidth;
+        gridCanvasEl.height = newHeight;
         
-        // Restore background color
-        const bgColor = canvas.style.backgroundColor || '#ffffff';
-        canvas.style.backgroundColor = bgColor;
-        
+        // Update wrapper transform
         const wrapper = this.canvasWrapper.nativeElement;
         wrapper.style.transform = `scale(${1/zoom})`;
         wrapper.style.width = `${newWidth}px`;
         wrapper.style.height = `${newHeight}px`;
         
-        // Restore content
-        if (currentImage) {
-            currentImage.onload = () => {
-                if (this.canvasContext) {
-                    this.canvasContext.drawImage(currentImage!, 0, 0, newWidth, newHeight);
-                }
-            };
-        } else if (this.history.length > 0 && this.historyStep >= 0) {
-            // Redraw from history if available
-            this.redrawCanvas();
-        }
-        
         this.drawGrid();
+        this.fabricCanvas.renderAll();
     }
     
     private drawGrid(): void {
         if (!this.gridContext || !this.gridCanvas) return;
         
         const gridCanvas = this.gridCanvas.nativeElement;
+        if (gridCanvas.width === 0 || gridCanvas.height === 0) {
+            return;
+        }
+        
         this.gridContext.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
         
         if (!this.gridVisible()) return;
@@ -404,112 +268,332 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             this.gridContext.stroke();
         }
     }
-     // Whiteboard Toggle
-     onToggleWhiteboard(): void {
-        this.whiteboardOpen.set(!this.whiteboardOpen());
+    
+    // Tool Selection
+    selectTool(toolId: string): void {
+        const tool = getToolFromId(toolId);
+        if (!tool || !this.fabricCanvas) return;
         
-        if (this.whiteboardOpen()) {
-            setTimeout(() => this.resizeCanvas(), 100);
+        if (isImageTool(toolId)) {
+            const uploadInput = toolId.includes('Mobile') ? 
+                document.getElementById('imageUploadMobile') as HTMLInputElement :
+                document.getElementById('imageUpload') as HTMLInputElement;
+            if (uploadInput) {
+                uploadInput.click();
+            }
+            return;
+        }
+        
+        // Clear selection when switching tools (except select tool)
+        if (tool !== 'select' && this.fabricCanvas.getActiveObjects().length > 0) {
+            this.fabricCanvas.discardActiveObject();
+            this.fabricCanvas.renderAll();
+        }
+        
+        this.currentTool.set(tool);
+        
+        // Configure canvas based on tool
+        if (tool === 'select') {
+            this.fabricCanvas.isDrawingMode = false;
+            this.fabricCanvas.selection = true;
+        } else if (tool === 'pen' || tool === 'highlighter' || tool === 'eraser') {
+            this.fabricCanvas.isDrawingMode = true;
+            this.fabricCanvas.selection = false;
+            this.configureDrawingMode();
+        } else {
+            this.fabricCanvas.isDrawingMode = false;
+            this.fabricCanvas.selection = false;
         }
     }
     
-    _onExitWhiteboard(): void {
-        //this.whiteboardOpen.set(false);
-        this.onExitWhiteboard.emit();
+    private configureDrawingMode(): void {
+        if (!this.fabricCanvas) return;
+        
+        const tool = this.currentTool();
+        const brush = this.fabricCanvas.freeDrawingBrush;
+        
+        if (!brush) return;
+        
+        if (tool === 'pen') {
+            brush.color = this.currentColor();
+            brush.width = this.currentLineWidth();
+        } else if (tool === 'highlighter') {
+            brush.color = this.currentColor();
+            brush.width = this.currentLineWidth() * 3;
+            // Note: opacity might not be available on brush, use globalAlpha instead
+        } else if (tool === 'eraser') {
+            brush.color = '#ffffff';
+            brush.width = this.currentLineWidth() * 3;
+        }
     }
+    
+    private getPointerFromEvent(event: MouseEvent | TouchEvent): { x: number; y: number } {
+        if (!this.fabricCanvas) return { x: 0, y: 0 };
+        
+        const canvasEl = this.fabricCanvas.getElement();
+        const rect = canvasEl.getBoundingClientRect();
+        
+        let clientX: number;
+        let clientY: number;
+        
+        if ('touches' in event && event.touches.length > 0) {
+            clientX = event.touches[0].clientX;
+            clientY = event.touches[0].clientY;
+        } else if ('changedTouches' in event && event.changedTouches.length > 0) {
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+        } else {
+            clientX = (event as MouseEvent).clientX;
+            clientY = (event as MouseEvent).clientY;
+        }
+        
+        const zoom = this.zoomLevel();
+        return {
+            x: (clientX - rect.left) / (1 / zoom),
+            y: (clientY - rect.top) / (1 / zoom)
+        };
+    }
+    
+    onToolSelect(toolId: string): void {
+        this.selectTool(toolId);
+    }
+    
+    private currentShape: FabricObject | null = null;
+    private isDrawingShape = false;
+    private shapeStartPoint: { x: number; y: number } | null = null;
+    
+    // Canvas Events (for shape tools)
+    onCanvasMouseDown(event: MouseEvent | TouchEvent): void {
+        if (!this.fabricCanvas) return;
+        
+        const tool = this.currentTool();
+        if (tool === 'rectangle' || tool === 'circle' || tool === 'arrow' || tool === 'line' || tool === 'text') {
+            event.preventDefault();
+            const pointer = this.getPointerFromEvent(event);
+            this.startDrawingShape(pointer, tool);
+        }
+    }
+    
+    onCanvasMouseMove(event: MouseEvent | TouchEvent): void {
+        if (!this.fabricCanvas || !this.isDrawingShape || !this.currentShape || !this.shapeStartPoint) return;
+        
+        const pointer = this.getPointerFromEvent(event);
+        this.updateShape(pointer);
+    }
+    
+    onCanvasMouseUp(event: MouseEvent | TouchEvent): void {
+        if (!this.fabricCanvas || !this.isDrawingShape) return;
+        
+        this.finishDrawingShape();
+    }
+    
+    onCanvasMouseLeave(): void {
+        if (this.isDrawingShape) {
+            this.finishDrawingShape();
+        }
+    }
+    
+    private startDrawingShape(pointer: { x: number; y: number }, tool: string): void {
+        if (!this.fabricCanvas) return;
+        
+        this.shapeStartPoint = pointer;
+        this.isDrawingShape = true;
+        const color = this.currentColor();
+        const lineWidth = this.currentLineWidth();
+        
+        if (tool === 'rectangle') {
+            this.currentShape = new Rect({
+                left: pointer.x,
+                top: pointer.y,
+                width: 0,
+                height: 0,
+                fill: this.fillShapes() ? color : 'transparent',
+                stroke: color,
+                strokeWidth: lineWidth,
+                strokeDashArray: this.getStrokeDashArray(),
+                selectable: false
+            });
+        } else if (tool === 'circle') {
+            this.currentShape = new Circle({
+                left: pointer.x,
+                top: pointer.y,
+                radius: 0,
+                fill: this.fillShapes() ? color : 'transparent',
+                stroke: color,
+                strokeWidth: lineWidth,
+                strokeDashArray: this.getStrokeDashArray(),
+                selectable: false
+            });
+        } else if (tool === 'line') {
+            this.currentShape = new Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+                stroke: color,
+                strokeWidth: lineWidth,
+                strokeDashArray: this.getStrokeDashArray(),
+                selectable: false
+            });
+        } else if (tool === 'arrow') {
+            // Create simple arrow (line with arrowhead)
+            this.currentShape = new Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+                stroke: color,
+                strokeWidth: lineWidth,
+                selectable: false
+            });
+        } else if (tool === 'text') {
+            const text = prompt('Enter text:');
+            if (text) {
+                this.currentShape = new Text(text, {
+                    left: pointer.x,
+                    top: pointer.y,
+                    fontSize: Math.max(12, lineWidth * 5),
+                    fill: color,
+                    fontFamily: 'Arial'
+                });
+                this.fabricCanvas.add(this.currentShape);
+                this.fabricCanvas.setActiveObject(this.currentShape);
+                this.finishDrawingShape();
+                return;
+            } else {
+                this.isDrawingShape = false;
+                return;
+            }
+        }
+        
+        if (this.currentShape) {
+            this.fabricCanvas.add(this.currentShape);
+            this.fabricCanvas.renderAll();
+        }
+    }
+    
+    private updateShape(pointer: { x: number; y: number }): void {
+        if (!this.fabricCanvas || !this.currentShape || !this.shapeStartPoint) return;
+        
+        const tool = this.currentTool();
+        const start = this.shapeStartPoint;
+        
+        if (tool === 'rectangle') {
+            const rect = this.currentShape as Rect;
+            rect.set({
+                width: Math.abs(pointer.x - start.x),
+                height: Math.abs(pointer.y - start.y),
+                left: Math.min(start.x, pointer.x),
+                top: Math.min(start.y, pointer.y)
+            });
+        } else if (tool === 'circle') {
+            const circle = this.currentShape as Circle;
+            const radius = Math.sqrt(
+                Math.pow(pointer.x - start.x, 2) + Math.pow(pointer.y - start.y, 2)
+            ) / 2;
+            circle.set({
+                radius: radius,
+                left: start.x - radius,
+                top: start.y - radius
+            });
+        } else if (tool === 'line' || tool === 'arrow') {
+            const line = this.currentShape as Line;
+            line.set({
+                x1: start.x,
+                y1: start.y,
+                x2: pointer.x,
+                y2: pointer.y
+            });
+        }
+        
+        this.fabricCanvas.renderAll();
+    }
+    
+    private finishDrawingShape(): void {
+        if (!this.fabricCanvas || !this.currentShape) return;
+        
+        // Make shape selectable and save state
+        this.currentShape.set({ selectable: true });
+        this.fabricCanvas.setActiveObject(this.currentShape);
+        this.fabricCanvas.renderAll();
+        this.saveState();
+        
+        this.currentShape = null;
+        this.isDrawingShape = false;
+        this.shapeStartPoint = null;
+    }
+    
+    private getStrokeDashArray(): number[] | undefined {
+        const style = this.lineStyle();
+        if (style === 'dashed') {
+            return [10, 5];
+        } else if (style === 'dotted') {
+            return [2, 2];
+        }
+        return undefined;
+    }
+    
     // Image Upload
     onImageUpload(event: Event): void {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
-        if (!file || !this.canvasContext || !this.whiteboardCanvas) return;
+        if (!file || !this.fabricCanvas) return;
         
-        // Reset input so same file can be selected again
         input.value = '';
         
         const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = this.whiteboardCanvas!.nativeElement;
-                if (this.canvasContext && canvas.width > 0 && canvas.height > 0) {
-                    // Calculate scaling to fit image within canvas while maintaining aspect ratio
-                    const canvasAspect = canvas.width / canvas.height;
-                    const imgAspect = img.width / img.height;
-                    
-                    let drawWidth = img.width;
-                    let drawHeight = img.height;
-                    let drawX = 0;
-                    let drawY = 0;
-                    
-                    if (imgAspect > canvasAspect) {
-                        // Image is wider - fit to width
-                        drawWidth = Math.min(img.width, canvas.width * 0.8);
-                        drawHeight = drawWidth / imgAspect;
-                    } else {
-                        // Image is taller - fit to height
-                        drawHeight = Math.min(img.height, canvas.height * 0.8);
-                        drawWidth = drawHeight * imgAspect;
-                    }
-                    
-                    // Center the image
-                    drawX = (canvas.width - drawWidth) / 2;
-                    drawY = (canvas.height - drawHeight) / 2;
-                    
-                    this.canvasContext.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        reader.onload = async (e) => {
+            const dataUrl = e.target?.result as string;
+            if (dataUrl && this.fabricCanvas) {
+                try {
+                    const fabricImg = await Image.fromURL(dataUrl);
+                    fabricImg.set({
+                        scaleX: 0.8,
+                        scaleY: 0.8,
+                        left: (this.fabricCanvas.getWidth() - (fabricImg.width || 0) * 0.8) / 2,
+                        top: (this.fabricCanvas.getHeight() - (fabricImg.height || 0) * 0.8) / 2
+                    });
+                    this.fabricCanvas.add(fabricImg);
+                    this.fabricCanvas.renderAll();
                     this.saveState();
+                } catch (error) {
+                    console.error('Failed to load image:', error);
+                    alert('Failed to load image. Please try a different file.');
                 }
-            };
-            img.onerror = () => {
-                console.error('Failed to load image');
-                alert('Failed to load image. Please try a different file.');
-            };
-            img.src = e.target?.result as string;
-        };
-        reader.onerror = () => {
-            console.error('Failed to read file');
-            alert('Failed to read file. Please try again.');
+            }
         };
         reader.readAsDataURL(file);
     }
-
-    // Fill Toggle
+    
+    // Style Options
     onToggleFill(): void {
         this.fillShapes.set(!this.fillShapes());
-    }
-
-   
-    
-    isWhiteboardOpen(): boolean {
-        return this.whiteboardOpen();
-    }
-    
-   
-    
-    // Removed - now handled by components
-    
-    getCurrentTool(): string {
-        return this.currentTool();
-    }
-    
-    getCurrentColor(): string {
-        return this.currentColor();
+        // Update selected objects
+        if (this.fabricCanvas) {
+            const activeObjects = this.fabricCanvas.getActiveObjects();
+            activeObjects.forEach((obj: FabricObject) => {
+                if (obj instanceof Rect || obj instanceof Circle) {
+                    obj.set({
+                        fill: this.fillShapes() ? this.currentColor() : 'transparent'
+                    });
+                }
+            });
+            this.fabricCanvas.renderAll();
+            this.saveState();
+        }
     }
     
-    getCurrentLineWidth(): number {
-        return this.currentLineWidth();
-    }
     onLineStyleChange(style: string): void {
         this.lineStyle.set(style);
+        if (this.fabricCanvas) {
+            const activeObjects = this.fabricCanvas.getActiveObjects();
+            activeObjects.forEach((obj: FabricObject) => {
+                obj.set({
+                    strokeDashArray: this.getStrokeDashArray()
+                });
+            });
+            this.fabricCanvas.renderAll();
+            this.saveState();
+        }
     }
     
     // Background Color
     onBackgroundColorChange(color: string): void {
-        if (this.whiteboardCanvas) {
-            const canvas = this.whiteboardCanvas.nativeElement;
-            // Just change the CSS background - the canvas is transparent
-            // so the background shows through
-            canvas.style.backgroundColor = color;
-            // No need to redraw - CSS background handles it
+        if (this.fabricCanvas) {
+            this.fabricCanvas.backgroundColor = color;
+            this.fabricCanvas.renderAll();
         }
     }
     
@@ -538,82 +622,73 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     // Color Picker
     onColorChange(color: string): void {
         this.currentColor.set(color);
-    }
-    
-    // Toggle More Colors
-    onToggleMoreColors(isMobile: boolean = false): void {
-        if (isMobile) {
-            this.showMoreColorsMobile.set(!this.showMoreColorsMobile());
-        } else {
-            this.showMoreColors.set(!this.showMoreColors());
+        this.configureDrawingMode();
+        // Update selected objects
+        if (this.fabricCanvas) {
+            const activeObjects = this.fabricCanvas.getActiveObjects();
+            activeObjects.forEach((obj: FabricObject) => {
+                if (obj instanceof Path || obj instanceof Line) {
+                    obj.set({ stroke: color });
+                } else if (obj instanceof Text) {
+                    obj.set({ fill: color });
+                } else if (obj instanceof Rect || obj instanceof Circle) {
+                    obj.set({
+                        stroke: color,
+                        fill: this.fillShapes() ? color : (obj.fill === 'transparent' ? 'transparent' : color)
+                    });
+                }
+            });
+            this.fabricCanvas.renderAll();
+            this.saveState();
         }
     }
     
     // Line Width
     onLineWidthChange(value: number): void {
         this.currentLineWidth.set(value);
+        this.configureDrawingMode();
+        // Update selected objects
+        if (this.fabricCanvas) {
+            const activeObjects = this.fabricCanvas.getActiveObjects();
+            activeObjects.forEach((obj: FabricObject) => {
+                if (obj instanceof Path || obj instanceof Line) {
+                    obj.set({ strokeWidth: value });
+                } else if (obj instanceof Text) {
+                    obj.set({ fontSize: Math.max(12, value * 5) });
+                } else if (obj instanceof Rect || obj instanceof Circle) {
+                    obj.set({ strokeWidth: value });
+                }
+            });
+            this.fabricCanvas.renderAll();
+            this.saveState();
+        }
     }
     
-    // Drawing Functions
-    private getMousePos(e: MouseEvent | TouchEvent): { x: number; y: number } {
-        if (!this.whiteboardCanvas || !this.canvasWrapper) return { x: 0, y: 0 };
-        
-        const canvas = this.whiteboardCanvas.nativeElement;
-        const wrapper = this.canvasWrapper.nativeElement;
-        const rect = wrapper.getBoundingClientRect();
-        
-        let clientX: number;
-        let clientY: number;
-        
-        if ('touches' in e && e.touches.length > 0) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else if ('changedTouches' in e && e.changedTouches.length > 0) {
-            clientX = e.changedTouches[0].clientX;
-            clientY = e.changedTouches[0].clientY;
-        } else {
-            clientX = (e as MouseEvent).clientX;
-            clientY = (e as MouseEvent).clientY;
-        }
-        
-        const scale = 1 / this.zoomLevel();
-        return {
-            x: (clientX - rect.left) / scale,
-            y: (clientY - rect.top) / scale
-        };
-    }
-
-     // Undo/Redo/Clear
-     onUndo(): void {
-        if (this.historyStep > 0) {
+    // Undo/Redo
+    onUndo(): void {
+        if (this.historyStep > 0 && this.fabricCanvas) {
             this.historyStep--;
-            this.redrawCanvas();
-        } else if (this.historyStep === 0 && this.history.length > 0) {
-            // Clear canvas if we're at the first state
-            this.historyStep = -1;
-            if (this.canvasContext && this.whiteboardCanvas) {
-                const canvas = this.whiteboardCanvas.nativeElement;
-                this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-            }
+            this.loadState();
         }
     }
     
     onRedo(): void {
-        if (this.historyStep < this.history.length - 1) {
+        if (this.historyStep < this.history.length - 1 && this.fabricCanvas) {
             this.historyStep++;
-            this.redrawCanvas();
+            this.loadState();
         }
     }
     
+    // Clear
     onClear(): void {
         if (!this.isReceivingRemoteUpdate && !confirm('Clear the whiteboard? This action cannot be undone.')) {
             return;
         }
         
-        if (this.canvasContext && this.whiteboardCanvas) {
-            const canvas = this.whiteboardCanvas.nativeElement;
-            this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-            // Reset history
+        if (this.fabricCanvas) {
+            this.fabricCanvas.clear();
+            this.fabricCanvas.backgroundColor = '#ffffff';
+            this.fabricCanvas.renderAll();
             this.history = [];
             this.historyStep = -1;
             this.saveState();
@@ -630,32 +705,21 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             }
         }
     }
-     // Set Line Style
-     private setLineStyle(context: CanvasRenderingContext2D): void {
-        context.setLineDash([]);
-        const style = this.lineStyle();
-        if (style === 'dashed') {
-            context.setLineDash([10, 5]);
-        } else if (style === 'dotted') {
-            context.setLineDash([2, 2]);
-        }
-    }
     
-    // Save Whiteboard
+    // Save/Export
     onSaveWhiteboard(): void {
-        if (!this.whiteboardCanvas) return;
+        if (!this.fabricCanvas) return;
         
         const link = document.createElement('a');
         link.download = `whiteboard-${Date.now()}.png`;
-        link.href = this.whiteboardCanvas.nativeElement.toDataURL();
+        link.href = this.fabricCanvas.toDataURL({ multiplier: 1, format: 'png' });
         link.click();
     }
     
-    // Export PDF
     onExportPDF(): void {
-        if (!this.whiteboardCanvas) return;
+        if (!this.fabricCanvas) return;
         
-        const dataURL = this.whiteboardCanvas.nativeElement.toDataURL('image/png');
+        const dataURL = this.fabricCanvas.toDataURL({ multiplier: 1, format: 'png' });
         const printWindow = window.open('', '_blank');
         if (printWindow) {
             printWindow.document.write(
@@ -669,320 +733,139 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             };
         }
     }
-    // Mobile Collapsible Sections
-    toggleCollapsible(panelId: string, chevronId: string): void {
-        let panel: ElementRef<HTMLDivElement> | undefined;
-        let chevron: ElementRef<HTMLElement> | undefined;
-        
-        // Get panel reference
-        switch (panelId) {
-            case 'colorSizePanelMobile':
-                panel = this.colorSizePanelMobile;
-                break;
-            case 'styleOptionsPanelMobile':
-                panel = this.styleOptionsPanelMobile;
-                break;
-            case 'zoomPanelMobile':
-                panel = this.zoomPanelMobile;
-                break;
-            case 'actionsPanelMobile':
-                panel = this.actionsPanelMobile;
-                break;
-            case 'saveExportPanelMobile':
-                panel = this.saveExportPanelMobile;
-                break;
-        }
-        
-        // Get chevron reference
-        switch (chevronId) {
-            case 'colorSizeChevron':
-                chevron = this.colorSizeChevron;
-                break;
-            case 'styleOptionsChevron':
-                chevron = this.styleOptionsChevron;
-                break;
-            case 'zoomChevron':
-                chevron = this.zoomChevron;
-                break;
-            case 'actionsChevron':
-                chevron = this.actionsChevron;
-                break;
-            case 'saveExportChevron':
-                chevron = this.saveExportChevron;
-                break;
-        }
-        
-        if (panel?.nativeElement && chevron?.nativeElement) {
-            const panelEl = panel.nativeElement;
-            const chevronEl = chevron.nativeElement;
-            const isHidden = panelEl.classList.contains('hidden');
-            
-            if (isHidden) {
-                panelEl.classList.remove('hidden');
-                chevronEl.classList.remove('rotate-0');
-                chevronEl.classList.add('rotate-180');
-            } else {
-                panelEl.classList.add('hidden');
-                chevronEl.classList.remove('rotate-180');
-                chevronEl.classList.add('rotate-0');
-            }
-        }
-    }
-     // Canvas Events
-     onCanvasMouseDown(event: MouseEvent | TouchEvent): void {
-        event.preventDefault();
-        event.stopPropagation();
-        if (!this.canvasContext) return;
-        
-        this.isDrawing = true;
-        const pos = this.getMousePos(event);
-        this.startX = pos.x;
-        this.startY = pos.y;
-        
-        const tool = this.currentTool();
-        if (tool === 'pen' || tool === 'eraser' || tool === 'highlighter') {
-            this.canvasContext.beginPath();
-            this.canvasContext.moveTo(this.startX, this.startY);
-            this.saveState();
-        } else if (tool === 'rectangle' || tool === 'circle' || tool === 'arrow' || tool === 'line' || tool === 'text') {
-            this.saveState();
-        }
-    }
     
-    onCanvasMouseMove(event: MouseEvent | TouchEvent): void {
-        event.preventDefault();
-        event.stopPropagation();
-        if (!this.isDrawing || !this.canvasContext) return;
+    // Select Tool Actions
+    async onCopySelection(): Promise<void> {
+        if (!this.fabricCanvas) return;
         
-        const pos = this.getMousePos(event);
-        const tool = this.currentTool();
-        
-        if (tool === 'pen' || tool === 'eraser' || tool === 'highlighter') {
-            this.canvasContext.lineTo(pos.x, pos.y);
-            
-            if (tool === 'eraser') {
-                this.canvasContext.strokeStyle = this.whiteboardCanvas?.nativeElement.style.backgroundColor || '#ffffff';
-                this.canvasContext.lineWidth = this.currentLineWidth() * 3;
-                this.canvasContext.globalCompositeOperation = 'destination-out';
-            } else if (tool === 'highlighter') {
-                this.canvasContext.strokeStyle = this.currentColor();
-                this.canvasContext.globalAlpha = 0.3;
-                this.canvasContext.lineWidth = this.currentLineWidth() * 3;
-            } else {
-                this.canvasContext.strokeStyle = this.currentColor();
-                this.canvasContext.globalAlpha = 1;
-                this.canvasContext.lineWidth = this.currentLineWidth();
-            }
-            
-            this.canvasContext.lineCap = 'round';
-            this.canvasContext.lineJoin = 'round';
-            this.canvasContext.stroke();
-            this.canvasContext.globalCompositeOperation = 'source-over';
-            this.canvasContext.beginPath();
-            this.canvasContext.moveTo(pos.x, pos.y);
-        } else if (tool === 'rectangle' || tool === 'circle' || tool === 'arrow' || tool === 'line') {
-            // Redraw canvas to show preview without affecting the base
-            this.redrawCanvas();
-            
-            // Set drawing properties
-            this.canvasContext.strokeStyle = this.currentColor();
-            this.canvasContext.fillStyle = this.currentColor();
-            this.canvasContext.lineWidth = this.currentLineWidth();
-            this.canvasContext.globalAlpha = 1; // Always use full opacity for preview
-            this.setLineStyle(this.canvasContext);
-            
-            if (tool === 'rectangle') {
-                // Calculate proper rectangle dimensions (handle negative values)
-                const width = pos.x - this.startX;
-                const height = pos.y - this.startY;
-                const x = width < 0 ? pos.x : this.startX;
-                const y = height < 0 ? pos.y : this.startY;
-                const absWidth = Math.abs(width);
-                const absHeight = Math.abs(height);
-                
-                this.canvasContext.beginPath();
-                if (this.fillShapes()) {
-                    this.canvasContext.fillRect(x, y, absWidth, absHeight);
-                } else {
-                    this.canvasContext.strokeRect(x, y, absWidth, absHeight);
-                }
-            } else if (tool === 'circle') {
-                // Calculate center and radius for circle (from corner to corner like rectangle)
-                const width = pos.x - this.startX;
-                const height = pos.y - this.startY;
-                const centerX = this.startX + width / 2;
-                const centerY = this.startY + height / 2;
-                const radius = Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2));
-                
-                this.canvasContext.beginPath();
-                this.canvasContext.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-                if (this.fillShapes()) {
-                    this.canvasContext.fill();
-                } else {
-                    this.canvasContext.stroke();
-                }
-            } else if (tool === 'line') {
-                this.canvasContext.beginPath();
-                this.canvasContext.moveTo(this.startX, this.startY);
-                this.canvasContext.lineTo(pos.x, pos.y);
-                this.canvasContext.stroke();
-            } else if (tool === 'arrow') {
-                const angle = Math.atan2(pos.y - this.startY, pos.x - this.startX);
-                const arrowLength = 30;
-                
-                this.canvasContext.beginPath();
-                this.canvasContext.moveTo(this.startX, this.startY);
-                this.canvasContext.lineTo(pos.x, pos.y);
-                this.canvasContext.stroke();
-                
-                this.canvasContext.beginPath();
-                this.canvasContext.moveTo(pos.x, pos.y);
-                this.canvasContext.lineTo(
-                    pos.x - arrowLength * Math.cos(angle - Math.PI / 6),
-                    pos.y - arrowLength * Math.sin(angle - Math.PI / 6)
-                );
-                this.canvasContext.moveTo(pos.x, pos.y);
-                this.canvasContext.lineTo(
-                    pos.x - arrowLength * Math.cos(angle + Math.PI / 6),
-                    pos.y - arrowLength * Math.sin(angle + Math.PI / 6)
-                );
-                this.canvasContext.stroke();
-            }
-            
-            this.canvasContext.globalAlpha = 1;
-            this.canvasContext.setLineDash([]);
-        }
-    }
-    
-    onCanvasMouseUp(event: MouseEvent | TouchEvent): void {
-        event.preventDefault();
-        event.stopPropagation();
-        if (!this.isDrawing || !this.canvasContext) return;
-        
-        this.isDrawing = false;
-        const pos = this.getMousePos(event);
-        const tool = this.currentTool();
-        
-        this.canvasContext.strokeStyle = this.currentColor();
-        this.canvasContext.fillStyle = this.currentColor();
-        this.canvasContext.lineWidth = this.currentLineWidth();
-        this.setLineStyle(this.canvasContext);
-        
-        if (tool === 'rectangle') {
-            // Calculate proper rectangle dimensions (handle negative values)
-            const width = pos.x - this.startX;
-            const height = pos.y - this.startY;
-            const x = width < 0 ? pos.x : this.startX;
-            const y = height < 0 ? pos.y : this.startY;
-            const absWidth = Math.abs(width);
-            const absHeight = Math.abs(height);
-            
-            this.canvasContext.beginPath();
-            if (this.fillShapes()) {
-                this.canvasContext.fillRect(x, y, absWidth, absHeight);
-            } else {
-                this.canvasContext.strokeRect(x, y, absWidth, absHeight);
-            }
-            this.saveState();
-        } else if (tool === 'circle') {
-            // Calculate center and radius for circle (from corner to corner like rectangle)
-            const width = pos.x - this.startX;
-            const height = pos.y - this.startY;
-            const centerX = this.startX + width / 2;
-            const centerY = this.startY + height / 2;
-            const radius = Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2));
-            
-            this.canvasContext.beginPath();
-            this.canvasContext.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            if (this.fillShapes()) {
-                this.canvasContext.fill();
-            } else {
-                this.canvasContext.stroke();
-            }
-            this.saveState();
-        } else if (tool === 'arrow') {
-            const angle = Math.atan2(pos.y - this.startY, pos.x - this.startX);
-            const arrowLength = 30;
-            
-            this.canvasContext.beginPath();
-            this.canvasContext.moveTo(this.startX, this.startY);
-            this.canvasContext.lineTo(pos.x, pos.y);
-            this.canvasContext.stroke();
-            
-            this.canvasContext.beginPath();
-            this.canvasContext.moveTo(pos.x, pos.y);
-            this.canvasContext.lineTo(
-                pos.x - arrowLength * Math.cos(angle - Math.PI / 6),
-                pos.y - arrowLength * Math.sin(angle - Math.PI / 6)
+        const activeObjects = this.fabricCanvas.getActiveObjects();
+        if (activeObjects.length > 0) {
+            this.clipboardObjects = await Promise.all(
+                activeObjects.map((obj: FabricObject) => obj.clone())
             );
-            this.canvasContext.moveTo(pos.x, pos.y);
-            this.canvasContext.lineTo(
-                pos.x - arrowLength * Math.cos(angle + Math.PI / 6),
-                pos.y - arrowLength * Math.sin(angle + Math.PI / 6)
-            );
-            this.canvasContext.stroke();
-            
-            if (this.fillShapes()) {
-                this.canvasContext.beginPath();
-                this.canvasContext.moveTo(pos.x, pos.y);
-                this.canvasContext.lineTo(
-                    pos.x - arrowLength * Math.cos(angle - Math.PI / 6),
-                    pos.y - arrowLength * Math.sin(angle - Math.PI / 6)
-                );
-                this.canvasContext.lineTo(
-                    pos.x - arrowLength * Math.cos(angle + Math.PI / 6),
-                    pos.y - arrowLength * Math.sin(angle + Math.PI / 6)
-                );
-                this.canvasContext.closePath();
-                this.canvasContext.fill();
-            }
-            this.saveState();
-        } else if (tool === 'line') {
-            this.canvasContext.beginPath();
-            this.canvasContext.moveTo(this.startX, this.startY);
-            this.canvasContext.lineTo(pos.x, pos.y);
-            this.canvasContext.stroke();
-            this.saveState();
-        } else if (tool === 'text') {
-            // For text, we'll use a simple prompt for now
-            // In a production app, you might want a custom modal
-            const text = prompt('Enter text:');
-            if (text && this.canvasContext) {
-                this.canvasContext.fillStyle = this.currentColor();
-                this.canvasContext.font = `bold ${Math.max(12, this.currentLineWidth() * 5)}px Arial`;
-                this.canvasContext.textBaseline = 'top';
-                this.canvasContext.fillText(text, this.startX, this.startY);
-                this.saveState();
-            }
+            this.hasClipboard.set(true);
         }
-        
-        this.canvasContext.setLineDash([]);
-        this.canvasContext.beginPath();
     }
     
-    onCanvasMouseLeave(): void {
-        if (this.isDrawing) {
-            // Save state when leaving canvas during drawing
-            const tool = this.currentTool();
-            if (tool === 'pen' || tool === 'eraser' || tool === 'highlighter') {
-                this.saveState();
-            }
+    async onCutSelection(): Promise<void> {
+        if (!this.fabricCanvas) return;
+        
+        const activeObjects = this.fabricCanvas.getActiveObjects();
+        if (activeObjects.length > 0) {
+            this.clipboardObjects = await Promise.all(
+                activeObjects.map((obj: FabricObject) => obj.clone())
+            );
+            this.hasClipboard.set(true);
+            activeObjects.forEach((obj: FabricObject) => this.fabricCanvas!.remove(obj));
+            this.fabricCanvas.discardActiveObject();
+            this.fabricCanvas.renderAll();
+            this.saveState();
         }
-        this.isDrawing = false;
     }
+    
+    async onPasteSelection(): Promise<void> {
+        if (!this.fabricCanvas || this.clipboardObjects.length === 0) return;
+        
+        const canvasCenter = {
+            x: this.fabricCanvas.getWidth() / 2,
+            y: this.fabricCanvas.getHeight() / 2
+        };
+        
+        const pastedObjects = await Promise.all(
+            this.clipboardObjects.map(async (obj: FabricObject) => {
+                const cloned = await obj.clone();
+                cloned.set({
+                    left: canvasCenter.x + (cloned.left || 0) - (obj.left || 0),
+                    top: canvasCenter.y + (cloned.top || 0) - (obj.top || 0)
+                });
+                return cloned;
+            })
+        );
+        
+        pastedObjects.forEach((obj: FabricObject) => this.fabricCanvas!.add(obj));
+        if (pastedObjects.length > 1) {
+            this.fabricCanvas.setActiveObject(new ActiveSelection(pastedObjects, {
+                canvas: this.fabricCanvas
+            }));
+        } else {
+            this.fabricCanvas.setActiveObject(pastedObjects[0]);
+        }
+        this.fabricCanvas.renderAll();
+        this.saveState();
+    }
+    
+    onAlignSelection(alignment: 'left' | 'center' | 'right' | 'top' | 'bottom'): void {
+        if (!this.fabricCanvas) return;
+        
+        const activeObjects = this.fabricCanvas.getActiveObjects();
+        if (activeObjects.length === 0) return;
+        
+        const canvasWidth = this.fabricCanvas.getWidth();
+        const canvasHeight = this.fabricCanvas.getHeight();
+        
+        activeObjects.forEach((obj: FabricObject) => {
+            const bounds = obj.getBoundingRect();
+            switch (alignment) {
+                case 'left':
+                    obj.set({ left: 0 });
+                    break;
+                case 'center':
+                    obj.set({ left: (canvasWidth - bounds.width) / 2 });
+                    break;
+                case 'right':
+                    obj.set({ left: canvasWidth - bounds.width });
+                    break;
+                case 'top':
+                    obj.set({ top: 0 });
+                    break;
+                case 'bottom':
+                    obj.set({ top: canvasHeight - bounds.height });
+                    break;
+            }
+        });
+        
+        this.fabricCanvas.renderAll();
+        this.saveState();
+    }
+    
+    onLayerChange(direction: 'front' | 'back'): void {
+        if (!this.fabricCanvas) return;
+        
+        const activeObjects = this.fabricCanvas.getActiveObjects();
+        activeObjects.forEach((obj: FabricObject) => {
+            if (direction === 'front') {
+                this.fabricCanvas!.bringObjectToFront(obj);
+            } else {
+                this.fabricCanvas!.sendObjectToBack(obj);
+            }
+        });
+        this.fabricCanvas.renderAll();
+        this.saveState();
+    }
+    
+    onDeleteSelection(): void {
+        if (!this.fabricCanvas) return;
+        
+        const activeObjects = this.fabricCanvas.getActiveObjects();
+        activeObjects.forEach((obj: FabricObject) => this.fabricCanvas!.remove(obj));
+        this.fabricCanvas.discardActiveObject();
+        this.fabricCanvas.renderAll();
+        this.saveState();
+    }
+    
+    // History Management
     private saveState(): void {
-        if (!this.whiteboardCanvas || !this.canvasContext) return;
+        if (!this.fabricCanvas) return;
         
-        // Limit history size to prevent memory issues (keep last 50 states)
         const maxHistorySize = 50;
-        
         this.historyStep++;
+        
         if (this.historyStep < this.history.length) {
             this.history = this.history.slice(0, this.historyStep);
         }
-        this.history.push(this.whiteboardCanvas.nativeElement.toDataURL());
         
-        // Trim history if it gets too large
+        this.history.push(JSON.stringify(this.fabricCanvas.toJSON()));
+        
         if (this.history.length > maxHistorySize) {
             this.history.shift();
             this.historyStep--;
@@ -991,38 +874,122 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         // Save current page state
         const currentPage = this.pages()[this.currentPageIndex()];
         if (currentPage) {
-            this.pageStorage.set(currentPage.id, this.whiteboardCanvas.nativeElement.toDataURL());
+            this.pageStorage.set(currentPage.id, JSON.stringify(this.fabricCanvas.toJSON()));
         }
         
-        // Emit drawing update via socket
         this.emitDrawing();
     }
     
-    private redrawCanvas(): void {
-        if (!this.canvasContext || !this.whiteboardCanvas) return;
+    private loadState(): void {
+        if (!this.fabricCanvas || this.history.length === 0) return;
         
-        if (this.history.length > 0 && this.historyStep >= 0) {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = this.whiteboardCanvas!.nativeElement;
-                this.canvasContext!.clearRect(0, 0, canvas.width, canvas.height);
-                this.canvasContext!.drawImage(img, 0, 0);
-            };
-            img.src = this.history[this.historyStep];
-        } else {
-            const canvas = this.whiteboardCanvas.nativeElement;
-            this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        const state = this.history[this.historyStep];
+        if (state) {
+            this.fabricCanvas.loadFromJSON(state, () => {
+                this.fabricCanvas?.renderAll();
+            });
         }
     }
     
-    // New Feature Methods
+    // Socket Integration
+    private initializeSocket(): void {
+        const socket = this.socket();
+        if (!socket || !socket.connected) {
+            console.warn('⚠️ Socket not available for whiteboard collaboration');
+            return;
+        }
+        
+        const sessionId = this.sessionId();
+        if (!sessionId) {
+            console.warn('⚠️ Session ID not available for whiteboard collaboration');
+            return;
+        }
+        
+        socket.on(this.WHITEBOARD_LISTENERS.DRAWING, (data: any) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return;
+            this.handleRemoteDrawing(data);
+        });
+        
+        socket.on(this.WHITEBOARD_LISTENERS.CLEAR, (data: any) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return;
+            if (data.pageId === this.pages()[this.currentPageIndex()]?.id) {
+                this.isReceivingRemoteUpdate = true;
+                this.onClear();
+                this.isReceivingRemoteUpdate = false;
+            }
+        });
+        
+        socket.on(this.WHITEBOARD_LISTENERS.PAGE_CHANGE, (data: any) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return;
+            this.onPageChange(data.pageId);
+        });
+        
+        socket.on(this.WHITEBOARD_LISTENERS.LOCK_TOGGLE, (data: any) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return;
+            this.isLocked.set(data.isLocked);
+            this.isEditable.set(!data.isLocked);
+        });
+        
+        socket.on(this.WHITEBOARD_LISTENERS.PRESENCE, (data: any) => {
+            this.activeUsers.set(data.users);
+        });
+        
+        socket.emit(this.WHITEBOARD_EMITTERS.SYNC_REQUEST, {
+            sessionId,
+            pageId: this.pages()[this.currentPageIndex()]?.id
+        });
+    }
     
-    // Permissions
+    private handleRemoteDrawing(data: any): void {
+        if (!this.fabricCanvas) return;
+        // Load canvas state from remote
+        if (data.canvasData) {
+            this.fabricCanvas.loadFromJSON(data.canvasData, () => {
+                this.fabricCanvas?.renderAll();
+            });
+        }
+    }
+    
+    private emitDrawing(): void {
+        const socket = this.socket();
+        if (!socket || !socket.connected || this.isReceivingRemoteUpdate) return;
+        
+        const currentPage = this.pages()[this.currentPageIndex()];
+        if (this.fabricCanvas) {
+            socket.emit(this.WHITEBOARD_EMITTERS.DRAWING, {
+                sessionId: this.sessionId(),
+                userId: this.authService.getCurrentUser()?.id,
+                pageId: currentPage?.id,
+                canvasData: JSON.stringify(this.fabricCanvas.toJSON())
+            });
+        }
+    }
+    
+    private cleanupSocket(): void {
+        const socket = this.socket();
+        if (!socket) return;
+        
+        Object.values(this.WHITEBOARD_LISTENERS).forEach(listener => {
+            socket.off(listener);
+        });
+    }
+    
+    // Other methods
+    onToggleWhiteboard(): void {
+        this.whiteboardOpen.set(!this.whiteboardOpen());
+        if (this.whiteboardOpen()) {
+            setTimeout(() => this.resizeCanvas(), 100);
+        }
+    }
+    
+    _onExitWhiteboard(): void {
+        this.onExitWhiteboard.emit();
+    }
+    
     onToggleLock(isLocked: boolean): void {
         this.isLocked.set(isLocked);
         this.isEditable.set(!isLocked);
         
-        // Emit socket event for real-time sync
         const socket = this.socket();
         if (socket && socket.connected) {
             socket.emit(this.WHITEBOARD_EMITTERS.LOCK_TOGGLE, {
@@ -1034,42 +1001,32 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     }
     
     onClearStudentDrawings(): void {
-        // For now, clear entire canvas (full implementation would require user tracking per drawing)
         if (confirm('Clear all student drawings? This will clear the entire whiteboard.')) {
             this.onClear();
         }
     }
     
-    // Pages
     onPageChange(pageId: string): void {
         const index = this.pages().findIndex(p => p.id === pageId);
         if (index >= 0) {
-            // Save current page before switching
             const currentPage = this.pages()[this.currentPageIndex()];
-            if (currentPage && this.whiteboardCanvas) {
-                this.pageStorage.set(currentPage.id, this.whiteboardCanvas.nativeElement.toDataURL());
+            if (currentPage && this.fabricCanvas) {
+                this.pageStorage.set(currentPage.id, JSON.stringify(this.fabricCanvas.toJSON()));
             }
             
             this.currentPageIndex.set(index);
             
-            // Load page content from storage
             const savedData = this.pageStorage.get(pageId);
-            if (savedData && this.canvasContext && this.whiteboardCanvas) {
-                const img = new Image();
-                img.onload = () => {
-                    this.canvasContext!.clearRect(0, 0, this.whiteboardCanvas!.nativeElement.width, this.whiteboardCanvas!.nativeElement.height);
-                    this.canvasContext!.drawImage(img, 0, 0);
-                };
-                img.src = savedData;
-            } else {
-                // Clear canvas if no saved data
-                if (this.canvasContext && this.whiteboardCanvas) {
-                    const canvas = this.whiteboardCanvas.nativeElement;
-                    this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-                }
+            if (savedData && this.fabricCanvas) {
+                this.fabricCanvas.loadFromJSON(savedData, () => {
+                    this.fabricCanvas?.renderAll();
+                });
+            } else if (this.fabricCanvas) {
+                this.fabricCanvas.clear();
+                this.fabricCanvas.backgroundColor = '#ffffff';
+                this.fabricCanvas.renderAll();
             }
             
-            // Emit page change via socket
             const socket = this.socket();
             if (socket && socket.connected) {
                 socket.emit(this.WHITEBOARD_EMITTERS.PAGE_CHANGE, {
@@ -1088,7 +1045,6 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         };
         this.pages.set([...this.pages(), newPage]);
         this.currentPageIndex.set(this.pages().length - 1);
-        // TODO: Initialize new page canvas
     }
     
     onDeletePage(pageId: string): void {
@@ -1114,68 +1070,26 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             newPages.splice(index + 1, 0, newPage);
             this.pages.set(newPages);
             this.currentPageIndex.set(index + 1);
-            // TODO: Copy page content
         }
     }
     
-    // Select Tool
-    onCopySelection(): void {
-        // TODO: Copy selected objects to clipboard
-        this.hasClipboard.set(true);
-    }
-    
-    onCutSelection(): void {
-        // TODO: Cut selected objects to clipboard
-        this.hasClipboard.set(true);
-        this.hasSelection.set(false);
-    }
-    
-    onPasteSelection(): void {
-        // TODO: Paste from clipboard
-    }
-    
-    onAlignSelection(alignment: 'left' | 'center' | 'right' | 'top' | 'bottom'): void {
-        // TODO: Align selected objects
-    }
-    
-    onLayerChange(direction: 'front' | 'back'): void {
-        // TODO: Change layer order
-    }
-    
-    onDeleteSelection(): void {
-        // TODO: Delete selected objects
-        this.hasSelection.set(false);
-    }
-    
-    // Templates
     onTemplateSelect(templateId: string): void {
-        // TODO: Apply template to current page
-        const template = this.templates().find(t => t.id === templateId);
-        if (template) {
-            // Apply template background/pattern
-        }
+        // TODO: Apply template
     }
     
-    // Stamps
     onStampSelect(stampId: string): void {
         this.currentTool.set('stamp');
-        // TODO: Store selected stamp ID for drawing
     }
     
-    // Sticky Notes
     onAddStickyNote(data: { x: number; y: number; color: string }): void {
-        // TODO: Add sticky note at position
+        // TODO: Add sticky note
     }
     
-    // Math Tools
     onMathToolActivate(tool: 'ruler' | 'protractor' | 'equation' | 'graph' | 'calculator'): void {
         this.currentTool.set(tool);
-        // TODO: Activate specific math tool
     }
     
-    // Initialize templates
     private initializeTemplates(): void {
-        // Load default templates
         const defaultTemplates: WhiteboardTemplate[] = [
             { id: 'blank', name: 'Blank', icon: 'fas fa-square', preview: '', type: 'blank' },
             { id: 'lined', name: 'Lined Paper', icon: 'fas fa-grip-lines', preview: '', type: 'lined' },
@@ -1184,7 +1098,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         ];
         this.templates.set(defaultTemplates);
     }
-
+    
     onAddTab(tabName: string): void {
         this.tabs.set([...this.tabs(), tabName as 'pen' | 'screen-sharing']);
     }
@@ -1192,4 +1106,22 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     onCloseWhiteboard(): void {
         this._onExitWhiteboard();
     }
+    
+    // Getters for compatibility
+    getCurrentTool(): string {
+        return this.currentTool();
+    }
+    
+    getCurrentColor(): string {
+        return this.currentColor();
+    }
+    
+    getCurrentLineWidth(): number {
+        return this.currentLineWidth();
+    }
+    
+    isWhiteboardOpen(): boolean {
+        return this.whiteboardOpen();
+    }
 }
+

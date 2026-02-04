@@ -1,0 +1,28 @@
+<div class="px-3 py-3 flex items-center justify-between gap-2 border-b border-gray-200/60 bg-gradient-to-r from-gray-50/80 to-white">
+    <!-- Tools Scroll -->
+    <div class="flex-1 overflow-x-auto mobile-toolbar-scroll scrollbar-hide">
+        <div class="flex items-center gap-2.5 min-w-max">
+            @for (tool of tools; track tool.id) {
+            <button [id]="tool.id" (click)="selectTool(tool.id)"
+                [class.border-blue-500]="isActive(tool.value)"
+                [class.bg-gradient-to-br]="isActive(tool.value)"
+                [class.from-blue-500]="isActive(tool.value)"
+                [class.to-blue-600]="isActive(tool.value)"
+                [class.text-white]="isActive(tool.value)"
+                [class.border-2]="isActive(tool.value)"
+                [class.bg-white]="!isActive(tool.value)"
+                class="mobile-tool-btn p-3.5 bg-white rounded-2xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95"
+                [title]="tool.title">
+                <i [class.text-white]="isActive(tool.value)"
+                    [class.text-gray-700]="!isActive(tool.value)" [class]="tool.icon"></i>
+            </button>
+            }
+            <input #imageUploadMobile type="file" (change)="onImageUpload($event)" accept="image/*" class="hidden">
+        </div>
+    </div>
+    <button (click)="onClose()"
+        class="p-3.5 bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg transition-all hover:scale-105 active:scale-95">
+        <i class="fas fa-times text-xl"></i>
+    </button>
+</div>
+

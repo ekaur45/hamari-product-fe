@@ -5,10 +5,10 @@
             (addTabEvent)="onAddTab($event)">
         </app-whiteboard-top-bar>
     </div>
-    <div class="grid grid-cols-[200px_1fr]">
+    <div class="grid grid-cols-[320px_1fr]">
         <div>
             <div
-                class="hidden sm:block bg-white/95 backdrop-blur-sm border-r border-gray-200/80 shadow-lg w-80 flex-shrink-0 overflow-y-auto flex flex-col">
+                class="hidden sm:block bg-white/95 backdrop-blur-sm border-r border-gray-200/80 shadow-lg w-full flex-shrink-0 overflow-y-auto flex flex-col">
                 <!-- Top Row: Permissions & Presence -->
                 <div
                     class="px-4 py-3 flex flex-col gap-3 border-b border-gray-200/60 bg-gradient-to-b from-gray-50/80 to-white">
@@ -95,182 +95,26 @@
             <!-- Mobile Layout -->
             <div class="sm:hidden">
                 <!-- Top Row: Essential Tools & Exit -->
-                <div
-                    class="px-3 py-3 flex items-center justify-between gap-2 border-b border-gray-200/60 bg-gradient-to-r from-gray-50/80 to-white">
-                    <!-- Tools Scroll -->
-                    <div class="flex-1 overflow-x-auto mobile-toolbar-scroll scrollbar-hide">
-                        <div class="flex items-center gap-2.5 min-w-max">
-                            <button id="penToolMobile" (click)="selectTool('penToolMobile')"
-                                [class.border-blue-500]="currentTool() === 'pen'"
-                                [class.bg-gradient-to-br]="currentTool() === 'pen'"
-                                [class.from-blue-500]="currentTool() === 'pen'"
-                                [class.to-blue-600]="currentTool() === 'pen'"
-                                [class.text-white]="currentTool() === 'pen'" [class.border-2]="currentTool() === 'pen'"
-                                [class.bg-white]="currentTool() !== 'pen'"
-                                class="mobile-tool-btn p-3.5 bg-white rounded-2xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95"
-                                title="Pen">
-                                <i [class.text-white]="currentTool() === 'pen'"
-                                    [class.text-gray-700]="currentTool() !== 'pen'" class="fas fa-pen text-lg"></i>
-                            </button>
-                            <button id="highlighterToolMobile" (click)="selectTool('highlighterToolMobile')"
-                                [class.border-blue-500]="currentTool() === 'highlighter'"
-                                [class.bg-gradient-to-br]="currentTool() === 'highlighter'"
-                                [class.from-blue-500]="currentTool() === 'highlighter'"
-                                [class.to-blue-600]="currentTool() === 'highlighter'"
-                                [class.text-white]="currentTool() === 'highlighter'"
-                                [class.border-2]="currentTool() === 'highlighter'"
-                                [class.bg-white]="currentTool() !== 'highlighter'"
-                                class="mobile-tool-btn p-3.5 bg-white rounded-2xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95"
-                                title="Highlighter">
-                                <i [class.text-white]="currentTool() === 'highlighter'"
-                                    [class.text-gray-700]="currentTool() !== 'highlighter'"
-                                    class="fas fa-highlighter text-lg"></i>
-                            </button>
-                            <button id="eraserToolMobile" (click)="selectTool('eraserToolMobile')"
-                                [class.border-blue-500]="currentTool() === 'eraser'"
-                                [class.bg-gradient-to-br]="currentTool() === 'eraser'"
-                                [class.from-blue-500]="currentTool() === 'eraser'"
-                                [class.to-blue-600]="currentTool() === 'eraser'"
-                                [class.text-white]="currentTool() === 'eraser'"
-                                [class.border-2]="currentTool() === 'eraser'"
-                                [class.bg-white]="currentTool() !== 'eraser'"
-                                class="mobile-tool-btn p-3.5 bg-white rounded-2xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95"
-                                title="Eraser">
-                                <i [class.text-white]="currentTool() === 'eraser'"
-                                    [class.text-gray-700]="currentTool() !== 'eraser'"
-                                    class="fas fa-eraser text-lg"></i>
-                            </button>
-                            <button id="shapeToolMobile" (click)="selectTool('shapeToolMobile')"
-                                [class.border-blue-500]="currentTool() === 'rectangle'"
-                                [class.bg-gradient-to-br]="currentTool() === 'rectangle'"
-                                [class.from-blue-500]="currentTool() === 'rectangle'"
-                                [class.to-blue-600]="currentTool() === 'rectangle'"
-                                [class.text-white]="currentTool() === 'rectangle'"
-                                [class.border-2]="currentTool() === 'rectangle'"
-                                [class.bg-white]="currentTool() !== 'rectangle'"
-                                class="mobile-tool-btn p-3.5 bg-white rounded-2xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95"
-                                title="Rectangle">
-                                <i [class.text-white]="currentTool() === 'rectangle'"
-                                    [class.text-gray-700]="currentTool() !== 'rectangle'"
-                                    class="fas fa-square text-lg"></i>
-                            </button>
-                            <button id="circleToolMobile" (click)="selectTool('circleToolMobile')"
-                                [class.border-blue-500]="currentTool() === 'circle'"
-                                [class.bg-gradient-to-br]="currentTool() === 'circle'"
-                                [class.from-blue-500]="currentTool() === 'circle'"
-                                [class.to-blue-600]="currentTool() === 'circle'"
-                                [class.text-white]="currentTool() === 'circle'"
-                                [class.border-2]="currentTool() === 'circle'"
-                                [class.bg-white]="currentTool() !== 'circle'"
-                                class="mobile-tool-btn p-3.5 bg-white rounded-2xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95"
-                                title="Circle">
-                                <i [class.text-white]="currentTool() === 'circle'"
-                                    [class.text-gray-700]="currentTool() !== 'circle'"
-                                    class="far fa-circle text-lg"></i>
-                            </button>
-                            <button id="arrowToolMobile" (click)="selectTool('arrowToolMobile')"
-                                [class.border-blue-500]="currentTool() === 'arrow'"
-                                [class.bg-gradient-to-br]="currentTool() === 'arrow'"
-                                [class.from-blue-500]="currentTool() === 'arrow'"
-                                [class.to-blue-600]="currentTool() === 'arrow'"
-                                [class.text-white]="currentTool() === 'arrow'"
-                                [class.border-2]="currentTool() === 'arrow'"
-                                [class.bg-white]="currentTool() !== 'arrow'"
-                                class="mobile-tool-btn p-3.5 bg-white rounded-2xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95"
-                                title="Arrow">
-                                <i [class.text-white]="currentTool() === 'arrow'"
-                                    [class.text-gray-700]="currentTool() !== 'arrow'"
-                                    class="fas fa-arrow-right text-lg"></i>
-                            </button>
-                            <button id="lineToolMobile" (click)="selectTool('lineToolMobile')"
-                                [class.border-blue-500]="currentTool() === 'line'"
-                                [class.bg-gradient-to-br]="currentTool() === 'line'"
-                                [class.from-blue-500]="currentTool() === 'line'"
-                                [class.to-blue-600]="currentTool() === 'line'"
-                                [class.text-white]="currentTool() === 'line'"
-                                [class.border-2]="currentTool() === 'line'" [class.bg-white]="currentTool() !== 'line'"
-                                class="mobile-tool-btn p-3.5 bg-white rounded-2xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95"
-                                title="Line">
-                                <i [class.text-white]="currentTool() === 'line'"
-                                    [class.text-gray-700]="currentTool() !== 'line'" class="fas fa-minus text-lg"></i>
-                            </button>
-                            <button id="textToolMobile" (click)="selectTool('textToolMobile')"
-                                [class.border-blue-500]="currentTool() === 'text'"
-                                [class.bg-gradient-to-br]="currentTool() === 'text'"
-                                [class.from-blue-500]="currentTool() === 'text'"
-                                [class.to-blue-600]="currentTool() === 'text'"
-                                [class.text-white]="currentTool() === 'text'"
-                                [class.border-2]="currentTool() === 'text'" [class.bg-white]="currentTool() !== 'text'"
-                                class="mobile-tool-btn p-3.5 bg-white rounded-2xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95"
-                                title="Text">
-                                <i [class.text-white]="currentTool() === 'text'"
-                                    [class.text-gray-700]="currentTool() !== 'text'" class="fas fa-font text-lg"></i>
-                            </button>
-                            <button id="imageToolMobile" (click)="selectTool('imageToolMobile')"
-                                [class.border-blue-500]="currentTool() === 'image'"
-                                [class.bg-gradient-to-br]="currentTool() === 'image'"
-                                [class.from-blue-500]="currentTool() === 'image'"
-                                [class.to-blue-600]="currentTool() === 'image'"
-                                [class.text-white]="currentTool() === 'image'"
-                                [class.border-2]="currentTool() === 'image'"
-                                [class.bg-white]="currentTool() !== 'image'"
-                                class="mobile-tool-btn p-3.5 bg-white rounded-2xl border-2 border-gray-200 tool-btn flex items-center justify-center shadow-md transition-all hover:scale-105 active:scale-95"
-                                title="Image">
-                                <i [class.text-white]="currentTool() === 'image'"
-                                    [class.text-gray-700]="currentTool() !== 'image'" class="fas fa-image text-lg"></i>
-                            </button>
-                            <input #imageUploadMobile type="file" (change)="onImageUpload($event)" accept="image/*"
-                                class="hidden">
-                        </div>
-                    </div>
-                    <button #exitWhiteboardFullscreenMobile (click)="_onExitWhiteboard()"
-                        class="p-3.5 bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg transition-all hover:scale-105 active:scale-95">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
+                <app-whiteboard-mobile-toolbar [currentTool]="currentTool()"
+                    (toolSelectEvent)="onToolSelect($event)" (imageUploadEvent)="onImageUpload($event)"
+                    (closeEvent)="_onExitWhiteboard()">
+                </app-whiteboard-mobile-toolbar>
 
-                <!-- Mobile collapsible sections remain for now - can be extracted later if needed -->
+                <!-- Mobile Collapsible Sections -->
                 <!-- Color & Size Section -->
-                <div class="border-b border-gray-200/60">
-                    <button (click)="toggleCollapsible('colorSizePanelMobile', 'colorSizeChevron')"
-                        class="w-full px-4 py-3.5 flex items-center justify-between bg-white hover:bg-gray-50/80 transition-all">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center shadow-sm">
-                                <i class="fas fa-palette text-blue-600 text-lg"></i>
-                            </div>
-                            <span class="text-sm font-bold text-gray-800">Color &amp; Size</span>
-                        </div>
-                        <i #colorSizeChevron
-                            class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div #colorSizePanelMobile
-                        class="hidden px-4 py-4 border-t border-gray-100 bg-gradient-to-b from-gray-50/50 to-white">
-                        <!-- Mobile color/size content - simplified for now -->
-                        <app-whiteboard-color-size-picker [currentColor]="currentColor()"
-                            [currentLineWidth]="currentLineWidth()"
-                            (colorChangeEvent)="onColorChange($event)"
-                            (lineWidthChangeEvent)="onLineWidthChange($event)">
-                        </app-whiteboard-color-size-picker>
-                    </div>
-                </div>
+                <app-whiteboard-mobile-collapsible title="Color &amp; Size" icon="fas fa-palette"
+                    iconColor="blue">
+                    <app-whiteboard-color-size-picker [currentColor]="currentColor()"
+                        [currentLineWidth]="currentLineWidth()"
+                        (colorChangeEvent)="onColorChange($event)"
+                        (lineWidthChangeEvent)="onLineWidthChange($event)">
+                    </app-whiteboard-color-size-picker>
+                </app-whiteboard-mobile-collapsible>
 
                 <!-- Style Options Section -->
-                <div class="border-b border-gray-200/60">
-                    <button (click)="toggleCollapsible('styleOptionsPanelMobile', 'styleOptionsChevron')"
-                        class="w-full px-4 py-3.5 flex items-center justify-between bg-white hover:bg-gray-50/80 transition-all">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center shadow-sm">
-                                <i class="fas fa-sliders-h text-purple-600 text-lg"></i>
-                            </div>
-                            <span class="text-sm font-bold text-gray-800">Style Options</span>
-                        </div>
-                        <i #styleOptionsChevron
-                            class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div #styleOptionsPanelMobile
-                        class="hidden px-4 py-4 border-t border-gray-100 bg-gradient-to-b from-gray-50/50 to-white space-y-3.5">
+                <app-whiteboard-mobile-collapsible title="Style Options" icon="fas fa-sliders-h"
+                    iconColor="purple">
+                    <div class="space-y-3.5">
                         <app-whiteboard-style-options [fillShapes]="fillShapes()" [lineStyle]="lineStyle()"
                             (toggleFillEvent)="onToggleFill()" (lineStyleChangeEvent)="onLineStyleChange($event)">
                         </app-whiteboard-style-options>
@@ -279,79 +123,38 @@
                             (toggleGridEvent)="onToggleGridVisible()">
                         </app-whiteboard-canvas-options>
                     </div>
-                </div>
+                </app-whiteboard-mobile-collapsible>
 
                 <!-- Zoom Controls Section -->
-                <div class="border-b border-gray-200/60">
-                    <button (click)="toggleCollapsible('zoomPanelMobile', 'zoomChevron')"
-                        class="w-full px-4 py-3.5 flex items-center justify-between bg-white hover:bg-gray-50/80 transition-all">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-11 h-11 rounded-xl bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center shadow-sm">
-                                <i class="fas fa-search-plus text-green-600 text-lg"></i>
-                            </div>
-                            <span class="text-sm font-bold text-gray-800">Zoom Controls</span>
-                        </div>
-                        <i #zoomChevron class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div #zoomPanelMobile
-                        class="hidden px-4 py-4 border-t border-gray-100 bg-gradient-to-b from-gray-50/50 to-white">
-                        <app-whiteboard-zoom-controls [zoomLevel]="zoomLevel()" (zoomInEvent)="onZoomIn()"
-                            (zoomOutEvent)="onZoomOut()" (zoomResetEvent)="onZoomReset()">
-                        </app-whiteboard-zoom-controls>
-                    </div>
-                </div>
+                <app-whiteboard-mobile-collapsible title="Zoom Controls" icon="fas fa-search-plus"
+                    iconColor="green">
+                    <app-whiteboard-zoom-controls [zoomLevel]="zoomLevel()" (zoomInEvent)="onZoomIn()"
+                        (zoomOutEvent)="onZoomOut()" (zoomResetEvent)="onZoomReset()">
+                    </app-whiteboard-zoom-controls>
+                </app-whiteboard-mobile-collapsible>
 
                 <!-- Actions Section -->
-                <div class="border-b border-gray-200/60">
-                    <button (click)="toggleCollapsible('actionsPanelMobile', 'actionsChevron')"
-                        class="w-full px-4 py-3.5 flex items-center justify-between bg-white hover:bg-gray-50/80 transition-all">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center shadow-sm">
-                                <i class="fas fa-history text-orange-600 text-lg"></i>
-                            </div>
-                            <span class="text-sm font-bold text-gray-800">History &amp; Actions</span>
-                        </div>
-                        <i #actionsChevron
-                            class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div #actionsPanelMobile
-                        class="hidden px-4 py-4 border-t border-gray-100 bg-gradient-to-b from-gray-50/50 to-white">
-                        <div class="flex items-center gap-2.5">
-                            <app-whiteboard-undo-redo (undoEvent)="onUndo()" (redoEvent)="onRedo()">
-                            </app-whiteboard-undo-redo>
-                            <button id="clearBtnMobile" (click)="onClear()"
-                                class="flex-1 px-4 py-3.5 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl"
-                                title="Clear Canvas">
-                                <i class="fas fa-trash"></i>
-                                <span class="text-xs font-bold">Clear</span>
-                            </button>
-                        </div>
+                <app-whiteboard-mobile-collapsible title="History &amp; Actions" icon="fas fa-history"
+                    iconColor="orange">
+                    <div class="flex items-center gap-2.5">
+                        <app-whiteboard-undo-redo (undoEvent)="onUndo()" (redoEvent)="onRedo()">
+                        </app-whiteboard-undo-redo>
+                        <button id="clearBtnMobile" (click)="onClear()"
+                            class="flex-1 px-4 py-3.5 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl"
+                            title="Clear Canvas">
+                            <i class="fas fa-trash"></i>
+                            <span class="text-xs font-bold">Clear</span>
+                        </button>
                     </div>
-                </div>
+                </app-whiteboard-mobile-collapsible>
 
                 <!-- Save & Export Section -->
-                <div class="border-b border-gray-200/60">
-                    <button (click)="toggleCollapsible('saveExportPanelMobile', 'saveExportChevron')"
-                        class="w-full px-4 py-3.5 flex items-center justify-between bg-white hover:bg-gray-50/80 transition-all">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100 flex items-center justify-center shadow-sm">
-                                <i class="fas fa-download text-indigo-600 text-lg"></i>
-                            </div>
-                            <span class="text-sm font-bold text-gray-800">Save &amp; Export</span>
-                        </div>
-                        <i #saveExportChevron
-                            class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div #saveExportPanelMobile
-                        class="hidden px-4 py-4 border-t border-gray-100 bg-gradient-to-b from-gray-50/50 to-white">
-                        <app-whiteboard-action-buttons (clearEvent)="onClear()" (saveEvent)="onSaveWhiteboard()"
-                            (exportPDFEvent)="onExportPDF()">
-                        </app-whiteboard-action-buttons>
-                    </div>
-                </div>
+                <app-whiteboard-mobile-collapsible title="Save &amp; Export" icon="fas fa-download"
+                    iconColor="indigo">
+                    <app-whiteboard-action-buttons (clearEvent)="onClear()" (saveEvent)="onSaveWhiteboard()"
+                        (exportPDFEvent)="onExportPDF()">
+                    </app-whiteboard-action-buttons>
+                </app-whiteboard-mobile-collapsible>
             </div>
         </div>
         <div>
@@ -361,11 +164,10 @@
                     style="position: relative;">
                     <div #canvasWrapper
                         style="position: relative; width: 100%; height: 100%; transform-origin: center center; transform: scale(1);">
-                        <canvas #whiteboardCanvas (mousedown)="onCanvasMouseDown($event)"
-                            (mousemove)="onCanvasMouseMove($event)" (mouseup)="onCanvasMouseUp($event)"
-                            (mouseleave)="onCanvasMouseLeave()" (touchstart)="onCanvasMouseDown($event)"
-                            (touchmove)="onCanvasMouseMove($event)" (touchend)="onCanvasMouseUp($event)"
-                            class="bg-white cursor-crosshair shadow-2xl"
+                        <canvas #whiteboardCanvas 
+                            (mousedown)="onCanvasMouseDown($event)"
+                            (touchstart)="onCanvasMouseDown($event)"
+                            class="bg-white shadow-2xl"
                             style="width: 100%; height: 100%; display: block; background-color: rgb(255, 255, 255);"
                             width="0" height="0">
                         </canvas>
