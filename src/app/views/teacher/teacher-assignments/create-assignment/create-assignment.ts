@@ -33,6 +33,7 @@ export class CreateAssignment implements OnInit {
   selectedBooking = signal<TeacherBookingDto | null>(null);
   readonly AssignmentType = AssignmentType;
   onCreatedAssignment = output<CreateAssignmentDto>();
+  onCancel = output<void>();
   constructor(
     private assignmentService: AssignmentService,
     private teacherService: TeacherService,
@@ -63,7 +64,8 @@ export class CreateAssignment implements OnInit {
     });
   }
   onCancelClick(): void {
-    this.router.navigate(['/teacher/assignments']);
+    this.selectedBooking.set(null);
+    this.onCancel.emit();
   }
   selectBooking(booking: TeacherBookingDto): void {
     this.selectedBooking.set(booking);

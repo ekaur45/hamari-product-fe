@@ -10,6 +10,8 @@ import { WhiteboardMathTools } from "./tools/whiteboard-math-tools";
 import { WhiteboardPresence, WhiteboardUser } from "./collaboration/whiteboard-presence";
 import { UserRole, AuthService } from "../../shared";
 import { Socket } from "socket.io-client";
+import { DialogModule } from "primeng/dialog";
+import { FormsModule } from "@angular/forms";
 
 @Component({
     selector: 'app-white-board',
@@ -24,13 +26,18 @@ import { Socket } from "socket.io-client";
         WhiteboardTemplates,
         WhiteboardStamps,
         WhiteboardMathTools,
-        WhiteboardPresence
+        WhiteboardPresence,
+        DialogModule,
+        FormsModule
     ],
     standalone: true,
 })
 export class WhiteBoard implements AfterViewInit, OnDestroy {
     @Output() onExitWhiteboard = new EventEmitter<void>();
-    
+
+    tabs = signal<('pen' | 'screen-sharing')[]>(['pen']);
+    showAddTabDialog = signal<boolean>(false);
+    newTabName = signal<string>('');
     // Inputs
     currentUserRole = input<UserRole>(UserRole.STUDENT);
     sessionId = input<string>('');
@@ -1193,5 +1200,11 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             { id: 'coordinate', name: 'Coordinate Plane', icon: 'fas fa-chart-line', preview: '', type: 'coordinate' },
         ];
         this.templates.set(defaultTemplates);
+    }
+
+    onAddTab(): void {
+        this.tabs.set([...this.tabs(), this.newTabName() as 'pen' | 'screen-sharing']);
+        this.newTabName.set('');
+        this.showAddTabDialog.set(false);
     }
 }

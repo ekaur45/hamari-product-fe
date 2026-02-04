@@ -12,15 +12,6 @@
                'fa-lock': !isEditable() && currentRole() === UserRole.TEACHER,
                'fa-eye': !isEditable() && currentRole() === UserRole.STUDENT
            }"></i>
-        <span class="text-xs font-medium">
-            @if(isEditable()) {
-                Editing Enabled
-            } @else if(currentRole() === UserRole.TEACHER) {
-                Locked
-            } @else {
-                View Only
-            }
-        </span>
     </div>
 
     <!-- Teacher Controls -->

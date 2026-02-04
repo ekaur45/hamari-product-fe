@@ -4,14 +4,14 @@
 } @else {
 @if(bookings() && bookings().length > 0) {
 <h1 class="text-2xl font-bold text-gray-900 mb-6">Select a Booking</h1>
-<div class="flex items-center justify-center gap-2">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
     @for (booking of bookings(); track booking.id) {
     <button type="button"
         class="cursor-pointer px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
         (click)="selectBooking(booking)">
         <div class="flex gap-2">
             <profile-photo [user]="booking.student!.user!" />
-            <div class="flex flex-col gap-1">
+            <div class="flex flex-col items-start gap-1">
                 <div class="text-sm font-medium text-gray-900">
                     {{booking.student!.user!.firstName}} {{booking.student!.user!.lastName}} -
                     {{booking.teacherSubject!.subject!.name}}

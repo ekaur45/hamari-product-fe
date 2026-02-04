@@ -148,8 +148,8 @@ export class TaleemiyatCreateAssignment implements OnInit {
     uploadFile(file: AssignmentFile): void {
         this.fileService.uploadFile(file.file).subscribe({
             next: (res) => {
-                //file.isUploaded = true;
-                //file.isUploading = false;                
+                file.isUploaded = true;
+                file.isUploading = false;                
                 file.filePath = res.data.url;
             },
             error: (err) => {
