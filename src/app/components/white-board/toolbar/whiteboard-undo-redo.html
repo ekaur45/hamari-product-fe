@@ -1,0 +1,14 @@
+<div
+    class="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl p-2 border border-gray-200/60 shadow-md flex flex-wrap items-center gap-1 backdrop-blur-sm">
+    <button id="undoBtn" (click)="onUndo()"
+        class="p-2.5 hover:bg-gray-100 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
+        title="Undo (Ctrl+Z)">
+        <i class="fas fa-undo text-gray-700 text-base"></i>
+    </button>
+    <button id="redoBtn" (click)="onRedo()"
+        class="p-2.5 hover:bg-gray-100 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
+        title="Redo (Ctrl+Y)">
+        <i class="fas fa-redo text-gray-700 text-base"></i>
+    </button>
+</div>
+

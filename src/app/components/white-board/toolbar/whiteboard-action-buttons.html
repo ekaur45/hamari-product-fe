@@ -1,0 +1,22 @@
+<div
+    class="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl p-2 border border-gray-200/60 shadow-md flex flex-col gap-2 backdrop-blur-sm">
+    <button id="clearBtn" (click)="onClear()"
+        class="w-full px-4 py-2 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl"
+        title="Clear Canvas">
+        <i class="fas fa-trash"></i>
+        <span>Clear</span>
+    </button>
+    <button id="saveWhiteboardBtn" (click)="onSave()"
+        class="w-full px-4 py-2 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl"
+        title="Save Whiteboard">
+        <i class="fas fa-download"></i>
+        <span>Save</span>
+    </button>
+    <button id="exportPDFBtn" (click)="onExportPDF()"
+        class="w-full px-4 py-2 bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl"
+        title="Export as PDF">
+        <i class="fas fa-file-pdf"></i>
+        <span>Export PDF</span>
+    </button>
+</div>
+

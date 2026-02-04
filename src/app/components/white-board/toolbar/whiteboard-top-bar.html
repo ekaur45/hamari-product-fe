@@ -1,0 +1,36 @@
+<div class="flex items-center justify-between gap-2 p-2 border-b border-gray-200/60 bg-white/95 backdrop-blur-sm flex-shrink-0">
+    <div class="flex items-center gap-0.5">
+        @for (tab of tabs(); track tab) {
+        <button
+            class="px-4 py-2 border-r border-gray-200/60 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium text-sm cursor-pointer">
+            {{ tab }}
+        </button>
+        }
+        <button
+            class="ml-2 px-4 py-2 border-r border-gray-200/60 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium text-sm cursor-pointer"
+            (click)="onShowAddTabDialog()">
+            Add Tab
+        </button>
+    </div>
+    <button (click)="onClose()"
+        class="px-4 py-2 bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg transition-all text-sm font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl">
+        <i class="fas fa-times"></i>
+        <span>Close</span>
+    </button>
+</div>
+
+<p-dialog [(visible)]="showAddTabDialog()" [modal]="true" [draggable]="false" [resizable]="false" [closable]="true"
+    [dismissableMask]="true" [closeOnEscape]="true" headerTemplate="Add New Tab" title="Add New Tab"
+    [style]="{width: '500px'}">
+    <ng-template pTemplate="header">
+        <h3>Add New Tab</h3>
+    </ng-template>
+
+    <div class="flex items-center flex-col gap-2 p-4">
+        <input type="text"
+            class="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [(ngModel)]="newTabName" placeholder="Enter tab name" />
+        <button (click)="onAddTab()" class="w-full p-2 rounded-md bg-blue-500 text-white">Add</button>
+    </div>
+</p-dialog>
+

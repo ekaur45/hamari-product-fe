@@ -1,0 +1,31 @@
+<div
+    class="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl p-2.5 border border-gray-200/60 shadow-md flex flex-col gap-2.5 backdrop-blur-sm">
+    <div class="flex flex-col gap-2">
+        <label
+            class="text-xs text-gray-600 font-semibold uppercase tracking-wide">Background</label>
+        <select (change)="onBackgroundColorChange($any($event.target).value)"
+            class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all shadow-sm">
+            <option value="#ffffff">White</option>
+            <option value="#f9fafb">Gray</option>
+            <option value="#fef3c7">Yellow</option>
+            <option value="#dbeafe">Blue</option>
+            <option value="#fce7f3">Pink</option>
+            <option value="#e0e7ff">Purple</option>
+            <option value="#d1fae5">Green</option>
+        </select>
+    </div>
+    <button id="gridToggle" (click)="onToggleGrid()"
+        [class.bg-gradient-to-br]="gridVisible()" [class.from-blue-500]="gridVisible()"
+        [class.to-blue-600]="gridVisible()" [class.text-white]="gridVisible()"
+        [class.shadow-md]="gridVisible()" [class.bg-white]="!gridVisible()"
+        [class.hover:bg-gray-50]="!gridVisible()"
+        class="px-4 py-2 border border-gray-200 rounded-xl hover:border-blue-400 text-xs font-semibold flex items-center gap-2 transition-all"
+        title="Toggle Grid">
+        <i class="fas fa-th"></i>
+        <span>Grid</span>
+        <span class="text-xs font-bold px-1.5 py-0.5 rounded-md"
+            [class.bg-white/20]="gridVisible()" [class.bg-gray-100]="!gridVisible()">{{
+            getGridStatus() }}</span>
+    </button>
+</div>
+

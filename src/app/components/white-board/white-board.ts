@@ -1,17 +1,24 @@
 import { Component, AfterViewInit, ElementRef, EventEmitter, OnDestroy, Output, signal, ViewChild, input, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { WhiteboardPermissions } from "./permissions/whiteboard-permissions";
-import { WhiteboardPages, WhiteboardPage } from "./pages/whiteboard-pages";
+import { WhiteboardPage } from "./pages/whiteboard-pages";
 import { WhiteboardSelectTool } from "./tools/whiteboard-select-tool";
 import { WhiteboardStickyNotes } from "./tools/whiteboard-sticky-notes";
 import { WhiteboardTemplates, WhiteboardTemplate } from "./tools/whiteboard-templates";
 import { WhiteboardStamps } from "./tools/whiteboard-stamps";
 import { WhiteboardMathTools } from "./tools/whiteboard-math-tools";
 import { WhiteboardPresence, WhiteboardUser } from "./collaboration/whiteboard-presence";
+import { WhiteboardTopBar } from "./toolbar/whiteboard-top-bar";
+import { WhiteboardDrawingTools } from "./toolbar/whiteboard-drawing-tools";
+import { WhiteboardStyleOptions } from "./toolbar/whiteboard-style-options";
+import { WhiteboardColorSizePicker } from "./toolbar/whiteboard-color-size-picker";
+import { WhiteboardCanvasOptions } from "./toolbar/whiteboard-canvas-options";
+import { WhiteboardZoomControls } from "./toolbar/whiteboard-zoom-controls";
+import { WhiteboardActionButtons } from "./toolbar/whiteboard-action-buttons";
+import { WhiteboardUndoRedo } from "./toolbar/whiteboard-undo-redo";
 import { UserRole, AuthService } from "../../shared";
 import { Socket } from "socket.io-client";
-import { DialogModule } from "primeng/dialog";
-import { FormsModule } from "@angular/forms";
+import { getToolFromId, isImageTool, clampZoom } from "./utils/whiteboard-helpers";
 
 @Component({
     selector: 'app-white-board',
@@ -20,15 +27,20 @@ import { FormsModule } from "@angular/forms";
     imports: [
         CommonModule,
         WhiteboardPermissions,
-        WhiteboardPages,
         WhiteboardSelectTool,
         WhiteboardStickyNotes,
         WhiteboardTemplates,
         WhiteboardStamps,
         WhiteboardMathTools,
         WhiteboardPresence,
-        DialogModule,
-        FormsModule
+        WhiteboardTopBar,
+        WhiteboardDrawingTools,
+        WhiteboardStyleOptions,
+        WhiteboardColorSizePicker,
+        WhiteboardCanvasOptions,
+        WhiteboardZoomControls,
+        WhiteboardActionButtons,
+        WhiteboardUndoRedo
     ],
     standalone: true,
 })
@@ -36,8 +48,6 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     @Output() onExitWhiteboard = new EventEmitter<void>();
 
     tabs = signal<('pen' | 'screen-sharing')[]>(['pen']);
-    showAddTabDialog = signal<boolean>(false);
-    newTabName = signal<string>('');
     // Inputs
     currentUserRole = input<UserRole>(UserRole.STUDENT);
     sessionId = input<string>('');
@@ -252,31 +262,10 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
 
      // Tool Selection
      selectTool(toolId: string): void {
-        const toolMap: { [key: string]: string } = {
-            'penTool': 'pen',
-            'penToolMobile': 'pen',
-            'highlighterTool': 'highlighter',
-            'highlighterToolMobile': 'highlighter',
-            'eraserTool': 'eraser',
-            'eraserToolMobile': 'eraser',
-            'shapeTool': 'rectangle',
-            'shapeToolMobile': 'rectangle',
-            'circleTool': 'circle',
-            'circleToolMobile': 'circle',
-            'arrowTool': 'arrow',
-            'arrowToolMobile': 'arrow',
-            'lineTool': 'line',
-            'lineToolMobile': 'line',
-            'textTool': 'text',
-            'textToolMobile': 'text',
-            'imageTool': 'image',
-            'imageToolMobile': 'image'
-        };
-        
-        const tool = toolMap[toolId];
+        const tool = getToolFromId(toolId);
         if (!tool) return;
         
-        if (tool === 'image') {
+        if (isImageTool(toolId)) {
             const uploadInput = toolId.includes('Mobile') ? this.imageUploadMobile : this.imageUpload;
             if (uploadInput) {
                 uploadInput.nativeElement.click();
@@ -285,6 +274,10 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         }
         
         this.currentTool.set(tool);
+    }
+    
+    onToolSelect(toolId: string): void {
+        this.selectTool(toolId);
     }
 
     // Whiteboard Functionality
@@ -492,17 +485,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     
    
     
-    getZoomLevel(): string {
-        return Math.round(this.zoomLevel() * 100) + '%';
-    }
-    
-    getFillStatus(): string {
-        return this.fillShapes() ? 'On' : 'Off';
-    }
-    
-    getGridStatus(): string {
-        return this.gridVisible() ? 'On' : 'Off';
-    }
+    // Removed - now handled by components
     
     getCurrentTool(): string {
         return this.currentTool();
@@ -538,12 +521,12 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     
     // Zoom Controls
     onZoomIn(): void {
-        this.zoomLevel.set(Math.min(this.zoomLevel() + 0.25, 3));
+        this.zoomLevel.set(clampZoom(this.zoomLevel() + 0.25));
         this.resizeCanvas();
     }
     
     onZoomOut(): void {
-        this.zoomLevel.set(Math.max(this.zoomLevel() - 0.25, 0.5));
+        this.zoomLevel.set(clampZoom(this.zoomLevel() - 0.25));
         this.resizeCanvas();
     }
     
@@ -1202,9 +1185,11 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         this.templates.set(defaultTemplates);
     }
 
-    onAddTab(): void {
-        this.tabs.set([...this.tabs(), this.newTabName() as 'pen' | 'screen-sharing']);
-        this.newTabName.set('');
-        this.showAddTabDialog.set(false);
+    onAddTab(tabName: string): void {
+        this.tabs.set([...this.tabs(), tabName as 'pen' | 'screen-sharing']);
+    }
+    
+    onCloseWhiteboard(): void {
+        this._onExitWhiteboard();
     }
 }
