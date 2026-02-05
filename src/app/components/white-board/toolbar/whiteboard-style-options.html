@@ -1,50 +1,7 @@
-<div
-    class="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl p-2.5 border border-gray-200/60 shadow-md flex flex-wrap items-center gap-3 backdrop-blur-sm">
-    <button id="fillToggle" (click)="onToggleFill()" [class.bg-gradient-to-br]="fillShapes()"
-        [class.from-blue-500]="fillShapes()" [class.to-blue-600]="fillShapes()"
-        [class.text-white]="fillShapes()" [class.shadow-md]="fillShapes()"
-        [class.bg-white]="!fillShapes()" [class.hover:bg-gray-50]="!fillShapes()"
-        class="px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all duration-200 hover:scale-105"
-        title="Fill Shapes">
-        <i class="fas fa-fill-drip"></i>
-        <span>Fill</span>
-        <span class="text-xs font-bold px-1.5 py-0.5 rounded-md"
-            [class.bg-white/20]="fillShapes()" [class.bg-gray-100]="!fillShapes()">{{
-            getFillStatus() }}</span>
-    </button>
-    <div class="w-px h-6 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
-    <div class="flex items-center gap-2">
-        <span class="text-xs text-gray-500 font-semibold">Style</span>
-        <div class="flex items-center gap-1 bg-gray-50/50 rounded-lg p-1">
-            <button id="lineStyleSolid" (click)="onLineStyleChange('solid')"
-                [class.bg-white]="lineStyle() === 'solid'"
-                [class.shadow-sm]="lineStyle() === 'solid'"
-                [class.border-blue-500]="lineStyle() === 'solid'"
-                class="px-2.5 py-1.5 hover:bg-white rounded-lg line-style-btn transition-all border-2 border-transparent"
-                title="Solid Line">
-                <div class="w-6 h-0.5 bg-gray-700"></div>
-            </button>
-            <button id="lineStyleDashed" (click)="onLineStyleChange('dashed')"
-                [class.bg-white]="lineStyle() === 'dashed'"
-                [class.shadow-sm]="lineStyle() === 'dashed'"
-                [class.border-blue-500]="lineStyle() === 'dashed'"
-                class="px-2.5 py-1.5 hover:bg-white rounded-lg line-style-btn transition-all border-2 border-transparent"
-                title="Dashed Line">
-                <div class="w-6 h-0.5 border-t-2 border-dashed border-gray-700"></div>
-            </button>
-            <button id="lineStyleDotted" (click)="onLineStyleChange('dotted')"
-                [class.bg-white]="lineStyle() === 'dotted'"
-                [class.shadow-sm]="lineStyle() === 'dotted'"
-                [class.border-blue-500]="lineStyle() === 'dotted'"
-                class="px-2.5 py-1.5 hover:bg-white rounded-lg line-style-btn transition-all border-2 border-transparent"
-                title="Dotted Line">
-                <div class="w-6 h-1 flex space-x-1 justify-center items-center">
-                    <div class="w-1 h-1 bg-gray-700 rounded-full"></div>
-                    <div class="w-1 h-1 bg-gray-700 rounded-full"></div>
-                    <div class="w-1 h-1 bg-gray-700 rounded-full"></div>
-                </div>
-            </button>
-        </div>
-    </div>
-</div>
+<p-menu [model]="menuItems()" [popup]="true" [appendTo]="'body'"
+    [baseZIndex]="1000" #styleMenu></p-menu>
+
+<button (click)="styleMenu.toggle($event)" class="p-3 rounded-xl tool-btn transition-all duration-200 hover:scale-105 active:scale-95" title="Style Options">
+    <i class="fas fa-sliders-h text-base"></i>
+</button>
 

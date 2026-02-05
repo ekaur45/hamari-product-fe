@@ -1,10 +1,12 @@
-import { Component, input, output, signal } from "@angular/core";
+import { Component, input, output, computed } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { MenuModule } from "primeng/menu";
+import { MenuItem } from "primeng/api";
 
 @Component({
     selector: 'app-whiteboard-select-tool',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, MenuModule],
     templateUrl: './whiteboard-select-tool.html'
 })
 export class WhiteboardSelectTool {
@@ -20,44 +22,39 @@ export class WhiteboardSelectTool {
     layerEvent = output<'front' | 'back'>();
     deleteEvent = output<void>();
     
-    activateSelectTool(): void {
-        this.activateEvent.emit();
-    }
-    
-    copySelection(): void {
-        this.copyEvent.emit();
-    }
-    
-    cutSelection(): void {
-        this.cutEvent.emit();
-    }
-    
-    pasteSelection(): void {
-        this.pasteEvent.emit();
-    }
-    
-    alignLeft(): void {
-        this.alignEvent.emit('left');
-    }
-    
-    alignCenter(): void {
-        this.alignEvent.emit('center');
-    }
-    
-    alignRight(): void {
-        this.alignEvent.emit('right');
-    }
-    
-    bringToFront(): void {
-        this.layerEvent.emit('front');
-    }
-    
-    sendToBack(): void {
-        this.layerEvent.emit('back');
-    }
-    
-    deleteSelection(): void {
-        this.deleteEvent.emit();
-    }
+    menuItems = computed<MenuItem[]>(() => {
+        const items: MenuItem[] = [
+            {
+                label: 'Select Tool',
+                icon: 'fas fa-mouse-pointer',
+                command: () => this.activateEvent.emit()
+            },
+            { separator: true }
+        ];
+        
+        if (this.hasSelection()) {
+            items.push(
+                { label: 'Copy', icon: 'fas fa-copy', command: () => this.copyEvent.emit() },
+                { label: 'Cut', icon: 'fas fa-cut', command: () => this.cutEvent.emit() },
+                { 
+                    label: 'Paste', 
+                    icon: 'fas fa-paste', 
+                    command: () => this.pasteEvent.emit(),
+                    disabled: !this.hasClipboard()
+                },
+                { separator: true },
+                { label: 'Align Left', icon: 'fas fa-align-left', command: () => this.alignEvent.emit('left') },
+                { label: 'Align Center', icon: 'fas fa-align-center', command: () => this.alignEvent.emit('center') },
+                { label: 'Align Right', icon: 'fas fa-align-right', command: () => this.alignEvent.emit('right') },
+                { separator: true },
+                { label: 'Bring to Front', icon: 'fas fa-arrow-up', command: () => this.layerEvent.emit('front') },
+                { label: 'Send to Back', icon: 'fas fa-arrow-down', command: () => this.layerEvent.emit('back') },
+                { separator: true },
+                { label: 'Delete', icon: 'fas fa-trash', command: () => this.deleteEvent.emit() }
+            );
+        }
+        
+        return items;
+    });
 }
 

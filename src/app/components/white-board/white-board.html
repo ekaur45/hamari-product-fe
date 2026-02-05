@@ -3,14 +3,33 @@
     <div class="flex-shrink-0">
         <app-whiteboard-top-bar [tabs]="tabs()" (closeEvent)="onCloseWhiteboard()"
             (addTabEvent)="onAddTab($event)">
+            <div class="flex flex-wrap items-center gap-2.5">
+                <app-whiteboard-templates [templates]="templates()"
+                    (templateSelectEvent)="onTemplateSelect($event)">
+                </app-whiteboard-templates>
+
+                <app-whiteboard-stamps [isActive]="currentTool() === 'stamp'"
+                    (stampSelectEvent)="onStampSelect($event)">
+                </app-whiteboard-stamps>
+
+                <app-whiteboard-sticky-notes [isActive]="currentTool() === 'stickyNote'"
+                    (activateEvent)="selectTool('stickyNoteTool')" (addNoteEvent)="onAddStickyNote($event)">
+                </app-whiteboard-sticky-notes>
+
+                <app-whiteboard-math-tools (toolActivateEvent)="onMathToolActivate($event)">
+                </app-whiteboard-math-tools>
+                <app-whiteboard-action-buttons (clearEvent)="onClear()" (saveEvent)="onSaveWhiteboard()"
+                (exportPDFEvent)="onExportPDF()">
+            </app-whiteboard-action-buttons>
+            </div>
         </app-whiteboard-top-bar>
     </div>
-    <div class="grid grid-cols-[320px_1fr]">
-        <div>
+    <div class="grid grid-cols-[auto_1fr] h-full">
+        <div class="h-full relative">
             <div
-                class="hidden sm:block bg-white/95 backdrop-blur-sm border-r border-gray-200/80 shadow-lg w-full flex-shrink-0 overflow-y-auto flex flex-col">
+                class="hidden sm:block bg-white/95 backdrop-blur-sm border-r border-gray-200/80 shadow-lg w-full flex-shrink-0 flex flex-col h-full">
                 <!-- Top Row: Permissions & Presence -->
-                <div
+                <!-- <div
                     class="px-4 py-3 flex flex-col gap-3 border-b border-gray-200/60 bg-gradient-to-b from-gray-50/80 to-white">
                     <app-whiteboard-permissions [currentRole]="currentUserRole()" [isEditable]="isEditable()"
                         [isLocked]="isLocked()" (toggleLockEvent)="onToggleLock($event)"
@@ -19,10 +38,10 @@
 
                     <app-whiteboard-presence [activeUsers]="activeUsers()">
                     </app-whiteboard-presence>
-                </div>
+                </div> -->
 
                 <!-- Main Toolbar - Vertical Layout -->
-                <div class="px-4 py-4 flex flex-col gap-4 flex-1 overflow-y-auto">
+                <div class="px-2 py-2 flex flex-col gap-4 flex-1">
                     <!-- All Controls Group - Vertical Stack -->
                     <div class="flex flex-col gap-3">
                         <!-- Select Tool -->
@@ -52,22 +71,7 @@
                         </app-whiteboard-color-size-picker>
 
                         <!-- Educational Tools Group -->
-                        <div class="flex flex-wrap items-center gap-2.5">
-                            <app-whiteboard-templates [templates]="templates()"
-                                (templateSelectEvent)="onTemplateSelect($event)">
-                            </app-whiteboard-templates>
-
-                            <app-whiteboard-stamps [isActive]="currentTool() === 'stamp'"
-                                (stampSelectEvent)="onStampSelect($event)">
-                            </app-whiteboard-stamps>
-
-                            <app-whiteboard-sticky-notes [isActive]="currentTool() === 'stickyNote'"
-                                (activateEvent)="selectTool('stickyNoteTool')" (addNoteEvent)="onAddStickyNote($event)">
-                            </app-whiteboard-sticky-notes>
-
-                            <app-whiteboard-math-tools (toolActivateEvent)="onMathToolActivate($event)">
-                            </app-whiteboard-math-tools>
-                        </div>
+                    
 
                         <!-- Canvas Options -->
                         <app-whiteboard-canvas-options [gridVisible]="gridVisible()"
@@ -76,18 +80,16 @@
                         </app-whiteboard-canvas-options>
 
                         <!-- Undo/Redo -->
-                        <app-whiteboard-undo-redo (undoEvent)="onUndo()" (redoEvent)="onRedo()">
-                        </app-whiteboard-undo-redo>
+                        <!-- <app-whiteboard-undo-redo (undoEvent)="onUndo()" (redoEvent)="onRedo()">
+                        </app-whiteboard-undo-redo> -->
 
                         <!-- Zoom Controls -->
-                        <app-whiteboard-zoom-controls [zoomLevel]="zoomLevel()" (zoomInEvent)="onZoomIn()"
+                        <!-- <app-whiteboard-zoom-controls [zoomLevel]="zoomLevel()" (zoomInEvent)="onZoomIn()"
                             (zoomOutEvent)="onZoomOut()" (zoomResetEvent)="onZoomReset()">
-                        </app-whiteboard-zoom-controls>
+                        </app-whiteboard-zoom-controls> -->
 
                         <!-- Action Buttons -->
-                        <app-whiteboard-action-buttons (clearEvent)="onClear()" (saveEvent)="onSaveWhiteboard()"
-                            (exportPDFEvent)="onExportPDF()">
-                        </app-whiteboard-action-buttons>
+
                     </div>
                 </div>
             </div>
@@ -165,8 +167,6 @@
                     <div #canvasWrapper
                         style="position: relative; width: 100%; height: 100%; transform-origin: center center; transform: scale(1);">
                         <canvas #whiteboardCanvas 
-                            (mousedown)="onCanvasMouseDown($event)"
-                            (touchstart)="onCanvasMouseDown($event)"
                             class="bg-white shadow-2xl"
                             style="width: 100%; height: 100%; display: block; background-color: rgb(255, 255, 255);"
                             width="0" height="0">

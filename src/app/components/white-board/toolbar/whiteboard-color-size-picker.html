@@ -1,95 +1,38 @@
-<div
-    class="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl p-2.5 border border-gray-200/60 shadow-md flex flex-col gap-3 backdrop-blur-sm">
-    <div class="flex flex-wrap items-center gap-2.5">
-        <label
-            class="text-xs text-gray-600 font-semibold uppercase tracking-wide w-full">Color</label>
-        <div class="relative">
-            <input type="color" [value]="currentColor()"
-                (input)="onColorChange($any($event.target).value)"
-                class="w-10 h-10 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-all shadow-sm hover:shadow-md"
-                title="Color Picker">
-            <div
-                class="absolute inset-0 rounded-xl pointer-events-none ring-2 ring-transparent hover:ring-blue-300 transition-all">
+<p-dialog [(visible)]="showDialog" [modal]="true" [style]="{width: '350px'}" [closable]="true"
+    (onHide)="closeDialog()">
+    <ng-template pTemplate="header">
+        <h3 class="text-lg font-semibold">Color & Size</h3>
+    </ng-template>
+    <div class="flex flex-col gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+            <div class="flex items-center gap-2">
+                <input type="color" [value]="currentColor()"
+                    (input)="onColorChange($any($event.target).value)"
+                    class="w-12 h-12 rounded-lg border-2 border-gray-200 cursor-pointer">
+                <div class="flex flex-wrap gap-2">
+                    @for(color of ['#000000', '#ef4444', '#3b82f6', '#10b981', '#eab308', '#a855f7', '#ec4899']; track color) {
+                        <button (click)="onColorChange(color)"
+                            [class.ring-2]="currentColor() === color"
+                            [class.ring-blue-500]="currentColor() === color"
+                            class="w-8 h-8 rounded-lg border-2 border-gray-200 transition-all"
+                            [style.background-color]="color"
+                            [title]="color">
+                        </button>
+                    }
+                </div>
             </div>
         </div>
-        <div class="flex space-x-1.5">
-            <button (click)="onColorChange('#000000')"
-                [class.ring-2]="currentColor() === '#000000'"
-                [class.ring-blue-500]="currentColor() === '#000000'"
-                [class.ring-offset-2]="currentColor() === '#000000'"
-                [class.scale-110]="currentColor() === '#000000'"
-                class="color-btn w-7 h-7 rounded-lg border-2 border-gray-200 bg-black hover:scale-110 transition-all shadow-sm hover:shadow-md"
-                title="Black">
-            </button>
-            <button (click)="onColorChange('#ef4444')"
-                [class.ring-2]="currentColor() === '#ef4444'"
-                [class.ring-blue-500]="currentColor() === '#ef4444'"
-                [class.ring-offset-2]="currentColor() === '#ef4444'"
-                [class.scale-110]="currentColor() === '#ef4444'"
-                class="color-btn w-7 h-7 rounded-lg border-2 border-gray-200 bg-red-500 hover:scale-110 transition-all shadow-sm hover:shadow-md"
-                title="Red">
-            </button>
-            <button (click)="onColorChange('#3b82f6')"
-                [class.ring-2]="currentColor() === '#3b82f6'"
-                [class.ring-blue-500]="currentColor() === '#3b82f6'"
-                [class.ring-offset-2]="currentColor() === '#3b82f6'"
-                [class.scale-110]="currentColor() === '#3b82f6'"
-                class="color-btn w-7 h-7 rounded-lg border-2 border-gray-200 bg-blue-500 hover:scale-110 transition-all shadow-sm hover:shadow-md"
-                title="Blue">
-            </button>
-            <button (click)="onColorChange('#10b981')"
-                [class.ring-2]="currentColor() === '#10b981'"
-                [class.ring-blue-500]="currentColor() === '#10b981'"
-                [class.ring-offset-2]="currentColor() === '#10b981'"
-                [class.scale-110]="currentColor() === '#10b981'"
-                class="color-btn w-7 h-7 rounded-lg border-2 border-gray-200 bg-green-500 hover:scale-110 transition-all shadow-sm hover:shadow-md"
-                title="Green">
-            </button>
-        </div>
-        <button (click)="onToggleMoreColors()" [class.bg-blue-50]="showMoreColors()"
-            [class.text-blue-600]="showMoreColors()"
-            class="px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg transition-all font-medium"
-            title="More Colors">
-            <i class="fas fa-ellipsis-h"></i>
-        </button>
-    </div>
-    <div [class.hidden]="!showMoreColors()"
-        class="flex items-center gap-1.5 ml-1 pl-3 border-l border-gray-200/60">
-        <button (click)="onColorChange('#eab308')" [class.ring-2]="currentColor() === '#eab308'"
-            [class.ring-blue-500]="currentColor() === '#eab308'"
-            [class.ring-offset-2]="currentColor() === '#eab308'"
-            [class.scale-110]="currentColor() === '#eab308'"
-            class="color-btn w-7 h-7 rounded-lg border-2 border-gray-200 bg-yellow-500 hover:scale-110 transition-all shadow-sm hover:shadow-md"
-            title="Yellow">
-        </button>
-        <button (click)="onColorChange('#a855f7')" [class.ring-2]="currentColor() === '#a855f7'"
-            [class.ring-blue-500]="currentColor() === '#a855f7'"
-            [class.ring-offset-2]="currentColor() === '#a855f7'"
-            [class.scale-110]="currentColor() === '#a855f7'"
-            class="color-btn w-7 h-7 rounded-lg border-2 border-gray-200 bg-purple-500 hover:scale-110 transition-all shadow-sm hover:shadow-md"
-            title="Purple">
-        </button>
-        <button (click)="onColorChange('#ec4899')" [class.ring-2]="currentColor() === '#ec4899'"
-            [class.ring-blue-500]="currentColor() === '#ec4899'"
-            [class.ring-offset-2]="currentColor() === '#ec4899'"
-            [class.scale-110]="currentColor() === '#ec4899'"
-            class="color-btn w-7 h-7 rounded-lg border-2 border-gray-200 bg-pink-500 hover:scale-110 transition-all shadow-sm hover:shadow-md"
-            title="Pink">
-        </button>
-    </div>
-    <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent">
-    </div>
-    <div class="flex flex-wrap items-center gap-2.5">
-        <label
-            class="text-xs text-gray-600 font-semibold uppercase tracking-wide w-full">Size</label>
-        <div class="flex items-center gap-2 bg-gray-50/50 rounded-lg px-3 py-1.5">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Size: {{currentLineWidth()}}px</label>
             <input type="range" [value]="currentLineWidth()"
                 (input)="onLineWidthChange(+$any($event.target).value)" min="1" max="30"
-                class="w-28 accent-blue-500 hover:accent-blue-600 transition-all">
-            <span
-                class="text-xs text-gray-800 font-bold w-10 text-center bg-white px-2 py-1 rounded-md shadow-sm">{{
-                currentLineWidth() }}px</span>
+                class="w-full accent-blue-500">
         </div>
     </div>
-</div>
+</p-dialog>
+
+<button (click)="openDialog()" class="p-3 rounded-xl tool-btn transition-all duration-200 hover:scale-105 active:scale-95" title="Color & Size">
+    <i class="fas fa-palette text-base"></i>
+</button>
 

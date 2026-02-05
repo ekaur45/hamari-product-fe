@@ -1,88 +1,11 @@
-<div class="bg-white rounded-lg p-1 border border-gray-300 flex items-center gap-1">
-    <button 
-        (click)="activateSelectTool()"
-        [class.active]="isActive()"
-        class="p-2 hover:bg-gray-100 rounded tool-btn"
-        title="Select & Move">
-        <i class="fas fa-mouse-pointer text-gray-700 text-sm"></i>
-    </button>
-    
-    @if(isActive() && hasSelection()) {
-        <div class="w-px h-6 bg-gray-300 mx-1"></div>
-        
-        <!-- Selection Actions -->
-        <button 
-            (click)="copySelection()"
-            class="p-1.5 hover:bg-gray-100 rounded"
-            title="Copy">
-            <i class="fas fa-copy text-gray-700 text-xs"></i>
-        </button>
-        
-        <button 
-            (click)="cutSelection()"
-            class="p-1.5 hover:bg-gray-100 rounded"
-            title="Cut">
-            <i class="fas fa-cut text-gray-700 text-xs"></i>
-        </button>
-        
-        <button 
-            (click)="pasteSelection()"
-            [disabled]="!hasClipboard()"
-            class="p-1.5 hover:bg-gray-100 rounded disabled:opacity-50"
-            title="Paste">
-            <i class="fas fa-paste text-gray-700 text-xs"></i>
-        </button>
-        
-        <div class="w-px h-6 bg-gray-300 mx-1"></div>
-        
-        <!-- Alignment Tools -->
-        <div class="flex items-center gap-0.5">
-            <button 
-                (click)="alignLeft()"
-                class="p-1.5 hover:bg-gray-100 rounded"
-                title="Align Left">
-                <i class="fas fa-align-left text-gray-700 text-xs"></i>
-            </button>
-            <button 
-                (click)="alignCenter()"
-                class="p-1.5 hover:bg-gray-100 rounded"
-                title="Align Center">
-                <i class="fas fa-align-center text-gray-700 text-xs"></i>
-            </button>
-            <button 
-                (click)="alignRight()"
-                class="p-1.5 hover:bg-gray-100 rounded"
-                title="Align Right">
-                <i class="fas fa-align-right text-gray-700 text-xs"></i>
-            </button>
-        </div>
-        
-        <div class="w-px h-6 bg-gray-300 mx-1"></div>
-        
-        <!-- Layer Controls -->
-        <button 
-            (click)="bringToFront()"
-            class="p-1.5 hover:bg-gray-100 rounded"
-            title="Bring to Front">
-            <i class="fas fa-arrow-up text-gray-700 text-xs"></i>
-        </button>
-        
-        <button 
-            (click)="sendToBack()"
-            class="p-1.5 hover:bg-gray-100 rounded"
-            title="Send to Back">
-            <i class="fas fa-arrow-down text-gray-700 text-xs"></i>
-        </button>
-        
-        <div class="w-px h-6 bg-gray-300 mx-1"></div>
-        
-        <!-- Delete -->
-        <button 
-            (click)="deleteSelection()"
-            class="p-1.5 hover:bg-red-100 text-red-600 rounded"
-            title="Delete">
-            <i class="fas fa-trash text-xs"></i>
-        </button>
-    }
-</div>
+<p-menu [model]="menuItems()" [popup]="true" [appendTo]="'body'"
+    [baseZIndex]="1000" #selectMenu></p-menu>
+
+<button (click)="selectMenu.toggle($event)" 
+    [class.bg-blue-50]="isActive()"
+    [class.text-blue-600]="isActive()"
+    class="p-3 rounded-xl tool-btn transition-all duration-200 hover:scale-105 active:scale-95" 
+    title="Select & Move">
+    <i class="fas fa-mouse-pointer text-base"></i>
+</button>
 

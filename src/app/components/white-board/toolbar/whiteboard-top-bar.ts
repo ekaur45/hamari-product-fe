@@ -12,6 +12,7 @@ import { FormsModule } from "@angular/forms";
 export class WhiteboardTopBar {
     tabs = input<('pen' | 'screen-sharing')[]>([]);
     showAddTabDialog = signal<boolean>(false);
+    
     newTabName = signal<string>('');
     
     closeEvent = output<void>();

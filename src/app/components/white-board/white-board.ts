@@ -139,6 +139,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     
     private initializeWhiteboard(): void {
         if (!this.whiteboardCanvas || !this.gridCanvas || !this.canvasContainer) {
+            console.warn('Whiteboard canvas elements not found');
             return;
         }
         
@@ -147,11 +148,18 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         const container = this.canvasContainer.nativeElement;
         
         // Initialize Fabric.js canvas
-        this.fabricCanvas = new Canvas(canvasEl, {
-            backgroundColor: '#ffffff',
-            selection: true,
-            preserveObjectStacking: true
-        });
+        try {
+            this.fabricCanvas = new Canvas(canvasEl, {
+                backgroundColor: '#ffffff',
+                selection: true,
+                preserveObjectStacking: true
+            });
+            
+            console.log('Fabric.js canvas initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize Fabric.js canvas:', error);
+            return;
+        }
         
         // Initialize grid canvas context
         this.gridContext = gridCanvasEl.getContext('2d') || undefined;
@@ -202,6 +210,48 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         this.fabricCanvas.on('path:created', () => {
             this.saveState();
         });
+        
+        // Handle mouse events for shape tools
+        this.fabricCanvas.on('mouse:down', (options) => {
+            this.handleMouseDown(options);
+        });
+        
+        this.fabricCanvas.on('mouse:move', (options) => {
+            this.handleMouseMove(options);
+        });
+        
+        this.fabricCanvas.on('mouse:up', (options) => {
+            this.handleMouseUp(options);
+        });
+    }
+    
+    private handleMouseDown(options: any): void {
+        if (!this.fabricCanvas) return;
+        
+        const tool = this.currentTool();
+        // Only handle shape tools here - free drawing is handled by Fabric.js
+        if (tool === 'rectangle' || tool === 'circle' || tool === 'arrow' || tool === 'line' || tool === 'text') {
+            // Prevent default selection behavior
+            if (options.e) {
+                options.e.preventDefault?.();
+                options.e.stopPropagation?.();
+            }
+            const pointer = this.fabricCanvas.getScenePoint(options.e);
+            this.startDrawingShape({ x: pointer.x, y: pointer.y }, tool);
+        }
+    }
+    
+    private handleMouseMove(options: any): void {
+        if (!this.fabricCanvas || !this.isDrawingShape || !this.currentShape || !this.shapeStartPoint) return;
+        
+        const pointer = this.fabricCanvas.getScenePoint(options.e);
+        this.updateShape({ x: pointer.x, y: pointer.y });
+    }
+    
+    private handleMouseUp(options: any): void {
+        if (!this.fabricCanvas || !this.isDrawingShape) return;
+        
+        this.finishDrawingShape();
     }
     
     private resizeCanvas(): void {
@@ -362,36 +412,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     private isDrawingShape = false;
     private shapeStartPoint: { x: number; y: number } | null = null;
     
-    // Canvas Events (for shape tools)
-    onCanvasMouseDown(event: MouseEvent | TouchEvent): void {
-        if (!this.fabricCanvas) return;
-        
-        const tool = this.currentTool();
-        if (tool === 'rectangle' || tool === 'circle' || tool === 'arrow' || tool === 'line' || tool === 'text') {
-            event.preventDefault();
-            const pointer = this.getPointerFromEvent(event);
-            this.startDrawingShape(pointer, tool);
-        }
-    }
-    
-    onCanvasMouseMove(event: MouseEvent | TouchEvent): void {
-        if (!this.fabricCanvas || !this.isDrawingShape || !this.currentShape || !this.shapeStartPoint) return;
-        
-        const pointer = this.getPointerFromEvent(event);
-        this.updateShape(pointer);
-    }
-    
-    onCanvasMouseUp(event: MouseEvent | TouchEvent): void {
-        if (!this.fabricCanvas || !this.isDrawingShape) return;
-        
-        this.finishDrawingShape();
-    }
-    
-    onCanvasMouseLeave(): void {
-        if (this.isDrawingShape) {
-            this.finishDrawingShape();
-        }
-    }
+    // Canvas Events - removed, now handled by Fabric.js events
     
     private startDrawingShape(pointer: { x: number; y: number }, tool: string): void {
         if (!this.fabricCanvas) return;

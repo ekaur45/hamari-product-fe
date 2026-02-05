@@ -51,6 +51,10 @@ export const routes: Routes = [
             {
                 path: 'test-call',
                 loadComponent: () => import('./views/test-call/test-call').then(m => m.TestCall)
+            },
+            {
+                path: 'test-wb-tools',
+                loadComponent: () => import('./views/test-wb-tools/wb-toosl').then(m => m.WbToolsComponent)
             }
 
         ]

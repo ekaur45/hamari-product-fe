@@ -1,0 +1,215 @@
+<app-white-board></app-white-board>
+
+
+@if(false){
+  <div class="h-screen w-screen">
+    <header class="topbar">
+      <div class="topbar__row">
+        <div class="group">
+          <div class="group__title">Tools</div>
+          <div class="group__body">
+            <button
+              class="btn tool"
+              type="button"
+              [class.is-active]="tool === 'select'"
+              title="Select (Esc)"
+              (click)="setTool('select')"
+            >
+              Select
+            </button>
+            <button
+              class="btn tool"
+              type="button"
+              [class.is-active]="tool === 'pencil'"
+              title="Pencil"
+              (click)="setTool('pencil')"
+            >
+              Pencil
+            </button>
+            <button
+              class="btn tool"
+              type="button"
+              [class.is-active]="tool === 'brush'"
+              title="Brush"
+              (click)="setTool('brush')"
+            >
+              Brush
+            </button>
+            <button
+              class="btn tool"
+              type="button"
+              [class.is-active]="tool === 'eraser'"
+              title="Eraser"
+              (click)="setTool('eraser')"
+            >
+              Eraser
+            </button>
+          </div>
+        </div>
+    
+        <div class="group">
+          <div class="group__title">Shapes</div>
+          <div class="group__body">
+            <button
+              class="btn tool"
+              type="button"
+              [class.is-active]="tool === 'line'"
+              title="Line"
+              (click)="setTool('line')"
+            >
+              Line
+            </button>
+            <button
+              class="btn tool"
+              type="button"
+              [class.is-active]="tool === 'rect'"
+              title="Rectangle"
+              (click)="setTool('rect')"
+            >
+              Rect
+            </button>
+            <button
+              class="btn tool"
+              type="button"
+              [class.is-active]="tool === 'ellipse'"
+              title="Ellipse"
+              (click)="setTool('ellipse')"
+            >
+              Ellipse
+            </button>
+            <button
+              class="btn tool"
+              type="button"
+              [class.is-active]="tool === 'text'"
+              title="Text"
+              (click)="setTool('text')"
+            >
+              Text
+            </button>
+            <button
+              class="btn tool"
+              type="button"
+              [class.is-active]="tool === 'equation'"
+              title="Equation (LaTeX)"
+              (click)="setTool('equation')"
+            >
+              Equation
+            </button>
+          </div>
+        </div>
+    
+        <div class="group">
+          <div class="group__title">Color</div>
+          <div class="group__body group__body--col">
+            <label class="field">
+              <span class="field__label">Stroke</span>
+              <input class="color" type="color" [value]="strokeColor" (input)="setStrokeColor($any($event.target).value)" />
+            </label>
+            <label class="field">
+              <span class="field__label">Fill</span>
+              <input class="color" type="color" [value]="fillColor" (input)="setFillColor($any($event.target).value)" />
+            </label>
+            <label class="check">
+              <input type="checkbox" [checked]="fillShapes" (change)="setFillShapes($any($event.target).checked)" />
+              <span>Fill new shapes</span>
+            </label>
+            <div class="palette" aria-label="Color palette">
+              <button
+                *ngFor="let c of paletteColors"
+                type="button"
+                class="swatch"
+                [style.background]="c"
+                [title]="c"
+                [attr.aria-label]="c"
+                [class.is-active]="normalizeCssColor(strokeColor) === normalizeCssColor(c)"
+                (click)="selectPalette(c)"
+              ></button>
+            </div>
+          </div>
+        </div>
+    
+        <div class="group">
+          <div class="group__title">Size</div>
+          <div class="group__body group__body--col">
+            <label class="field">
+              <span class="field__label">Width</span>
+              <input type="range" min="1" max="60" [value]="strokeWidth" (input)="setStrokeWidth($any($event.target).value)" />
+            </label>
+            <div class="hint">{{ strokeWidth }} px</div>
+          </div>
+        </div>
+    
+        <div class="group">
+          <div class="group__title">Actions</div>
+          <div class="group__body">
+            <button class="btn" type="button" title="Undo (Ctrl+Z)" [disabled]="!canUndo" (click)="undo()">Undo</button>
+            <button class="btn" type="button" title="Redo (Ctrl+Y)" [disabled]="!canRedo" (click)="redo()">Redo</button>
+            <button class="btn" type="button" title="Delete (Del)" (click)="deleteSelection()">Delete</button>
+            <button class="btn btn--danger" type="button" title="Clear canvas" (click)="clearCanvas()">Clear</button>
+            <button class="btn" type="button" title="Open image" (click)="openImagePicker()">Open</button>
+            <button class="btn btn--primary" type="button" title="Save as PNG (Ctrl+S)" (click)="downloadPng()">Save</button>
+            <input #fileInput type="file" accept="image/*" class="sr-only" (change)="onFileSelected($event)" />
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <main class="main h-full">
+      <div class="canvas-shell h-full">
+        <div #canvasWrap class="canvas-wrap">
+          <canvas #canvasEl></canvas>
+        </div>
+      </div>
+      <footer class="statusbar">
+        <div class="status">{{ statusText }}</div>
+        <div class="status">{{ coordsText }}</div>
+      </footer>
+    </main>
+    
+    <p-dialog [(visible)]="eqOpen" [modal]="true" [header]="'Equation editor'" (onHide)="closeEquationEditor()">
+      <div class="modal__panel" (mousedown)="$event.stopPropagation()">
+        <!-- <div class="modal__head">
+          <div class="modal__title" id="eqTitle">Equation editor</div>
+          <button class="btn" type="button" [disabled]="eqBusy()" (click)="closeEquationEditor()">Close</button>
+        </div> -->
+    
+        <div class="modal__body">
+          <label class="field field--stack">
+            <span class="field__label">LaTeX</span>
+            <textarea
+              #eqInput
+              class="textarea"
+              rows="3"
+              [value]="eqLatex"
+              (input)="setEqLatex($any($event.target).value)"
+              placeholder="e.g. \frac{a}{b}, x^2 + y^2 = r^2, \int_0^\infty e^{-x} dx"
+            ></textarea>
+          </label>
+    
+          <div class="modal__row">
+            <label class="field">
+              <span class="field__label">Size</span>
+              <input type="range" min="12" max="120" [value]="eqSize" (input)="setEqSize($any($event.target).value)" />
+            </label>
+            <div class="hint">{{ eqSize }} px</div>
+          </div>
+    
+          <div class="modal__previewWrap">
+            <div class="modal__previewTitle">Preview</div>
+            <div #eqPreview class="modal__preview"></div>
+            <div class="modal__error" aria-live="polite">{{ eqError }}</div>
+          </div>
+        </div>
+    
+        <div class="modal__foot">
+          <button class="btn btn--primary" type="button" [disabled]="eqBusy()" (click)="upsertEquationFromEditor()">
+            {{ eqEditingTarget ? "Update" : "Insert" }}
+          </button>
+          <button class="btn" type="button" [disabled]="eqBusy()" (click)="closeEquationEditor()">Cancel</button>
+        </div>
+      </div>
+    </p-dialog>
+    
+  </div>
+  
+}
