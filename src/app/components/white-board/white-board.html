@@ -1,4 +1,4 @@
-<div class="flex flex-col h-full w-full">
+<div class="flex flex-col h-[calc(100vh-130px)] overflow-hidden w-full">
     <!-- Header -->
     <div class="flex-shrink-0">
         <app-whiteboard-top-bar [tabs]="tabs()" (closeEvent)="onCloseWhiteboard()"
@@ -92,71 +92,6 @@
 
                     </div>
                 </div>
-            </div>
-
-            <!-- Mobile Layout -->
-            <div class="sm:hidden">
-                <!-- Top Row: Essential Tools & Exit -->
-                <app-whiteboard-mobile-toolbar [currentTool]="currentTool()"
-                    (toolSelectEvent)="onToolSelect($event)" (imageUploadEvent)="onImageUpload($event)"
-                    (closeEvent)="_onExitWhiteboard()">
-                </app-whiteboard-mobile-toolbar>
-
-                <!-- Mobile Collapsible Sections -->
-                <!-- Color & Size Section -->
-                <app-whiteboard-mobile-collapsible title="Color &amp; Size" icon="fas fa-palette"
-                    iconColor="blue">
-                    <app-whiteboard-color-size-picker [currentColor]="currentColor()"
-                        [currentLineWidth]="currentLineWidth()"
-                        (colorChangeEvent)="onColorChange($event)"
-                        (lineWidthChangeEvent)="onLineWidthChange($event)">
-                    </app-whiteboard-color-size-picker>
-                </app-whiteboard-mobile-collapsible>
-
-                <!-- Style Options Section -->
-                <app-whiteboard-mobile-collapsible title="Style Options" icon="fas fa-sliders-h"
-                    iconColor="purple">
-                    <div class="space-y-3.5">
-                        <app-whiteboard-style-options [fillShapes]="fillShapes()" [lineStyle]="lineStyle()"
-                            (toggleFillEvent)="onToggleFill()" (lineStyleChangeEvent)="onLineStyleChange($event)">
-                        </app-whiteboard-style-options>
-                        <app-whiteboard-canvas-options [gridVisible]="gridVisible()"
-                            (backgroundColorChangeEvent)="onBackgroundColorChange($event)"
-                            (toggleGridEvent)="onToggleGridVisible()">
-                        </app-whiteboard-canvas-options>
-                    </div>
-                </app-whiteboard-mobile-collapsible>
-
-                <!-- Zoom Controls Section -->
-                <app-whiteboard-mobile-collapsible title="Zoom Controls" icon="fas fa-search-plus"
-                    iconColor="green">
-                    <app-whiteboard-zoom-controls [zoomLevel]="zoomLevel()" (zoomInEvent)="onZoomIn()"
-                        (zoomOutEvent)="onZoomOut()" (zoomResetEvent)="onZoomReset()">
-                    </app-whiteboard-zoom-controls>
-                </app-whiteboard-mobile-collapsible>
-
-                <!-- Actions Section -->
-                <app-whiteboard-mobile-collapsible title="History &amp; Actions" icon="fas fa-history"
-                    iconColor="orange">
-                    <div class="flex items-center gap-2.5">
-                        <app-whiteboard-undo-redo (undoEvent)="onUndo()" (redoEvent)="onRedo()">
-                        </app-whiteboard-undo-redo>
-                        <button id="clearBtnMobile" (click)="onClear()"
-                            class="flex-1 px-4 py-3.5 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl"
-                            title="Clear Canvas">
-                            <i class="fas fa-trash"></i>
-                            <span class="text-xs font-bold">Clear</span>
-                        </button>
-                    </div>
-                </app-whiteboard-mobile-collapsible>
-
-                <!-- Save & Export Section -->
-                <app-whiteboard-mobile-collapsible title="Save &amp; Export" icon="fas fa-download"
-                    iconColor="indigo">
-                    <app-whiteboard-action-buttons (clearEvent)="onClear()" (saveEvent)="onSaveWhiteboard()"
-                        (exportPDFEvent)="onExportPDF()">
-                    </app-whiteboard-action-buttons>
-                </app-whiteboard-mobile-collapsible>
             </div>
         </div>
         <div>

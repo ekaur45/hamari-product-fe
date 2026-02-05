@@ -12,11 +12,11 @@ import { FormsModule } from "@angular/forms";
 export class WhiteboardTopBar {
     tabs = input<('pen' | 'screen-sharing')[]>([]);
     showAddTabDialog = signal<boolean>(false);
-    
+
     newTabName = signal<string>('');
     
     closeEvent = output<void>();
-    addTabEvent = output<string>();
+    addTabEvent = output<'pen' | 'screen-sharing'>();
     
     onClose(): void {
         this.closeEvent.emit();
@@ -29,7 +29,7 @@ export class WhiteboardTopBar {
     onAddTab(): void {
         const name = this.newTabName();
         if (name && name.trim()) {
-            this.addTabEvent.emit(name.trim());
+            this.addTabEvent.emit(name.trim() as 'pen' | 'screen-sharing');
             this.newTabName.set('');
             this.showAddTabDialog.set(false);
         }
