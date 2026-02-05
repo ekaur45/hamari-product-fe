@@ -22,8 +22,10 @@ export class WhiteboardDrawingTools {
         { label: 'Eraser', icon: 'fas fa-eraser', command: () => this.selectTool('eraserTool') },
         { label: 'Rectangle', icon: 'fas fa-square', command: () => this.selectTool('shapeTool') },
         { label: 'Circle', icon: 'far fa-circle', command: () => this.selectTool('circleTool') },
-        { label: 'Arrow', icon: 'fas fa-arrow-right', command: () => this.selectTool('arrowTool') },
+        { label: 'Oval', icon: 'far fa-circle', command: () => this.selectTool('ovalTool') },
+        { label: 'Triangle', icon: 'fas fa-play', command: () => this.selectTool('triangleTool') },
         { label: 'Line', icon: 'fas fa-minus', command: () => this.selectTool('lineTool') },
+        { label: 'Arrow', icon: 'fas fa-arrow-right', command: () => this.selectTool('arrowTool') },
     ];
     
     selectTool(toolId: string): void {

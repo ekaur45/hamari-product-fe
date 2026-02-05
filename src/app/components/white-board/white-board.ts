@@ -325,27 +325,35 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             const tool = this.currentTool();
             if (!this.isShapeTool(tool)) return;
 
-            const pointer = this.fabricCanvas.getPointer(opt.e);
+            const pointer = this.getPointer(opt);
+            // Store the start point - this will NOT change during mouse move
             this.isDrawingShape = true;
             this.startPoint = { x: pointer.x, y: pointer.y };
 
+            // Create shape at the start point
             this.drawingObject = this.createShape(tool, pointer.x, pointer.y);
             if (this.drawingObject) {
                 this.fabricCanvas.add(this.drawingObject);
+                this.fabricCanvas.requestRenderAll();
             }
         });
 
         this.fabricCanvas.on('mouse:move', (opt: any) => {
             if (!this.isDrawingShape || !this.drawingObject) return;
 
-            const pointer = this.fabricCanvas.getPointer(opt.e);
+            // Get current mouse position - startPoint stays fixed!
+            const pointer = this.getPointer(opt);
             const tool = this.currentTool();
+            
+            // Update shape from fixed startPoint to current pointer position
             this.updateShape(this.drawingObject, tool, this.startPoint, pointer);
             this.drawingObject.setCoords();
             this.fabricCanvas.requestRenderAll();
         });
 
-        this.fabricCanvas.on('mouse:up', () => {
+        this.fabricCanvas.on('mouse:up', (opt: any) => {
+            if (!this.isDrawingShape) return;
+            
             if (this.drawingObject) {
                 // Make shape selectable after drawing
                 this.drawingObject.selectable = true;
@@ -360,6 +368,315 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     onCloseWhiteboard(): void {
     }
     onAddTab(tab: 'pen' | 'screen-sharing'): void {
+    }
+
+    /**
+     * Get pointer coordinates from Fabric.js event
+     * Uses absolutePointer for canvas coordinates (what shapes need)
+     */
+    private getPointer(opt: any): { x: number; y: number } {
+        if (!this.fabricCanvas || !opt.e) {
+            return { x: 0, y: 0 };
+        }
+
+        // Fabric.js v6: absolutePointer gives canvas coordinates (what we need for shapes)
+        // This accounts for zoom, pan, and canvas transforms
+        if (opt.absolutePointer) {
+            return { x: opt.absolutePointer.x, y: opt.absolutePointer.y };
+        }
+
+        // Try to use canvas's getPointer method (works with npm package)
+        try {
+            const canvas = this.fabricCanvas as any;
+            if (canvas.getPointer) {
+                const pointer = canvas.getPointer(opt.e);
+                if (pointer) {
+                    return pointer;
+                }
+            }
+        } catch (e) {
+            // Continue to fallback
+        }
+
+        // Fallback: Use event object's pointer (viewport coordinates)
+        if (opt.pointer) {
+            return { x: opt.pointer.x, y: opt.pointer.y };
+        }
+
+        // Last resort: Calculate from mouse event and canvas bounds
+        if (this.whiteboardCanvas?.nativeElement) {
+            const canvasEl = this.whiteboardCanvas.nativeElement;
+            const rect = canvasEl.getBoundingClientRect();
+            const zoom = this.fabricCanvas.getZoom() || 1;
+            const vpt = this.fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+            
+            // Calculate pointer accounting for zoom and pan
+            const x = (opt.e.clientX - rect.left - vpt[4]) / zoom;
+            const y = (opt.e.clientY - rect.top - vpt[5]) / zoom;
+            
+            return { x, y };
+        }
+        
+        return { x: 0, y: 0 };
+    }
+
+    /**
+     * Check if tool is a shape tool
+     */
+    private isShapeTool(tool: string): boolean {
+        return ['rectangle', 'circle', 'oval', 'triangle', 'line', 'arrow'].includes(tool);
+    }
+
+    /**
+     * Create initial shape object
+     */
+    private createShape(tool: string, x: number, y: number): any {
+        switch (tool) {
+            case 'rectangle':
+                return this.makeRectangle(x, y);
+            case 'circle':
+                return this.makeCircle(x, y);
+            case 'oval':
+                return this.makeOval(x, y);
+            case 'triangle':
+                return this.makeTriangle(x, y);
+            case 'line':
+                return this.makeLine(x, y, x, y);
+            case 'arrow':
+                return this.makeArrow(x, y, x, y);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Update shape during mouse move
+     */
+    private updateShape(obj: any, tool: string, start: { x: number; y: number }, end: { x: number; y: number }): void {
+        const x0 = start.x;
+        const y0 = start.y;
+        const x1 = end.x;
+        const y1 = end.y;
+
+        switch (tool) {
+            case 'rectangle':
+                // x0, y0 is the fixed start point (mouse down position)
+                // x1, y1 is the current mouse position
+                // Calculate rectangle from top-left to bottom-right
+                const left = Math.min(x0, x1);
+                const top = Math.min(y0, y1);
+                const width = Math.abs(x1 - x0);
+                const height = Math.abs(y1 - y0);
+                // Ensure minimum size
+                obj.set({ 
+                    left, 
+                    top, 
+                    width: Math.max(1, width), 
+                    height: Math.max(1, height),
+                    originX: 'left',
+                    originY: 'top'
+                });
+                break;
+            case 'circle':
+                // Circle: center is midpoint between start and current, radius is half the distance
+                const distance = Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
+                const radius = Math.max(1, distance / 2);
+                const centerX = (x0 + x1) / 2;
+                const centerY = (y0 + y1) / 2;
+                obj.set({ 
+                    left: centerX, 
+                    top: centerY, 
+                    originX: 'center', 
+                    originY: 'center', 
+                    radius: Math.max(1, radius)
+                });
+                break;
+            case 'oval':
+                // Oval: center is midpoint, radius grows from center
+                const rx = Math.max(1, Math.abs(x1 - x0) / 2);
+                const ry = Math.max(1, Math.abs(y1 - y0) / 2);
+                const cx = (x0 + x1) / 2;
+                const cy = (y0 + y1) / 2;
+                obj.set({ 
+                    left: cx, 
+                    top: cy, 
+                    originX: 'center', 
+                    originY: 'center', 
+                    rx: Math.max(1, rx), 
+                    ry: Math.max(1, ry)
+                });
+                break;
+            case 'triangle':
+                // Triangle: from top-left corner, grows to bottom-right
+                const triLeft = Math.min(x0, x1);
+                const triTop = Math.min(y0, y1);
+                const triWidth = Math.abs(x1 - x0);
+                const triHeight = Math.abs(y1 - y0);
+                obj.set({ 
+                    left: triLeft, 
+                    top: triTop, 
+                    width: Math.max(1, triWidth), 
+                    height: Math.max(1, triHeight),
+                    originX: 'left',
+                    originY: 'top'
+                });
+                break;
+            case 'line':
+                // Line: start point (x0, y0) stays fixed, end point (x2, y2) moves to current position (x1, y1)
+                // Line is created with [x1, y1, x2, y2] where x1,y1 is start and x2,y2 is end
+                obj.set({ x2: x1, y2: y1 });
+                break;
+            case 'arrow':
+                // Arrow: start point (x0, y0) stays fixed, end point moves to current position (x1, y1)
+                // Recreate arrow path with new endpoint - remove old and add new
+                const dx = x1 - x0;
+                const dy = y1 - y0;
+                const angle = Math.atan2(dy, dx);
+                const arrowLength = 20;
+                const arrowX1 = x1 - arrowLength * Math.cos(angle - Math.PI / 6);
+                const arrowY1 = y1 - arrowLength * Math.sin(angle - Math.PI / 6);
+                const arrowX2 = x1 - arrowLength * Math.cos(angle + Math.PI / 6);
+                const arrowY2 = y1 - arrowLength * Math.sin(angle + Math.PI / 6);
+                const pathData = `M ${x0} ${y0} L ${x1} ${y1} M ${arrowX1} ${arrowY1} L ${x1} ${y1} L ${arrowX2} ${arrowY2}`;
+                // Recreate the path object
+                this.fabricCanvas.remove(obj);
+                const newArrow = new Path(pathData, {
+                    stroke: this.currentColor(),
+                    strokeWidth: this.currentLineWidth(),
+                    fill: '',
+                    selectable: false,
+                    evented: false,
+                    strokeUniform: true,
+                });
+                this.fabricCanvas.add(newArrow);
+                this.drawingObject = newArrow;
+                break;
+        }
+    }
+
+    /**
+     * Create rectangle shape
+     * Initial rectangle starts at the mouse down point with minimal size
+     */
+    private makeRectangle(x: number, y: number): any {
+        return new Rect({
+            left: x,
+            top: y,
+            width: 1,
+            height: 1,
+            originX: 'left',
+            originY: 'top',
+            fill: this.fillShapes() ? this.currentColor() : 'transparent',
+            stroke: this.currentColor(),
+            strokeWidth: this.currentLineWidth(),
+            selectable: false,
+            evented: false,
+            strokeUniform: true,
+        });
+    }
+
+    /**
+     * Create circle shape
+     * Circle starts at mouse down point (center), radius grows from center
+     */
+    private makeCircle(x: number, y: number): any {
+        return new Circle({
+            left: x,
+            top: y,
+            radius: 1,
+            originX: 'center',
+            originY: 'center',
+            fill: this.fillShapes() ? this.currentColor() : 'transparent',
+            stroke: this.currentColor(),
+            strokeWidth: this.currentLineWidth(),
+            selectable: false,
+            evented: false,
+            strokeUniform: true,
+        });
+    }
+
+    /**
+     * Create oval/ellipse shape
+     * Oval starts at mouse down point, center will be calculated during update
+     */
+    private makeOval(x: number, y: number): any {
+        return new Ellipse({
+            left: x,
+            top: y,
+            rx: 1,
+            ry: 1,
+            originX: 'center',
+            originY: 'center',
+            fill: this.fillShapes() ? this.currentColor() : 'transparent',
+            stroke: this.currentColor(),
+            strokeWidth: this.currentLineWidth(),
+            selectable: false,
+            evented: false,
+            strokeUniform: true,
+        });
+    }
+
+    /**
+     * Create triangle shape
+     * Triangle starts at mouse down point, grows from top-left corner
+     */
+    private makeTriangle(x: number, y: number): any {
+        return new Triangle({
+            left: x,
+            top: y,
+            width: 1,
+            height: 1,
+            originX: 'left',
+            originY: 'top',
+            fill: this.fillShapes() ? this.currentColor() : 'transparent',
+            stroke: this.currentColor(),
+            strokeWidth: this.currentLineWidth(),
+            selectable: false,
+            evented: false,
+            strokeUniform: true,
+        });
+    }
+
+    /**
+     * Create line shape
+     */
+    private makeLine(x1: number, y1: number, x2: number, y2: number): any {
+        return new Line([x1, y1, x2, y2], {
+            stroke: this.currentColor(),
+            strokeWidth: this.currentLineWidth(),
+            selectable: false,
+            evented: false,
+            strokeUniform: true,
+        });
+    }
+
+    /**
+     * Create arrow shape (line with arrowhead)
+     */
+    private makeArrow(x1: number, y1: number, x2: number, y2: number): any {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const angle = Math.atan2(dy, dx);
+        const arrowLength = 20;
+        const arrowWidth = 10;
+
+        // Calculate arrowhead points
+        const arrowX1 = x2 - arrowLength * Math.cos(angle - Math.PI / 6);
+        const arrowY1 = y2 - arrowLength * Math.sin(angle - Math.PI / 6);
+        const arrowX2 = x2 - arrowLength * Math.cos(angle + Math.PI / 6);
+        const arrowY2 = y2 - arrowLength * Math.sin(angle + Math.PI / 6);
+
+        // Create path for arrow (line + arrowhead)
+        const pathData = `M ${x1} ${y1} L ${x2} ${y2} M ${arrowX1} ${arrowY1} L ${x2} ${y2} L ${arrowX2} ${arrowY2}`;
+        
+        return new Path(pathData, {
+            stroke: this.currentColor(),
+            strokeWidth: this.currentLineWidth(),
+            fill: '',
+            selectable: false,
+            evented: false,
+            strokeUniform: true,
+        });
     }
 
     onTemplateSelect(templateId: string): void {
@@ -550,6 +867,11 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         this.fabricCanvas.selection = tool === 'select';
         this.fabricCanvas.defaultCursor = tool === 'select' ? 'default' : 'crosshair';
 
+        // For shape tools, disable selection to prevent interference
+        if (this.isShapeTool(tool)) {
+            this.fabricCanvas.selection = false;
+        }
+
         // Modify ALL objects (like working version does)
         this.fabricCanvas.forEachObject((obj: any) => {
             obj.selectable = tool === 'select';
@@ -578,6 +900,8 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             // globalCompositeOperation will be set on path creation if needed
             this.fabricCanvas.freeDrawingBrush = eraser;
         }
+        // Shape tools (rectangle, circle, oval, triangle, line, arrow) are handled via mouse events
+        // No special configuration needed - they use isDrawingMode = false
     }
 
     /**
