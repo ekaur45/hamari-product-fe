@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, ElementRef, EventEmitter, OnDestroy, Output, signal, ViewChild, input, inject, NgZone, HostListener } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { Canvas, PencilBrush, Rect, Circle, Ellipse, Line, Triangle, Path } from 'fabric';
+import { Canvas, PencilBrush, Rect, Circle, Ellipse, Line, Triangle, Path, IText } from 'fabric';
 import { WhiteboardPage } from "./pages/whiteboard-pages";
 import { WhiteboardSelectTool } from "./tools/whiteboard-select-tool";
 import { WhiteboardStickyNotes } from "./tools/whiteboard-sticky-notes";
@@ -303,11 +303,33 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             if (!e.path) return;
             const tool = this.currentTool();
             
+            // Preserve original path properties before modifying
+            const originalStroke = e.path.stroke;
+            const originalStrokeWidth = e.path.strokeWidth;
+            
             // Only apply tool-specific properties that can't be set on the brush
             if (tool === 'highlighter') {
-                e.path.opacity = 0.3;
+                // Highlighter: set opacity but preserve original color
+                e.path.set({
+                    opacity: 0.3,
+                    stroke: originalStroke || this.currentColor(),
+                    strokeWidth: originalStrokeWidth
+                });
             } else if (tool === 'eraser') {
+                // Eraser: use destination-out to erase (make transparent)
+                // IMPORTANT: Set stroke to white FIRST, then apply composite operation
+                // This ensures the path doesn't show gray before the composite is applied
+                e.path.stroke = '#ffffff';
+                e.path.fill = '';
+                e.path.strokeWidth = originalStrokeWidth || this.currentLineWidth() * 2;
+                e.path.opacity = 1;
+                // Then apply the composite operation
                 e.path.globalCompositeOperation = 'destination-out';
+            } else if (tool === 'pen') {
+                // Pen: preserve original stroke color
+                if (originalStroke) {
+                    e.path.set({ stroke: originalStroke });
+                }
             }
             
             // Make paths non-selectable and non-evented (like working version)
@@ -320,9 +342,18 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             this.fabricCanvas.requestRenderAll();
         });
 
-        // Mouse events for shape drawing
+        // Mouse events for shape drawing and text
         this.fabricCanvas.on('mouse:down', (opt: any) => {
             const tool = this.currentTool();
+            
+            // Handle text tool
+            if (tool === 'text') {
+                const pointer = this.getPointer(opt);
+                this.addTextAt(pointer.x, pointer.y);
+                return;
+            }
+
+            // Handle shape tools
             if (!this.isShapeTool(tool)) return;
 
             const pointer = this.getPointer(opt);
@@ -425,6 +456,35 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
      */
     private isShapeTool(tool: string): boolean {
         return ['rectangle', 'circle', 'oval', 'triangle', 'line', 'arrow'].includes(tool);
+    }
+
+    /**
+     * Add text at specified position
+     * Based on the working test component implementation
+     */
+    private addTextAt(x: number, y: number): void {
+        if (!this.fabricCanvas) return;
+
+        const text = new IText('Text', {
+            left: x,
+            top: y,
+            fill: this.currentColor(),
+            fontSize: 28,
+            fontFamily: 'Segoe UI, system-ui, sans-serif',
+            editable: true,
+        });
+
+        this.fabricCanvas.add(text);
+        this.fabricCanvas.setActiveObject(text);
+        this.fabricCanvas.requestRenderAll();
+        
+        // Switch back to select tool after adding text
+        this.selectTool('selectTool');
+        
+        // Start editing immediately
+        setTimeout(() => {
+            text.enterEditing();
+        }, 0);
     }
 
     /**
@@ -896,8 +956,8 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             this.fabricCanvas.isDrawingMode = true;
             const eraser = new PencilBrush(this.fabricCanvas);
             eraser.width = this.currentLineWidth() * 2;
-            eraser.color = '#ffffff';
-            // globalCompositeOperation will be set on path creation if needed
+            eraser.color = '#ffffff'; // White color for eraser
+            // Note: globalCompositeOperation will be set on path creation
             this.fabricCanvas.freeDrawingBrush = eraser;
         }
         // Shape tools (rectangle, circle, oval, triangle, line, arrow) are handled via mouse events

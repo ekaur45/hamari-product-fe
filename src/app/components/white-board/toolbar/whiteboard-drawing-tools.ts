@@ -26,6 +26,7 @@ export class WhiteboardDrawingTools {
         { label: 'Triangle', icon: 'fas fa-play', command: () => this.selectTool('triangleTool') },
         { label: 'Line', icon: 'fas fa-minus', command: () => this.selectTool('lineTool') },
         { label: 'Arrow', icon: 'fas fa-arrow-right', command: () => this.selectTool('arrowTool') },
+        { label: 'Text', icon: 'fas fa-font', command: () => this.selectTool('textTool') },
     ];
     
     selectTool(toolId: string): void {
