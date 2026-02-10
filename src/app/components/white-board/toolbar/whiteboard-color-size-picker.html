@@ -1,38 +1,27 @@
-<p-dialog [(visible)]="showDialog" [modal]="true" [style]="{width: '350px'}" [closable]="true"
-    (onHide)="closeDialog()">
-    <ng-template pTemplate="header">
-        <h3 class="text-lg font-semibold">Color & Size</h3>
-    </ng-template>
-    <div class="flex flex-col gap-4">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
-            <div class="flex items-center gap-2">
-                <input type="color" [value]="currentColor()"
-                    (input)="onColorChange($any($event.target).value)"
-                    class="w-12 h-12 rounded-lg border-2 border-gray-200 cursor-pointer">
-                <div class="flex flex-wrap gap-2">
-                    @for(color of ['#000000', '#ef4444', '#3b82f6', '#10b981', '#eab308', '#a855f7', '#ec4899']; track color) {
-                        <button (click)="onColorChange(color)"
-                            [class.ring-2]="currentColor() === color"
-                            [class.ring-blue-500]="currentColor() === color"
-                            class="w-8 h-8 rounded-lg border-2 border-gray-200 transition-all"
-                            [style.background-color]="color"
-                            [title]="color">
-                        </button>
-                    }
-                </div>
-            </div>
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Size: {{currentLineWidth()}}px</label>
-            <input type="range" [value]="currentLineWidth()"
-                (input)="onLineWidthChange(+$any($event.target).value)" min="1" max="30"
-                class="w-full accent-blue-500">
+<div class="flex items-center gap-3 px-3 py-2 border border-gray-200 rounded-lg bg-white">
+    <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Color:</label>
+        <input type="color" [value]="currentColor()"
+            (input)="onColorChange($any($event.target).value)"
+            class="w-8 h-8 rounded border-2 border-gray-200 cursor-pointer">
+        <div class="flex flex-wrap gap-1.5">
+            @for(color of ['#000000', '#ef4444', '#3b82f6', '#10b981', '#eab308', '#a855f7', '#ec4899']; track color) {
+                <button (click)="onColorChange(color)"
+                    [class.ring-2]="currentColor() === color"
+                    [class.ring-blue-500]="currentColor() === color"
+                    class="w-6 h-6 rounded border border-gray-200 transition-all hover:scale-110"
+                    [style.background-color]="color"
+                    [title]="color">
+                </button>
+            }
         </div>
     </div>
-</p-dialog>
-
-<button (click)="openDialog()" class="p-3 rounded-xl tool-btn transition-all duration-200 hover:scale-105 active:scale-95" title="Color & Size">
-    <i class="fas fa-palette text-base"></i>
-</button>
+    <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Size:</label>
+        <span class="text-sm text-gray-600 min-w-[2rem]">{{currentLineWidth()}}px</span>
+        <input type="range" [value]="currentLineWidth()"
+            (input)="onLineWidthChange(+$any($event.target).value)" min="1" max="30"
+            class="w-24 accent-blue-500">
+    </div>
+</div>
 

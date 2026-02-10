@@ -4,6 +4,12 @@
         <app-whiteboard-top-bar [tabs]="tabs()" (closeEvent)="onCloseWhiteboard()"
             (addTabEvent)="onAddTab($event)">
             <div class="flex flex-wrap items-center gap-2.5">
+                <app-whiteboard-color-size-picker [currentColor]="currentColor()"
+                    [currentLineWidth]="currentLineWidth()"
+                    (colorChangeEvent)="onColorChange($event)"
+                    (lineWidthChangeEvent)="onLineWidthChange($event)">
+                </app-whiteboard-color-size-picker>
+
                 <app-whiteboard-templates [templates]="templates()"
                     (templateSelectEvent)="onTemplateSelect($event)">
                 </app-whiteboard-templates>
@@ -62,13 +68,6 @@
                         <app-whiteboard-style-options [fillShapes]="fillShapes()" [lineStyle]="lineStyle()"
                             (toggleFillEvent)="onToggleFill()" (lineStyleChangeEvent)="onLineStyleChange($event)">
                         </app-whiteboard-style-options>
-
-                        <!-- Color & Size -->
-                        <app-whiteboard-color-size-picker [currentColor]="currentColor()"
-                            [currentLineWidth]="currentLineWidth()"
-                            (colorChangeEvent)="onColorChange($event)"
-                            (lineWidthChangeEvent)="onLineWidthChange($event)">
-                        </app-whiteboard-color-size-picker>
 
                         <!-- Educational Tools Group -->
                     

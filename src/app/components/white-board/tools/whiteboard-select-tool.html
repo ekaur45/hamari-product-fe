@@ -1,7 +1,7 @@
 <p-menu [model]="menuItems()" [popup]="true" [appendTo]="'body'"
     [baseZIndex]="1000" #selectMenu></p-menu>
 
-<button (click)="selectMenu.toggle($event)" 
+<button (click)="this.activateEvent.emit()"
     [class.bg-blue-50]="isActive()"
     [class.text-blue-600]="isActive()"
     class="p-3 rounded-xl tool-btn transition-all duration-200 hover:scale-105 active:scale-95" 
