@@ -4,7 +4,8 @@
         <app-whiteboard-top-bar [tabs]="tabs()" (closeEvent)="onCloseWhiteboard()" (addTabEvent)="onAddTab($event)">
             <div class="flex flex-wrap items-center gap-2.5">
                 <app-whiteboard-zoom-controls [zoomLevel]="zoomLevel()" (zoomInEvent)="onZoomIn()"
-                    (zoomOutEvent)="onZoomOut()" (zoomResetEvent)="onZoomReset()">
+                    (zoomOutEvent)="onZoomOut()" (zoomResetEvent)="onZoomReset()"
+                    (centerContentEvent)="centerCanvasContent()">
                 </app-whiteboard-zoom-controls>
                 <app-whiteboard-color-size-picker [currentColor]="currentColor()"
                     [currentLineWidth]="currentLineWidth()" (colorChangeEvent)="onColorChange($event)"

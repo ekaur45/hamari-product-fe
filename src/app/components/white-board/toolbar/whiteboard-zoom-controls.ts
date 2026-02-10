@@ -13,6 +13,7 @@ export class WhiteboardZoomControls {
     zoomInEvent = output<void>();
     zoomOutEvent = output<void>();
     zoomResetEvent = output<void>();
+    centerContentEvent = output<void>();
     
     onZoomIn(): void {
         this.zoomInEvent.emit();
@@ -24,6 +25,10 @@ export class WhiteboardZoomControls {
     
     onZoomReset(): void {
         this.zoomResetEvent.emit();
+    }
+    
+    onCenterContent(): void {
+        this.centerContentEvent.emit();
     }
     
     getZoomLevel(): string {

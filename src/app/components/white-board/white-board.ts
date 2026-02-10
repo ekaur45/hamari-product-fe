@@ -2009,6 +2009,70 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         canvas.requestRenderAll();
     }
 
+    centerCanvasContent(): void {
+        if (!this.fabricCanvas || !this.canvasContainer?.nativeElement) return;
+        
+        const canvas = this.fabricCanvas;
+        const container = this.canvasContainer.nativeElement;
+        const objects = canvas.getObjects();
+        
+        if (objects.length === 0) {
+            // No objects, just center the canvas
+            const containerRect = container.getBoundingClientRect();
+            const canvasWidth = canvas.getWidth();
+            const canvasHeight = canvas.getHeight();
+            
+            const centerX = (containerRect.width - canvasWidth) / 2;
+            const centerY = (containerRect.height - canvasHeight) / 2;
+            
+            const vpt = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+            const zoom = vpt[0] || 1;
+            
+            const newVpt = [zoom, 0, 0, zoom, centerX, centerY];
+            canvas.setViewportTransform(newVpt);
+            canvas.calcOffset();
+            canvas.requestRenderAll();
+            return;
+        }
+        
+        // Calculate bounding box of all objects
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        
+        objects.forEach((obj: any) => {
+            const bounds = obj.getBoundingRect();
+            minX = Math.min(minX, bounds.left);
+            minY = Math.min(minY, bounds.top);
+            maxX = Math.max(maxX, bounds.left + bounds.width);
+            maxY = Math.max(maxY, bounds.top + bounds.height);
+        });
+        
+        const contentWidth = maxX - minX;
+        const contentHeight = maxY - minY;
+        const contentCenterX = minX + contentWidth / 2;
+        const contentCenterY = minY + contentHeight / 2;
+        
+        // Get container dimensions
+        const containerRect = container.getBoundingClientRect();
+        const containerWidth = containerRect.width;
+        const containerHeight = containerRect.height;
+        const viewportCenterX = containerWidth / 2;
+        const viewportCenterY = containerHeight / 2;
+        
+        // Get current zoom
+        const vpt = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+        const zoom = vpt[0] || 1;
+        
+        // Calculate translation to center the content
+        const newTranslateX = viewportCenterX - contentCenterX * zoom;
+        const newTranslateY = viewportCenterY - contentCenterY * zoom;
+        
+        // Apply new viewport transform
+        const newVpt = [zoom, 0, 0, zoom, newTranslateX, newTranslateY];
+        canvas.setViewportTransform(newVpt);
+        canvas.calcOffset();
+        canvas.requestRenderAll();
+    }
+
     /**
      * Set zoom level on Fabric.js canvas with proper viewport transform
      */
@@ -2033,27 +2097,36 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             return;
         }
         
-        // Get container dimensions
+        // Get container dimensions and scroll position
         const containerRect = container.getBoundingClientRect();
         const containerWidth = containerRect.width;
         const containerHeight = containerRect.height;
+        const scrollLeft = container.scrollLeft || 0;
+        const scrollTop = container.scrollTop || 0;
         
-        // Get the center of the visible viewport (relative to container)
-        const viewportCenterX = containerWidth / 2;
-        const viewportCenterY = containerHeight / 2;
+        // Get the center of the visible viewport (accounting for scroll)
+        // This is the point in the container that we want to keep centered
+        const viewportCenterX = scrollLeft + containerWidth / 2;
+        const viewportCenterY = scrollTop + containerHeight / 2;
         
-        // Get canvas element position
+        // Get canvas element position relative to container
         const canvasEl = canvas.getElement();
         const canvasRect = canvasEl.getBoundingClientRect();
+        const canvasOffsetX = canvasRect.left - containerRect.left;
+        const canvasOffsetY = canvasRect.top - containerRect.top;
         
         // Calculate the point in canvas coordinates that corresponds to the viewport center
-        // Account for current zoom and translation
-        const canvasPointX = (viewportCenterX - vpt[4]) / currentZoom;
-        const canvasPointY = (viewportCenterY - vpt[5]) / currentZoom;
+        // First, get the point relative to the canvas element
+        const relativeX = viewportCenterX - canvasOffsetX;
+        const relativeY = viewportCenterY - canvasOffsetY;
+        
+        // Convert to canvas coordinate space (accounting for current zoom and pan)
+        const canvasPointX = (relativeX - vpt[4]) / currentZoom;
+        const canvasPointY = (relativeY - vpt[5]) / currentZoom;
         
         // Calculate new translation to keep the same canvas point at the viewport center
-        const newTranslateX = viewportCenterX - canvasPointX * zoom;
-        const newTranslateY = viewportCenterY - canvasPointY * zoom;
+        const newTranslateX = relativeX - canvasPointX * zoom;
+        const newTranslateY = relativeY - canvasPointY * zoom;
         
         // Create new viewport transform
         const newVpt = [zoom, 0, 0, zoom, newTranslateX, newTranslateY];
