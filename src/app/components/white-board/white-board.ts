@@ -82,6 +82,12 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     equationError = signal<string>('');
     equationPosition = signal<{ x: number; y: number } | null>(null);
     editingEquation = signal<any>(null); // The equation object being edited
+    
+    // Graph function plotting state
+    showGraphFunctionDialog = signal<boolean>(false);
+    graphFunction = signal<string>('x');
+    graphFunctionError = signal<string>('');
+    selectedGraph = signal<any>(null); // The graph object to plot on
 
     // Fabric.js and MathJax instances
     private fabricCanvas: any = null;
@@ -93,6 +99,9 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     private isDrawingShape = false;
     private drawingObject: any = null;
     private startPoint: { x: number; y: number } = { x: 0, y: 0 };
+    private graphClickStartPoint: { x: number; y: number } | null = null;
+    private graphClickTarget: any = null;
+    private graphInitialState: { left: number; top: number; scaleX: number; scaleY: number; angle: number } | null = null;
 
     constructor(private ngZone: NgZone) {}
 
@@ -285,10 +294,40 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         }
 
         // Selection events
-        this.fabricCanvas.on('selection:created', () => {
+        this.fabricCanvas.on('selection:created', (e: any) => {
+            // Prevent function paths from being selected
+            const activeObject = this.fabricCanvas.getActiveObject();
+            if (activeObject && (activeObject as any).isGraphFunction) {
+                this.fabricCanvas.discardActiveObject();
+                this.fabricCanvas.requestRenderAll();
+                return;
+            }
+            
             this.ngZone.run(() => {
                 this.hasSelection.set(true);
             });
+        });
+        
+        // Prevent function paths from being moved
+        this.fabricCanvas.on('object:modified', (e: any) => {
+            const obj = e.target;
+            if (obj && (obj as any).isGraphFunction) {
+                // If a function path was somehow moved, reset it to its graph position
+                const parentGraph = (obj as any).parentGraph;
+                if (parentGraph) {
+                    obj.set({
+                        left: parentGraph.left,
+                        top: parentGraph.top,
+                        angle: parentGraph.angle || 0,
+                        scaleX: parentGraph.scaleX || 1,
+                        scaleY: parentGraph.scaleY || 1,
+                        selectable: false,
+                        evented: false,
+                    });
+                    obj.setCoords();
+                    this.fabricCanvas.requestRenderAll();
+                }
+            }
         });
 
         this.fabricCanvas.on('selection:updated', () => {
@@ -303,8 +342,8 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             });
         });
 
-        // Object modification events
-        this.fabricCanvas.on('object:modified', () => {
+        // Object modification events (function path protection handled above at line 309)
+        this.fabricCanvas.on('object:modified', (e: any) => {
             this.ngZone.run(() => {
                 // Handle object modification
             });
@@ -422,12 +461,31 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
                 return;
             }
 
-            // Handle graph tool - create coordinate plane
+            // Handle graph tool - create coordinate plane or plot function
             if (mathTool === 'graph') {
-                // Check if user clicked on an existing object (don't create new graph if moving existing one)
                 const target = opt.target;
+                
+                // If clicking on existing graph, track the click to detect if it's a simple click or drag
+                if (target && target !== this.fabricCanvas && (target as any).isGraph) {
+                    const pointer = this.getPointer(opt);
+                    this.graphClickStartPoint = { x: pointer.x, y: pointer.y };
+                    this.graphClickTarget = target;
+                    // Store initial state to detect if graph was moved/resized
+                    this.graphInitialState = {
+                        left: target.left,
+                        top: target.top,
+                        scaleX: target.scaleX || 1,
+                        scaleY: target.scaleY || 1,
+                        angle: target.angle || 0
+                    };
+                    // Don't open dialog yet - wait to see if user drags
+                    // Let Fabric.js handle the selection/movement normally
+                    return;
+                }
+                
+                // Otherwise, create new coordinate plane
                 if (target && target !== this.fabricCanvas) {
-                    // User clicked on an existing object, let it be handled normally
+                    // User clicked on other object, let it be handled normally
                     return;
                 }
                 
@@ -497,6 +555,39 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         });
 
         this.fabricCanvas.on('mouse:up', (opt: any) => {
+            // Handle graph click for function dialog (check before isDrawingShape)
+            if (this.graphClickStartPoint && this.graphClickTarget && this.graphInitialState) {
+                const mathTool = this.activeMathTool();
+                if (mathTool === 'graph') {
+                    const pointer = this.getPointer(opt);
+                    const distance = Math.sqrt(
+                        Math.pow(pointer.x - this.graphClickStartPoint.x, 2) + 
+                        Math.pow(pointer.y - this.graphClickStartPoint.y, 2)
+                    );
+                    // Only open dialog if it was a simple click (moved less than 5 pixels)
+                    // and the graph wasn't modified (moved/resized)
+                    const target = opt.target;
+                    if (distance < 5 && target && (target as any).isGraph && target === this.graphClickTarget) {
+                        // Check if graph was actually moved/resized
+                        const wasModified = 
+                            Math.abs(target.left - this.graphInitialState.left) > 1 ||
+                            Math.abs(target.top - this.graphInitialState.top) > 1 ||
+                            Math.abs((target.scaleX || 1) - this.graphInitialState.scaleX) > 0.01 ||
+                            Math.abs((target.scaleY || 1) - this.graphInitialState.scaleY) > 0.01 ||
+                            Math.abs((target.angle || 0) - this.graphInitialState.angle) > 0.01;
+                        
+                        // Only open dialog if graph wasn't moved/resized
+                        if (!wasModified) {
+                            this.selectedGraph.set(target);
+                            this.openGraphFunctionDialog();
+                        }
+                    }
+                }
+                this.graphClickStartPoint = null;
+                this.graphClickTarget = null;
+                this.graphInitialState = null;
+            }
+            
             if (!this.isDrawingShape) return;
             
             if (this.drawingObject) {
@@ -507,6 +598,10 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
                     // For math tools, make it selectable and evented
                     this.drawingObject.selectable = true;
                     this.drawingObject.evented = true;
+                    // For graph, also enable moving
+                    if (mathTool === 'graph') {
+                        this.drawingObject.moveCursor = 'move';
+                    }
                 } else {
                     // For regular shapes
                     this.drawingObject.selectable = true;
@@ -1073,11 +1168,267 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             evented: false,
         });
         
+        // Mark as graph and store properties
+        (newGraphGroup as any).isGraph = true;
+        (newGraphGroup as any).graphCenterX = centerX;
+        (newGraphGroup as any).graphCenterY = centerY;
+        (newGraphGroup as any).graphWidth = width;
+        (newGraphGroup as any).graphHeight = height;
+        (newGraphGroup as any).gridSpacing = gridSpacing;
+        (newGraphGroup as any).functionPaths = []; // Store function paths associated with this graph
+        
         // Add new group to canvas
         this.fabricCanvas.add(newGraphGroup);
         
+        // Listen for graph movement to update function paths
+        const updateGraphFunctions = () => {
+            // Update graph center position
+            (newGraphGroup as any).graphCenterX = newGraphGroup.left;
+            (newGraphGroup as any).graphCenterY = newGraphGroup.top;
+            this.updateGraphFunctionPaths(newGraphGroup);
+        };
+        
+        newGraphGroup.on('modified', updateGraphFunctions);
+        newGraphGroup.on('moving', updateGraphFunctions);
+        newGraphGroup.on('scaling', updateGraphFunctions);
+        newGraphGroup.on('rotating', updateGraphFunctions);
+        
         // Update the drawing object reference
         this.drawingObject = newGraphGroup;
+    }
+
+    /**
+     * Update function paths when graph is moved
+     */
+    private updateGraphFunctionPaths(graph: any): void {
+        if (!graph || !graph.isGraph || !graph.functionPaths) return;
+        
+        const centerX = graph.left;
+        const centerY = graph.top;
+        const angle = graph.angle || 0;
+        const scaleX = graph.scaleX || 1;
+        const scaleY = graph.scaleY || 1;
+        
+        // Update position, rotation, and scale of all function paths to match graph
+        graph.functionPaths.forEach((funcPath: any) => {
+            if (funcPath && this.fabricCanvas.getObjects().includes(funcPath)) {
+                // Ensure function paths are not selectable
+                funcPath.set({
+                    left: centerX,
+                    top: centerY,
+                    angle: angle,
+                    scaleX: scaleX,
+                    scaleY: scaleY,
+                    selectable: false,
+                    evented: false,
+                });
+                funcPath.setCoords();
+            }
+        });
+        
+        this.fabricCanvas.requestRenderAll();
+    }
+
+    /**
+     * Open graph function plotting dialog
+     */
+    private openGraphFunctionDialog(): void {
+        this.graphFunction.set('x');
+        this.graphFunctionError.set('');
+        this.showGraphFunctionDialog.set(true);
+    }
+
+    /**
+     * Convert LaTeX math expression to JavaScript function string
+     */
+    private latexToJavaScriptFunction(latex: string): string {
+        let js = latex.trim();
+        
+        // Remove common LaTeX wrappers
+        js = js.replace(/^\$|\$$/g, ''); // Remove $ delimiters
+        js = js.replace(/^\\begin\{equation\}|\\end\{equation\}$/g, ''); // Remove equation environment
+        
+        // Replace common LaTeX functions with JavaScript equivalents
+        js = js.replace(/\\sin\(/g, 'Math.sin(');
+        js = js.replace(/\\cos\(/g, 'Math.cos(');
+        js = js.replace(/\\tan\(/g, 'Math.tan(');
+        js = js.replace(/\\ln\(/g, 'Math.log(');
+        js = js.replace(/\\log\(/g, 'Math.log10(');
+        js = js.replace(/\\sqrt\{([^}]+)\}/g, 'Math.sqrt($1)'); // \sqrt{x} -> Math.sqrt(x)
+        js = js.replace(/\\sqrt\[(\d+)\]\{([^}]+)\}/g, 'Math.pow($2, 1/$1)'); // \sqrt[n]{x} -> Math.pow(x, 1/n)
+        js = js.replace(/\\abs\{([^}]+)\}/g, 'Math.abs($1)'); // \abs{x} -> Math.abs(x)
+        js = js.replace(/\\abs\(([^)]+)\)/g, 'Math.abs($1)'); // \abs(x) -> Math.abs(x)
+        js = js.replace(/\|([^|]+)\|/g, 'Math.abs($1)'); // |x| -> Math.abs(x)
+        
+        // Handle exponents: x^2 -> Math.pow(x, 2) or x**2
+        // More complex: handle x^{2}, x^2, etc.
+        js = js.replace(/([a-zA-Z0-9_]+)\^\{([^}]+)\}/g, 'Math.pow($1, $2)'); // x^{2} -> Math.pow(x, 2)
+        js = js.replace(/([a-zA-Z0-9_]+)\^([0-9.]+)/g, 'Math.pow($1, $2)'); // x^2 -> Math.pow(x, 2)
+        js = js.replace(/e\^\{([^}]+)\}/g, 'Math.exp($1)'); // e^{x} -> Math.exp(x)
+        js = js.replace(/e\^([a-zA-Z0-9_]+)/g, 'Math.exp($1)'); // e^x -> Math.exp(x)
+        
+        // Handle fractions: \frac{a}{b} -> (a)/(b)
+        js = js.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)');
+        
+        // Handle multiplication: 2x -> 2*x, xy -> x*y (but be careful with functions)
+        js = js.replace(/(\d+)([a-zA-Z])/g, '$1*$2'); // 2x -> 2*x
+        js = js.replace(/([a-zA-Z])([a-zA-Z])/g, '$1*$2'); // xy -> x*y (but this might break some cases)
+        
+        // Handle pi and e constants
+        js = js.replace(/\\pi/g, 'Math.PI');
+        js = js.replace(/\\e\b/g, 'Math.E');
+        js = js.replace(/\bpi\b/g, 'Math.PI');
+        js = js.replace(/\be\b(?!\w)/g, 'Math.E'); // e not followed by word char
+        
+        return js;
+    }
+
+    /**
+     * Close graph function dialog
+     */
+    onCloseGraphFunctionDialog(): void {
+        this.showGraphFunctionDialog.set(false);
+        this.selectedGraph.set(null);
+    }
+
+    /**
+     * Plot function on graph
+     */
+    onPlotFunction(): void {
+        const latexStr = this.graphFunction().trim();
+        if (!latexStr) {
+            this.graphFunctionError.set('Please enter a function');
+            return;
+        }
+
+        const graph = this.selectedGraph();
+        if (!graph || !(graph as any).isGraph) {
+            this.graphFunctionError.set('No graph selected');
+            return;
+        }
+
+        try {
+            this.graphFunctionError.set('');
+            
+            // Convert LaTeX to JavaScript function
+            const functionStr = this.latexToJavaScriptFunction(latexStr);
+            
+            // Get graph properties
+            const centerX = (graph as any).graphCenterX || graph.left;
+            const centerY = (graph as any).graphCenterY || graph.top;
+            const width = (graph as any).graphWidth || 400;
+            const height = (graph as any).graphHeight || 400;
+            const gridSpacing = (graph as any).gridSpacing || 20;
+            
+            // Calculate bounds in graph coordinates (relative to graph center)
+            const leftBound = -width / 2;
+            const rightBound = width / 2;
+            const topBound = -height / 2;
+            const bottomBound = height / 2;
+            
+            // Create function to evaluate the expression
+            const evaluateFunction = (x: number): number => {
+                try {
+                    // Convert pixel x to graph coordinate
+                    const graphX = x / gridSpacing;
+                    // Replace x in the function string and evaluate
+                    // Handle both x and X, and ensure proper replacement (not in function names)
+                    let expr = functionStr;
+                    // Replace x variable (but not in function names like Math.exp)
+                    expr = expr.replace(/\bx\b/g, `(${graphX})`);
+                    // Use Function constructor for safe evaluation
+                    // Note: This is a simple implementation. For production, use a proper math parser
+                    const func = new Function('Math', `return ${expr}`);
+                    const result = func(Math);
+                    return -result * gridSpacing; // Negative because Y increases downward in canvas
+                } catch (e) {
+                    throw new Error(`Error evaluating function: ${e}`);
+                }
+            };
+            
+            // Generate points for the function
+            const points: { x: number; y: number }[] = [];
+            const step = 2; // Step size in pixels
+            let lastY: number | null = null;
+            
+            for (let x = leftBound; x <= rightBound; x += step) {
+                try {
+                    const y = evaluateFunction(x);
+                    // Check if point is within bounds
+                    if (y >= topBound && y <= bottomBound) {
+                        // Skip if there's a large jump (discontinuity)
+                        if (lastY !== null && Math.abs(y - lastY) > height) {
+                            continue;
+                        }
+                        points.push({ x, y });
+                        lastY = y;
+                    } else {
+                        lastY = null; // Reset on out of bounds
+                    }
+                } catch (e) {
+                    // Skip points that cause errors
+                    lastY = null;
+                }
+            }
+            
+            if (points.length < 2) {
+                this.graphFunctionError.set('Function did not produce enough points. Try examples like: x, 2x, x^2, \\sin(x), \\cos(x), e^x');
+                return;
+            }
+            
+            // Create path from points (coordinates are relative to graph center)
+            let pathData = `M ${points[0].x} ${points[0].y}`;
+            for (let i = 1; i < points.length; i++) {
+                pathData += ` L ${points[i].x} ${points[i].y}`;
+            }
+            
+            const functionPath = new Path(pathData, {
+                left: centerX,
+                top: centerY,
+                originX: 'center',
+                originY: 'center',
+                stroke: this.currentColor(),
+                strokeWidth: this.currentLineWidth(),
+                fill: '',
+                selectable: false, // Function paths should not be independently movable
+                evented: false, // Function paths should not be independently movable
+                strokeUniform: true,
+            });
+            
+            // Store function metadata
+            (functionPath as any).isGraphFunction = true;
+            (functionPath as any).functionExpression = functionStr;
+            (functionPath as any).parentGraph = graph;
+            
+            // Add function path to graph's functionPaths array
+            if (!graph.functionPaths) {
+                graph.functionPaths = [];
+            }
+            graph.functionPaths.push(functionPath);
+            
+            // Listen for graph movement to update this function path
+            const updateFunction = () => {
+                if (functionPath && graph && this.fabricCanvas.getObjects().includes(functionPath)) {
+                    functionPath.set({
+                        left: graph.left,
+                        top: graph.top,
+                    });
+                    functionPath.setCoords();
+                    this.fabricCanvas.requestRenderAll();
+                }
+            };
+            
+            // Update function path when graph moves
+            graph.on('modified', updateFunction);
+            graph.on('moving', updateFunction);
+            
+            // Add function path to canvas (positioned relative to graph center)
+            this.fabricCanvas.add(functionPath);
+            this.fabricCanvas.requestRenderAll();
+            this.onCloseGraphFunctionDialog();
+        } catch (error) {
+            this.graphFunctionError.set(error instanceof Error ? error.message : String(error));
+        }
     }
 
     /**
