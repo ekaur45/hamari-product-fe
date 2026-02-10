@@ -1,6 +1,8 @@
 import { Component, AfterViewInit, ElementRef, EventEmitter, OnDestroy, Output, signal, ViewChild, input, inject, NgZone, HostListener } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { Canvas, PencilBrush, Rect, Circle, Ellipse, Line, Triangle, Path, IText, Group } from 'fabric';
+import { FormsModule } from "@angular/forms";
+import { DialogModule } from "primeng/dialog";
+import { Canvas, PencilBrush, Rect, Circle, Ellipse, Line, Triangle, Path, IText, Group, util, Image } from 'fabric';
 import { WhiteboardPage } from "./pages/whiteboard-pages";
 import { WhiteboardSelectTool } from "./tools/whiteboard-select-tool";
 import { WhiteboardStickyNotes } from "./tools/whiteboard-sticky-notes";
@@ -24,6 +26,8 @@ declare const MathJax: any;
     styleUrls: ['./white-board.css'],
     imports: [
         CommonModule,
+        FormsModule,
+        DialogModule,
         WhiteboardSelectTool,
         WhiteboardStickyNotes,
         WhiteboardTemplates,
@@ -70,6 +74,14 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     activeUsers = signal<WhiteboardUser[]>([]);
     whiteboardOpen = signal<boolean>(true);
     activeMathTool = signal<'ruler' | 'protractor' | 'equation' | 'graph' | 'calculator' | null>(null);
+    
+    // Equation editor state
+    showEquationDialog = signal<boolean>(false);
+    equationLatex = signal<string>('\\frac{a}{b}');
+    equationSize = signal<number>(36);
+    equationError = signal<string>('');
+    equationPosition = signal<{ x: number; y: number } | null>(null);
+    editingEquation = signal<any>(null); // The equation object being edited
 
     // Fabric.js and MathJax instances
     private fabricCanvas: any = null;
@@ -375,6 +387,61 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
                 return;
             }
 
+            // Handle protractor tool - only if not clicking on an existing object
+            if (mathTool === 'protractor') {
+                // Check if user clicked on an existing object (don't create new protractor if moving existing one)
+                const target = opt.target;
+                if (target && target !== this.fabricCanvas) {
+                    // User clicked on an existing object, let it be handled normally
+                    return;
+                }
+                
+                const pointer = this.getPointer(opt);
+                this.isDrawingShape = true;
+                this.startPoint = { x: pointer.x, y: pointer.y };
+                this.drawingObject = this.createProtractor(pointer.x, pointer.y);
+                if (this.drawingObject) {
+                    this.fabricCanvas.add(this.drawingObject);
+                    this.fabricCanvas.requestRenderAll();
+                }
+                return;
+            }
+
+            // Handle equation tool - show dialog to enter equation
+            if (mathTool === 'equation') {
+                const target = opt.target;
+                // If clicking on existing equation, edit it
+                if (target && target !== this.fabricCanvas && (target as any).isEquation) {
+                    this.editEquation(target);
+                    return;
+                }
+                
+                // Otherwise, create new equation at click position
+                const pointer = this.getPointer(opt);
+                this.openEquationDialog(pointer.x, pointer.y);
+                return;
+            }
+
+            // Handle graph tool - create coordinate plane
+            if (mathTool === 'graph') {
+                // Check if user clicked on an existing object (don't create new graph if moving existing one)
+                const target = opt.target;
+                if (target && target !== this.fabricCanvas) {
+                    // User clicked on an existing object, let it be handled normally
+                    return;
+                }
+                
+                const pointer = this.getPointer(opt);
+                this.isDrawingShape = true;
+                this.startPoint = { x: pointer.x, y: pointer.y };
+                this.drawingObject = this.createGraph(pointer.x, pointer.y);
+                if (this.drawingObject) {
+                    this.fabricCanvas.add(this.drawingObject);
+                    this.fabricCanvas.requestRenderAll();
+                }
+                return;
+            }
+
             // Handle shape tools
             if (!this.isShapeTool(tool)) return;
 
@@ -406,6 +473,22 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
                 this.fabricCanvas.requestRenderAll();
                 return;
             }
+
+            // Handle protractor update
+            if (mathTool === 'protractor') {
+                this.updateProtractor(this.drawingObject, this.startPoint, pointer);
+                this.drawingObject.setCoords();
+                this.fabricCanvas.requestRenderAll();
+                return;
+            }
+
+            // Handle graph update
+            if (mathTool === 'graph') {
+                this.updateGraph(this.drawingObject, this.startPoint, pointer);
+                this.drawingObject.setCoords();
+                this.fabricCanvas.requestRenderAll();
+                return;
+            }
             
             // Update shape from fixed startPoint to current pointer position
             this.updateShape(this.drawingObject, tool, this.startPoint, pointer);
@@ -419,9 +502,9 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             if (this.drawingObject) {
                 const mathTool = this.activeMathTool();
                 
-                // Make shape/ruler selectable after drawing
-                if (mathTool === 'ruler') {
-                    // For ruler, make it selectable and evented
+                // Make shape/ruler/protractor/graph selectable after drawing
+                if (mathTool === 'ruler' || mathTool === 'protractor' || mathTool === 'graph') {
+                    // For math tools, make it selectable and evented
                     this.drawingObject.selectable = true;
                     this.drawingObject.evented = true;
                 } else {
@@ -631,6 +714,370 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         
         // Update the drawing object reference
         this.drawingObject = newRulerGroup;
+    }
+
+    /**
+     * Create protractor object
+     */
+    private createProtractor(x: number, y: number): any {
+        // Create a group that will contain the protractor semicircle and angle markings
+        const protractorGroup = new Group([], {
+            left: x,
+            top: y,
+            selectable: false,
+            evented: false,
+        });
+        
+        // Store initial position for updates
+        (protractorGroup as any).protractorStartX = x;
+        (protractorGroup as any).protractorStartY = y;
+        
+        return protractorGroup;
+    }
+
+    /**
+     * Update protractor during mouse move
+     */
+    private updateProtractor(protractorGroup: any, start: { x: number; y: number }, end: { x: number; y: number }): void {
+        const x0 = start.x;
+        const y0 = start.y;
+        const x1 = end.x;
+        const y1 = end.y;
+        
+        // Calculate distance (radius) and angle
+        const dx = x1 - x0;
+        const dy = y1 - y0;
+        const radius = Math.sqrt(dx * dx + dy * dy);
+        const baseAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+        
+        if (radius < 30) {
+            // Too small, don't draw
+            return;
+        }
+        
+        // Remove old group from canvas
+        this.fabricCanvas.remove(protractorGroup);
+        
+        const objects: any[] = [];
+        
+        // Create semicircle arc (180 degrees)
+        // Protractor is a semicircle from 0° to 180°
+        // We'll draw it as a path
+        const semicirclePath = this.createSemicirclePath(radius);
+        const semicircle = new Path(semicirclePath, {
+            stroke: this.currentColor(),
+            strokeWidth: 2,
+            fill: 'transparent',
+            selectable: false,
+            evented: false,
+        });
+        objects.push(semicircle);
+        
+        // Add angle markings every 10 degrees
+        const markLength = 8;
+        const majorMarkLength = 12;
+        const labelRadius = radius + 20;
+        
+        for (let angle = 0; angle <= 180; angle += 10) {
+            const isMajorMark = angle % 30 === 0 || angle === 45 || angle === 135;
+            const markLen = isMajorMark ? majorMarkLength : markLength;
+            const rad = (angle * Math.PI) / 180;
+            
+            // Calculate mark endpoints
+            const x1 = radius * Math.cos(rad);
+            const y1 = -radius * Math.sin(rad); // Negative because canvas Y increases downward
+            const x2 = (radius - markLen) * Math.cos(rad);
+            const y2 = -(radius - markLen) * Math.sin(rad);
+            
+            const mark = new Line([x1, y1, x2, y2], {
+                stroke: this.currentColor(),
+                strokeWidth: isMajorMark ? 2 : 1,
+                selectable: false,
+                evented: false,
+            });
+            objects.push(mark);
+            
+            // Add angle labels for major marks
+            if (isMajorMark) {
+                const labelX = labelRadius * Math.cos(rad);
+                const labelY = -labelRadius * Math.sin(rad);
+                const label = new IText(`${angle}°`, {
+                    left: labelX,
+                    top: labelY,
+                    fontSize: 11,
+                    fill: this.currentColor(),
+                    fontFamily: 'Arial, sans-serif',
+                    textAlign: 'center',
+                    originX: 'center',
+                    originY: 'center',
+                    selectable: false,
+                    evented: false,
+                });
+                objects.push(label);
+            }
+        }
+        
+        // Add center point indicator
+        const centerCircle = new Circle({
+            left: 0,
+            top: 0,
+            radius: 3,
+            fill: this.currentColor(),
+            stroke: this.currentColor(),
+            strokeWidth: 1,
+            originX: 'center',
+            originY: 'center',
+            selectable: false,
+            evented: false,
+        });
+        objects.push(centerCircle);
+        
+        // Create new group with all objects
+        const newProtractorGroup = new Group(objects, {
+            left: x0,
+            top: y0,
+            angle: baseAngle,
+            originX: 'center',
+            originY: 'center',
+            selectable: false,
+            evented: false,
+        });
+        
+        // Add new group to canvas
+        this.fabricCanvas.add(newProtractorGroup);
+        
+        // Update the drawing object reference
+        this.drawingObject = newProtractorGroup;
+    }
+
+    /**
+     * Create SVG path for semicircle (180 degrees)
+     */
+    private createSemicirclePath(radius: number): string {
+        // Create semicircle from 0° to 180° (left to right, top arc)
+        // Using SVG arc path: M (move to start), A (arc to end)
+        // Start at left point (-radius, 0), arc to right point (radius, 0)
+        // Arc parameters: rx, ry, x-axis-rotation, large-arc-flag, sweep-flag, x, y
+        // For semicircle: large-arc-flag=0 (180° is exactly half), sweep-flag=1 (clockwise from top)
+        const startX = -radius;
+        const startY = 0;
+        const endX = radius;
+        const endY = 0;
+        
+        return `M ${startX} ${startY} A ${radius} ${radius} 0 0 1 ${endX} ${endY}`;
+    }
+
+    /**
+     * Create graph/coordinate plane object
+     */
+    private createGraph(x: number, y: number): any {
+        // Create a group that will contain the graph axes and grid
+        const graphGroup = new Group([], {
+            left: x,
+            top: y,
+            selectable: false,
+            evented: false,
+        });
+        
+        // Store initial position for updates
+        (graphGroup as any).graphStartX = x;
+        (graphGroup as any).graphStartY = y;
+        
+        return graphGroup;
+    }
+
+    /**
+     * Update graph during mouse move
+     */
+    private updateGraph(graphGroup: any, start: { x: number; y: number }, end: { x: number; y: number }): void {
+        const x0 = start.x;
+        const y0 = start.y;
+        const x1 = end.x;
+        const y1 = end.y;
+        
+        // Calculate width and height
+        const width = Math.abs(x1 - x0);
+        const height = Math.abs(y1 - y0);
+        
+        if (width < 100 || height < 100) {
+            // Too small, don't draw
+            return;
+        }
+        
+        // Remove old group from canvas
+        this.fabricCanvas.remove(graphGroup);
+        
+        const objects: any[] = [];
+        
+        // Calculate center and bounds
+        const centerX = (x0 + x1) / 2;
+        const centerY = (y0 + y1) / 2;
+        const left = Math.min(x0, x1);
+        const top = Math.min(y0, y1);
+        const right = Math.max(x0, x1);
+        const bottom = Math.max(y0, y1);
+        
+        // Grid spacing (every 20 pixels)
+        const gridSpacing = 20;
+        
+        // Draw grid lines (light gray)
+        const gridColor = '#e5e7eb';
+        
+        // Vertical grid lines
+        for (let x = left; x <= right; x += gridSpacing) {
+            const gridLine = new Line([x - centerX, top - centerY, x - centerX, bottom - centerY], {
+                stroke: gridColor,
+                strokeWidth: 1,
+                selectable: false,
+                evented: false,
+            });
+            objects.push(gridLine);
+        }
+        
+        // Horizontal grid lines
+        for (let y = top; y <= bottom; y += gridSpacing) {
+            const gridLine = new Line([left - centerX, y - centerY, right - centerX, y - centerY], {
+                stroke: gridColor,
+                strokeWidth: 1,
+                selectable: false,
+                evented: false,
+            });
+            objects.push(gridLine);
+        }
+        
+        // Draw X-axis (horizontal line through center)
+        const xAxis = new Line([left - centerX, 0, right - centerX, 0], {
+            stroke: this.currentColor(),
+            strokeWidth: 2,
+            selectable: false,
+            evented: false,
+        });
+        objects.push(xAxis);
+        
+        // Draw Y-axis (vertical line through center)
+        const yAxis = new Line([0, top - centerY, 0, bottom - centerY], {
+            stroke: this.currentColor(),
+            strokeWidth: 2,
+            selectable: false,
+            evented: false,
+        });
+        objects.push(yAxis);
+        
+        // Draw arrow on X-axis (right side)
+        const arrowSize = 8;
+        const xArrow = new Path(`M ${right - centerX - arrowSize} ${-arrowSize} L ${right - centerX} 0 L ${right - centerX - arrowSize} ${arrowSize}`, {
+            stroke: this.currentColor(),
+            strokeWidth: 2,
+            fill: this.currentColor(),
+            selectable: false,
+            evented: false,
+        });
+        objects.push(xArrow);
+        
+        // Draw arrow on Y-axis (top side)
+        const yArrow = new Path(`M ${-arrowSize} ${top - centerY + arrowSize} L 0 ${top - centerY} L ${arrowSize} ${top - centerY + arrowSize}`, {
+            stroke: this.currentColor(),
+            strokeWidth: 2,
+            fill: this.currentColor(),
+            selectable: false,
+            evented: false,
+        });
+        objects.push(yArrow);
+        
+        // Add axis labels
+        // X-axis labels (numbers along X-axis)
+        const xLabelSpacing = gridSpacing * 2; // Label every 2 grid units
+        for (let i = Math.floor((left - centerX) / xLabelSpacing) * xLabelSpacing; i <= right - centerX; i += xLabelSpacing) {
+            if (Math.abs(i) < 5) continue; // Skip origin
+            const label = new IText((i / gridSpacing).toString(), {
+                left: i,
+                top: 5,
+                fontSize: 10,
+                fill: this.currentColor(),
+                fontFamily: 'Arial, sans-serif',
+                textAlign: 'center',
+                originX: 'center',
+                originY: 'top',
+                selectable: false,
+                evented: false,
+            });
+            objects.push(label);
+        }
+        
+        // Y-axis labels (numbers along Y-axis)
+        const yLabelSpacing = gridSpacing * 2;
+        for (let i = Math.floor((top - centerY) / yLabelSpacing) * yLabelSpacing; i <= bottom - centerY; i += yLabelSpacing) {
+            if (Math.abs(i) < 5) continue; // Skip origin
+            const label = new IText((-i / gridSpacing).toString(), { // Negative because Y increases downward
+                left: -5,
+                top: i,
+                fontSize: 10,
+                fill: this.currentColor(),
+                fontFamily: 'Arial, sans-serif',
+                textAlign: 'right',
+                originX: 'right',
+                originY: 'center',
+                selectable: false,
+                evented: false,
+            });
+            objects.push(label);
+        }
+        
+        // Add origin label (0,0)
+        const originLabel = new IText('0', {
+            left: -5,
+            top: 5,
+            fontSize: 10,
+            fill: this.currentColor(),
+            fontFamily: 'Arial, sans-serif',
+            textAlign: 'right',
+            originX: 'right',
+            originY: 'top',
+            selectable: false,
+            evented: false,
+        });
+        objects.push(originLabel);
+        
+        // Add axis labels (X and Y)
+        const xAxisLabel = new IText('X', {
+            left: right - centerX - 15,
+            top: -20,
+            fontSize: 12,
+            fill: this.currentColor(),
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: 'bold',
+            selectable: false,
+            evented: false,
+        });
+        objects.push(xAxisLabel);
+        
+        const yAxisLabel = new IText('Y', {
+            left: -20,
+            top: top - centerY + 15,
+            fontSize: 12,
+            fill: this.currentColor(),
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: 'bold',
+            selectable: false,
+            evented: false,
+        });
+        objects.push(yAxisLabel);
+        
+        // Create new group with all objects
+        const newGraphGroup = new Group(objects, {
+            left: centerX,
+            top: centerY,
+            originX: 'center',
+            originY: 'center',
+            selectable: false,
+            evented: false,
+        });
+        
+        // Add new group to canvas
+        this.fabricCanvas.add(newGraphGroup);
+        
+        // Update the drawing object reference
+        this.drawingObject = newGraphGroup;
     }
 
     /**
@@ -933,6 +1380,21 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             // Switch to a special tool mode for ruler
             this.currentTool.set('ruler');
             this.applyToolToCanvas();
+        } else if (tool === 'protractor') {
+            this.activeMathTool.set('protractor');
+            // Switch to a special tool mode for protractor
+            this.currentTool.set('protractor');
+            this.applyToolToCanvas();
+        } else if (tool === 'equation') {
+            this.activeMathTool.set('equation');
+            // Switch to a special tool mode for equation
+            this.currentTool.set('equation');
+            this.applyToolToCanvas();
+        } else if (tool === 'graph') {
+            this.activeMathTool.set('graph');
+            // Switch to a special tool mode for graph
+            this.currentTool.set('graph');
+            this.applyToolToCanvas();
         } else {
             // For other tools, just store the active tool
             this.activeMathTool.set(tool);
@@ -1196,8 +1658,8 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         this.fabricCanvas.selection = tool === 'select';
         this.fabricCanvas.defaultCursor = tool === 'select' ? 'default' : 'crosshair';
 
-        // For shape tools and ruler, disable selection to prevent interference
-        if (this.isShapeTool(tool) || tool === 'ruler') {
+        // For shape tools, ruler, protractor, equation, and graph, disable selection to prevent interference
+        if (this.isShapeTool(tool) || tool === 'ruler' || tool === 'protractor' || tool === 'equation' || tool === 'graph') {
             this.fabricCanvas.selection = false;
         }
 
@@ -1272,6 +1734,166 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     onUndo(): void {
     }
     onRedo(): void {
+    }
+
+    /**
+     * Open equation editor dialog
+     */
+    private openEquationDialog(x: number, y: number): void {
+        this.equationPosition.set({ x, y });
+        this.equationLatex.set('\\frac{a}{b}');
+        this.equationSize.set(36);
+        this.equationError.set('');
+        this.editingEquation.set(null);
+        this.showEquationDialog.set(true);
+    }
+
+    /**
+     * Edit existing equation
+     */
+    private editEquation(equationObj: any): void {
+        const latex = equationObj.equationLatex || '\\frac{a}{b}';
+        const size = equationObj.equationSize || 36;
+        const pos = equationObj.getCenterPoint();
+        
+        this.equationPosition.set({ x: pos.x, y: pos.y });
+        this.equationLatex.set(latex);
+        this.equationSize.set(size);
+        this.equationError.set('');
+        this.editingEquation.set(equationObj);
+        this.showEquationDialog.set(true);
+    }
+
+    /**
+     * Close equation dialog
+     */
+    onCloseEquationDialog(): void {
+        this.showEquationDialog.set(false);
+        this.equationPosition.set(null);
+        this.editingEquation.set(null);
+    }
+
+    /**
+     * Save equation to canvas
+     */
+    async onSaveEquation(): Promise<void> {
+        const latex = this.equationLatex().trim();
+        if (!latex) {
+            this.equationError.set('Please enter a LaTeX equation');
+            return;
+        }
+
+        const position = this.equationPosition();
+        if (!position) {
+            this.equationError.set('Invalid position');
+            return;
+        }
+
+        try {
+            this.equationError.set('');
+            
+            // Ensure MathJax is ready
+            await this.ensureMathJaxReady();
+            
+            // Convert LaTeX to SVG string
+            const svgString = await this.latexToSvgString(latex, this.currentColor());
+            
+            // Load SVG as Fabric.js object
+            const equationObj = await this.loadSvgAsFabricObject(svgString);
+            
+            // Set properties
+            equationObj.set({
+                left: position.x,
+                top: position.y,
+                originX: 'center',
+                originY: 'center',
+                selectable: true,
+                evented: true,
+            });
+            
+            // Store equation metadata
+            (equationObj as any).isEquation = true;
+            (equationObj as any).equationLatex = latex;
+            (equationObj as any).equationSize = this.equationSize();
+            (equationObj as any).equationColor = this.currentColor();
+            
+            // If editing, remove old equation
+            const editing = this.editingEquation();
+            if (editing) {
+                this.fabricCanvas.remove(editing);
+            }
+            
+            // Add to canvas
+            this.fabricCanvas.add(equationObj);
+            this.fabricCanvas.setActiveObject(equationObj);
+            this.fabricCanvas.requestRenderAll();
+            
+            // Close dialog
+            this.onCloseEquationDialog();
+        } catch (error) {
+            this.equationError.set(error instanceof Error ? error.message : String(error));
+        }
+    }
+
+    /**
+     * Convert LaTeX to SVG string
+     */
+    private async latexToSvgString(latex: string, color: string): Promise<string> {
+        await this.ensureMathJaxReady();
+        
+        const mj = MathJax;
+        const tex2svgPromise = mj.tex2svgPromise || ((t: string, opts: any) => 
+            Promise.resolve(mj.tex2svg(t, opts)));
+        
+        const node = await tex2svgPromise(latex, { display: true });
+        
+        // Set color
+        node.style.color = color;
+        
+        // Set size
+        const svg = node.querySelector('svg');
+        if (svg) {
+            svg.style.height = `${this.equationSize()}px`;
+            svg.style.width = 'auto';
+            // Ensure SVG has xmlns attribute
+            if (!svg.getAttribute('xmlns')) {
+                svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            }
+        }
+        
+        // Return the SVG element's outerHTML, or the full node if no SVG found
+        return svg ? svg.outerHTML : node.outerHTML;
+    }
+
+    /**
+     * Load SVG string as Fabric.js object
+     */
+    private loadSvgAsFabricObject(svgString: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            try {
+                // Convert SVG string to data URL (more reliable than blob URL)
+                // Encode the SVG string to base64
+                const encodedSvg = encodeURIComponent(svgString);
+                const dataUrl = `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
+                
+                // Use Image.fromURL to load the SVG
+                // In Fabric.js v7, fromURL returns a Promise
+                Image.fromURL(dataUrl, {
+                    crossOrigin: 'anonymous'
+                }).then((img: any) => {
+                    if (!img) {
+                        reject(new Error('Failed to load SVG as image'));
+                        return;
+                    }
+                    
+                    resolve(img);
+                }).catch((err: any) => {
+                    reject(err);
+                });
+            } catch (err) {
+                reject(err);
+            }
+        });
     }
 }
 
