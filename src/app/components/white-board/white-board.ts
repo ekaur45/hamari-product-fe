@@ -88,6 +88,17 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     graphFunction = signal<string>('x');
     graphFunctionError = signal<string>('');
     selectedGraph = signal<any>(null); // The graph object to plot on
+    
+    // Calculator state
+    showCalculatorDialog = signal<boolean>(false);
+    calculatorDisplay = signal<string>('0');
+    calculatorMode = signal<'basic' | 'scientific' | 'conversion'>('basic');
+    calculatorMemory = signal<number>(0);
+    calculatorHistory = signal<string[]>([]);
+    conversionFrom = signal<string>('meter');
+    conversionTo = signal<string>('kilometer');
+    conversionValue = signal<string>('1');
+    conversionResult = signal<string>('');
 
     // Fabric.js and MathJax instances
     private fabricCanvas: any = null;
@@ -1746,6 +1757,14 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             // Switch to a special tool mode for graph
             this.currentTool.set('graph');
             this.applyToolToCanvas();
+        } else if (tool === 'calculator') {
+            this.activeMathTool.set('calculator');
+            // Open calculator dialog
+            this.currentTool.set('select');
+            this.showCalculatorDialog.set(true);
+            this.calculatorDisplay.set('0');
+            this.calculatorMode.set('basic');
+            this.applyToolToCanvas();
         } else {
             // For other tools, just store the active tool
             this.activeMathTool.set(tool);
@@ -2245,6 +2264,362 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
                 reject(err);
             }
         });
+    }
+
+    // ==================== Calculator Methods ====================
+
+    /**
+     * Close calculator dialog
+     */
+    onCloseCalculator(): void {
+        this.showCalculatorDialog.set(false);
+    }
+
+    /**
+     * Switch calculator mode
+     */
+    onCalculatorModeChange(mode: 'basic' | 'scientific' | 'conversion'): void {
+        this.calculatorMode.set(mode);
+        if (mode === 'conversion') {
+            this.conversionValue.set('1');
+            // Ensure "To" is in the same category as "From"
+            this.syncConversionCategories();
+            this.onConversionCalculate();
+        }
+    }
+
+    /**
+     * Get category of a unit
+     */
+    getUnitCategory(unit: string): 'length' | 'weight' | 'temperature' | 'volume' {
+        const lengthUnits = ['meter', 'kilometer', 'centimeter', 'millimeter', 'inch', 'foot', 'yard', 'mile'];
+        const weightUnits = ['gram', 'kilogram', 'milligram', 'pound', 'ounce', 'ton'];
+        const temperatureUnits = ['celsius', 'fahrenheit', 'kelvin'];
+        const volumeUnits = ['liter', 'milliliter', 'gallon', 'quart', 'pint', 'cup', 'fluid-ounce'];
+        
+        if (lengthUnits.includes(unit)) return 'length';
+        if (weightUnits.includes(unit)) return 'weight';
+        if (temperatureUnits.includes(unit)) return 'temperature';
+        if (volumeUnits.includes(unit)) return 'volume';
+        return 'length'; // Default
+    }
+
+    /**
+     * Get available units for a category
+     */
+    getAvailableUnitsForCategory(category: 'length' | 'weight' | 'temperature' | 'volume'): Array<{value: string, label: string}> {
+        const units: { [key: string]: Array<{value: string, label: string}> } = {
+            length: [
+                { value: 'meter', label: 'Meter' },
+                { value: 'kilometer', label: 'Kilometer' },
+                { value: 'centimeter', label: 'Centimeter' },
+                { value: 'millimeter', label: 'Millimeter' },
+                { value: 'inch', label: 'Inch' },
+                { value: 'foot', label: 'Foot' },
+                { value: 'yard', label: 'Yard' },
+                { value: 'mile', label: 'Mile' }
+            ],
+            weight: [
+                { value: 'gram', label: 'Gram' },
+                { value: 'kilogram', label: 'Kilogram' },
+                { value: 'milligram', label: 'Milligram' },
+                { value: 'pound', label: 'Pound' },
+                { value: 'ounce', label: 'Ounce' },
+                { value: 'ton', label: 'Ton' }
+            ],
+            temperature: [
+                { value: 'celsius', label: 'Celsius' },
+                { value: 'fahrenheit', label: 'Fahrenheit' },
+                { value: 'kelvin', label: 'Kelvin' }
+            ],
+            volume: [
+                { value: 'liter', label: 'Liter' },
+                { value: 'milliliter', label: 'Milliliter' },
+                { value: 'gallon', label: 'Gallon' },
+                { value: 'quart', label: 'Quart' },
+                { value: 'pint', label: 'Pint' },
+                { value: 'cup', label: 'Cup' },
+                { value: 'fluid-ounce', label: 'Fluid Ounce' }
+            ]
+        };
+        return units[category] || units['length'];
+    }
+
+    /**
+     * Sync conversion categories - ensure "To" is in same category as "From"
+     */
+    syncConversionCategories(): void {
+        const fromCategory = this.getUnitCategory(this.conversionFrom());
+        const toCategory = this.getUnitCategory(this.conversionTo());
+        
+        if (fromCategory !== toCategory) {
+            // Reset "To" to first unit of "From" category
+            const availableUnits = this.getAvailableUnitsForCategory(fromCategory);
+            if (availableUnits.length > 0) {
+                this.conversionTo.set(availableUnits[0].value);
+            }
+        }
+    }
+
+    /**
+     * Handle calculator button press
+     */
+    onCalculatorButton(value: string): void {
+        const current = this.calculatorDisplay();
+        
+        if (value === 'C') {
+            this.calculatorDisplay.set('0');
+        } else if (value === 'CE') {
+            this.calculatorDisplay.set('0');
+        } else if (value === '=') {
+            this.calculateResult();
+        } else if (value === '±') {
+            if (current !== '0' && current !== 'Error') {
+                this.calculatorDisplay.set(current.startsWith('-') ? current.substring(1) : '-' + current);
+            }
+        } else if (value === '%') {
+            try {
+                const num = parseFloat(current);
+                this.calculatorDisplay.set((num / 100).toString());
+            } catch {
+                this.calculatorDisplay.set('Error');
+            }
+        } else if (['+', '-', '*', '/'].includes(value)) {
+            if (current !== 'Error') {
+                this.calculatorDisplay.set(current + ' ' + value + ' ');
+            }
+        } else if (value === '.') {
+            if (!current.includes('.')) {
+                this.calculatorDisplay.set(current + '.');
+            }
+        } else {
+            // Number or operator
+            if (current === '0' || current === 'Error') {
+                this.calculatorDisplay.set(value);
+            } else {
+                this.calculatorDisplay.set(current + value);
+            }
+        }
+    }
+
+    /**
+     * Calculate result
+     */
+    private calculateResult(): void {
+        try {
+            const expression = this.calculatorDisplay().replace(/\s+/g, '');
+            // Replace × and ÷ with * and /
+            const normalized = expression.replace(/×/g, '*').replace(/÷/g, '/');
+            
+            // Use Function constructor for safe evaluation
+            const result = new Function('return ' + normalized)();
+            
+            if (isNaN(result) || !isFinite(result)) {
+                this.calculatorDisplay.set('Error');
+            } else {
+                const resultStr = result.toString();
+                this.calculatorDisplay.set(resultStr);
+                // Add to history
+                const history = this.calculatorHistory();
+                history.push(`${expression} = ${resultStr}`);
+                if (history.length > 10) history.shift();
+                this.calculatorHistory.set([...history]);
+            }
+        } catch (error) {
+            this.calculatorDisplay.set('Error');
+        }
+    }
+
+    /**
+     * Scientific calculator functions
+     */
+    onScientificFunction(func: string): void {
+        const current = parseFloat(this.calculatorDisplay());
+        if (isNaN(current)) {
+            this.calculatorDisplay.set('Error');
+            return;
+        }
+
+        let result: number;
+        try {
+            switch (func) {
+                case 'sin':
+                    result = Math.sin(current * Math.PI / 180); // Convert to radians
+                    break;
+                case 'cos':
+                    result = Math.cos(current * Math.PI / 180);
+                    break;
+                case 'tan':
+                    result = Math.tan(current * Math.PI / 180);
+                    break;
+                case 'asin':
+                    result = Math.asin(current) * 180 / Math.PI; // Convert to degrees
+                    break;
+                case 'acos':
+                    result = Math.acos(current) * 180 / Math.PI;
+                    break;
+                case 'atan':
+                    result = Math.atan(current) * 180 / Math.PI;
+                    break;
+                case 'log':
+                    result = Math.log10(current);
+                    break;
+                case 'ln':
+                    result = Math.log(current);
+                    break;
+                case 'sqrt':
+                    result = Math.sqrt(current);
+                    break;
+                case 'cbrt':
+                    result = Math.cbrt(current);
+                    break;
+                case 'pow2':
+                    result = Math.pow(current, 2);
+                    break;
+                case 'pow3':
+                    result = Math.pow(current, 3);
+                    break;
+                case 'exp':
+                    result = Math.exp(current);
+                    break;
+                case 'fact':
+                    result = this.factorial(Math.floor(current));
+                    break;
+                default:
+                    return;
+            }
+            
+            if (isNaN(result) || !isFinite(result)) {
+                this.calculatorDisplay.set('Error');
+            } else {
+                this.calculatorDisplay.set(result.toString());
+            }
+        } catch {
+            this.calculatorDisplay.set('Error');
+        }
+    }
+
+    /**
+     * Factorial function
+     */
+    private factorial(n: number): number {
+        if (n < 0 || n > 170) return NaN; // Limit to prevent overflow
+        if (n === 0 || n === 1) return 1;
+        let result = 1;
+        for (let i = 2; i <= n; i++) {
+            result *= i;
+        }
+        return result;
+    }
+
+    /**
+     * Memory functions
+     */
+    onMemoryFunction(func: 'MC' | 'MR' | 'M+' | 'M-'): void {
+        const current = parseFloat(this.calculatorDisplay());
+        let memory = this.calculatorMemory();
+        
+        switch (func) {
+            case 'MC':
+                this.calculatorMemory.set(0);
+                break;
+            case 'MR':
+                this.calculatorDisplay.set(memory.toString());
+                break;
+            case 'M+':
+                this.calculatorMemory.set(memory + (isNaN(current) ? 0 : current));
+                break;
+            case 'M-':
+                this.calculatorMemory.set(memory - (isNaN(current) ? 0 : current));
+                break;
+        }
+    }
+
+    /**
+     * Calculate conversion
+     */
+    onConversionCalculate(): void {
+        const value = parseFloat(this.conversionValue());
+        if (isNaN(value)) {
+            this.conversionResult.set('Invalid input');
+            return;
+        }
+
+        const from = this.conversionFrom();
+        const to = this.conversionTo();
+        
+        // Conversion factors (to base unit: meter for length, gram for weight, etc.)
+        const conversions: { [key: string]: { [key: string]: number } } = {
+            length: {
+                'meter': 1,
+                'kilometer': 1000,
+                'centimeter': 0.01,
+                'millimeter': 0.001,
+                'inch': 0.0254,
+                'foot': 0.3048,
+                'yard': 0.9144,
+                'mile': 1609.34
+            },
+            weight: {
+                'gram': 1,
+                'kilogram': 1000,
+                'milligram': 0.001,
+                'pound': 453.592,
+                'ounce': 28.3495,
+                'ton': 1000000
+            },
+            temperature: {
+                'celsius': 1,
+                'fahrenheit': 1,
+                'kelvin': 1
+            },
+            volume: {
+                'liter': 1,
+                'milliliter': 0.001,
+                'gallon': 3.78541,
+                'quart': 0.946353,
+                'pint': 0.473176,
+                'cup': 0.236588,
+                'fluid-ounce': 0.0295735
+            }
+        };
+
+        // Determine category
+        let category = 'length';
+        if (['gram', 'kilogram', 'milligram', 'pound', 'ounce', 'ton'].includes(from)) {
+            category = 'weight';
+        } else if (['celsius', 'fahrenheit', 'kelvin'].includes(from)) {
+            category = 'temperature';
+        } else if (['liter', 'milliliter', 'gallon', 'quart', 'pint', 'cup', 'fluid-ounce'].includes(from)) {
+            category = 'volume';
+        }
+
+        // Special handling for temperature
+        if (category === 'temperature') {
+            let result: number;
+            if (from === 'celsius' && to === 'fahrenheit') {
+                result = (value * 9/5) + 32;
+            } else if (from === 'fahrenheit' && to === 'celsius') {
+                result = (value - 32) * 5/9;
+            } else if (from === 'celsius' && to === 'kelvin') {
+                result = value + 273.15;
+            } else if (from === 'kelvin' && to === 'celsius') {
+                result = value - 273.15;
+            } else if (from === 'fahrenheit' && to === 'kelvin') {
+                result = ((value - 32) * 5/9) + 273.15;
+            } else if (from === 'kelvin' && to === 'fahrenheit') {
+                result = ((value - 273.15) * 9/5) + 32;
+            } else {
+                result = value;
+            }
+            this.conversionResult.set(result.toFixed(2));
+        } else {
+            // Convert to base unit, then to target unit
+            const fromFactor = conversions[category][from] || 1;
+            const toFactor = conversions[category][to] || 1;
+            const result = (value * fromFactor) / toFactor;
+            this.conversionResult.set(result.toFixed(6));
+        }
     }
 }
 
