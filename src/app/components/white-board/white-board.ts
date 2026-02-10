@@ -16,6 +16,7 @@ import { WhiteboardStyleOptions } from "./toolbar/whiteboard-style-options";
 import { WhiteboardColorSizePicker } from "./toolbar/whiteboard-color-size-picker";
 import { WhiteboardCanvasOptions } from "./toolbar/whiteboard-canvas-options";
 import { WhiteboardActionButtons } from "./toolbar/whiteboard-action-buttons";
+import { WhiteboardZoomControls } from "./toolbar/whiteboard-zoom-controls";
 import { UserRole, AuthService } from "../../shared";
 import { Socket } from "socket.io-client";
 import { getToolFromId, isImageTool, clampZoom } from "./utils/whiteboard-helpers";
@@ -38,7 +39,8 @@ declare const MathJax: any;
         WhiteboardStyleOptions,
         WhiteboardColorSizePicker,
         WhiteboardCanvasOptions,
-        WhiteboardActionButtons
+        WhiteboardActionButtons,
+        WhiteboardZoomControls
     ],
     standalone: true,
 })
@@ -72,6 +74,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     hasSelection = signal<boolean>(false);
     hasClipboard = signal<boolean>(false);
     activeUsers = signal<WhiteboardUser[]>([]);
+    private zoomUpdateTimeout: any = null;
     whiteboardOpen = signal<boolean>(true);
     activeMathTool = signal<'ruler' | 'protractor' | 'equation' | 'graph' | 'calculator' | null>(null);
     
@@ -250,6 +253,16 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         );
 
         this.fabricCanvas.calcOffset();
+        
+        // Initialize zoom level
+        if (this.zoomLevel() !== 1) {
+            this.setCanvasZoom(this.zoomLevel());
+        } else {
+            // Set initial zoom to 1 via viewport transform
+            this.fabricCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+            this.updateCanvasScrollability(1);
+        }
+        
         this.fabricCanvas.requestRenderAll();
 
         // Resize grid canvas if it exists
@@ -714,8 +727,8 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         if (this.whiteboardCanvas?.nativeElement) {
             const canvasEl = this.whiteboardCanvas.nativeElement;
             const rect = canvasEl.getBoundingClientRect();
-            const zoom = this.fabricCanvas.getZoom() || 1;
             const vpt = this.fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+            const zoom = vpt[0] || 1;
             
             // Calculate pointer accounting for zoom and pan
             const x = (opt.e.clientX - rect.left - vpt[4]) / zoom;
@@ -1942,20 +1955,139 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     }
 
     onZoomIn(): void {
-        const newZoom = Math.min(3, this.zoomLevel() + 0.1);
-        this.zoomLevel.set(newZoom);
-        this.applyZoom();
+        if (!this.fabricCanvas) return;
+        // Get current zoom from viewportTransform (first element is scaleX/zoom)
+        const vpt = this.fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+        const currentZoom = vpt[0] || 1;
+        // Use larger step to reduce number of updates
+        const newZoom = Math.min(3, currentZoom + 0.2);
+        this.setCanvasZoom(newZoom);
     }
 
     onZoomOut(): void {
-        const newZoom = Math.max(0.1, this.zoomLevel() - 0.1);
-        this.zoomLevel.set(newZoom);
-        this.applyZoom();
+        if (!this.fabricCanvas) return;
+        // Get current zoom from viewportTransform (first element is scaleX/zoom)
+        const vpt = this.fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+        const currentZoom = vpt[0] || 1;
+        // Use larger step to reduce number of updates
+        const newZoom = Math.max(0.1, currentZoom - 0.2);
+        this.setCanvasZoom(newZoom);
     }
 
     onZoomReset(): void {
-        this.zoomLevel.set(1);
-        this.applyZoom();
+        if (!this.fabricCanvas) return;
+        this.setCanvasZoom(1);
+    }
+
+    /**
+     * Set zoom level on Fabric.js canvas with proper viewport transform
+     */
+    private setCanvasZoom(zoom: number): void {
+        if (!this.fabricCanvas) return;
+        
+        const canvas = this.fabricCanvas;
+        
+        // Get current viewport transform (if it exists)
+        let vpt = canvas.viewportTransform;
+        if (!vpt) {
+            vpt = [1, 0, 0, 1, 0, 0];
+            canvas.viewportTransform = vpt;
+        }
+        
+        // Get current zoom from viewport transform (first element is scaleX/zoom)
+        const currentZoom = vpt[0] || 1;
+        
+        // Skip if zoom hasn't changed significantly (avoid unnecessary updates)
+        if (Math.abs(currentZoom - zoom) < 0.001) {
+            return;
+        }
+        
+        // Get canvas dimensions
+        const canvasWidth = canvas.getWidth();
+        const canvasHeight = canvas.getHeight();
+        
+        // Calculate canvas center in canvas coordinates
+        const canvasCenterX = canvasWidth / 2;
+        const canvasCenterY = canvasHeight / 2;
+        
+        // Calculate current center position in viewport coordinates
+        const currentCenterX = canvasCenterX * currentZoom + vpt[4];
+        const currentCenterY = canvasCenterY * currentZoom + vpt[5];
+        
+        // Calculate new translation to keep the same center point
+        const newTranslateX = currentCenterX - canvasCenterX * zoom;
+        const newTranslateY = currentCenterY - canvasCenterY * zoom;
+        
+        // Create new viewport transform
+        const newVpt = [zoom, 0, 0, zoom, newTranslateX, newTranslateY];
+        
+        // Apply the new viewport transform (this triggers a render automatically)
+        canvas.setViewportTransform(newVpt);
+        
+        // Recalculate canvas offset after zoom
+        canvas.calcOffset();
+        
+        // Update zoom level signal
+        this.zoomLevel.set(zoom);
+        
+        // Update wrapper size after a delay to debounce rapid zoom changes
+        // Don't call requestRenderAll here - setViewportTransform already triggers rendering
+        if (this.zoomUpdateTimeout) {
+            clearTimeout(this.zoomUpdateTimeout);
+        }
+        this.zoomUpdateTimeout = setTimeout(() => {
+            this.updateCanvasScrollability(zoom);
+            // Only render if needed (setViewportTransform should have already rendered)
+        }, 100);
+    }
+
+    /**
+     * Update canvas container scrollability based on zoom level
+     */
+    private updateCanvasScrollability(zoom: number): void {
+        if (!this.canvasContainer?.nativeElement || !this.canvasWrapper?.nativeElement || !this.fabricCanvas) return;
+        
+        const container = this.canvasContainer.nativeElement;
+        const wrapper = this.canvasWrapper.nativeElement;
+        
+        // Always enable scrolling
+        container.style.overflow = 'auto';
+        
+        // Get canvas dimensions
+        const canvasWidth = this.fabricCanvas.getWidth();
+        const canvasHeight = this.fabricCanvas.getHeight();
+        
+        // Get container dimensions to calculate proper wrapper size
+        const containerRect = container.getBoundingClientRect();
+        const containerWidth = containerRect.width;
+        const containerHeight = containerRect.height;
+        
+        if (zoom > 1) {
+            // When zoomed in, wrapper needs to be larger to enable scrolling
+            const newWidth = canvasWidth * zoom;
+            const newHeight = canvasHeight * zoom;
+            
+            // Check if size actually needs to change to avoid unnecessary reflows
+            const currentWidth = parseFloat(wrapper.style.width) || 0;
+            const currentHeight = parseFloat(wrapper.style.height) || 0;
+            
+            if (Math.abs(currentWidth - newWidth) > 1 || Math.abs(currentHeight - newHeight) > 1) {
+                // Batch all style updates together to minimize reflows
+                wrapper.style.width = `${newWidth}px`;
+                wrapper.style.height = `${newHeight}px`;
+                wrapper.style.minWidth = `${newWidth}px`;
+                wrapper.style.minHeight = `${newHeight}px`;
+            }
+        } else {
+            // When zoomed out or at 100%, use container size
+            // Only update if not already at 100%
+            if (wrapper.style.width !== '100%') {
+                wrapper.style.width = '100%';
+                wrapper.style.height = '100%';
+                wrapper.style.minWidth = '100%';
+                wrapper.style.minHeight = '100%';
+            }
+        }
     }
 
     onCopySelection(): void {
