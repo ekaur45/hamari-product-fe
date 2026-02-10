@@ -603,6 +603,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
                 const newArrow = new Path(pathData, {
                     stroke: this.currentColor(),
                     strokeWidth: this.currentLineWidth(),
+                    strokeDashArray: this.getStrokeDashArray(),
                     fill: '',
                     selectable: false,
                     evented: false,
@@ -629,6 +630,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             fill: this.fillShapes() ? this.currentColor() : 'transparent',
             stroke: this.currentColor(),
             strokeWidth: this.currentLineWidth(),
+            strokeDashArray: this.getStrokeDashArray(),
             selectable: false,
             evented: false,
             strokeUniform: true,
@@ -649,6 +651,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             fill: this.fillShapes() ? this.currentColor() : 'transparent',
             stroke: this.currentColor(),
             strokeWidth: this.currentLineWidth(),
+            strokeDashArray: this.getStrokeDashArray(),
             selectable: false,
             evented: false,
             strokeUniform: true,
@@ -670,6 +673,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             fill: this.fillShapes() ? this.currentColor() : 'transparent',
             stroke: this.currentColor(),
             strokeWidth: this.currentLineWidth(),
+            strokeDashArray: this.getStrokeDashArray(),
             selectable: false,
             evented: false,
             strokeUniform: true,
@@ -691,6 +695,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             fill: this.fillShapes() ? this.currentColor() : 'transparent',
             stroke: this.currentColor(),
             strokeWidth: this.currentLineWidth(),
+            strokeDashArray: this.getStrokeDashArray(),
             selectable: false,
             evented: false,
             strokeUniform: true,
@@ -704,6 +709,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         return new Line([x1, y1, x2, y2], {
             stroke: this.currentColor(),
             strokeWidth: this.currentLineWidth(),
+            strokeDashArray: this.getStrokeDashArray(),
             selectable: false,
             evented: false,
             strokeUniform: true,
@@ -732,6 +738,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         return new Path(pathData, {
             stroke: this.currentColor(),
             strokeWidth: this.currentLineWidth(),
+            strokeDashArray: this.getStrokeDashArray(),
             fill: '',
             selectable: false,
             evented: false,
@@ -763,10 +770,68 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
 
     onToggleFill(): void {
         this.fillShapes.set(!this.fillShapes());
+        this.updateSelectedObjectsStyle();
     }
 
     onLineStyleChange(style: string): void {
         this.lineStyle.set(style);
+        this.updateSelectedObjectsStyle();
+    }
+
+    /**
+     * Update style of selected objects when style options change
+     */
+    private updateSelectedObjectsStyle(): void {
+        if (!this.fabricCanvas) return;
+        const activeObject = this.fabricCanvas.getActiveObject();
+        if (!activeObject) return;
+
+        const style = this.getStrokeDashArray();
+        const fill = this.fillShapes() ? this.currentColor() : 'transparent';
+
+        // Handle multiple selected objects (activeSelection)
+        if (activeObject.type === 'activeSelection') {
+            const objects = (activeObject as any).getObjects();
+            objects.forEach((obj: any) => {
+                if (this.isShapeObject(obj)) {
+                    obj.set({
+                        strokeDashArray: style,
+                        fill: obj.type === 'line' || obj.type === 'path' ? '' : fill
+                    });
+                }
+            });
+        } else {
+            // Handle single object
+            if (this.isShapeObject(activeObject)) {
+                (activeObject as any).set({
+                    strokeDashArray: style,
+                    fill: activeObject.type === 'line' || activeObject.type === 'path' ? '' : fill
+                });
+            }
+        }
+
+        this.fabricCanvas.requestRenderAll();
+    }
+
+    /**
+     * Check if object is a shape that supports styling
+     */
+    private isShapeObject(obj: any): boolean {
+        const shapeTypes = ['rect', 'circle', 'ellipse', 'triangle', 'line', 'path', 'polygon', 'polyline'];
+        return shapeTypes.includes(obj.type);
+    }
+
+    /**
+     * Get stroke dash array based on line style
+     */
+    private getStrokeDashArray(): number[] | undefined {
+        const style = this.lineStyle();
+        if (style === 'dashed') {
+            return [10, 5];
+        } else if (style === 'dotted') {
+            return [2, 2];
+        }
+        return undefined; // solid line
     }
 
     onColorChange(color: string): void {
@@ -780,10 +845,22 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     }
 
     onBackgroundColorChange(color: string): void {
-        if (this.fabricCanvas) {
-            this.fabricCanvas.setBackgroundColor(color, () => {
-                this.fabricCanvas.requestRenderAll();
-            });
+        if (!this.fabricCanvas) return;
+        
+        // In Fabric.js v6, set backgroundColor directly as a property
+        (this.fabricCanvas as any).backgroundColor = color;
+        
+        // Force a render to update the background immediately
+        this.fabricCanvas.requestRenderAll();
+        
+        // Update the container background to match
+        // The container has Tailwind gradient classes that we need to override
+        if (this.canvasContainer?.nativeElement) {
+            const container = this.canvasContainer.nativeElement;
+            // Remove Tailwind gradient classes
+            container.classList.remove('bg-gradient-to-br', 'from-gray-100', 'to-gray-200');
+            // Set inline style (inline styles have higher specificity than classes)
+            container.style.background = color;
         }
     }
 
