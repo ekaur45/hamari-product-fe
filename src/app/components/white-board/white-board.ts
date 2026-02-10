@@ -355,8 +355,15 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
                 return;
             }
 
-            // Handle ruler tool
+            // Handle ruler tool - only if not clicking on an existing object
             if (mathTool === 'ruler') {
+                // Check if user clicked on an existing object (don't create new ruler if moving existing one)
+                const target = opt.target;
+                if (target && target !== this.fabricCanvas) {
+                    // User clicked on an existing object, let it be handled normally
+                    return;
+                }
+                
                 const pointer = this.getPointer(opt);
                 this.isDrawingShape = true;
                 this.startPoint = { x: pointer.x, y: pointer.y };
@@ -533,7 +540,8 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         // Remove old group from canvas
         this.fabricCanvas.remove(rulerGroup);
         
-        // Create main ruler line
+        // Create main ruler line - line goes from (0,0) to (length, 0) in group coordinates
+        // The group will be positioned at (x0, y0) and rotated by angle
         const mainLine = new Line([0, 0, length, 0], {
             stroke: this.currentColor(),
             strokeWidth: 2,
@@ -607,10 +615,13 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         objects.push(lengthLabel);
         
         // Create new group with all objects
+        // Set origin to top-left so rotation happens around the start point
         const newRulerGroup = new Group(objects, {
             left: x0,
             top: y0,
             angle: angle,
+            originX: 'left',
+            originY: 'top',
             selectable: false,
             evented: false,
         });
@@ -925,6 +936,10 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         } else {
             // For other tools, just store the active tool
             this.activeMathTool.set(tool);
+            // Clear regular tool when math tool is activated
+            // Set to select tool as default when math tool is active but not drawing
+            this.currentTool.set('select');
+            this.applyToolToCanvas();
             // TODO: Implement other math tools
         }
     }
@@ -1160,6 +1175,9 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         const tool = getToolFromId(toolId);
         if (!tool || !this.fabricCanvas) return;
 
+        // Clear math tool when selecting a regular tool
+        this.activeMathTool.set(null);
+        
         this.currentTool.set(tool);
         this.applyToolToCanvas();
     }
