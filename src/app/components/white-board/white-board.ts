@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, ElementRef, EventEmitter, OnDestroy, Output, signal, ViewChild, input, inject, NgZone, HostListener } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { Canvas, PencilBrush, Rect, Circle, Ellipse, Line, Triangle, Path, IText } from 'fabric';
+import { Canvas, PencilBrush, Rect, Circle, Ellipse, Line, Triangle, Path, IText, Group } from 'fabric';
 import { WhiteboardPage } from "./pages/whiteboard-pages";
 import { WhiteboardSelectTool } from "./tools/whiteboard-select-tool";
 import { WhiteboardStickyNotes } from "./tools/whiteboard-sticky-notes";
@@ -69,6 +69,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     hasClipboard = signal<boolean>(false);
     activeUsers = signal<WhiteboardUser[]>([]);
     whiteboardOpen = signal<boolean>(true);
+    activeMathTool = signal<'ruler' | 'protractor' | 'equation' | 'graph' | 'calculator' | null>(null);
 
     // Fabric.js and MathJax instances
     private fabricCanvas: any = null;
@@ -345,11 +346,25 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         // Mouse events for shape drawing and text
         this.fabricCanvas.on('mouse:down', (opt: any) => {
             const tool = this.currentTool();
+            const mathTool = this.activeMathTool();
             
             // Handle text tool
             if (tool === 'text') {
                 const pointer = this.getPointer(opt);
                 this.addTextAt(pointer.x, pointer.y);
+                return;
+            }
+
+            // Handle ruler tool
+            if (mathTool === 'ruler') {
+                const pointer = this.getPointer(opt);
+                this.isDrawingShape = true;
+                this.startPoint = { x: pointer.x, y: pointer.y };
+                this.drawingObject = this.createRuler(pointer.x, pointer.y);
+                if (this.drawingObject) {
+                    this.fabricCanvas.add(this.drawingObject);
+                    this.fabricCanvas.requestRenderAll();
+                }
                 return;
             }
 
@@ -375,6 +390,15 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             // Get current mouse position - startPoint stays fixed!
             const pointer = this.getPointer(opt);
             const tool = this.currentTool();
+            const mathTool = this.activeMathTool();
+            
+            // Handle ruler update
+            if (mathTool === 'ruler') {
+                this.updateRuler(this.drawingObject, this.startPoint, pointer);
+                this.drawingObject.setCoords();
+                this.fabricCanvas.requestRenderAll();
+                return;
+            }
             
             // Update shape from fixed startPoint to current pointer position
             this.updateShape(this.drawingObject, tool, this.startPoint, pointer);
@@ -386,9 +410,18 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             if (!this.isDrawingShape) return;
             
             if (this.drawingObject) {
-                // Make shape selectable after drawing
-                this.drawingObject.selectable = true;
-                this.drawingObject.evented = true;
+                const mathTool = this.activeMathTool();
+                
+                // Make shape/ruler selectable after drawing
+                if (mathTool === 'ruler') {
+                    // For ruler, make it selectable and evented
+                    this.drawingObject.selectable = true;
+                    this.drawingObject.evented = true;
+                } else {
+                    // For regular shapes
+                    this.drawingObject.selectable = true;
+                    this.drawingObject.evented = true;
+                }
                 this.drawingObject = null;
             }
             this.isDrawingShape = false;
@@ -456,6 +489,137 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
      */
     private isShapeTool(tool: string): boolean {
         return ['rectangle', 'circle', 'oval', 'triangle', 'line', 'arrow'].includes(tool);
+    }
+
+    /**
+     * Create ruler object
+     */
+    private createRuler(x: number, y: number): any {
+        // Create a group that will contain the ruler line and measurement marks
+        const rulerGroup = new Group([], {
+            left: x,
+            top: y,
+            selectable: false,
+            evented: false,
+        });
+        
+        // Store initial position for updates
+        (rulerGroup as any).rulerStartX = x;
+        (rulerGroup as any).rulerStartY = y;
+        
+        return rulerGroup;
+    }
+
+    /**
+     * Update ruler during mouse move
+     */
+    private updateRuler(rulerGroup: any, start: { x: number; y: number }, end: { x: number; y: number }): void {
+        const x0 = start.x;
+        const y0 = start.y;
+        const x1 = end.x;
+        const y1 = end.y;
+        
+        // Calculate distance and angle
+        const dx = x1 - x0;
+        const dy = y1 - y0;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+        
+        if (length < 10) {
+            // Too short, don't draw
+            return;
+        }
+        
+        // Remove old group from canvas
+        this.fabricCanvas.remove(rulerGroup);
+        
+        // Create main ruler line
+        const mainLine = new Line([0, 0, length, 0], {
+            stroke: this.currentColor(),
+            strokeWidth: 2,
+            selectable: false,
+            evented: false,
+        });
+        
+        const objects: any[] = [mainLine];
+        
+        // Add measurement marks (every 20 pixels = 1 unit)
+        const unitSize = 20; // pixels per unit
+        const numUnits = Math.floor(length / unitSize);
+        const markHeight = 8;
+        
+        // Add marks along the ruler
+        for (let i = 0; i <= numUnits; i++) {
+            const x = i * unitSize;
+            const isMajorMark = i % 5 === 0; // Major mark every 5 units
+            const markH = isMajorMark ? markHeight : markHeight / 2;
+            
+            // Top mark
+            const topMark = new Line([x, -markH, x, 0], {
+                stroke: this.currentColor(),
+                strokeWidth: isMajorMark ? 2 : 1,
+                selectable: false,
+                evented: false,
+            });
+            objects.push(topMark);
+            
+            // Bottom mark
+            const bottomMark = new Line([x, 0, x, markH], {
+                stroke: this.currentColor(),
+                strokeWidth: isMajorMark ? 2 : 1,
+                selectable: false,
+                evented: false,
+            });
+            objects.push(bottomMark);
+            
+            // Add number labels for major marks
+            if (isMajorMark && i > 0) {
+                const label = new IText(i.toString(), {
+                    left: x,
+                    top: -markH - 15,
+                    fontSize: 12,
+                    fill: this.currentColor(),
+                    fontFamily: 'Arial, sans-serif',
+                    textAlign: 'center',
+                    originX: 'center',
+                    originY: 'bottom',
+                    selectable: false,
+                    evented: false,
+                });
+                objects.push(label);
+            }
+        }
+        
+        // Add length label at the end
+        const lengthText = `${Math.round(length)}px`;
+        const lengthLabel = new IText(lengthText, {
+            left: length / 2,
+            top: markHeight + 10,
+            fontSize: 11,
+            fill: this.currentColor(),
+            fontFamily: 'Arial, sans-serif',
+            textAlign: 'center',
+            originX: 'center',
+            originY: 'top',
+            selectable: false,
+            evented: false,
+        });
+        objects.push(lengthLabel);
+        
+        // Create new group with all objects
+        const newRulerGroup = new Group(objects, {
+            left: x0,
+            top: y0,
+            angle: angle,
+            selectable: false,
+            evented: false,
+        });
+        
+        // Add new group to canvas
+        this.fabricCanvas.add(newRulerGroup);
+        
+        // Update the drawing object reference
+        this.drawingObject = newRulerGroup;
     }
 
     /**
@@ -753,6 +917,16 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     onStickyNoteSelect(stickyNoteId: string): void {
     }
     onMathToolActivate(tool: 'ruler' | 'protractor' | 'equation' | 'graph' | 'calculator'): void {
+        if (tool === 'ruler') {
+            this.activeMathTool.set('ruler');
+            // Switch to a special tool mode for ruler
+            this.currentTool.set('ruler');
+            this.applyToolToCanvas();
+        } else {
+            // For other tools, just store the active tool
+            this.activeMathTool.set(tool);
+            // TODO: Implement other math tools
+        }
     }
     onClear(): void {
     }
@@ -1004,8 +1178,8 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         this.fabricCanvas.selection = tool === 'select';
         this.fabricCanvas.defaultCursor = tool === 'select' ? 'default' : 'crosshair';
 
-        // For shape tools, disable selection to prevent interference
-        if (this.isShapeTool(tool)) {
+        // For shape tools and ruler, disable selection to prevent interference
+        if (this.isShapeTool(tool) || tool === 'ruler') {
             this.fabricCanvas.selection = false;
         }
 
