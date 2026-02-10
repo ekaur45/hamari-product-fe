@@ -29,7 +29,8 @@ export const TOOL_MAP: ToolMapping = {
     'textToolMobile': 'text',
     'imageTool': 'image',
     'imageToolMobile': 'image',
-    'selectTool': 'select'
+    'selectTool': 'select',
+    'stickyNoteTool': 'stickyNote'
 };
 
 /**

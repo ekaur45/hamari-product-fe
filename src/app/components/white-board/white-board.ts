@@ -417,6 +417,53 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
                 return;
             }
 
+            // Handle sticky note tool
+            if (tool === 'stickyNote') {
+                const target = opt.target;
+                // If clicking on existing sticky note, allow selection/editing
+                if (target && target !== this.fabricCanvas) {
+                    // Check if it's a sticky note group
+                    if ((target as any).isStickyNote) {
+                        // Allow normal selection/editing - text will be editable on click
+                        const text = (target as any).text;
+                        if (text) {
+                            setTimeout(() => {
+                                if (!text.isEditing) {
+                                    text.enterEditing();
+                                }
+                            }, 200);
+                        }
+                        return;
+                    }
+                    // Check if it's inside a sticky note group (text or rect)
+                    const parent = (target as any).group;
+                    if (parent && parent.isStickyNote) {
+                        // If clicking on text, allow editing immediately
+                        if (target === parent.text) {
+                            setTimeout(() => {
+                                if (!target.isEditing) {
+                                    target.enterEditing();
+                                }
+                            }, 100);
+                        } else if (target === parent.rect) {
+                            // Clicking on rect background - edit text
+                            setTimeout(() => {
+                                const text = parent.text;
+                                if (text && !text.isEditing) {
+                                    text.enterEditing();
+                                }
+                            }, 150);
+                        }
+                        return;
+                    }
+                }
+                
+                // Create new sticky note at click position
+                const pointer = this.getPointer(opt);
+                this.createStickyNote(pointer.x, pointer.y);
+                return;
+            }
+
             // Handle ruler tool - only if not clicking on an existing object
             if (mathTool === 'ruler') {
                 // Check if user clicked on an existing object (don't create new ruler if moving existing one)
@@ -1997,7 +2044,204 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     }
 
     onAddStickyNote(data: { x: number; y: number; color: string }): void {
-        // TODO: Implement sticky note
+        this.createStickyNote(data.x, data.y, data.color);
+    }
+
+    /**
+     * Create a sticky note on the canvas
+     */
+    private createStickyNote(x: number, y: number, color?: string): void {
+        if (!this.fabricCanvas) return;
+
+        const noteColor = color || this.getStickyNoteColor();
+        const noteWidth = 200;
+        const noteHeight = 150;
+        
+        // Create background rectangle (relative to group origin)
+        const rect = new Rect({
+            left: 0,
+            top: 0,
+            width: noteWidth,
+            height: noteHeight,
+            fill: noteColor,
+            stroke: '#d1d5db',
+            strokeWidth: 1,
+            rx: 4, // Rounded corners
+            ry: 4,
+            selectable: false,
+            evented: false,
+        });
+
+        // Create text object (relative to group origin)
+        // Position at top-left with padding
+        const textPadding = 10;
+        const textMaxHeight = noteHeight - (textPadding * 2);
+        const text = new IText('', {
+            left: textPadding,
+            top: textPadding,
+            width: noteWidth - (textPadding * 2),
+            fontSize: 14,
+            fontFamily: 'Arial, sans-serif',
+            fill: '#1f2937',
+            textAlign: 'left',
+            originX: 'left',
+            originY: 'top',
+            editable: true,
+            selectable: true,
+            evented: true,
+            splitByGrapheme: true,
+            lockUniScaling: true,
+            // Set fixed height for clipping (scrolling effect when text overflows)
+            height: textMaxHeight,
+            // Temporarily remove clipPath to ensure editing works
+            // clipPath can interfere with text editing in groups
+            // clipPath: new Rect({
+            //     left: 0,
+            //     top: 0,
+            //     width: noteWidth - (textPadding * 2),
+            //     height: textMaxHeight,
+            //     absolutePositioned: true,
+            // }),
+            charSpacing: 0,
+            lineHeight: 1.2,
+        });
+
+        // Create group with both objects
+        // Note: In Fabric.js, text editing in groups requires subTargetCheck
+        const stickyNoteGroup = new Group([rect, text], {
+            left: x,
+            top: y,
+            selectable: true,
+            evented: true,
+            subTargetCheck: true, // Allow interaction with objects inside group
+        });
+
+        // Mark as sticky note
+        (stickyNoteGroup as any).isStickyNote = true;
+        (stickyNoteGroup as any).stickyNoteId = `sticky-${Date.now()}`;
+        (stickyNoteGroup as any).noteColor = noteColor;
+
+        // Store references for later updates
+        (stickyNoteGroup as any).rect = rect;
+        (stickyNoteGroup as any).text = text;
+
+        // Update rect size when text changes (but keep max height for scrolling)
+        text.on('changed', () => {
+            const textHeight = text.calcTextHeight();
+            // Set max height - text will scroll if it exceeds this
+            const maxHeight = 300; // Max visible height before scrolling
+            const newHeight = Math.min(maxHeight, Math.max(150, textHeight + (textPadding * 2)));
+            rect.set({
+                height: newHeight,
+            });
+            // Update group dimensions
+            stickyNoteGroup.set({
+                height: newHeight,
+            });
+            // Update text height to match visible area
+            const newTextMaxHeight = newHeight - (textPadding * 2);
+            text.set({
+                height: newTextMaxHeight,
+            });
+            // clipPath removed temporarily to ensure editing works
+            // if (text.clipPath) {
+            //     (text.clipPath as any).set({
+            //         height: newTextMaxHeight,
+            //     });
+            // }
+            stickyNoteGroup.setCoords();
+            this.fabricCanvas.requestRenderAll();
+        });
+
+        // Handle click on sticky note to edit text
+        // When clicking on the group or rect, activate text for editing
+        stickyNoteGroup.on('mousedown', (e: any) => {
+            // If clicking on the group or rect background
+            if (e.target === stickyNoteGroup || e.target === rect) {
+                // Don't stop propagation - let Fabric handle it, but activate text
+                setTimeout(() => {
+                    // Exit editing on other objects first
+                    this.fabricCanvas.getObjects().forEach((obj: any) => {
+                        if (obj !== text && obj.isEditing !== undefined && obj.isEditing) {
+                            obj.exitEditing();
+                        }
+                    });
+                    // Activate the text object and enter editing
+                    this.fabricCanvas.setActiveObject(text);
+                    this.fabricCanvas.requestRenderAll();
+                    // Enter editing mode
+                    setTimeout(() => {
+                        if (text && !text.isEditing) {
+                            text.enterEditing();
+                        }
+                    }, 50);
+                }, 100);
+            }
+        });
+
+        // Handle double-click to edit text
+        stickyNoteGroup.on('mousedblclick', () => {
+            this.fabricCanvas.setActiveObject(text);
+            text.enterEditing();
+        });
+
+        // Handle click directly on text
+        text.on('mousedown', () => {
+            // Text click should allow editing
+            setTimeout(() => {
+                if (!text.isEditing) {
+                    text.enterEditing();
+                }
+            }, 50);
+        });
+
+        // Add group to canvas
+        this.fabricCanvas.add(stickyNoteGroup);
+        this.fabricCanvas.setActiveObject(stickyNoteGroup);
+        this.fabricCanvas.requestRenderAll();
+
+        // Start editing text immediately after creation
+        // Need to set text as active object first when it's in a group
+        setTimeout(() => {
+            // Set the text as the active object (Fabric.js will handle group interaction)
+            this.fabricCanvas.setActiveObject(text);
+            this.fabricCanvas.requestRenderAll();
+            // Then enter editing mode
+            setTimeout(() => {
+                try {
+                    if (text && typeof text.enterEditing === 'function') {
+                        text.enterEditing();
+                    }
+                } catch (error) {
+                    console.warn('Error entering edit mode:', error);
+                }
+            }, 100);
+        }, 200);
+    }
+
+    /**
+     * Get a color for sticky note (cycle through colors)
+     */
+    private getStickyNoteColor(): string {
+        const colors = [
+            '#fef08a', // Yellow
+            '#fde047', // Bright yellow
+            '#fbbf24', // Amber
+            '#fb923c', // Orange
+            '#f87171', // Red
+            '#f472b6', // Pink
+            '#c084fc', // Purple
+            '#a78bfa', // Violet
+            '#60a5fa', // Blue
+            '#34d399', // Green
+            '#4ade80', // Emerald
+            '#a7f3d0', // Teal
+        ];
+        
+        // Get count of existing sticky notes to cycle colors
+        const existingNotes = this.fabricCanvas.getObjects().filter((obj: any) => obj.isStickyNote && obj.type === 'rect');
+        const colorIndex = existingNotes.length % colors.length;
+        return colors[colorIndex];
     }
     
     /**
@@ -2031,12 +2275,21 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         // For shape tools, ruler, protractor, equation, and graph, disable selection to prevent interference
         if (this.isShapeTool(tool) || tool === 'ruler' || tool === 'protractor' || tool === 'equation' || tool === 'graph') {
             this.fabricCanvas.selection = false;
+        } else if (tool === 'stickyNote') {
+            // Enable selection for sticky note tool so existing notes can be selected
+            this.fabricCanvas.selection = true;
         }
 
         // Modify ALL objects (like working version does)
         this.fabricCanvas.forEachObject((obj: any) => {
-            obj.selectable = tool === 'select';
-            obj.evented = tool === 'select';
+            // Keep sticky notes selectable when sticky note tool is active
+            if (obj.isStickyNote) {
+                obj.selectable = tool === 'select' || tool === 'stickyNote';
+                obj.evented = tool === 'select' || tool === 'stickyNote';
+            } else {
+                obj.selectable = tool === 'select';
+                obj.evented = tool === 'select';
+            }
         });
 
         // Configure drawing tools
