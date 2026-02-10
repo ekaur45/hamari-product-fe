@@ -1958,8 +1958,8 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         if (!this.fabricCanvas) return;
         // Get current zoom from viewportTransform (first element is scaleX/zoom)
         const vpt = this.fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0];
-        const currentZoom = vpt[0] || 1;
-        // Use larger step to reduce number of updates
+        const currentZoom = Math.abs(vpt[0]) || 1; // Ensure positive zoom value
+        // Increase zoom (make things bigger) - clamp to max 3x
         const newZoom = Math.min(3, currentZoom + 0.2);
         this.setCanvasZoom(newZoom);
     }
@@ -1968,24 +1968,55 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         if (!this.fabricCanvas) return;
         // Get current zoom from viewportTransform (first element is scaleX/zoom)
         const vpt = this.fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0];
-        const currentZoom = vpt[0] || 1;
-        // Use larger step to reduce number of updates
+        const currentZoom = Math.abs(vpt[0]) || 1; // Ensure positive zoom value
+        // Decrease zoom (make things smaller) - clamp to min 0.1x
         const newZoom = Math.max(0.1, currentZoom - 0.2);
         this.setCanvasZoom(newZoom);
     }
 
     onZoomReset(): void {
         if (!this.fabricCanvas) return;
-        this.setCanvasZoom(1);
+        
+        const canvas = this.fabricCanvas;
+        
+        // Reset zoom to 1 and center the canvas
+        // Simply reset the viewport transform to default (no zoom, no pan)
+        const resetVpt = [1, 0, 0, 1, 0, 0];
+        canvas.setViewportTransform(resetVpt);
+        
+        // Recalculate canvas offset
+        canvas.calcOffset();
+        
+        // Update zoom level signal
+        this.zoomLevel.set(1);
+        
+        // Reset wrapper size
+        if (this.canvasWrapper?.nativeElement) {
+            const wrapper = this.canvasWrapper.nativeElement;
+            wrapper.style.width = '100%';
+            wrapper.style.height = '100%';
+            wrapper.style.minWidth = '100%';
+            wrapper.style.minHeight = '100%';
+        }
+        
+        // Ensure container scrolling is reset
+        if (this.canvasContainer?.nativeElement) {
+            this.canvasContainer.nativeElement.scrollLeft = 0;
+            this.canvasContainer.nativeElement.scrollTop = 0;
+        }
+        
+        // Render
+        canvas.requestRenderAll();
     }
 
     /**
      * Set zoom level on Fabric.js canvas with proper viewport transform
      */
     private setCanvasZoom(zoom: number): void {
-        if (!this.fabricCanvas) return;
+        if (!this.fabricCanvas || !this.canvasContainer?.nativeElement) return;
         
         const canvas = this.fabricCanvas;
+        const container = this.canvasContainer.nativeElement;
         
         // Get current viewport transform (if it exists)
         let vpt = canvas.viewportTransform;
@@ -2002,21 +2033,27 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             return;
         }
         
-        // Get canvas dimensions
-        const canvasWidth = canvas.getWidth();
-        const canvasHeight = canvas.getHeight();
+        // Get container dimensions
+        const containerRect = container.getBoundingClientRect();
+        const containerWidth = containerRect.width;
+        const containerHeight = containerRect.height;
         
-        // Calculate canvas center in canvas coordinates
-        const canvasCenterX = canvasWidth / 2;
-        const canvasCenterY = canvasHeight / 2;
+        // Get the center of the visible viewport (relative to container)
+        const viewportCenterX = containerWidth / 2;
+        const viewportCenterY = containerHeight / 2;
         
-        // Calculate current center position in viewport coordinates
-        const currentCenterX = canvasCenterX * currentZoom + vpt[4];
-        const currentCenterY = canvasCenterY * currentZoom + vpt[5];
+        // Get canvas element position
+        const canvasEl = canvas.getElement();
+        const canvasRect = canvasEl.getBoundingClientRect();
         
-        // Calculate new translation to keep the same center point
-        const newTranslateX = currentCenterX - canvasCenterX * zoom;
-        const newTranslateY = currentCenterY - canvasCenterY * zoom;
+        // Calculate the point in canvas coordinates that corresponds to the viewport center
+        // Account for current zoom and translation
+        const canvasPointX = (viewportCenterX - vpt[4]) / currentZoom;
+        const canvasPointY = (viewportCenterY - vpt[5]) / currentZoom;
+        
+        // Calculate new translation to keep the same canvas point at the viewport center
+        const newTranslateX = viewportCenterX - canvasPointX * zoom;
+        const newTranslateY = viewportCenterY - canvasPointY * zoom;
         
         // Create new viewport transform
         const newVpt = [zoom, 0, 0, zoom, newTranslateX, newTranslateY];
@@ -2037,7 +2074,10 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         }
         this.zoomUpdateTimeout = setTimeout(() => {
             this.updateCanvasScrollability(zoom);
-            // Only render if needed (setViewportTransform should have already rendered)
+            // Ensure all objects are visible after zoom
+            if (this.fabricCanvas) {
+                this.fabricCanvas.requestRenderAll();
+            }
         }, 100);
     }
 

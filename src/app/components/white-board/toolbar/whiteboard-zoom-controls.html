@@ -1,13 +1,14 @@
 <div
-    class="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl p-2 border border-gray-200/60 shadow-md flex flex-wrap items-center gap-2 backdrop-blur-sm">
+    class="border border-gray-200/60 rounded-xl flex flex-wrap items-center gap-2 bg-white shadow-sm">
     <button id="zoomOut" (click)="onZoomOut()"
         class="p-2.5 hover:bg-gray-100 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
         title="Zoom Out">
         <i class="fas fa-search-minus text-gray-700 text-base"></i>
     </button>
     <span
-        class="px-4 py-2 text-xs text-gray-800 font-bold min-w-[4rem] text-center bg-gradient-to-br from-gray-50 to-white rounded-xl shadow-sm border border-gray-200/60">{{
-        getZoomLevel() }}</span>
+        class="px-4 py-2 text-sm text-gray-900 font-bold min-w-[5rem] text-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm border border-blue-200/60 font-mono">
+        {{ getZoomLevel() }}
+    </span>
     <button id="zoomIn" (click)="onZoomIn()"
         class="p-2.5 hover:bg-gray-100 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
         title="Zoom In">
