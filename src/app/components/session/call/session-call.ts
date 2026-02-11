@@ -866,11 +866,19 @@ export default class SessionCall implements OnInit, OnDestroy {
         try {
             const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
             this.screenShareStream.set(stream);
+            this.activeTab.set('screen-sharing');
+            if(!this.tabs().includes('screen-sharing')){
+                this.tabs.set([...this.tabs(), 'screen-sharing']);
+            }
             stream.onremovetrack = (event) => {
                 console.log('🔄 Screen share track removed');
                 this.screenShareStream.set(null);
                 this.isScreenSharing.set(false);
                 this.tabs.set(this.tabs().filter(tab => tab !== 'screen-sharing'));
+                // Switch to whiteboard if available, otherwise default view
+                if(this.showWhiteboard() && this.tabs().includes('whiteboard')) {
+                    this.activeTab.set('whiteboard');
+                }
             };
         } catch (error) {
             console.error('Error toggling screen share:', error);
@@ -996,5 +1004,13 @@ export default class SessionCall implements OnInit, OnDestroy {
     cancelRateAndReview(): void {
         this.showRateAndReviewDialog.set(false);
         this.showLeaveDialog.set(true);
+    }
+    
+    openWhiteboard(): void {
+        this.showWhiteboard.set(true);
+        this.activeTab.set('whiteboard');
+        if(!this.tabs().includes('whiteboard')){
+            this.tabs.set([...this.tabs(), 'whiteboard']);
+        }
     }
 }

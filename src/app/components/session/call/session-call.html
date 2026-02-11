@@ -84,16 +84,26 @@
         } @else if(isConnected()) {
         <!-- Connected State - Video Layout -->
         <div class="h-full w-full relative flex flex-col md:flex-row text-white">
-            @if(showWhiteboard() && activeTab() === 'whiteboard') {
+            <!-- Whiteboard - Keep mounted but hide when not active -->
+            @if(showWhiteboard()) {
             <app-white-board [sessionId]="bookingId() || sessionId()" [currentUserRole]="userType()" [socket]="socket"
-                (onExitWhiteboard)="showWhiteboard.set(false)" class="w-full h-full">
+                (onExitWhiteboard)="showWhiteboard.set(false)" 
+                class="w-full h-full"
+                [class.hidden]="activeTab() !== 'whiteboard'">
             </app-white-board>
-            } @else if(activeTab() === 'screen-sharing' && screenShareStream()) {
-            <div class="flex flex-col h-[calc(100vh-130px)] overflow-hidden w-full">
-                <video #screenShareVideo [appStream]="screenShareStream()" autoplay playsinline class="w-full h-full object-cover" class="w-full h-full object-cover"></video>
+            }
+            
+            <!-- Screen Sharing - Keep mounted but hide when not active -->
+            @if(activeTab() === 'screen-sharing' && screenShareStream()) {
+            <div class="flex flex-col h-[calc(100vh-130px)] overflow-hidden w-full"
+                [class.hidden]="activeTab() !== 'screen-sharing'">
+                <video #screenShareVideo [appStream]="screenShareStream()" autoplay playsinline class="w-full h-full object-cover"></video>
             </div>
-            } @else {
-            <div class="relative flex-1 bg-gray-900 overflow-hidden h-1/2 md:h-full">
+            }
+            
+            <!-- Default Video View - Hide when whiteboard or screen-sharing is active -->
+            <div class="relative flex-1 bg-gray-900 overflow-hidden h-1/2 md:h-full"
+                [class.hidden]="(showWhiteboard() && activeTab() === 'whiteboard') || (activeTab() === 'screen-sharing' && screenShareStream())">
                 @if(remoteStream()) {
                 <video #remoteVideo [appStream]="remoteStream()" autoplay playsinline class="w-full h-full object-cover"
                     style="transform: scaleX(-1);" [class.hidden]="!remoteParticipant()?.isVideoOn">
@@ -158,7 +168,6 @@
                     </div>
                 </div>
             </div>
-            }
             <div class="flex flex-col gap-2 top-0 right-0 p-2"
             [ngClass]="{absolute: !showWhiteboard()}"
             >
@@ -358,7 +367,7 @@
                 </button>
 
                 <!-- Whiteboard -->
-                <button (click)="showWhiteboard.set(true)"
+                <button (click)="openWhiteboard()"
                     class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-700 hover:bg-gray-600 text-white rounded-full flex items-center justify-center transition flex-shrink-0 hidden sm:flex"
                     [title]="showWhiteboard() ? 'Hide whiteboard' : 'Show whiteboard'">
                     <i class="fas fa-pen-nib text-sm sm:text-base"></i>
