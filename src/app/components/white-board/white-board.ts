@@ -1836,6 +1836,29 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         }
     }
     onClear(): void {
+        if (!this.fabricCanvas) return;
+        
+        // Remove all objects from the canvas
+        const objects = this.fabricCanvas.getObjects();
+        
+        // Remove each object
+        objects.forEach((obj: any) => {
+            this.fabricCanvas.remove(obj);
+        });
+        
+        // Clear the canvas
+        this.fabricCanvas.clear();
+        
+        // Restore background color if it was set
+        if (this.fabricCanvas.backgroundColor) {
+            this.fabricCanvas.backgroundColor = this.fabricCanvas.backgroundColor;
+        }
+        
+        // Render the cleared canvas
+        this.fabricCanvas.requestRenderAll();
+        
+        // Reset selection
+        this.hasSelection.set(false);
     }
     onSaveWhiteboard(): void {
     }
