@@ -686,6 +686,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
 
 
     onCloseWhiteboard(): void {
+        this.onExitWhiteboard.emit();
     }
     onAddTab(tab: 'pen' | 'screen-sharing'): void {
     }

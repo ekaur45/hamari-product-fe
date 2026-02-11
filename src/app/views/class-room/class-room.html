@@ -1,3 +1,5 @@
 <p-toast />
 <p-confirmDialog />
+@if(booking()) {
 <taleemiyat-session-call [bookingId]="bookingId()" [sessionId]="booking()!.id" [booking]="booking()" [testMode]="false"></taleemiyat-session-call>
+}

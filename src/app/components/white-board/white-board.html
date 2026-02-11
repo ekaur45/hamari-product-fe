@@ -31,7 +31,7 @@
             </div>
         </app-whiteboard-top-bar>
     </div>
-    <div class="grid grid-cols-[auto_1fr] h-full">
+    <div class="grid grid-cols-[auto_1fr] h-[calc(100dvh-230px)]">
         <div class="h-full relative">
             <div
                 class="hidden sm:block bg-white/95 backdrop-blur-sm border-r border-gray-200/80 shadow-lg w-full flex-shrink-0 flex flex-col h-full">
@@ -86,9 +86,8 @@
                 </div>
             </div>
         </div>
-        <div>
+        <div class="w-full h-full overflow-auto">
             <div #whiteboardView [class.hidden]="!whiteboardOpen()" class="w-full h-full flex flex-col z-50">
-                <!-- Canvas Container -->
                 <div #canvasContainer class="flex-1 overflow-auto bg-gradient-to-br from-gray-100 to-gray-200"
                     style="position: relative;">
                     <div #canvasWrapper
@@ -96,7 +95,6 @@
                         <canvas #whiteboardCanvas class="shadow-2xl" style="width: 100%; height: 100%; display: block;"
                             width="0" height="0">
                         </canvas>
-                        <!-- Grid Overlay -->
                         <canvas #gridCanvas
                             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.25;"
                             width="0" height="0">
