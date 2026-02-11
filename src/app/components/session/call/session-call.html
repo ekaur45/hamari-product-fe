@@ -1,4 +1,4 @@
-<div class="bg-gray-900 grid h-screen grid-rows-[auto_1fr_auto] overflow-hidden">
+<div class="bg-gray-900 grid h-screen grid-rows-[auto_1fr_auto] overflow-hidden" #recordContainer>
     <!-- Header -->
     <header
         class="bg-gray-800 text-white px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between border-b border-gray-700 z-10">
@@ -83,7 +83,7 @@
         </div>
         } @else if(isConnected()) {
         <!-- Connected State - Video Layout -->
-        <div class="h-full w-full relative flex flex-col md:flex-row text-white">
+        <div class="h-full w-full relative flex flex-col md:flex-row">
             <!-- Whiteboard - Keep mounted but hide when not active -->
             @if(showWhiteboard()) {
             <app-white-board [sessionId]="bookingId() || sessionId()" [currentUserRole]="userType()" [socket]="socket"
@@ -372,6 +372,33 @@
                     [title]="showWhiteboard() ? 'Hide whiteboard' : 'Show whiteboard'">
                     <i class="fas fa-pen-nib text-sm sm:text-base"></i>
                 </button>
+
+                <!-- Screenshot -->
+                <button (click)="captureScreenshot()"
+                    class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-700 hover:bg-gray-600 text-white rounded-full flex items-center justify-center transition flex-shrink-0 hidden sm:flex"
+                    title="Take screenshot">
+                    <i class="fas fa-camera text-sm sm:text-base"></i>
+                </button>
+
+                <!-- Recording -->
+                <button (click)="toggleRecording()"
+                    [class.bg-red-600]="isRecording()"
+                    [class.hover:bg-red-700]="isRecording()"
+                    [class.bg-gray-700]="!isRecording()"
+                    [class.hover:bg-gray-600]="!isRecording()"
+                    class="w-10 h-10 sm:w-12 sm:h-12 text-white rounded-full flex items-center justify-center transition flex-shrink-0 hidden sm:flex relative"
+                    [title]="isRecording() ? 'Stop recording' : 'Start recording'">
+                    <i class="fas" [ngClass]="{'fa-stop': isRecording(), 'fa-circle': !isRecording()}" class="text-sm sm:text-base"></i>
+                    @if(isRecording()) {
+                    <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                    }
+                </button>
+                @if(isRecording()) {
+                <div class="flex items-center space-x-1 sm:space-x-2 bg-red-600 px-2 sm:px-3 py-1 rounded-lg hidden sm:flex">
+                    <i class="fas fa-circle text-xs animate-pulse"></i>
+                    <span class="text-xs sm:text-sm font-medium">{{ recordingDuration() }}</span>
+                </div>
+                }
 
                 <!-- View Mode Toggle (Split/PIP) -->
                 <button (click)="toggleViewMode()"
