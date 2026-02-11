@@ -64,7 +64,7 @@ export default class SessionCall implements OnInit, OnDestroy {
     // Connection quality
     connectionQuality = signal<'excellent' | 'good' | 'fair' | 'poor'>('good');
     tabs = signal<('whiteboard' | 'screen-sharing')[]>([]);
-    activeTab = signal<'whiteboard' | 'screen-sharing'>('whiteboard');
+    activeTab = signal<'whiteboard' | 'screen-sharing' | 'default'>('default');
     menuItems = signal<MenuItem[]>([
         {
             label: 'Whiteboard',
@@ -127,6 +127,10 @@ export default class SessionCall implements OnInit, OnDestroy {
         UNMUTE_VIDEO: 'unmute-video',
         LEAVE_CALL: 'leave-call',
         END_CALL: 'end-call',
+        WHITEBOARD_OPEN: 'whiteboard-open',
+        WHITEBOARD_CLOSE: 'whiteboard-close',
+        SCREEN_SHARE_START: 'screen-share-start',
+        SCREEN_SHARE_STOP: 'screen-share-stop',
     };
 
     private readonly LISTENERS = {
@@ -140,6 +144,10 @@ export default class SessionCall implements OnInit, OnDestroy {
         UNMUTE_VIDEO: 'unmute-video',
         TEACHER_LEFT: 'teacher-left',
         CALL_ENDED: 'call-ended',
+        WHITEBOARD_OPEN: 'whiteboard-open',
+        WHITEBOARD_CLOSE: 'whiteboard-close',
+        SCREEN_SHARE_START: 'screen-share-start',
+        SCREEN_SHARE_STOP: 'screen-share-stop',
     };
 
     constructor(
@@ -624,13 +632,69 @@ export default class SessionCall implements OnInit, OnDestroy {
         // Listen for when teacher leaves the call
         this.socket.on(this.LISTENERS.CALL_ENDED, (data: { userId: string, role: string }) => {
             console.log('👋 Teacher left the call:', data.userId);
-
+            
             // Only show rating dialog if current user is a student
             if (this.userType() === UserRole.STUDENT) {
                 // Close any open dialogs first
                 this.showLeaveDialog.set(false);
                 // Show rating dialog
                 this.showRateAndReviewDialog.set(true);
+            }
+        });
+        
+        // Listen for whiteboard open/close events from teacher
+        this.socket.on(this.LISTENERS.WHITEBOARD_OPEN, (data: { userId: string }) => {
+            console.log('📝 Teacher opened whiteboard:', data.userId);
+            // Only auto-switch if current user is a student
+            if (this.userType() === UserRole.STUDENT && data.userId !== this.authService.getCurrentUser()?.id) {
+                this.showWhiteboard.set(true);
+                this.activeTab.set('whiteboard');
+                if (!this.tabs().includes('whiteboard')) {
+                    this.tabs.set([...this.tabs(), 'whiteboard']);
+                }
+            }
+        });
+        
+        this.socket.on(this.LISTENERS.WHITEBOARD_CLOSE, (data: { userId: string }) => {
+            console.log('📝 Teacher closed whiteboard:', data.userId);
+            // Only auto-switch if current user is a student
+            if (this.userType() === UserRole.STUDENT && data.userId !== this.authService.getCurrentUser()?.id) {
+                // If whiteboard was active, switch to screen-sharing or default view
+                if (this.activeTab() === 'whiteboard') {
+                    // Switch to screen-sharing if available, otherwise default view
+                    if (this.tabs().includes('screen-sharing') && this.screenShareStream()) {
+                        this.activeTab.set('screen-sharing');
+                    } else {
+                        this.activeTab.set('default');
+                    }
+                }
+            }
+        });
+        
+        // Listen for screen share start/stop events from teacher
+        this.socket.on(this.LISTENERS.SCREEN_SHARE_START, (data: { userId: string }) => {
+            console.log('🖥️ Teacher started screen sharing:', data.userId);
+            // Only auto-switch if current user is a student
+            if (this.userType() === UserRole.STUDENT && data.userId !== this.authService.getCurrentUser()?.id) {
+                this.activeTab.set('screen-sharing');
+                if (!this.tabs().includes('screen-sharing')) {
+                    this.tabs.set([...this.tabs(), 'screen-sharing']);
+                }
+            }
+        });
+        
+        this.socket.on(this.LISTENERS.SCREEN_SHARE_STOP, (data: { userId: string }) => {
+            console.log('🖥️ Teacher stopped screen sharing:', data.userId);
+            // Only auto-switch if current user is a student
+            if (this.userType() === UserRole.STUDENT && data.userId !== this.authService.getCurrentUser()?.id) {
+                // Switch to whiteboard if available, otherwise default view
+                if (this.activeTab() === 'screen-sharing') {
+                    if (this.showWhiteboard() && this.tabs().includes('whiteboard')) {
+                        this.activeTab.set('whiteboard');
+                    } else {
+                        this.activeTab.set('default');
+                    }
+                }
             }
         });
     }
@@ -892,30 +956,75 @@ export default class SessionCall implements OnInit, OnDestroy {
     }
 
     async toggleScreenShare(): Promise<void> {
-        // TODO: Implement screen sharing
-        try {
-            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
-            this.screenShareStream.set(stream);
-            this.activeTab.set('screen-sharing');
-            if (!this.tabs().includes('screen-sharing')) {
-                this.tabs.set([...this.tabs(), 'screen-sharing']);
-            }
-            stream.onremovetrack = (event) => {
-                console.log('🔄 Screen share track removed');
+        const wasSharing = this.isScreenSharing();
+        
+        if (wasSharing) {
+            // Stop screen sharing
+            if (this.screenShareStream()) {
+                this.screenShareStream()!.getTracks().forEach(track => track.stop());
                 this.screenShareStream.set(null);
-                this.isScreenSharing.set(false);
-                this.tabs.set(this.tabs().filter(tab => tab !== 'screen-sharing'));
-                // Switch to whiteboard if available, otherwise default view
-                if (this.showWhiteboard() && this.tabs().includes('whiteboard')) {
-                    this.activeTab.set('whiteboard');
+            }
+            this.isScreenSharing.set(false);
+            this.tabs.set(this.tabs().filter(tab => tab !== 'screen-sharing'));
+            
+            // Switch to whiteboard if available, otherwise default view
+            if (this.showWhiteboard() && this.tabs().includes('whiteboard')) {
+                this.activeTab.set('whiteboard');
+            }
+            
+            // Emit event to notify students (only if teacher)
+            if (this.userType() === UserRole.TEACHER && this.socket) {
+                const sessionId = this.bookingId() || this.sessionId();
+                this.socket.emit(this.EMITTERS.SCREEN_SHARE_STOP, {
+                    bookingId: sessionId,
+                    userId: this.authService.getCurrentUser()?.id
+                });
+            }
+        } else {
+            // Start screen sharing
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+                this.screenShareStream.set(stream);
+                this.isScreenSharing.set(true);
+                this.activeTab.set('screen-sharing');
+                if (!this.tabs().includes('screen-sharing')) {
+                    this.tabs.set([...this.tabs(), 'screen-sharing']);
                 }
-            };
-        } catch (error) {
-            console.error('Error toggling screen share:', error);
+                
+                // Emit event to notify students (only if teacher)
+                if (this.userType() === UserRole.TEACHER && this.socket) {
+                    const sessionId = this.bookingId() || this.sessionId();
+                    this.socket.emit(this.EMITTERS.SCREEN_SHARE_START, {
+                        bookingId: sessionId,
+                        userId: this.authService.getCurrentUser()?.id
+                    });
+                }
+                
+                stream.onremovetrack = (event) => {
+                    console.log('🔄 Screen share track removed');
+                    this.screenShareStream.set(null);
+                    this.isScreenSharing.set(false);
+                    this.tabs.set(this.tabs().filter(tab => tab !== 'screen-sharing'));
+                    
+                    // Switch to whiteboard if available, otherwise default view
+                    if (this.showWhiteboard() && this.tabs().includes('whiteboard')) {
+                        this.activeTab.set('whiteboard');
+                    }
+                    
+                    // Emit event to notify students (only if teacher)
+                    if (this.userType() === UserRole.TEACHER && this.socket) {
+                        const sessionId = this.bookingId() || this.sessionId();
+                        this.socket.emit(this.EMITTERS.SCREEN_SHARE_STOP, {
+                            bookingId: sessionId,
+                            userId: this.authService.getCurrentUser()?.id
+                        });
+                    }
+                };
+            } catch (error) {
+                console.error('Error toggling screen share:', error);
+                this.isScreenSharing.set(false);
+            }
         }
-
-
-        this.isScreenSharing.set(!this.isScreenSharing());
     }
 
     toggleViewMode(): void {
@@ -1041,6 +1150,29 @@ export default class SessionCall implements OnInit, OnDestroy {
         this.activeTab.set('whiteboard');
         if (!this.tabs().includes('whiteboard')) {
             this.tabs.set([...this.tabs(), 'whiteboard']);
+        }
+        
+        // Emit event to notify students (only if teacher)
+        if (this.userType() === UserRole.TEACHER && this.socket) {
+            const sessionId = this.bookingId() || this.sessionId();
+            this.socket.emit(this.EMITTERS.WHITEBOARD_OPEN, {
+                bookingId: sessionId,
+                userId: this.authService.getCurrentUser()?.id
+            });
+        }
+    }
+    
+    closeWhiteboard(): void {
+        const wasOpen = this.showWhiteboard();
+        this.showWhiteboard.set(false);
+        
+        // Emit event to notify students (only if teacher and whiteboard was open)
+        if (wasOpen && this.userType() === UserRole.TEACHER && this.socket) {
+            const sessionId = this.bookingId() || this.sessionId();
+            this.socket.emit(this.EMITTERS.WHITEBOARD_CLOSE, {
+                bookingId: sessionId,
+                userId: this.authService.getCurrentUser()?.id
+            });
         }
     }
     

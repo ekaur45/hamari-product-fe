@@ -87,7 +87,7 @@
             <!-- Whiteboard - Keep mounted but hide when not active -->
             @if(showWhiteboard()) {
             <app-white-board [sessionId]="bookingId() || sessionId()" [currentUserRole]="userType()" [socket]="socket"
-                (onExitWhiteboard)="showWhiteboard.set(false)" 
+                (onExitWhiteboard)="closeWhiteboard()" 
                 class="w-full h-full"
                 [class.hidden]="activeTab() !== 'whiteboard'">
             </app-white-board>

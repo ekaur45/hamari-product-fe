@@ -108,6 +108,10 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     private gridContext: CanvasRenderingContext2D | null = null;
     private resizeObserver: ResizeObserver | null = null;
     private mathJaxReadyPromise: Promise<void> | null = null;
+    
+    // Collaboration state
+    private isReceivingRemoteUpdate = false; // Flag to prevent emitting events for remote updates
+    private collaborationInitialized = false;
 
     // Shape drawing state
     private isDrawingShape = false;
@@ -117,14 +121,205 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     private graphClickTarget: any = null;
     private graphInitialState: { left: number; top: number; scaleX: number; scaleY: number; angle: number } | null = null;
 
+    private authService = inject(AuthService);
+    
     constructor(private ngZone: NgZone) {}
 
     ngAfterViewInit(): void {
         this.initializeFabric();
         this.initializeMathJax();
+        this.initializeCollaboration();
+    }
+    
+    /**
+     * Initialize real-time collaboration via socket
+     */
+    private initializeCollaboration(): void {
+        if (!this.socket() || !this.sessionId()) {
+            console.warn('Socket or sessionId not available for collaboration');
+            return;
+        }
+        
+        const socket = this.socket()!;
+        const sessionId = this.sessionId();
+        
+        // Listen for whiteboard object added from other users
+        socket.on(`whiteboard-object-added_${sessionId}`, (data: { objectData: any, userId: string }) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return; // Ignore own events
+            
+            this.isReceivingRemoteUpdate = true;
+            try {
+                this.applyRemoteObject(data.objectData);
+            } catch (error) {
+                console.error('Error applying remote object:', error);
+            } finally {
+                this.isReceivingRemoteUpdate = false;
+            }
+        });
+        
+        // Listen for whiteboard object modified from other users
+        socket.on(`whiteboard-object-modified_${sessionId}`, (data: { objectData: any, userId: string }) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return; // Ignore own events
+            
+            this.isReceivingRemoteUpdate = true;
+            try {
+                this.applyRemoteObjectModification(data.objectData);
+            } catch (error) {
+                console.error('Error applying remote object modification:', error);
+            } finally {
+                this.isReceivingRemoteUpdate = false;
+            }
+        });
+        
+        // Listen for whiteboard object removed from other users
+        socket.on(`whiteboard-object-removed_${sessionId}`, (data: { objectId: string, userId: string }) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return; // Ignore own events
+            
+            this.isReceivingRemoteUpdate = true;
+            try {
+                this.applyRemoteObjectRemoval(data.objectId);
+            } catch (error) {
+                console.error('Error applying remote object removal:', error);
+            } finally {
+                this.isReceivingRemoteUpdate = false;
+            }
+        });
+        
+        // Listen for whiteboard cleared from other users
+        socket.on(`whiteboard-cleared_${sessionId}`, (data: { userId: string }) => {
+            if (data.userId === this.authService.getCurrentUser()?.id) return; // Ignore own events
+            
+            this.isReceivingRemoteUpdate = true;
+            try {
+                this.fabricCanvas.clear();
+                this.fabricCanvas.backgroundColor = '#ffffff';
+                this.fabricCanvas.renderAll();
+            } catch (error) {
+                console.error('Error applying remote clear:', error);
+            } finally {
+                this.isReceivingRemoteUpdate = false;
+            }
+        });
+        
+        this.collaborationInitialized = true;
+        console.log('✅ Whiteboard collaboration initialized');
+    }
+    
+    /**
+     * Apply remote object to canvas
+     */
+    private applyRemoteObject(objectData: any): void {
+        if (!this.fabricCanvas) return;
+        
+        try {
+            // Parse the object data
+            const objects = JSON.parse(objectData);
+            objects.forEach((objData: any) => {
+                // Use Fabric.js's fromObject method to properly deserialize
+                const className = this.getFabricClass(objData.type);
+                if (className) {
+                    className.fromObject(objData, (obj: any) => {
+                        if (obj) {
+                            // Make remote objects non-selectable to prevent conflicts
+                            obj.selectable = false;
+                            obj.evented = false;
+                            this.fabricCanvas.add(obj);
+                            this.fabricCanvas.renderAll();
+                        }
+                    });
+                }
+            });
+        } catch (error) {
+            console.error('Error loading remote object:', error);
+        }
+    }
+    
+    /**
+     * Get Fabric.js class by type name
+     */
+    private getFabricClass(type: string): any {
+        const classMap: { [key: string]: any } = {
+            'rect': Rect,
+            'circle': Circle,
+            'ellipse': Ellipse,
+            'triangle': Triangle,
+            'line': Line,
+            'path': Path,
+            'i-text': IText,
+            'text': IText,
+            'group': Group,
+            'image': Image,
+        };
+        return classMap[type] || null;
+    }
+    
+    /**
+     * Apply remote object modification
+     */
+    private applyRemoteObjectModification(objectData: any): void {
+        if (!this.fabricCanvas) return;
+        
+        try {
+            const obj = this.fabricCanvas.getObjects().find((o: any) => o.id === objectData.id);
+            if (obj) {
+                obj.set(objectData);
+                obj.setCoords();
+                this.fabricCanvas.renderAll();
+            }
+        } catch (error) {
+            console.error('Error modifying remote object:', error);
+        }
+    }
+    
+    /**
+     * Apply remote object removal
+     */
+    private applyRemoteObjectRemoval(objectId: string): void {
+        if (!this.fabricCanvas) return;
+        
+        try {
+            const obj = this.fabricCanvas.getObjects().find((o: any) => o.id === objectId);
+            if (obj) {
+                this.fabricCanvas.remove(obj);
+                this.fabricCanvas.renderAll();
+            }
+        } catch (error) {
+            console.error('Error removing remote object:', error);
+        }
+    }
+    
+    /**
+     * Emit whiteboard event to other users
+     */
+    private emitWhiteboardEvent(event: string, data: any): void {
+        if (!this.socket() || !this.sessionId() || this.isReceivingRemoteUpdate) {
+            return; // Don't emit if receiving remote update or socket not available
+        }
+        
+        const socket = this.socket()!;
+        const sessionId = this.sessionId();
+        const userId = this.authService.getCurrentUser()?.id;
+        
+        // Emit with bookingId for backend routing
+        socket.emit(event, {
+            bookingId: sessionId, // Backend expects bookingId
+            sessionId: sessionId,
+            userId: userId,
+            ...data
+        });
     }
 
     ngOnDestroy(): void {
+        // Cleanup socket listeners
+        if (this.socket() && this.sessionId()) {
+            const socket = this.socket()!;
+            const sessionId = this.sessionId();
+            socket.off(`whiteboard-object-added_${sessionId}`);
+            socket.off(`whiteboard-object-modified_${sessionId}`);
+            socket.off(`whiteboard-object-removed_${sessionId}`);
+            socket.off(`whiteboard-cleared_${sessionId}`);
+        }
+        
         // Cleanup ResizeObserver
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
@@ -371,6 +566,21 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             this.ngZone.run(() => {
                 // Handle object modification
             });
+            
+            // Emit socket event for real-time collaboration
+            if (!this.isReceivingRemoteUpdate && this.collaborationInitialized && e.target) {
+                try {
+                    const obj = e.target;
+                    // Add unique ID if not present
+                    if (!obj.id) {
+                        obj.id = `obj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    }
+                    const objectData = obj.toObject();
+                    this.emitWhiteboardEvent('whiteboard-object-modified', { objectData });
+                } catch (error) {
+                    console.warn('Error emitting object:modified event:', error);
+                }
+            }
         });
 
         // Path created event (when drawing is complete)
@@ -416,6 +626,16 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             
             e.path.setCoords();
             this.fabricCanvas.requestRenderAll();
+            
+            // Emit socket event for real-time collaboration
+            if (!this.isReceivingRemoteUpdate && this.collaborationInitialized) {
+                try {
+                    const objectData = JSON.stringify([e.path.toObject()]);
+                    this.emitWhiteboardEvent('whiteboard-object-added', { objectData });
+                } catch (error) {
+                    console.warn('Error emitting path:created event:', error);
+                }
+            }
         });
 
         // Mouse events for shape drawing and text
@@ -625,6 +845,27 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             this.fabricCanvas.requestRenderAll();
         });
 
+        // Object added event (for shapes, text, etc.)
+        this.fabricCanvas.on('object:added', (e: any) => {
+            // Only emit for non-path objects (paths are handled in path:created)
+            if (!this.isReceivingRemoteUpdate && this.collaborationInitialized && e.target) {
+                const obj = e.target;
+                // Skip if it's a path (handled separately) or if it's being drawn (will be emitted on mouse:up)
+                if (obj.type !== 'path' && !this.isDrawingShape) {
+                    try {
+                        // Add unique ID if not present
+                        if (!obj.id) {
+                            obj.id = `obj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                        }
+                        const objectData = JSON.stringify([obj.toObject()]);
+                        this.emitWhiteboardEvent('whiteboard-object-added', { objectData });
+                    } catch (error) {
+                        console.warn('Error emitting object:added event:', error);
+                    }
+                }
+            }
+        });
+        
         this.fabricCanvas.on('mouse:up', (opt: any) => {
             // Handle graph click for function dialog (check before isDrawingShape)
             if (this.graphClickStartPoint && this.graphClickTarget && this.graphInitialState) {
@@ -678,6 +919,21 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
                     this.drawingObject.selectable = true;
                     this.drawingObject.evented = true;
                 }
+                
+                // Emit socket event for real-time collaboration (for shapes, rulers, protractors, graphs)
+                if (!this.isReceivingRemoteUpdate && this.collaborationInitialized) {
+                    try {
+                        // Add unique ID if not present
+                        if (!this.drawingObject.id) {
+                            this.drawingObject.id = `obj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                        }
+                        const objectData = JSON.stringify([this.drawingObject.toObject()]);
+                        this.emitWhiteboardEvent('whiteboard-object-added', { objectData });
+                    } catch (error) {
+                        console.warn('Error emitting shape creation event:', error);
+                    }
+                }
+                
                 this.drawingObject = null;
             }
             this.isDrawingShape = false;
@@ -1855,6 +2111,11 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             this.fabricCanvas.backgroundColor = this.fabricCanvas.backgroundColor;
         }
         
+        // Emit socket event for real-time collaboration
+        if (!this.isReceivingRemoteUpdate && this.collaborationInitialized) {
+            this.emitWhiteboardEvent('whiteboard-cleared', {});
+        }
+        
         // Render the cleared canvas
         this.fabricCanvas.requestRenderAll();
         
@@ -2265,8 +2526,27 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         if (activeObject.type === 'activeSelection') {
             const objects = (activeObject as any).getObjects();
             this.fabricCanvas.discardActiveObject();
+            
+            // Emit socket events for each removed object
+            if (!this.isReceivingRemoteUpdate && this.collaborationInitialized) {
+                objects.forEach((obj: any) => {
+                    const objectId = obj.id || obj.toObject().id;
+                    if (objectId) {
+                        this.emitWhiteboardEvent('whiteboard-object-removed', { objectId });
+                    }
+                });
+            }
+            
             objects.forEach((obj: any) => this.fabricCanvas.remove(obj));
         } else {
+            // Emit socket event for removed object
+            if (!this.isReceivingRemoteUpdate && this.collaborationInitialized) {
+                const objectId = (activeObject as any).id || activeObject.toObject().id;
+                if (objectId) {
+                    this.emitWhiteboardEvent('whiteboard-object-removed', { objectId });
+                }
+            }
+            
             // Handle single object
             this.fabricCanvas.remove(activeObject);
         }
