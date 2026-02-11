@@ -13,12 +13,14 @@ import { environment } from "../../../../environments/environment";
 import { WhiteBoard } from "../../white-board/white-board";
 import { RatingModule } from "primeng/rating";
 import { UIRating } from "../../misc/rating/ui-rating";
+import { MenuModule } from "primeng/menu";
+import { MenuItem } from "primeng/api";
 
 @Component({
     selector: 'taleemiyat-session-call',
     templateUrl: './session-call.html',
     standalone: true,
-    imports: [CommonModule, DialogModule, SessionCallSettings, SessionChat, StreamDirective, ProfilePhoto, WhiteBoard, RatingModule, UIRating],
+    imports: [CommonModule, DialogModule, SessionCallSettings, SessionChat, StreamDirective, ProfilePhoto, WhiteBoard, RatingModule, UIRating, MenuModule],
 })
 export default class SessionCall implements OnInit, OnDestroy {
     @ViewChild('localVideo') localVideoElement?: ElementRef<HTMLVideoElement>;
@@ -58,6 +60,34 @@ export default class SessionCall implements OnInit, OnDestroy {
     
     // Connection quality
     connectionQuality = signal<'excellent' | 'good' | 'fair' | 'poor'>('good');
+    tabs = signal<('whiteboard' | 'screen-sharing')[]>([]);
+    activeTab = signal<'whiteboard' | 'screen-sharing'>('whiteboard');
+    menuItems = signal<MenuItem[]>([
+        {
+            label: 'Whiteboard',
+            icon: 'fas fa-whiteboard',
+            command: () => {
+                this.activeTab.set('whiteboard');
+                this.showWhiteboard.set(true);
+                if(!this.tabs().includes('whiteboard')){
+                    this.tabs.set([...this.tabs(), 'whiteboard']);
+                }
+            }
+        },
+        {
+            label: 'Screen Sharing',
+            icon: 'fas fa-share-screen',
+            command: () => {
+                this.activeTab.set('screen-sharing');
+                this.toggleScreenShare();
+                if(!this.tabs().includes('screen-sharing')){
+                    this.tabs.set([...this.tabs(), 'screen-sharing']);
+                }
+            }
+        }
+    ]);
+    
+    screenShareStream = signal<MediaStream | null>(null);
     
     // Timer
     private timerInterval?: number;
@@ -831,8 +861,22 @@ export default class SessionCall implements OnInit, OnDestroy {
         }
     }
     
-    toggleScreenShare(): void {
+    async toggleScreenShare(): Promise<void> {
         // TODO: Implement screen sharing
+        try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+            this.screenShareStream.set(stream);
+            stream.onremovetrack = (event) => {
+                console.log('🔄 Screen share track removed');
+                this.screenShareStream.set(null);
+                this.isScreenSharing.set(false);
+                this.tabs.set(this.tabs().filter(tab => tab !== 'screen-sharing'));
+            };
+        } catch (error) {
+            console.error('Error toggling screen share:', error);
+        }
+
+
         this.isScreenSharing.set(!this.isScreenSharing());
     }
     
