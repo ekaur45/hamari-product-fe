@@ -128,7 +128,10 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
     ngAfterViewInit(): void {
         this.initializeFabric();
         this.initializeMathJax();
-        this.initializeCollaboration();
+        // Initialize collaboration after a short delay to ensure fabric canvas is ready
+        setTimeout(() => {
+            this.initializeCollaboration();
+        }, 500);
     }
     
     /**
@@ -136,22 +139,37 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
      */
     private initializeCollaboration(): void {
         if (!this.socket() || !this.sessionId()) {
-            console.warn('Socket or sessionId not available for collaboration');
+            console.warn('Socket or sessionId not available for collaboration', {
+                socket: !!this.socket(),
+                sessionId: this.sessionId()
+            });
+            return;
+        }
+        
+        if (!this.fabricCanvas) {
+            console.warn('Fabric canvas not ready for collaboration');
             return;
         }
         
         const socket = this.socket()!;
         const sessionId = this.sessionId();
+        const currentUserId = this.authService.getCurrentUser()?.id;
+        
+        console.log('🔵 Initializing whiteboard collaboration', { sessionId, currentUserId });
         
         // Listen for whiteboard object added from other users
         socket.on(`whiteboard-object-added_${sessionId}`, (data: { objectData: any, userId: string }) => {
-            if (data.userId === this.authService.getCurrentUser()?.id) return; // Ignore own events
+            console.log('📥 Received whiteboard-object-added', { userId: data.userId, currentUserId });
+            if (data.userId === currentUserId) {
+                console.log('⏭️ Ignoring own event');
+                return; // Ignore own events
+            }
             
             this.isReceivingRemoteUpdate = true;
             try {
                 this.applyRemoteObject(data.objectData);
             } catch (error) {
-                console.error('Error applying remote object:', error);
+                console.error('❌ Error applying remote object:', error);
             } finally {
                 this.isReceivingRemoteUpdate = false;
             }
@@ -159,13 +177,13 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         
         // Listen for whiteboard object modified from other users
         socket.on(`whiteboard-object-modified_${sessionId}`, (data: { objectData: any, userId: string }) => {
-            if (data.userId === this.authService.getCurrentUser()?.id) return; // Ignore own events
+            if (data.userId === currentUserId) return; // Ignore own events
             
             this.isReceivingRemoteUpdate = true;
             try {
                 this.applyRemoteObjectModification(data.objectData);
             } catch (error) {
-                console.error('Error applying remote object modification:', error);
+                console.error('❌ Error applying remote object modification:', error);
             } finally {
                 this.isReceivingRemoteUpdate = false;
             }
@@ -173,13 +191,13 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         
         // Listen for whiteboard object removed from other users
         socket.on(`whiteboard-object-removed_${sessionId}`, (data: { objectId: string, userId: string }) => {
-            if (data.userId === this.authService.getCurrentUser()?.id) return; // Ignore own events
+            if (data.userId === currentUserId) return; // Ignore own events
             
             this.isReceivingRemoteUpdate = true;
             try {
                 this.applyRemoteObjectRemoval(data.objectId);
             } catch (error) {
-                console.error('Error applying remote object removal:', error);
+                console.error('❌ Error applying remote object removal:', error);
             } finally {
                 this.isReceivingRemoteUpdate = false;
             }
@@ -187,7 +205,7 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
         
         // Listen for whiteboard cleared from other users
         socket.on(`whiteboard-cleared_${sessionId}`, (data: { userId: string }) => {
-            if (data.userId === this.authService.getCurrentUser()?.id) return; // Ignore own events
+            if (data.userId === currentUserId) return; // Ignore own events
             
             this.isReceivingRemoteUpdate = true;
             try {
@@ -195,79 +213,132 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
                 this.fabricCanvas.backgroundColor = '#ffffff';
                 this.fabricCanvas.renderAll();
             } catch (error) {
-                console.error('Error applying remote clear:', error);
+                console.error('❌ Error applying remote clear:', error);
             } finally {
                 this.isReceivingRemoteUpdate = false;
             }
         });
         
         this.collaborationInitialized = true;
-        console.log('✅ Whiteboard collaboration initialized');
+        console.log('✅ Whiteboard collaboration initialized', { sessionId, currentUserId });
     }
     
     /**
      * Apply remote object to canvas
      */
     private applyRemoteObject(objectData: any): void {
-        if (!this.fabricCanvas) return;
+        if (!this.fabricCanvas) {
+            console.warn('⚠️ Fabric canvas not available for applying remote object');
+            return;
+        }
         
         try {
             // Parse the object data
             const objects = JSON.parse(objectData);
+            console.log('📦 Applying remote objects', { count: objects.length, types: objects.map((o: any) => o.type) });
+            
             objects.forEach((objData: any) => {
                 // Use Fabric.js's fromObject method to properly deserialize
                 const className = this.getFabricClass(objData.type);
                 if (className) {
-                    className.fromObject(objData, (obj: any) => {
+                    // fromObject can be async, handle both sync and async cases
+                    const result = className.fromObject(objData);
+                    if (result instanceof Promise) {
+                        result.then((obj: any) => {
+                            if (obj) {
+                                // Add unique ID if not present
+                                if (!obj.id) {
+                                    obj.id = objData.id || `remote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                                }
+                                // Make remote objects non-selectable to prevent conflicts
+                                obj.selectable = false;
+                                obj.evented = false;
+                                this.fabricCanvas.add(obj);
+                                this.fabricCanvas.renderAll();
+                                console.log('✅ Added remote object', { type: obj.type, id: obj.id });
+                            }
+                        }).catch((error: any) => {
+                            console.error('❌ Error loading remote object (async):', error);
+                        });
+                    } else {
+                        // Synchronous case
+                        const obj = result;
                         if (obj) {
+                            // Add unique ID if not present
+                            if (!obj.id) {
+                                obj.id = objData.id || `remote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                            }
                             // Make remote objects non-selectable to prevent conflicts
                             obj.selectable = false;
                             obj.evented = false;
                             this.fabricCanvas.add(obj);
                             this.fabricCanvas.renderAll();
+                            console.log('✅ Added remote object (sync)', { type: obj.type, id: obj.id });
                         }
-                    });
+                    }
+                } else {
+                    console.warn('⚠️ Unknown object type:', objData.type);
                 }
             });
         } catch (error) {
-            console.error('Error loading remote object:', error);
+            console.error('❌ Error loading remote object:', error, { objectData });
         }
     }
     
     /**
      * Get Fabric.js class by type name
+     * Handles both lowercase and capitalized type names (e.g., "rect" and "Rect")
      */
     private getFabricClass(type: string): any {
+        // Normalize type to lowercase for lookup (Fabric.js can return "Rect", "rect", etc.)
+        const normalizedType = type.toLowerCase();
+        
         const classMap: { [key: string]: any } = {
             'rect': Rect,
+            'rectangle': Rect,
             'circle': Circle,
             'ellipse': Ellipse,
             'triangle': Triangle,
             'line': Line,
             'path': Path,
             'i-text': IText,
+            'itext': IText,
             'text': IText,
             'group': Group,
             'image': Image,
         };
-        return classMap[type] || null;
+        
+        const fabricClass = classMap[normalizedType];
+        if (fabricClass) {
+            return fabricClass;
+        }
+        
+        console.warn('⚠️ Unknown object type:', type, 'Normalized:', normalizedType, 'Available types:', Object.keys(classMap));
+        return null;
     }
     
     /**
      * Apply remote object modification
      */
     private applyRemoteObjectModification(objectData: any): void {
-        if (!this.fabricCanvas) return;
+        if (!this.fabricCanvas) {
+            console.warn('⚠️ Fabric canvas not available for modifying remote object');
+            return;
+        }
         
         try {
             const obj = this.fabricCanvas.getObjects().find((o: any) => o.id === objectData.id);
             if (obj) {
-                obj.set(objectData);
+                console.log('🔄 Modifying remote object', { id: objectData.id, type: obj.type });
+                // Use loadFromObject to properly update the object
+                obj.loadFromObject(objectData);
                 obj.setCoords();
                 this.fabricCanvas.renderAll();
+            } else {
+                console.warn('⚠️ Object not found for modification', { id: objectData.id });
             }
         } catch (error) {
-            console.error('Error modifying remote object:', error);
+            console.error('❌ Error modifying remote object:', error, { objectData });
         }
     }
     
@@ -275,16 +346,22 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
      * Apply remote object removal
      */
     private applyRemoteObjectRemoval(objectId: string): void {
-        if (!this.fabricCanvas) return;
+        if (!this.fabricCanvas) {
+            console.warn('⚠️ Fabric canvas not available for removing remote object');
+            return;
+        }
         
         try {
             const obj = this.fabricCanvas.getObjects().find((o: any) => o.id === objectId);
             if (obj) {
+                console.log('🗑️ Removing remote object', { id: objectId, type: obj.type });
                 this.fabricCanvas.remove(obj);
                 this.fabricCanvas.renderAll();
+            } else {
+                console.warn('⚠️ Object not found for removal', { id: objectId });
             }
         } catch (error) {
-            console.error('Error removing remote object:', error);
+            console.error('❌ Error removing remote object:', error, { objectId });
         }
     }
     
@@ -293,20 +370,32 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
      */
     private emitWhiteboardEvent(event: string, data: any): void {
         if (!this.socket() || !this.sessionId() || this.isReceivingRemoteUpdate) {
+            if (!this.socket()) console.warn('⚠️ Socket not available for emitting', event);
+            if (!this.sessionId()) console.warn('⚠️ SessionId not available for emitting', event);
+            if (this.isReceivingRemoteUpdate) console.log('⏭️ Skipping emit (receiving remote update)', event);
             return; // Don't emit if receiving remote update or socket not available
+        }
+        
+        if (!this.collaborationInitialized) {
+            console.warn('⚠️ Collaboration not initialized yet', event);
+            return;
         }
         
         const socket = this.socket()!;
         const sessionId = this.sessionId();
         const userId = this.authService.getCurrentUser()?.id;
         
-        // Emit with bookingId for backend routing
-        socket.emit(event, {
+        const payload = {
             bookingId: sessionId, // Backend expects bookingId
             sessionId: sessionId,
             userId: userId,
             ...data
-        });
+        };
+        
+        console.log('📤 Emitting whiteboard event', { event, sessionId, userId, dataKeys: Object.keys(data) });
+        
+        // Emit with bookingId for backend routing
+        socket.emit(event, payload);
     }
 
     ngOnDestroy(): void {
@@ -630,10 +719,14 @@ export class WhiteBoard implements AfterViewInit, OnDestroy {
             // Emit socket event for real-time collaboration
             if (!this.isReceivingRemoteUpdate && this.collaborationInitialized) {
                 try {
+                    // Add unique ID if not present
+                    if (!e.path.id) {
+                        e.path.id = `path_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    }
                     const objectData = JSON.stringify([e.path.toObject()]);
                     this.emitWhiteboardEvent('whiteboard-object-added', { objectData });
                 } catch (error) {
-                    console.warn('Error emitting path:created event:', error);
+                    console.warn('⚠️ Error emitting path:created event:', error);
                 }
             }
         });
