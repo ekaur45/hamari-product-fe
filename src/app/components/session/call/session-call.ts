@@ -15,7 +15,6 @@ import { RatingModule } from "primeng/rating";
 import { UIRating } from "../../misc/rating/ui-rating";
 import { MenuModule } from "primeng/menu";
 import { MenuItem } from "primeng/api";
-import * as htmlToImage from 'html-to-image';
 
 @Component({
     selector: 'taleemiyat-session-call',
@@ -105,10 +104,6 @@ export default class SessionCall implements OnInit, OnDestroy {
     private recordingCanvasStream?: MediaStream;
     private recordingMediaRecorder?: MediaRecorder;
     private recordingAnimationFrame?: number;
-    private recordingInterval?: number;
-    private uiCaptureImage?: HTMLImageElement;
-    private lastUICaptureTime: number = 0;
-    private readonly UI_CAPTURE_INTERVAL = 2000; // Capture UI every 2 seconds
 
     // Timer
     private timerInterval?: number;
@@ -312,11 +307,12 @@ export default class SessionCall implements OnInit, OnDestroy {
         if (this.recordingTimerInterval) {
             clearInterval(this.recordingTimerInterval);
         }
-        // Stop recording if active
+        // Stop recording if active (must be done before other cleanup)
         if (this.isRecording()) {
+            console.log('🧹 Stopping recording during component destruction...');
             this.stopRecording();
         }
-        // Cleanup recording resources
+        // Cleanup recording resources (in case stopRecording didn't complete)
         this.cleanupRecording();
         if (this.socket) {
             this.socket.disconnect();
@@ -1189,225 +1185,101 @@ export default class SessionCall implements OnInit, OnDestroy {
             const width = Math.max(rect.width || 1920, 640);
             const height = Math.max(rect.height || 1080, 480);
             
-            // Temporarily hide videos for better html-to-image capture
+            // Create a canvas to capture videos and whiteboard
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+                console.error('Failed to get canvas context for screenshot');
+                alert('Failed to initialize canvas for screenshot');
+                return;
+            }
+            
+            // Fill background
+            ctx.fillStyle = '#111827';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Draw video elements
             const videoElements = container.querySelectorAll('video');
-            const videoStyles: { element: HTMLVideoElement; display: string }[] = [];
             videoElements.forEach((video: HTMLVideoElement) => {
-                videoStyles.push({
-                    element: video,
-                    display: video.style.display
-                });
-                video.style.display = 'none';
+                const isVisible = !video.classList.contains('hidden') && 
+                                 video.offsetWidth > 0 && 
+                                 video.offsetHeight > 0;
+                
+                if (isVisible && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
+                    try {
+                        const videoRect = video.getBoundingClientRect();
+                        const containerRect = container.getBoundingClientRect();
+                        
+                        const x = Math.max(0, videoRect.left - containerRect.left);
+                        const y = Math.max(0, videoRect.top - containerRect.top);
+                        const drawWidth = Math.min(videoRect.width, width - x);
+                        const drawHeight = Math.min(videoRect.height, height - y);
+                        
+                        if (drawWidth > 0 && drawHeight > 0) {
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
+                            ctx.drawImage(video, x, y, drawWidth, drawHeight);
+                        }
+                    } catch (error) {
+                        console.warn('Error drawing video in screenshot:', error);
+                    }
+                }
             });
             
-            try {
-                // Capture container with html-to-image
-                const dataUrl = await htmlToImage.toPng(container, {
-                    width: width,
-                    height: height,
-                    backgroundColor: '#111827',
-                    pixelRatio: 2, // Higher quality for screenshot
-                    cacheBust: false,
-                    quality: 1.0
-                });
-                
-                // Restore video visibility immediately
-                videoStyles.forEach(({ element, display }) => {
-                    element.style.display = display || '';
-                });
-                
-                // Validate dataUrl
-                if (!dataUrl || dataUrl.length === 0) {
-                    throw new Error('Failed to generate screenshot data');
-                }
-                
-                // Create a canvas to composite videos on top
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                
-                if (!ctx) {
-                    throw new Error('Failed to get canvas context');
-                }
-                
-                // Try to composite videos, but fallback to direct download if it fails
+            // Draw whiteboard canvas on top if visible
+            const whiteboardComponent = container.querySelector('app-white-board');
+            if (whiteboardComponent && !whiteboardComponent.classList.contains('hidden')) {
                 try {
-                    // Draw the captured UI with proper error handling
-                    const img = new Image();
-                    await new Promise<void>((resolve, reject) => {
-                        // Add timeout to prevent hanging
-                        const timeout = setTimeout(() => {
-                            // Timeout fallback: download directly
-                            const a = document.createElement('a');
-                            a.href = dataUrl;
-                            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-                            a.download = `screenshot-${timestamp}.png`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            console.log('✅ Screenshot saved (timeout fallback)');
-                            resolve();
-                        }, 5000); // 5 second timeout
-                        
-                        // Check if image is already loaded (data URLs can load instantly)
-                        if (dataUrl.startsWith('data:')) {
-                            // For data URLs, set handlers before src
-                            img.onload = () => {
-                                clearTimeout(timeout);
-                                try {
-                                    // Fill background first
-                                    ctx.fillStyle = '#111827';
-                                    ctx.fillRect(0, 0, width, height);
-                                    
-                                    // Draw the captured UI
-                                    ctx.drawImage(img, 0, 0, width, height);
-                                    
-                                    // Draw videos on top
-                                    videoElements.forEach((video: HTMLVideoElement) => {
-                                        const isVisible = !video.classList.contains('hidden') && 
-                                                         video.offsetWidth > 0 && 
-                                                         video.offsetHeight > 0;
-                                        
-                                        if (isVisible && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
-                                            try {
-                                                const videoRect = video.getBoundingClientRect();
-                                                const containerRect = container.getBoundingClientRect();
-                                                
-                                                const x = Math.max(0, videoRect.left - containerRect.left);
-                                                const y = Math.max(0, videoRect.top - containerRect.top);
-                                                const drawWidth = Math.min(videoRect.width, width - x);
-                                                const drawHeight = Math.min(videoRect.height, height - y);
-                                                
-                                                if (drawWidth > 0 && drawHeight > 0) {
-                                                    ctx.drawImage(video, x, y, drawWidth, drawHeight);
-                                                }
-                                            } catch (error) {
-                                                console.warn('Error drawing video in screenshot:', error);
-                                            }
-                                        }
-                                    });
-                                    
-                                    // Draw whiteboard on top if visible
-                                    const whiteboardComponent = container.querySelector('app-white-board');
-                                    if (whiteboardComponent && !whiteboardComponent.classList.contains('hidden')) {
-                                        try {
-                                            const whiteboardCanvases = whiteboardComponent.querySelectorAll('canvas');
-                                            whiteboardCanvases.forEach((canvas: HTMLCanvasElement) => {
-                                                if (canvas.width > 0 && canvas.height > 0) {
-                                                    try {
-                                                        const canvasRect = canvas.getBoundingClientRect();
-                                                        const containerRect = container.getBoundingClientRect();
-                                                        
-                                                        const x = Math.max(0, canvasRect.left - containerRect.left);
-                                                        const y = Math.max(0, canvasRect.top - containerRect.top);
-                                                        const drawWidth = Math.min(canvasRect.width, width - x);
-                                                        const drawHeight = Math.min(canvasRect.height, height - y);
-                                                        
-                                                        if (drawWidth > 0 && drawHeight > 0) {
-                                                            ctx.drawImage(canvas, x, y, drawWidth, drawHeight);
-                                                        }
-                                                    } catch (error) {
-                                                        console.warn('Error drawing whiteboard in screenshot:', error);
-                                                    }
-                                                }
-                                            });
-                                        } catch (error) {
-                                            console.warn('Error accessing whiteboard in screenshot:', error);
-                                        }
-                                    }
-                                    
-                                    // Convert canvas to blob and download
-                                    canvas.toBlob((blob) => {
-                                        if (blob) {
-                                            const url = URL.createObjectURL(blob);
-                                            const a = document.createElement('a');
-                                            a.href = url;
-                                            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-                                            a.download = `screenshot-${timestamp}.png`;
-                                            document.body.appendChild(a);
-                                            a.click();
-                                            document.body.removeChild(a);
-                                            setTimeout(() => URL.revokeObjectURL(url), 100);
-                                            console.log('✅ Screenshot saved');
-                                            resolve();
-                                        } else {
-                                            // Fallback to direct download
-                                            const a = document.createElement('a');
-                                            a.href = dataUrl;
-                                            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-                                            a.download = `screenshot-${timestamp}.png`;
-                                            document.body.appendChild(a);
-                                            a.click();
-                                            document.body.removeChild(a);
-                                            console.log('✅ Screenshot saved (blob fallback)');
-                                            resolve();
-                                        }
-                                    }, 'image/png', 1.0);
-                                } catch (error) {
-                                    clearTimeout(timeout);
-                                    // Fallback to direct download on error
-                                    const a = document.createElement('a');
-                                    a.href = dataUrl;
-                                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-                                    a.download = `screenshot-${timestamp}.png`;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    document.body.removeChild(a);
-                                    console.log('✅ Screenshot saved (error fallback)');
-                                    resolve();
+                    const whiteboardCanvases = whiteboardComponent.querySelectorAll('canvas');
+                    whiteboardCanvases.forEach((canvasEl: HTMLCanvasElement) => {
+                        if (canvasEl.width > 0 && canvasEl.height > 0) {
+                            try {
+                                const canvasRect = canvasEl.getBoundingClientRect();
+                                const containerRect = container.getBoundingClientRect();
+                                
+                                const x = Math.max(0, canvasRect.left - containerRect.left);
+                                const y = Math.max(0, canvasRect.top - containerRect.top);
+                                const drawWidth = Math.min(canvasRect.width, width - x);
+                                const drawHeight = Math.min(canvasRect.height, height - y);
+                                
+                                if (drawWidth > 0 && drawHeight > 0) {
+                                    ctx.imageSmoothingEnabled = true;
+                                    ctx.imageSmoothingQuality = 'high';
+                                    ctx.drawImage(canvasEl, x, y, drawWidth, drawHeight);
                                 }
-                            };
-                            
-                            img.onerror = () => {
-                                clearTimeout(timeout);
-                                // Fallback: download directly from dataUrl
-                                const a = document.createElement('a');
-                                a.href = dataUrl;
-                                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-                                a.download = `screenshot-${timestamp}.png`;
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                console.log('✅ Screenshot saved (error fallback)');
-                                resolve();
-                            };
-                            
-                            img.src = dataUrl;
-                        } else {
-                            // Not a data URL, use direct download
-                            clearTimeout(timeout);
-                            const a = document.createElement('a');
-                            a.href = dataUrl;
-                            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-                            a.download = `screenshot-${timestamp}.png`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            console.log('✅ Screenshot saved (direct)');
-                            resolve();
+                            } catch (error) {
+                                console.warn('Error drawing whiteboard canvas in screenshot:', error);
+                            }
                         }
                     });
-                } catch (compositeError) {
-                    // If compositing fails, just download the dataUrl directly
-                    console.warn('Compositing failed, using direct download:', compositeError);
+                } catch (error) {
+                    console.warn('Error accessing whiteboard in screenshot:', error);
+                }
+            }
+            
+            // Convert canvas to blob and download
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = dataUrl;
+                    a.href = url;
                     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
                     a.download = `screenshot-${timestamp}.png`;
+                    a.style.display = 'none';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
-                    console.log('✅ Screenshot saved (composite error fallback)');
+                    setTimeout(() => URL.revokeObjectURL(url), 100);
+                    console.log('✅ Screenshot saved');
+                } else {
+                    console.error('Failed to create blob from canvas for screenshot');
+                    alert('Failed to create image file for screenshot');
                 }
-            } catch (error) {
-                // Restore video visibility even if capture failed
-                videoStyles.forEach(({ element, display }) => {
-                    element.style.display = display || '';
-                });
-                console.error('Error capturing screenshot:', error);
-                alert('Failed to capture screenshot: ' + (error instanceof Error ? error.message : 'Unknown error'));
-            }
+            }, 'image/png', 1.0);
+            
         } catch (error) {
             console.error('Error in captureScreenshot:', error);
             alert('Failed to capture screenshot: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -1424,22 +1296,35 @@ export default class SessionCall implements OnInit, OnDestroy {
 
     async startRecording(): Promise<void> {
         try {
+            // Check if already recording
+            if (this.isRecording()) {
+                console.warn('Recording is already in progress');
+                return;
+            }
+
             // Check if MediaRecorder is supported
             if (!navigator.mediaDevices || !window.MediaRecorder) {
                 console.error('MediaRecorder is not supported in this browser');
-                alert('Recording is not supported in your browser');
+                alert('Recording is not supported in your browser. Please use a modern browser like Chrome, Firefox, or Edge.');
                 return;
             }
 
             // Check if recordContainer is available
             if (!this.recordContainer?.nativeElement) {
                 console.error('Record container not found');
-                alert('Recording container not available');
+                alert('Recording container not available. Please refresh the page and try again.');
                 return;
             }
 
             const container = this.recordContainer.nativeElement;
             const rect = container.getBoundingClientRect();
+            
+            // Validate container dimensions
+            if (rect.width === 0 || rect.height === 0) {
+                console.error('Container has invalid dimensions');
+                alert('Cannot start recording: container dimensions are invalid. Please wait a moment and try again.');
+                return;
+            }
             
             // Create canvas for recording
             this.recordingCanvas = document.createElement('canvas');
@@ -1447,12 +1332,13 @@ export default class SessionCall implements OnInit, OnDestroy {
             this.recordingCanvas.height = Math.max(rect.height || 1080, 480);
             
             this.recordingCanvasContext = this.recordingCanvas.getContext('2d', {
-                willReadFrequently: true
+                willReadFrequently: true,
+                alpha: false // No transparency needed for recording
             }) || undefined;
             
             if (!this.recordingCanvasContext) {
                 console.error('Failed to get canvas context');
-                alert('Failed to initialize recording canvas');
+                alert('Failed to initialize recording canvas. Please refresh the page and try again.');
                 return;
             }
             
@@ -1460,76 +1346,7 @@ export default class SessionCall implements OnInit, OnDestroy {
             this.recordingCanvasContext.fillStyle = '#111827'; // bg-gray-900
             this.recordingCanvasContext.fillRect(0, 0, this.recordingCanvas.width, this.recordingCanvas.height);
             
-            // Optimized capture: Periodic UI capture + real-time videos/whiteboard
-            // Capture UI elements periodically (every 2 seconds) to avoid performance issues
-            const captureUI = async () => {
-                if (!this.isRecording() || !this.recordContainer?.nativeElement) {
-                    return;
-                }
-                
-                try {
-                    const currentRect = container.getBoundingClientRect();
-                    const width = Math.max(currentRect.width || 1920, 640);
-                    const height = Math.max(currentRect.height || 1080, 480);
-                    
-                    // Temporarily hide videos for UI capture
-                    const videoElements = container.querySelectorAll('video');
-                    const videoStyles: { element: HTMLVideoElement; display: string }[] = [];
-                    videoElements.forEach((video: HTMLVideoElement) => {
-                        videoStyles.push({
-                            element: video,
-                            display: video.style.display
-                        });
-                        video.style.display = 'none';
-                    });
-                    
-                    // Capture UI
-                    const dataUrl = await htmlToImage.toPng(container, {
-                        width: width,
-                        height: height,
-                        backgroundColor: '#111827',
-                        pixelRatio: 1,
-                        cacheBust: false,
-                        quality: 0.9
-                    });
-                    
-                    // Restore videos
-                    videoStyles.forEach(({ element, display }) => {
-                        element.style.display = display || '';
-                    });
-                    
-                    // Store UI capture
-                    const img = new Image();
-                    await new Promise<void>((resolve) => {
-                        img.onload = () => {
-                            this.uiCaptureImage = img;
-                            this.lastUICaptureTime = Date.now();
-                            resolve();
-                        };
-                        img.onerror = () => resolve();
-                        img.src = dataUrl;
-                    });
-                } catch (error) {
-                    console.warn('UI capture failed:', error);
-                }
-            };
-            
-            // Initial UI capture
-            captureUI();
-            
-            // Periodic UI capture
-            const uiCaptureInterval = setInterval(() => {
-                if (this.isRecording()) {
-                    captureUI();
-                } else {
-                    clearInterval(uiCaptureInterval);
-                }
-            }, this.UI_CAPTURE_INTERVAL);
-            
-            // Store interval for cleanup
-            this.recordingInterval = uiCaptureInterval as any;
-            
-            // Real-time frame capture: Draw UI (if available) + videos + whiteboard
+            // Real-time frame capture: Draw videos + whiteboard directly
             const captureFrame = () => {
                 if (!this.isRecording() || !this.recordingCanvas || !this.recordingCanvasContext || !this.recordContainer?.nativeElement) {
                     return;
@@ -1551,22 +1368,15 @@ export default class SessionCall implements OnInit, OnDestroy {
                     this.recordingCanvasContext.fillStyle = '#111827';
                     this.recordingCanvasContext.fillRect(0, 0, width, height);
                     
-                    // Draw UI capture if available (cached, fast)
-                    if (this.uiCaptureImage && this.uiCaptureImage.complete) {
-                        try {
-                            this.recordingCanvasContext.drawImage(this.uiCaptureImage, 0, 0, width, height);
-                        } catch (error) {
-                            // If UI image fails, just continue with background
-                        }
-                    }
-                    
-                    // Draw video elements directly on top (synchronous, fast)
+                    // Draw video elements directly (synchronous, fast)
+                    // This includes: local video, remote video, and screen share video
                     const videoElements = container.querySelectorAll('video');
                     videoElements.forEach((video: HTMLVideoElement) => {
                         const isVisible = !video.classList.contains('hidden') && 
                                          video.offsetWidth > 0 && 
                                          video.offsetHeight > 0;
                         
+                        // Check if video is ready (readyState >= 2 means HAVE_CURRENT_DATA or higher)
                         if (isVisible && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
                             try {
                                 const videoRect = video.getBoundingClientRect();
@@ -1578,10 +1388,13 @@ export default class SessionCall implements OnInit, OnDestroy {
                                 const drawHeight = Math.min(videoRect.height, height - y);
                                 
                                 if (drawWidth > 0 && drawHeight > 0) {
+                                    // Use image smoothing for better quality
+                                    this.recordingCanvasContext!.imageSmoothingEnabled = true;
+                                    this.recordingCanvasContext!.imageSmoothingQuality = 'high';
                                     this.recordingCanvasContext!.drawImage(video, x, y, drawWidth, drawHeight);
                                 }
                             } catch (error) {
-                                console.warn('Error drawing video:', error);
+                                console.warn('Error drawing video to recording canvas:', error);
                             }
                         }
                     });
@@ -1675,6 +1488,15 @@ export default class SessionCall implements OnInit, OnDestroy {
                 });
             }
             
+            // Add audio tracks from screen share stream (if available and has audio)
+            if (this.screenShareStream()) {
+                this.screenShareStream()!.getAudioTracks().forEach(track => {
+                    if (track.enabled) {
+                        combinedStream.addTrack(track);
+                    }
+                });
+            }
+            
             // Check available MIME types
             const supportedTypes = [
                 'video/webm;codecs=vp9,opus',
@@ -1697,37 +1519,77 @@ export default class SessionCall implements OnInit, OnDestroy {
             
             this.recordingMimeType = mimeType;
             
-            // Create MediaRecorder
-            this.recordingMediaRecorder = new MediaRecorder(combinedStream, {
-                mimeType: mimeType,
-                videoBitsPerSecond: 2500000, // 2.5 Mbps
-                audioBitsPerSecond: 128000   // 128 kbps
-            });
+            // Validate that we have at least one track
+            if (combinedStream.getTracks().length === 0) {
+                console.error('No tracks available for recording');
+                alert('Cannot start recording: No media tracks available. Please ensure your camera/microphone permissions are granted.');
+                this.cleanupRecording();
+                return;
+            }
+            
+            // Create MediaRecorder with error handling
+            try {
+                this.recordingMediaRecorder = new MediaRecorder(combinedStream, {
+                    mimeType: mimeType,
+                    videoBitsPerSecond: 2500000, // 2.5 Mbps for good quality
+                    audioBitsPerSecond: 128000   // 128 kbps for good audio quality
+                });
+            } catch (recorderError) {
+                console.error('Failed to create MediaRecorder:', recorderError);
+                // Try with default options if specific options fail
+                try {
+                    this.recordingMediaRecorder = new MediaRecorder(combinedStream);
+                    console.warn('Created MediaRecorder with default options');
+                } catch (fallbackError) {
+                    console.error('Failed to create MediaRecorder even with default options:', fallbackError);
+                    alert('Failed to initialize recording. Please try refreshing the page.');
+                    this.cleanupRecording();
+                    return;
+                }
+            }
             
             this.recordingMediaRecorder.ondataavailable = (event) => {
                 if (event.data && event.data.size > 0) {
                     this.recordedChunks.push(event.data);
+                    console.log(`📦 Recording data chunk received: ${event.data.size} bytes`);
                 }
             };
             
             this.recordingMediaRecorder.onstop = () => {
+                console.log('🛑 MediaRecorder stopped, processing recording...');
                 this.handleRecordingStop();
             };
             
             this.recordingMediaRecorder.onerror = (event: any) => {
-                console.error('MediaRecorder error:', event);
+                console.error('❌ MediaRecorder error:', event);
+                const errorMessage = event.error?.message || 'An unknown error occurred while recording';
                 this.isRecording.set(false);
                 this.cleanupRecording();
-                alert('An error occurred while recording');
+                alert(`Recording error: ${errorMessage}`);
             };
             
-            // Start recording
-            this.recordingMediaRecorder.start(1000); // Collect data every second
-            this.isRecording.set(true);
-            this.recordingStartTime = Date.now();
-            this.startRecordingTimer();
-            
-            console.log('✅ Recording started with MIME type:', mimeType);
+            // Start recording with data collection interval
+            try {
+                // Collect data every second for better reliability
+                this.recordingMediaRecorder.start(1000);
+                this.isRecording.set(true);
+                this.recordingStartTime = Date.now();
+                this.startRecordingTimer();
+                
+                console.log('✅ Recording started successfully');
+                console.log('📊 Recording details:', {
+                    mimeType: mimeType,
+                    videoTracks: combinedStream.getVideoTracks().length,
+                    audioTracks: combinedStream.getAudioTracks().length,
+                    canvasSize: `${this.recordingCanvas.width}x${this.recordingCanvas.height}`,
+                    fps: fps
+                });
+            } catch (startError) {
+                console.error('Failed to start MediaRecorder:', startError);
+                alert('Failed to start recording. Please try again.');
+                this.isRecording.set(false);
+                this.cleanupRecording();
+            }
 
         } catch (error) {
             console.error('Error starting recording:', error);
@@ -1751,20 +1613,40 @@ export default class SessionCall implements OnInit, OnDestroy {
     }
 
     stopRecording(): void {
-        if (this.recordingMediaRecorder && this.recordingMediaRecorder.state !== 'inactive') {
-            this.recordingMediaRecorder.stop();
+        if (!this.isRecording()) {
+            console.warn('Attempted to stop recording, but recording is not active');
+            return;
         }
 
-        // Stop capture loop
+        console.log('🛑 Stopping recording...');
+        
+        // Stop MediaRecorder if it exists and is active
+        if (this.recordingMediaRecorder) {
+            try {
+                if (this.recordingMediaRecorder.state === 'recording') {
+                    this.recordingMediaRecorder.stop();
+                    console.log('📹 MediaRecorder stop() called');
+                } else if (this.recordingMediaRecorder.state === 'paused') {
+                    this.recordingMediaRecorder.stop();
+                } else {
+                    console.warn('MediaRecorder state is:', this.recordingMediaRecorder.state);
+                }
+            } catch (error) {
+                console.error('Error stopping MediaRecorder:', error);
+            }
+        }
+
+        // Stop capture loop and cleanup resources
         this.cleanupRecording();
 
+        // Stop recording timer
         if (this.recordingTimerInterval) {
             clearInterval(this.recordingTimerInterval);
             this.recordingTimerInterval = undefined;
         }
 
         this.isRecording.set(false);
-        console.log('🛑 Recording stopped');
+        console.log('✅ Recording stopped successfully');
     }
     
     private cleanupRecording(): void {
@@ -1772,12 +1654,6 @@ export default class SessionCall implements OnInit, OnDestroy {
         if (this.recordingAnimationFrame) {
             cancelAnimationFrame(this.recordingAnimationFrame);
             this.recordingAnimationFrame = undefined;
-        }
-        
-        // Stop UI capture interval
-        if (this.recordingInterval) {
-            clearInterval(this.recordingInterval);
-            this.recordingInterval = undefined;
         }
         
         // Stop canvas stream
@@ -1789,48 +1665,68 @@ export default class SessionCall implements OnInit, OnDestroy {
         // Clear canvas references
         this.recordingCanvas = undefined;
         this.recordingCanvasContext = undefined;
-        this.uiCaptureImage = undefined;
-        this.lastUICaptureTime = 0;
     }
 
 
 
     private handleRecordingStop(): void {
         if (this.recordedChunks.length === 0) {
-            console.warn('No recording data available');
+            console.warn('⚠️ No recording data available');
+            alert('No recording data was captured. The recording may have been too short or an error occurred.');
             return;
         }
 
-        // Determine file extension based on MIME type
-        let fileExtension = 'webm';
-        if (this.recordingMimeType.includes('mp4')) {
-            fileExtension = 'mp4';
-        } else if (this.recordingMimeType.includes('webm')) {
-            fileExtension = 'webm';
+        try {
+            // Calculate total size
+            const totalSize = this.recordedChunks.reduce((sum, chunk) => sum + chunk.size, 0);
+            console.log(`📦 Total recording size: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
+
+            // Determine file extension based on MIME type
+            let fileExtension = 'webm';
+            if (this.recordingMimeType.includes('mp4')) {
+                fileExtension = 'mp4';
+            } else if (this.recordingMimeType.includes('webm')) {
+                fileExtension = 'webm';
+            }
+
+            // Create blob from recorded chunks
+            const blob = new Blob(this.recordedChunks, { type: this.recordingMimeType });
+            
+            if (blob.size === 0) {
+                console.error('Created blob is empty');
+                alert('Recording file is empty. Please try recording again.');
+                this.recordedChunks = [];
+                return;
+            }
+
+            const url = URL.createObjectURL(blob);
+
+            // Create download link
+            const a = document.createElement('a');
+            a.href = url;
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const sessionId = this.bookingId() || this.sessionId() || 'session';
+            a.download = `session-recording-${sessionId}-${timestamp}.${fileExtension}`;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up download link after a short delay
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+
+            // Reset recording state
+            this.recordedChunks = [];
+            this.recordingDuration.set('00:00:00');
+            this.recordingMimeType = 'video/webm';
+
+            console.log(`✅ Recording saved and downloaded: ${a.download} (${(blob.size / 1024 / 1024).toFixed(2)} MB)`);
+        } catch (error) {
+            console.error('❌ Error processing recording:', error);
+            alert('Failed to save recording: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            this.recordedChunks = [];
         }
-
-        // Create blob from recorded chunks
-        const blob = new Blob(this.recordedChunks, { type: this.recordingMimeType });
-        const url = URL.createObjectURL(blob);
-
-        // Create download link
-        const a = document.createElement('a');
-        a.href = url;
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-        a.download = `session-recording-${timestamp}.${fileExtension}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        // Clean up
-        setTimeout(() => {
-            URL.revokeObjectURL(url);
-        }, 100);
-
-        this.recordedChunks = [];
-        this.recordingDuration.set('00:00:00');
-        this.recordingMimeType = 'video/webm';
-
-        console.log('✅ Recording saved and downloaded');
     }
 }
