@@ -3,11 +3,16 @@ import { CommonModule } from "@angular/common";
 import { Component, OnInit, signal } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { ProfilePhoto } from "@/app/components/misc/profile-photo/profile-photo";
-
+import { DialogModule } from "primeng/dialog";
+import { UIRating } from "@/app/components/misc/rating/ui-rating";
+import { FormsModule } from "@angular/forms";
+import {type ReviewType} from '@/app/shared/models/review.model'
+import { mapRatingToNumber } from "@/app/shared/utils/misc.util";
+import { ReviewService } from "@/app/shared/services/review.service";
 @Component({
     selector: 'app-teacher-sessions',
     standalone: true,
-    imports: [CommonModule, RouterModule, ProfilePhoto],
+    imports: [CommonModule, RouterModule, ProfilePhoto, DialogModule, UIRating,FormsModule],
     templateUrl: './teacher-sessions.html'
 })
 export class TeacherSessions implements OnInit {
@@ -21,13 +26,28 @@ export class TeacherSessions implements OnInit {
         hasNext: false,
         hasPrev: false,
     });
-    
+    selectedReviewSession = signal<TeacherBookingDto | null>(null);
+    showReviewModal = signal<boolean>(false);
+
+    // review modal states
+
+    punctuality = signal<ReviewType>(null);
+    engagement = signal<ReviewType>(null);
+    knowledge = signal<ReviewType>(null);
+    communication = signal<ReviewType>(null);
+    overallExperience = signal<ReviewType>(null);
+
+    comment = signal<string | null>(null);
+
+    isAddingReview = signal<boolean>(false);
+
     // Expose Math for template
     Math = Math;
     
     constructor(
         private teacherService:TeacherService,
-        private authService:AuthService
+        private authService:AuthService,
+        private reviewService:ReviewService
     ) {}
     
     ngOnInit(): void {
@@ -67,5 +87,34 @@ export class TeacherSessions implements OnInit {
     isPast(date: Date,endTime: string): boolean {
         const endTimeDate = new Date(`${new Date(date).toISOString().split('T')[0]} ${endTime}`);
         return endTimeDate < new Date();
+    }
+    handleShowAddReviewModal(session:TeacherBookingDto){
+        this.selectedReviewSession.set(session);
+        this.showReviewModal.set(true);        
+    }
+    handleOnSubmitReview(){
+        this.isAddingReview.set(true);
+        const postData = {
+            teacherBookingId:this.selectedReviewSession()!.id,
+            punctuality: mapRatingToNumber(this.punctuality()),
+            engagement: mapRatingToNumber(this.engagement()),
+            knowledge: mapRatingToNumber(this.knowledge()),
+            communication: mapRatingToNumber(this.communication()),
+            overallExperience: mapRatingToNumber(this.overallExperience()),
+            rating: null,
+            comment: this.comment()
+        }
+        this.reviewService.addReview(postData).subscribe({
+            next:()=>{
+                this.getTeacherSessions();
+                this.isAddingReview.set(false);
+            },
+            complete:()=> {
+                this.isAddingReview.set(false);
+            },
+            error:()=>{
+                this.isAddingReview.set(false);
+            }
+        })
     }
 }

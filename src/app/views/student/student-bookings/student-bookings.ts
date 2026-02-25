@@ -11,6 +11,7 @@ import { StudentService, AuthService } from "../../../shared";
 import { UIRating } from "@/app/components/misc/rating/ui-rating";
 import { BookingStatus } from "@/app/shared/enums";
 import { FormsModule } from "@angular/forms";
+import { type ReviewType } from "@/app/shared/models/review.model";
 
 @Component({
   selector: 'app-student-bookings',
@@ -44,7 +45,7 @@ export class StudentBookings implements OnInit {
     hasPrev: false,
   });
   studentId = signal<string>('');
-  rating = signal<'excellent' | 'good' | 'average' | 'poor' | 'very poor' | null>(null);
+  rating = signal<ReviewType>(null);
   comment = signal<string>('');
   constructor(
     private studentService: StudentService,

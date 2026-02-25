@@ -6,6 +6,10 @@
  * API Endpoints
  */
 export const API_ENDPOINTS = {
+
+  REVIEW:{
+    ADD:'/reviews'
+  },
   // Upload
   NOTIFICATIONS: {
     GET_NOTIFICATIONS: '/notifications',

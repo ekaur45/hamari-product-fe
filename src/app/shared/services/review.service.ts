@@ -36,5 +36,18 @@ export class ReviewService {
       catchError(e => throwError(() => e))
     );
   }
+
+  addReview(review:{    teacherBookingId:string;
+    reviewerId?:string;
+    revieweeId?:string;
+    punctuality: number | null;
+    engagement: number | null;
+    knowledge: number | null;
+    communication: number | null;
+    overallExperience: number | null;
+    rating: number | null;
+    comment: string | null;}){
+      return this.apiService.post(API_ENDPOINTS.REVIEW.ADD,review);
+  }
 }
 

@@ -148,7 +148,9 @@
                         @if(isPast(session.bookingDate, session.availability!.endTime!)) {
                             <button 
                                 class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
-                                [title]="'Add Review'">
+                                [title]="'Add Review'"
+                                (click)="handleShowAddReviewModal(session)"
+                                >
                                 <i class="fas fa-star mr-2"></i>
                                 Add Review
                             </button>
@@ -213,3 +215,66 @@
         </div>
     </div>
 }
+
+
+
+<p-dialog [(visible)]="showReviewModal" [modal]="true" [closable]="false" [draggable]="false"
+    [resizable]="false" styleClass="w-[95vw] sm:w-full max-w-md" [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+    [style]="{width: '95vw', maxWidth: '40rem'}" (onHide)="showReviewModal.set(false)">
+    <ng-template pTemplate="header">
+        <div class="flex items-center justify-between w-full pr-2">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div
+                    class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                    <i class="fas fa-star text-lg sm:text-xl"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1">
+                        Rate and Review
+                    </h2>
+                    <p class="text-sm text-gray-500">Please rate and review your experience</p>
+                </div>
+            </div>
+            <button (click)="showReviewModal.set(false)"
+                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors duration-200 p-1 rounded-full hover:bg-gray-100"
+                title="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </ng-template>
+    <div class="space-y-4 py-2">
+
+        <taleemiyat-ui-rating title="Punctuality" [(rating)]="punctuality"></taleemiyat-ui-rating>
+        <taleemiyat-ui-rating title="Engagement" [(rating)]="engagement" ></taleemiyat-ui-rating>
+        <taleemiyat-ui-rating title="Knowledge" [(rating)]="knowledge"></taleemiyat-ui-rating>
+        <taleemiyat-ui-rating title="Communication" [(rating)]="communication"></taleemiyat-ui-rating>
+        <taleemiyat-ui-rating title="Overall Experience" [(rating)]="overallExperience"></taleemiyat-ui-rating>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Comment</label>
+            <textarea rows="5"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Share your experience..." [(ngModel)]="comment"></textarea>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button type="button" (click)="showReviewModal.set(false)"
+        [disabled]="isAddingReview()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 mr-2">
+            Cancel
+        </button>
+        <button type="button"
+            class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-orange-600 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            (click)="handleOnSubmitReview()"
+            [disabled]="isAddingReview()"
+            >
+            @if(isAddingReview()){
+                <i class="fas fa-paper-plane mr-2 animate"></i>
+                Submiting...
+            }@else {                
+                <i class="fas fa-paper-plane mr-2"></i>
+                Submit Review
+            }
+        </button>
+    </ng-template>
+</p-dialog>
