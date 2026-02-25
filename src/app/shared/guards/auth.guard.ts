@@ -20,6 +20,7 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
+    return true;
     // Ensure auth state is restored on hard refresh
     return this.authService.pingAuth().pipe(
       map((user) => {

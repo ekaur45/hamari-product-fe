@@ -8,6 +8,9 @@ import { ToastModule } from "primeng/toast";
 import { ConfirmDialogModule } from "primeng/confirmdialog";
 import { MessageService, ConfirmationService } from "primeng/api";
 import { StudentService, AuthService } from "../../../shared";
+import { UIRating } from "@/app/components/misc/rating/ui-rating";
+import { BookingStatus } from "@/app/shared/enums";
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: 'app-student-bookings',
@@ -20,11 +23,16 @@ import { StudentService, AuthService } from "../../../shared";
     ButtonModule,
     ToastModule,
     ConfirmDialogModule,
-  ],
+    UIRating,
+    FormsModule
+],
   templateUrl: './student-bookings.html',
   providers: [MessageService, ConfirmationService],
 })
 export class StudentBookings implements OnInit {
+  BookingStatus = BookingStatus;
+  isRateBookingDialogVisible = signal(false);
+  ratingBooking = signal<any>(null);
   isLoading = signal(false);
   bookings = signal<any[]>([]);
   pagination = signal({
@@ -36,7 +44,8 @@ export class StudentBookings implements OnInit {
     hasPrev: false,
   });
   studentId = signal<string>('');
-
+  rating = signal<'excellent' | 'good' | 'average' | 'poor' | 'very poor' | null>(null);
+  comment = signal<string>('');
   constructor(
     private studentService: StudentService,
     private authService: AuthService,
@@ -100,6 +109,12 @@ export class StudentBookings implements OnInit {
 
   canCancel(booking: any): boolean {
     return booking.status === 'pending' || booking.status === 'confirmed';
+  }
+  rateBooking(booking: any): void {
+    this.rating.set(null);
+    this.comment.set('');
+    this.ratingBooking.set(booking);
+    this.isRateBookingDialogVisible.set(true);
   }
 }
 

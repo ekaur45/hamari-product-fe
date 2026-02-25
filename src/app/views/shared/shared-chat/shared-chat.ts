@@ -291,6 +291,9 @@ export class SharedChat implements OnInit {
     }
 
     formatTime(date: Date): string {
+        if(!date) {
+            return '';
+        }
         const now = new Date();
         const diffMs = now.getTime() - new Date(date).getTime();
         const diffMins = Math.floor(diffMs / (1000 * 60));
@@ -306,7 +309,7 @@ export class SharedChat implements OnInit {
         } else if (diffDays < 7) {
             return `${diffDays}d ago`;
         } else {
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
     }
 
