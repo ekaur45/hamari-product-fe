@@ -12,6 +12,8 @@ import { UIRating } from "@/app/components/misc/rating/ui-rating";
 import { BookingStatus } from "@/app/shared/enums";
 import { FormsModule } from "@angular/forms";
 import { type ReviewType } from "@/app/shared/models/review.model";
+import { mapRatingToNumber } from "@/app/shared/utils/misc.util";
+import { ReviewService } from "@/app/shared/services/review.service";
 
 @Component({
   selector: 'app-student-bookings',
@@ -47,11 +49,15 @@ export class StudentBookings implements OnInit {
   studentId = signal<string>('');
   rating = signal<ReviewType>(null);
   comment = signal<string>('');
+  isAddingReview = signal<boolean>(false);
+
+
   constructor(
     private studentService: StudentService,
     private authService: AuthService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private reviewService:ReviewService
   ) {
     this.studentId.set(this.authService.getCurrentUser()?.id ?? '');
   }
@@ -117,5 +123,32 @@ export class StudentBookings implements OnInit {
     this.ratingBooking.set(booking);
     this.isRateBookingDialogVisible.set(true);
   }
+  handleOnSubmitReview(){
+    this.isAddingReview.set(true);
+    const postData = {
+        teacherBookingId:this.ratingBooking()!.id,
+        punctuality: null,
+        engagement: null,
+        knowledge: null,
+        communication: null,
+        overallExperience: null,
+        rating: mapRatingToNumber(this.rating()),
+        comment: this.comment()
+    }
+    this.reviewService.addReview(postData).subscribe({
+        next:()=>{
+          this.loadBookings();
+          this.isAddingReview.set(false);
+          this.isRateBookingDialogVisible.set(false);
+        },
+        complete:()=> {
+          this.isRateBookingDialogVisible.set(false);
+            this.isAddingReview.set(false);
+        },
+        error:()=>{
+            this.isAddingReview.set(false);
+        }
+    })
+}
 }
 

@@ -73,6 +73,7 @@ export interface TeacherBookingDto {
   paidAmount: number;
   student: Student;
   studentUserId: string;
+  reviews:any[];
 }
 
 export interface StudentBookingDto {

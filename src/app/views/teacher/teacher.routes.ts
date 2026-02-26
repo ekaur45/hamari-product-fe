@@ -12,7 +12,7 @@ export const teacherRoutes: Routes = [
     },
     {
         path:'settings',
-        loadComponent: () => import('./teacher-settings/teacher-settings').then(m => m.TeacherSettings)
+        loadChildren: () => import('./teacher-settings/teacher-setting.routes').then(r=>r.teacherRoutes)
     },
     {
         path: 'schedule',

@@ -76,7 +76,7 @@ export class AssignmentList implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadTeacherData();
+    //this.loadTeacherData();
     this.fetchAssignments();
   }
 

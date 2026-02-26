@@ -38,7 +38,7 @@ export const sidenavData: Record<UserRole, SidenavItem[]> = {
         { label: 'Dashboard', icon: 'fa-home', link: '/teacher/dashboard' },
         { label: 'Schedule', icon: 'fa-calendar-alt', link: '/teacher/schedule' },
         { label: 'Sessions', icon: 'fa-video', link: '/teacher/sessions' },
-        { label: 'Students', icon: 'fa-user-graduate', link: '/teacher/students' },
+        // { label: 'Students', icon: 'fa-user-graduate', link: '/teacher/students' },
         { label: 'Assignments', icon: 'fa-tasks', link: '/teacher/assignments' },
         { label: 'Chat', icon: 'fa-comments', link: '/teacher/chat' },
         { label: 'Notifications', icon: 'fa-bell', link: '/teacher/notifications' },

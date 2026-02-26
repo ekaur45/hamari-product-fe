@@ -108,11 +108,13 @@ export class TeacherSessions implements OnInit {
             next:()=>{
                 this.getTeacherSessions();
                 this.isAddingReview.set(false);
+                this.showReviewModal.set(false);
             },
             complete:()=> {
                 this.isAddingReview.set(false);
             },
             error:()=>{
+                this.showReviewModal.set(false);
                 this.isAddingReview.set(false);
             }
         })

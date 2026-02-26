@@ -24,7 +24,7 @@
                 }
             </select>
         </div>
-        <div class="relative w-48">
+        <!-- <div class="relative w-48">
             <i class="fas fa-book absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             <select [ngModel]="classFilter()" (ngModelChange)="classFilter.set($event); onSearch()"
                 class="pl-10 pr-8 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
@@ -33,7 +33,7 @@
                 <option [value]="c.id">{{c.subject!.name}}</option>
                 }
             </select>
-        </div>
+        </div> -->
         <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
             (click)="onSearch()">
             <i class="fas fa-sync-alt mr-2"></i>Refresh

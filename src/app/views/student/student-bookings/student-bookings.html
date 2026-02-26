@@ -199,14 +199,21 @@
     </div>
     <ng-template pTemplate="footer">
         <button type="button" (click)="isRateBookingDialogVisible.set(false)"
+        [disabled]="isAddingReview()"
             class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 mr-2">
             Cancel
         </button>
         <button type="button"
+        [disabled]="isAddingReview()"
+        (click)="handleOnSubmitReview()"
             class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-orange-600 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-
-            <i class="fas fa-paper-plane mr-2"></i>
-            Submit Review
+            @if(isAddingReview()){
+                <i class="fas fa-paper-plane mr-2"></i>
+                Submiting...
+            }@else {
+                <i class="fas fa-paper-plane mr-2"></i>
+                Submit Review
+            }
         </button>
     </ng-template>
 </p-dialog>
