@@ -60,7 +60,14 @@ export const teacherRoutes: Routes = [
     },
     {
         path: 'sessions',
-        loadComponent: () => import('./teacher-sessions/teacher-sessions').then(m => m.TeacherSessions)
+        loadComponent: () => import('./teacher-sessions/teacher-sessions').then(m => m.TeacherSessions),
+        children:[
+            {
+                path:':sessionId/details',
+                loadComponent:()=>import('./teacher-session-details/teacher-session-details').then(c=>c.TeacherSessionDetails),
+                outlet:'session-details'
+            }
+        ]
     },
     {
         path: 'notifications',

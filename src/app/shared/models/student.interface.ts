@@ -74,6 +74,7 @@ export interface TeacherBookingDto {
   student: Student;
   studentUserId: string;
   reviews:any[];
+  assignments:Assignment[]
 }
 
 export interface StudentBookingDto {
@@ -102,5 +103,6 @@ import { Class, ClassEnrollment } from './class.interface';
 import { Performance } from './performance.interface';
 import { Parent, ParentChild } from './parent-child.interface';
 import TeacherBooking, { Teacher, TeacherSubject } from './teacher.interface';
+import { Assignment } from './assignment.interface';
 
 

@@ -213,14 +213,22 @@ export class AssignmentList implements OnInit {
           this.assignments.set([...this.assignments(), resp.data]);
           this.showCreateAssignmentDialog.set(false);
         }else{
-
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
             detail: resp.message || 'Failed to create assignment',
           });
+          this.showCreateAssignmentDialog.set(false);
         }
       },
+      error:(err)=>{
+        this.showCreateAssignmentDialog.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.message || 'Failed to create assignment',
+        });
+      }
     });
   }
 }

@@ -4,7 +4,7 @@ import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
 import { Teacher, CreateTeacherDto, UpdateTeacherDto, PaginatedApiResponse, CreateTeacherDirectDto, TeacherDirectResponse, TeacherListDto, Class, Subject, CreateClassDto, Student, TeacherStudentsListDto, StudentPerformanceDto, TeacherReviewsListDto, ApiResponse, TeacherBookingDto } from '../models';
-import TeacherBooking, { TeacherSessionDto } from '../models/teacher.interface';
+import TeacherBooking, { TeacherSessionDetailsDto, TeacherSessionDto } from '../models/teacher.interface';
 
 /**
  * Teacher Service
@@ -154,5 +154,13 @@ export class TeacherService {
       map(r => r),
       catchError(e => throwError(() => e))
     );
+  }
+  
+  getTeacherSessionDetails(teacherId:string,sessionId:string){
+    return this.apiService.get<TeacherSessionDetailsDto>(`${API_ENDPOINTS.TEACHERS.SESSION_DETAILS(teacherId,sessionId)}`).pipe(
+      map(r => r),
+      catchError(e => throwError(() => e))
+    );
+
   }
 }

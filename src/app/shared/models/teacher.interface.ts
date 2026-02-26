@@ -110,3 +110,6 @@ export interface TeacherSessionDto {
   sessions:TeacherBookingDto[]
   pagination:PaginationDto
 }
+export interface TeacherSessionDetailsDto{
+  details:TeacherBookingDto
+}

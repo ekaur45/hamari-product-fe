@@ -134,7 +134,8 @@ export const API_ENDPOINTS = {
     ASSIGNMENTS: (teacherId: string) => `/teachers/${teacherId}/assignments`,
     ASSIGNMENT_BY_ID: (teacherId: string, assignmentId: string) => `/teachers/${teacherId}/assignments/${assignmentId}`,
     ASSIGNMENT_SUBMISSIONS: (teacherId: string, assignmentId: string) => `/teachers/${teacherId}/assignments/${assignmentId}/submissions`,
-    GRADE_SUBMISSION: (teacherId: string, assignmentId: string, submissionId: string) => `/teachers/${teacherId}/assignments/${assignmentId}/submissions/${submissionId}/grade`
+    GRADE_SUBMISSION: (teacherId: string, assignmentId: string, submissionId: string) => `/teachers/${teacherId}/assignments/${assignmentId}/submissions/${submissionId}/grade`,
+    SESSION_DETAILS:(teacherId:string,sessionId:string)=> `/teachers/${teacherId}/sessions/${sessionId}`
   },
 
   // Classes

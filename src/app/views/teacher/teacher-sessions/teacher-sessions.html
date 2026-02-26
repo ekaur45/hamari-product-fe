@@ -1,4 +1,7 @@
+
 <!-- Page Header -->
+ <div class="relative h-full w-full">
+<router-outlet name="session-details"></router-outlet>
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 m-4 sm:m-0 sm:mb-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -25,8 +28,14 @@
 <!-- Sessions List -->
 <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 m-4 sm:m-0">
     @for (session of sessions(); track session.id) {
-    <div
-        class="group relative bg-white rounded-xl border-2 border-gray-100 hover:border-primary/30 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+    <div class="group relative bg-white rounded-xl border-2 border-gray-100 hover:border-primary/30 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer"
+        [routerLink]="[
+  {
+    outlets: {
+      'session-details': [session.id, 'details']
+    }
+  }
+]">
         <!-- Status Indicator Bar -->
         <div class="absolute top-0 left-0 right-0 h-1.5" [ngClass]="{
                          'bg-green-500': session.status === 'confirmed' || session.status === 'completed',
@@ -152,28 +161,32 @@
                 @if(!session.reviews.length){
                 <button
                     class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
-                    [title]="'Add Review'" (click)="handleShowAddReviewModal(session)">
+                    [title]="'Add Review'" (click)="$event.stopPropagation(); handleShowAddReviewModal(session)">
                     <i class="fas fa-star mr-2"></i>
                     Add Review
                 </button>
                 } @else {
-                    <button
+                <button
                     class="flex-1 inline-flex items-center justify-center px-4 py-2.5 border-1 text-blue-500 border-blue-500 hover:bg-blue-600 hover:text-white text-sm font-semibold rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
-                    [title]="'Add Review'">
+                    [title]="'Add Review'"
+                    (click)="$event.stopPropagation()"
+                    >
                     <i class="fas fa-star mr-2"></i>
                     View Rating
                 </button>
                 }
                 <button
                     class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-primary hover:bg-orange-600 text-white text-sm font-semibold rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
-                    [title]="'Add Assignment'">
+                    [title]="'Add Assignment'" (click)="$event.stopPropagation();handleAddAssignmentClick(session)">
                     <i class="fas fa-file-alt mr-2"></i>
                     Add Assignment
                 </button>
                 }
                 <button
                     class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200"
-                    [title]="'View Details'">
+                    [title]="'View Details'"
+                    (click)="$event.stopPropagation()"
+                    >
                     <i class="fas fa-info-circle"></i>
                 </button>
             </div>
@@ -223,7 +236,7 @@
 </div>
 }
 
-
+</div>
 
 <p-dialog [(visible)]="showReviewModal" [modal]="true" [closable]="false" [draggable]="false" [resizable]="false"
     styleClass="w-[95vw] sm:w-full max-w-md" [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
@@ -282,3 +295,35 @@
         </button>
     </ng-template>
 </p-dialog>
+
+@if(selectedBookingForAddAssignment()){
+<p-dialog [(visible)]="showAddAssignmentModal" [modal]="true" [closable]="false" [draggable]="false" [resizable]="false"
+    styleClass="w-[95vw] sm:w-full max-w-md" [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+    [style]="{width: '95vw', maxWidth: '40rem'}" (onHide)="showAddAssignmentModal.set(false)">
+    <ng-template pTemplate="header">
+        <div class="flex items-center justify-between w-full pr-2">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div
+                    class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                    <i class="fas fa-star text-lg sm:text-xl"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1">
+                        Add Assignment
+                    </h2>
+                    <p class="text-sm text-gray-500">Please add assignment</p>
+                </div>
+            </div>
+            <button (click)="showAddAssignmentModal.set(false)"
+                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors duration-200 p-1 rounded-full hover:bg-gray-100"
+                title="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </ng-template>
+    <taleemiyat-create-assignment [selectedBooking]="selectedBookingForAddAssignment()!"
+        (onCancel)="showAddAssignmentModal.set(false)"
+        (onCreated)="handleOnAssignmentCreated($event)"></taleemiyat-create-assignment>
+</p-dialog>
+}
+

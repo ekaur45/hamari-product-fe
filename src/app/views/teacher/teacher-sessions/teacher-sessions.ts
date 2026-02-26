@@ -1,4 +1,4 @@
-import { ApiResponse, AuthService, PaginationDto, TeacherBookingDto, TeacherService, TeacherSessionDto } from "@/app/shared";
+import { ApiResponse, AssignmentService, AuthService, CreateAssignmentDto, HTTP_STATUS, PaginationDto, TeacherBookingDto, TeacherService, TeacherSessionDto } from "@/app/shared";
 import { CommonModule } from "@angular/common";
 import { Component, OnInit, signal } from "@angular/core";
 import { RouterModule } from "@angular/router";
@@ -6,13 +6,15 @@ import { ProfilePhoto } from "@/app/components/misc/profile-photo/profile-photo"
 import { DialogModule } from "primeng/dialog";
 import { UIRating } from "@/app/components/misc/rating/ui-rating";
 import { FormsModule } from "@angular/forms";
-import {type ReviewType} from '@/app/shared/models/review.model'
+import { type ReviewType } from '@/app/shared/models/review.model'
 import { mapRatingToNumber } from "@/app/shared/utils/misc.util";
 import { ReviewService } from "@/app/shared/services/review.service";
+import { TaleemiyatCreateAssignment } from "@/app/components/assignment/create-assignment/create-assignment";
+import { MessageService } from "primeng/api";
 @Component({
     selector: 'app-teacher-sessions',
     standalone: true,
-    imports: [CommonModule, RouterModule, ProfilePhoto, DialogModule, UIRating,FormsModule],
+    imports: [CommonModule, RouterModule, ProfilePhoto, DialogModule, UIRating, FormsModule, TaleemiyatCreateAssignment],
     templateUrl: './teacher-sessions.html'
 })
 export class TeacherSessions implements OnInit {
@@ -43,22 +45,27 @@ export class TeacherSessions implements OnInit {
 
     // Expose Math for template
     Math = Math;
-    
+
+
+    showAddAssignmentModal = signal<boolean>(false);
+    selectedBookingForAddAssignment = signal<TeacherBookingDto | null>(null);
     constructor(
-        private teacherService:TeacherService,
-        private authService:AuthService,
-        private reviewService:ReviewService
-    ) {}
-    
+        private teacherService: TeacherService,
+        private authService: AuthService,
+        private reviewService: ReviewService,
+        private assignmentService:AssignmentService,
+        private messageService:MessageService
+    ) { }
+
     ngOnInit(): void {
-        this.getTeacherSessions();        
+        this.getTeacherSessions();
     }
-    
+
     getTeacherSessions(page: number = 1): void {
         this.isLoading.set(true);
         this.teacherService.getTeacherSessions(this.authService.getCurrentUser()?.id!).subscribe({
             next: (response: ApiResponse<TeacherSessionDto>) => {
-                if(response.statusCode === 200){
+                if (response.statusCode === 200) {
                     this.sessions.set(response.data.sessions);
                     this.pagination.set(response.data.pagination);
                 }
@@ -70,32 +77,32 @@ export class TeacherSessions implements OnInit {
             }
         });
     }
-    
+
     nextPage(): void {
         if (this.pagination().hasNext) {
             const nextPage = this.pagination().page + 1;
             this.getTeacherSessions(nextPage);
         }
     }
-    
+
     prevPage(): void {
         if (this.pagination().hasPrev) {
             const prevPage = this.pagination().page - 1;
             this.getTeacherSessions(prevPage);
         }
     }
-    isPast(date: Date,endTime: string): boolean {
+    isPast(date: Date, endTime: string): boolean {
         const endTimeDate = new Date(`${new Date(date).toISOString().split('T')[0]} ${endTime}`);
         return endTimeDate < new Date();
     }
-    handleShowAddReviewModal(session:TeacherBookingDto){
+    handleShowAddReviewModal(session: TeacherBookingDto) {
         this.selectedReviewSession.set(session);
-        this.showReviewModal.set(true);        
+        this.showReviewModal.set(true);
     }
-    handleOnSubmitReview(){
+    handleOnSubmitReview() {
         this.isAddingReview.set(true);
         const postData = {
-            teacherBookingId:this.selectedReviewSession()!.id,
+            teacherBookingId: this.selectedReviewSession()!.id,
             punctuality: mapRatingToNumber(this.punctuality()),
             engagement: mapRatingToNumber(this.engagement()),
             knowledge: mapRatingToNumber(this.knowledge()),
@@ -105,18 +112,54 @@ export class TeacherSessions implements OnInit {
             comment: this.comment()
         }
         this.reviewService.addReview(postData).subscribe({
-            next:()=>{
+            next: () => {
                 this.getTeacherSessions();
                 this.isAddingReview.set(false);
                 this.showReviewModal.set(false);
             },
-            complete:()=> {
+            complete: () => {
                 this.isAddingReview.set(false);
             },
-            error:()=>{
+            error: () => {
                 this.showReviewModal.set(false);
                 this.isAddingReview.set(false);
             }
         })
+    }
+    handleAddAssignmentClick(booking: TeacherBookingDto) {
+        this.selectedBookingForAddAssignment.set(booking);
+        this.showAddAssignmentModal.set(true);
+    }
+    handleOnAssignmentCreated(createAssignmentDto: CreateAssignmentDto) {
+        this.assignmentService.createAssignment(this.authService.getCurrentUser()?.id || '', createAssignmentDto).subscribe({
+            next: (resp: ApiResponse) => {
+                if (resp.statusCode === HTTP_STATUS.CREATED || resp.statusCode === HTTP_STATUS.OK) {
+                    this.messageService.add({
+                        severity:'success',
+                        summary:'Success',
+                        detail:resp.message
+                    })
+                    this.showAddAssignmentModal.set(false);
+                    setTimeout(() => {                        
+                        this.selectedBookingForAddAssignment.set(null);
+                    }, 100);
+                } else {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: resp.message || 'Failed to create assignment',
+                    });
+                    this.showAddAssignmentModal.set(false);
+                }
+            },
+            error:(err)=>{
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: err.message || 'Failed to create assignment',
+                });
+                this.showAddAssignmentModal.set(false);
+            }
+        });
     }
 }
