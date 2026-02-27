@@ -1,12 +1,14 @@
-import { ApiResponse, AuthService, HTTP_STATUS, TeacherBookingDto, TeacherService, TeacherSessionDetailsDto } from "@/app/shared";
+import { ApiResponse, AuthService, HTTP_STATUS, Review, TeacherBookingDto, TeacherService, TeacherSessionDetailsDto } from "@/app/shared";
 import { CommonModule } from "@angular/common";
 import { Component, HostListener, signal } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink, RouterModule } from "@angular/router";
 import { ProfilePhoto } from "@/app/components/misc/profile-photo/profile-photo";
+import { Dialog, DialogModule } from "primeng/dialog";
+import { RelativeTimePipe } from "@/app/shared/pipes/relative-time.pipe";
 
 @Component({
     templateUrl: './teacher-session-details.html',
-    imports: [CommonModule, RouterModule, RouterLink, ProfilePhoto]
+    imports: [CommonModule, RouterModule, RouterLink, ProfilePhoto, Dialog,DialogModule,RelativeTimePipe]
 })
 export class TeacherSessionDetails {
     sessionId = signal<string | null>(null);
@@ -50,5 +52,8 @@ export class TeacherSessionDetails {
             this.router.navigate(['/teacher/sessions']);
         }
         return;
+    }
+    checkIsOwnReview(review:Review){
+        return this.authService.getCurrentUser()!.id == review.reviewerId;
     }
 }
