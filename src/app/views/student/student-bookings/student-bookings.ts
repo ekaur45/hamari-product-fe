@@ -14,6 +14,8 @@ import { FormsModule } from "@angular/forms";
 import { type ReviewType } from "@/app/shared/models/review.model";
 import { mapRatingToNumber } from "@/app/shared/utils/misc.util";
 import { ReviewService } from "@/app/shared/services/review.service";
+import { ProfilePhoto } from "@/app/components/misc/profile-photo/profile-photo";
+import { RelativeTimePipe } from "@/app/shared/pipes/relative-time.pipe";
 
 @Component({
   selector: 'app-student-bookings',
@@ -27,7 +29,9 @@ import { ReviewService } from "@/app/shared/services/review.service";
     ToastModule,
     ConfirmDialogModule,
     UIRating,
-    FormsModule
+    FormsModule,
+    ProfilePhoto,
+    RelativeTimePipe
 ],
   templateUrl: './student-bookings.html',
   providers: [MessageService, ConfirmationService],
