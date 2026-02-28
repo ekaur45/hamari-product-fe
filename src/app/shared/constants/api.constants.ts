@@ -105,7 +105,8 @@ export const API_ENDPOINTS = {
     CLASS_DETAILS: (studentId: string, classId: string) => `/students/${studentId}/classes/${classId}`,
     CREATE_REVIEW: (studentId: string, teacherId: string) => `/students/${studentId}/reviews/teachers/${teacherId}`,
     TEACHER_REVIEWS: (studentId: string, teacherId: string) => `/students/${studentId}/reviews/teachers/${teacherId}`,
-    PERFORMANCE: (studentId: string) => `/students/${studentId}/performance`
+    PERFORMANCE: (studentId: string) => `/students/${studentId}/performance`,
+    BOOKING_DETAILS:(studentId:string,bookingId:string)=>`/students/${studentId}/bookings/${bookingId}`
   },
 
   // Parents

@@ -24,7 +24,14 @@ export const studentRoutes: Routes = [
     },
     {
         path: 'bookings',
-        loadComponent: () => import('./student-bookings/student-bookings').then(m => m.StudentBookings)
+        loadComponent: () => import('./student-bookings/student-bookings').then(m => m.StudentBookings),
+        children:[
+            {
+                path:':bookingId/details',
+                loadComponent:()=>import('./student-booking-details/student-booking-details').then(c=>c.StudentBookingDetails),
+                outlet:'booking-details'
+            }
+        ]
     },
     {
         path: 'performance',

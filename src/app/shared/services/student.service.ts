@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { Student, CreateStudentDto, UpdateStudentDto, PaginatedApiResponse, StudentListDto, StudentScheduleDto, StudentBookingDto, Assignment, AssignmentSubmission, AssignmentListDto, SubmissionStatus, Class, Review, StudentPerformanceDto } from '../models';
+import { Student, CreateStudentDto, UpdateStudentDto, PaginatedApiResponse, StudentListDto, StudentScheduleDto, StudentBookingDto, Assignment, AssignmentSubmission, AssignmentListDto, SubmissionStatus, Class, Review, StudentPerformanceDto, TeacherBookingDto, ApiResponse } from '../models';
 
 /**
  * Student Service
@@ -142,6 +142,13 @@ export class StudentService {
   getMyPerformance(studentId: string): Observable<StudentPerformanceDto> {
     return this.apiService.get<StudentPerformanceDto>(`${API_ENDPOINTS.STUDENTS.BASE}/${studentId}/performance`).pipe(
       map(r => r.data),
+      catchError(e => throwError(() => e))
+    );
+  }
+  
+  getBookingDetails(studentId:string,bookingId:string):Observable<ApiResponse<TeacherBookingDto>>{
+    return this.apiService.get<TeacherBookingDto>(`${API_ENDPOINTS.STUDENTS.BOOKING_DETAILS(studentId,bookingId)}`).pipe(
+      map(r => r),
       catchError(e => throwError(() => e))
     );
   }
