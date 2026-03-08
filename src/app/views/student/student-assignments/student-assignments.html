@@ -15,118 +15,107 @@
         </div>
     } @else {
         @if(assignments() && assignments().length > 0) {
-            <div class="grid grid-cols-1 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
                 @for(assignment of assignments(); track assignment.id) {
-                    @let submissionInfo = getSubmissionStatus(assignment);
-                    <div class="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden">
-                        <!-- Header Section -->
-                        <div class="bg-gradient-to-r from-primary/10 to-primary/5 px-6 py-4 border-b border-gray-100">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">{{assignment.title}}</h3>
-                                    @if(assignment.description) {
-                                        <p class="text-gray-600 text-sm line-clamp-2">{{assignment.description}}</p>
-                                    }
-                                </div>
-                                <div class="ml-4">
-                                    @if(submissionInfo.status === 'graded') {
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                            Graded
-                                        </span>
-                                    } @else if(submissionInfo.status === 'submitted') {
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            Submitted
-                                        </span>
-                                    } @else if(isPastDue(assignment)) {
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                            Overdue
-                                        </span>
-                                    } @else {
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                            Pending
-                                        </span>
-                                    }
-                                </div>
-                            </div>
-                        </div>
+                    @let submissionInfo = getSubmissionStatus(assignment);                    
+                    <div class="flex flex-col justify-between bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden">
                         
-                        <!-- Content Section -->
-                        <div class="p-6 space-y-4">
-                            <!-- Teacher -->
-                            <div class="flex items-start gap-3">
-                                <div class="flex-shrink-0 w-5 h-5 mt-0.5">
-                                    <i class="fas fa-chalkboard-teacher text-primary text-sm"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Teacher</p>
-                                    <p class="text-sm text-gray-700 font-medium">
-                                        {{assignment.teacher?.user?.firstName}} {{assignment.teacher?.user?.lastName}}
-                                    </p>
-                                </div>
-                            </div>
-                            
-                            <!-- Due Date -->
-                            @if(assignment.dueDate) {
-                                <div class="flex items-start gap-3">
-                                    <div class="flex-shrink-0 w-5 h-5 mt-0.5">
-                                        <i class="fas fa-calendar-times text-primary text-sm"></i>
+                        <div>
+                            <div class="bg-gradient-to-r from-primary/10 to-primary/5 px-6 py-4 border-b border-gray-100">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-1">{{assignment.title}}</h3>
+                                        @if(assignment.description) {
+                                            <p class="text-gray-600 text-sm line-clamp-2">{{assignment.description}}</p>
+                                        }
                                     </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Due Date</p>
-                                        <p class="text-sm text-gray-700" [class.text-red-600]="isPastDue(assignment)" [class.font-semibold]="isPastDue(assignment)">
-                                            {{formatDate(assignment.dueDate)}} @if(isPastDue(assignment) && assignment.allowLateSubmission) {
-                                                <span class="text-xs text-gray-500 ml-2">(Late submission allowed, penalty: {{assignment.latePenalty}}%) ({{assignment.submissionDate}}% deduction per day)</span>
-                                            }
-                                        </p>
-                                    </div>
-                                </div>
-                            }
-                            
-                            <!-- Type & Score -->
-                            <div class="flex items-start gap-3">
-                                <div class="flex-shrink-0 w-5 h-5 mt-0.5">
-                                    <i class="fas fa-tag text-primary text-sm"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Type</p>
-                                    <p class="text-sm text-gray-700 font-medium capitalize">{{assignment.type}}</p>
-                                    <p class="text-xs text-gray-500 mt-0.5">Max Score: {{assignment.maxScore}}</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Grade (if graded) -->
-                            @if(submissionInfo.submission && submissionInfo.submission.score !== null) {
-                                <div class="flex items-start gap-3">
-                                    <div class="flex-shrink-0 w-5 h-5 mt-0.5">
-                                        <i class="fas fa-star text-primary text-sm"></i>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Grade</p>
-                                        <p class="text-sm text-gray-700 font-semibold">
-                                            {{submissionInfo.submission.score}} / {{submissionInfo.submission.maxScore || assignment.maxScore}}
-                                        </p>
-                                        @if(submissionInfo.submission.feedback) {
-                                            <p class="text-xs text-gray-600 mt-1">{{submissionInfo.submission.feedback}}</p>
+                                    <div class="ml-4">
+                                        @if(submissionInfo.status === 'graded') {
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                                Graded
+                                            </span>
+                                        } @else if(submissionInfo.status === 'submitted') {
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                Submitted
+                                            </span>
+                                        } @else if(isPastDue(assignment)) {
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                                Overdue
+                                            </span>
+                                        } @else {
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                Pending
+                                            </span>
                                         }
                                     </div>
                                 </div>
-                            }
-                            
-                            <!-- Instructions -->
-                            @if(assignment.instructions) {
+                            </div>
+                            <div class="p-6 space-y-4">
                                 <div class="flex items-start gap-3">
                                     <div class="flex-shrink-0 w-5 h-5 mt-0.5">
-                                        <i class="fas fa-info-circle text-primary text-sm"></i>
+                                        <i class="fas fa-chalkboard-teacher text-primary text-sm"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Instructions</p>
-                                        <p class="text-sm text-gray-700">{{assignment.instructions}}</p>
+                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Teacher</p>
+                                        <p class="text-sm text-gray-700 font-medium">
+                                            {{assignment.teacher?.user?.firstName}} {{assignment.teacher?.user?.lastName}}
+                                        </p>
                                     </div>
                                 </div>
-                            }
+                                @if(assignment.dueDate) {
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                            <i class="fas fa-calendar-times text-primary text-sm"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Due Date</p>
+                                            <p class="text-sm text-gray-700" [class.text-red-600]="isPastDue(assignment)" [class.font-semibold]="isPastDue(assignment)">
+                                                {{formatDate(assignment.dueDate)}} @if(isPastDue(assignment) && assignment.allowLateSubmission) {
+                                                    <span class="text-xs text-gray-500 ml-2">(Late submission allowed, penalty: {{assignment.latePenalty}}%) ({{assignment.submissionDate}}% deduction per day)</span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                        <i class="fas fa-tag text-primary text-sm"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Type</p>
+                                        <p class="text-sm text-gray-700 font-medium capitalize">{{assignment.type}}</p>
+                                        <p class="text-xs text-gray-500 mt-0.5">Max Score: {{assignment.maxScore}}</p>
+                                    </div>
+                                </div>
+                                @if(submissionInfo.submission && submissionInfo.submission.score !== null) {
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                            <i class="fas fa-star text-primary text-sm"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Grade</p>
+                                            <p class="text-sm text-gray-700 font-semibold">
+                                                {{submissionInfo.submission.score}} / {{submissionInfo.submission.maxScore || assignment.maxScore}}
+                                            </p>
+                                            @if(submissionInfo.submission.feedback) {
+                                                <p class="text-xs text-gray-600 mt-1">{{submissionInfo.submission.feedback}}</p>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                @if(assignment.instructions) {
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                                            <i class="fas fa-info-circle text-primary text-sm"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Instructions</p>
+                                            <p class="text-sm text-gray-700">{{assignment.instructions}}</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
                         </div>
-                        
-                        <!-- Footer Actions -->
                         <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
                             @if(submissionInfo.status === 'not_submitted' || submissionInfo.status === 'pending') {
                                 <button 
@@ -152,8 +141,6 @@
                     </div>
                 }
             </div>
-            
-            <!-- Pagination -->
             @if(pagination().totalPages > 1) {
                 <div class="mt-6">
                     <p-paginator
