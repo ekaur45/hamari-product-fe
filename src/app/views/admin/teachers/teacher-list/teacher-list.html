@@ -68,6 +68,9 @@
                 <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition" (click)="onSearch()">
                     <i class="fas fa-sync-alt mr-2"></i>Refresh
                 </button>
+                <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition" (click)="onAddTeacherClick()">
+                    <i class="fas fa-user-plus mr-2"></i>Add Teacher
+                </button>
             </div>
         </div>
     </div>
@@ -209,3 +212,4 @@
     </div>
 
     <router-outlet name="teacherDetailsOutlet"></router-outlet>
+    <router-outlet name="addTeacherOutlet"></router-outlet>

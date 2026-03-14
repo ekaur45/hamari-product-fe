@@ -13,6 +13,8 @@ export class WbToolsComponent implements AfterViewInit, OnDestroy {
     ngOnDestroy(): void {
     }
     showDropDown = signal<boolean>(false);
+    /** 'above' | 'below' – where the dropdown is shown relative to the button */
+    dropdownPlacement = signal<'above' | 'below'>('below');
 
     @ViewChild("dropdownRef") dropdown!: ElementRef;
     @ViewChild("toggleBtn") toggleBtn!: ElementRef;
@@ -20,7 +22,34 @@ export class WbToolsComponent implements AfterViewInit, OnDestroy {
     ngAfterViewInit(): void { }
 
     toggleDropdown() {
-        this.showDropDown.set(!this.showDropDown());
+        const next = !this.showDropDown();
+        this.showDropDown.set(next);
+        if (next) {
+            setTimeout(() => this.updateDropdownPosition(), 0);
+        }
+    }
+
+    private updateDropdownPosition(): void {
+        const btn = this.toggleBtn?.nativeElement as HTMLElement;
+        const panel = this.dropdown?.nativeElement as HTMLElement;
+        if (!btn || !panel) return;
+
+        const btnRect = btn.getBoundingClientRect();
+        const panelHeight = panel.offsetHeight;
+        const gap = 4;
+        const spaceBelow = window.innerHeight - btnRect.bottom;
+        const spaceAbove = btnRect.top;
+
+        if (spaceBelow >= panelHeight + gap || spaceBelow >= spaceAbove) {
+            this.dropdownPlacement.set('below');
+        } else {
+            this.dropdownPlacement.set('above');
+        }
+    }
+
+    @HostListener('window:resize')
+    onResize(): void {
+        if (this.showDropDown()) this.updateDropdownPosition();
     }
 
     // Detect click outside
@@ -32,6 +61,6 @@ export class WbToolsComponent implements AfterViewInit, OnDestroy {
         if (!clickedInsideDropdown && !clickedToggleButton) {
             this.showDropDown.set(false);
         }
-    }   
+    }
 }
 

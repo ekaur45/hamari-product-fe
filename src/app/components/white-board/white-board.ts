@@ -5,7 +5,7 @@ import { DialogModule } from "primeng/dialog";
 import { Canvas, PencilBrush, Rect, Circle, Ellipse, Line, Triangle, Path, IText, Group, util, Image } from 'fabric';
 import { WhiteboardPage } from "./pages/whiteboard-pages";
 import { WhiteboardSelectTool } from "./tools/whiteboard-select-tool";
-import { WhiteboardStickyNotes } from "./tools/whiteboard-sticky-notes";
+// import { WhiteboardStickyNotes } from "./tools/whiteboard-sticky-notes";
 import { WhiteboardTemplates, WhiteboardTemplate } from "./tools/whiteboard-templates";
 import { WhiteboardStamps } from "./tools/whiteboard-stamps";
 import { WhiteboardMathTools } from "./tools/whiteboard-math-tools";
@@ -30,7 +30,6 @@ declare const MathJax: any;
         FormsModule,
         DialogModule,
         WhiteboardSelectTool,
-        WhiteboardStickyNotes,
         WhiteboardTemplates,
         WhiteboardStamps,
         WhiteboardMathTools,

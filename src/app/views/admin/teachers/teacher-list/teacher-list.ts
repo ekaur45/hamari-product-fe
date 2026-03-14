@@ -164,4 +164,14 @@ export class TeacherList implements OnInit {
             }
           ]);
     }
+    onAddTeacherClick(): void {
+        this.router.navigate([
+            'admin',
+            'teachers',
+            'list',
+            {
+                outlets: { addTeacherOutlet: ['add'] }
+            }
+        ]);
+    }
 }
