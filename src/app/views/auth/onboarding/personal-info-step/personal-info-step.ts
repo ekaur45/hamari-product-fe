@@ -236,6 +236,9 @@ export class PersonalInfoStep implements OnInit, OnDestroy {
                 } else if(this.currentUser()?.role === UserRole.STUDENT) {
                     this.router.navigate(['/auth/onboarding/education-step']);
                 }
+                else if(this.currentUser()?.role === UserRole.PARENT) {
+                    this.router.navigate(['/auth/onboarding/education-step']);
+                }
                 else {
                     this.router.navigate(['/auth/onboarding/final-step']);
                 }

@@ -141,6 +141,10 @@ export class FinalStep implements OnInit {
     }
 
     onEdit(step: string): void {
-        this.router.navigate([`/auth/onboarding/${step}`]);
+        if(this.currentUser()?.role === UserRole.PARENT) {
+            this.router.navigate(['/auth/onboarding/education-step']);
+        } else {
+            this.router.navigate([`/auth/onboarding/${step}`]);
+        }
     }
 }

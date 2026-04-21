@@ -19,7 +19,7 @@ import { environment } from "../../../../../environments/environment";
 })
 export class ProfilePhotoStep implements OnInit {
     @ViewChild(ImageCropperComponent) imageCropper?: ImageCropperComponent;
-assetsUrl = environment.assetsUrl;
+    assetsUrl = environment.assetsUrl;
     imageChangedEvent: any = null;
     croppedImage = signal<string | undefined>(undefined);
     isUploading = signal<boolean>(false);
@@ -57,7 +57,7 @@ assetsUrl = environment.assetsUrl;
     onFileSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
-        
+
         if (!file) {
             return;
         }
@@ -82,7 +82,7 @@ assetsUrl = environment.assetsUrl;
 
     imageCropped(event: ImageCroppedEvent): void {
         this.croppedImage.set(event.objectUrl ?? '');
-        
+
     }
 
     imageLoaded(): void {
@@ -123,7 +123,7 @@ assetsUrl = environment.assetsUrl;
         try {
             // Convert base64 to File
             const file = await this.base64ToFile(this.croppedImage()!, 'profile-photo.png');
-            
+
             this.profileService.updateProfilePhoto(file)
                 .pipe(
                     finalize(() => {
@@ -150,7 +150,7 @@ assetsUrl = environment.assetsUrl;
         return new Promise((resolve, reject) => {
             // Remove data URL prefix if present
             const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
-            
+
             // Convert base64 to blob
             const byteCharacters = atob(base64Data);
             const byteNumbers = new Array(byteCharacters.length);
@@ -159,7 +159,7 @@ assetsUrl = environment.assetsUrl;
             }
             const byteArray = new Uint8Array(byteNumbers);
             const blob = new Blob([byteArray], { type: 'image/png' });
-            
+
             // Convert blob to File
             const file = new File([blob], filename, { type: 'image/png' });
             resolve(file);

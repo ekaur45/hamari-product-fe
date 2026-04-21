@@ -20,7 +20,7 @@ import { AuthService } from "../../../../shared/services/auth.service";
 export class EducationStep implements OnInit {
     currentUser = signal<User | null>(null);
     isSaving = signal<boolean>(false);
-
+    readonly UserRole = UserRole;
     educations = computed<EducationItem[]>(() => {
         const user = this.currentUser();
         return user?.educations || [];
@@ -214,6 +214,16 @@ export class EducationStep implements OnInit {
         // Navigate to next step
         if (this.currentUser()?.role === UserRole.TEACHER) {
         this.router.navigate(['/auth/onboarding/subjects-step']);
+        }else{
+            this.router.navigate(['/auth/onboarding/final-step']);
+        }
+    }
+    onBackToPersonalInfo(): void {
+        this.router.navigate(['/auth/onboarding/personal-info-step']);
+    }
+    onSkip(): void {
+        if (this.currentUser()?.role === UserRole.TEACHER) {
+            this.router.navigate(['/auth/onboarding/subjects-step']);
         }else{
             this.router.navigate(['/auth/onboarding/final-step']);
         }
