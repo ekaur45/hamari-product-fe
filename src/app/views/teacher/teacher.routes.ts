@@ -22,6 +22,11 @@ export const teacherRoutes: Routes = [
         path: 'class',
         loadComponent: () => import('./teacher-class/teacher-class').then(m => m.TeacherClass)
     },
+    // Alias to match ROUTES_MAP + dashboard links
+    {
+        path: 'classes',
+        loadComponent: () => import('./teacher-class/teacher-class').then(m => m.TeacherClass)
+    },
     {
         path: 'assignments',
         loadComponent: () => import('./teacher-assignments/assignment-list/assignment-list').then(m => m.AssignmentList)

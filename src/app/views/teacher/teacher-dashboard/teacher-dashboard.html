@@ -16,13 +16,19 @@
         </div>
     </div>
 
+    @if(error()) {
+        <div class="mb-6 p-4 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+            <i class="fas fa-exclamation-triangle mr-2"></i>{{error()}}
+        </div>
+    }
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Active Classes</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ classes().length }}</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ activeClassesCount() }}</p>
                     <p class="text-xs text-blue-600 mt-1">
                         <i class="fas fa-check-circle mr-1"></i>All active
                     </p>
@@ -38,10 +44,10 @@
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600 mb-1">Total Students</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ bookings().length }}</p>
+                    <p class="text-sm text-gray-600 mb-1">Total Bookings</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ totalBookingsCount() }}</p>
                     <p class="text-xs text-green-600 mt-1">
-                        <i class="fas fa-user-plus mr-1"></i>Active 1:1 sessions
+                        <i class="fas fa-user-plus mr-1"></i>1:1 sessions
                     </p>
                 </div>
                 <div class="w-14 h-14 bg-green-500 rounded-lg flex items-center justify-center">
@@ -56,37 +62,37 @@
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600 mb-1">Pending Grading</p>
-                    <p class="text-3xl font-bold text-gray-900">0</p>
+                    <p class="text-sm text-gray-600 mb-1">Upcoming 1:1</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ upcomingBookingsCount() }}</p>
                     <p class="text-xs text-orange-600 mt-1">
-                        <i class="fas fa-exclamation-circle mr-1"></i>Needs attention
+                        <i class="fas fa-clock mr-1"></i>Next sessions
                     </p>
                 </div>
                 <div class="w-14 h-14 bg-orange-500 rounded-lg flex items-center justify-center">
                     <i class="fas fa-tasks text-white text-2xl"></i>
                 </div>
             </div>
-            <a href="teacher-assignments.html"
+            <a routerLink="/teacher/sessions"
                 class="text-orange-600 text-xs font-medium mt-3 inline-block hover:underline">
-                Grade now <i class="fas fa-arrow-right ml-1"></i>
+                View sessions <i class="fas fa-arrow-right ml-1"></i>
             </a>
         </div>
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600 mb-1">Today's Sessions</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ classes().length + bookings().length }}</p>
+                    <p class="text-sm text-gray-600 mb-1">Pending Requests</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ pendingBookingsCount() }}</p>
                     <p class="text-xs text-purple-600 mt-1">
-                        <i class="fas fa-calendar-check mr-1"></i>Total classes/bookings
+                        <i class="fas fa-calendar-check mr-1"></i>Requires response
                     </p>
                 </div>
                 <div class="w-14 h-14 bg-purple-500 rounded-lg flex items-center justify-center">
                     <i class="fas fa-calendar-check text-white text-2xl"></i>
                 </div>
             </div>
-            <a href="teacher-schedule.html"
+            <a routerLink="/teacher/sessions"
                 class="text-purple-600 text-xs font-medium mt-3 inline-block hover:underline">
-                View schedule <i class="fas fa-arrow-right ml-1"></i>
+                Review requests <i class="fas fa-arrow-right ml-1"></i>
             </a>
         </div>
     </div>
@@ -97,12 +103,12 @@
         <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">Today's Schedule</h3>
-                <a href="teacher-schedule.html" class="text-primary text-sm font-medium hover:underline">
+                <a routerLink="/teacher/schedule" class="text-primary text-sm font-medium hover:underline">
                     View full schedule <i class="fas fa-arrow-right ml-1"></i>
                 </a>
             </div>
             <div class="space-y-3">
-                @for (classItem of classes(); track classItem.id) {
+                @for (classItem of classes().slice(0, 3); track classItem.id) {
                 <div
                     class="flex items-start p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg hover:bg-blue-100 transition">
                     <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -110,21 +116,20 @@
                     </div>
                     <div class="ml-3 flex-1">
                         <div class="flex items-center justify-between">
-                            <p class="text-sm font-semibold text-gray-900">{{ classItem.name }}</p>
+                            <p class="text-sm font-semibold text-gray-900">{{ classItem.id }}</p>
                             <span class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Recurring</span>
                         </div>
-                        <p class="text-xs text-gray-600 mt-1">{{ classItem.subject?.name }}</p>
+                        <p class="text-xs text-gray-600 mt-1">{{ classItem.subject.name }}</p>
                         <div class="flex items-center mt-2 text-xs text-gray-600">
                             <i class="fas fa-clock mr-2"></i>
-                            <span>{{ classItem.day }} | {{ classItem.startTime }} - {{ classItem.endTime }}</span>
-                            <a href="session-live.html" class="ml-4 text-primary hover:underline font-medium">Start
-                                Session</a>
+                            <span>{{ classItem.startTime }} - {{ classItem.endTime }}</span>
+                            <a routerLink="/teacher/sessions" class="ml-4 text-primary hover:underline font-medium">Open</a>
                         </div>
                     </div>
                 </div>
                 }
 
-                @for (booking of bookings(); track booking.id) {
+                @for (booking of bookings().slice(0, 3); track booking.id) {
                 <div
                     class="flex items-start p-4 bg-green-50 border-l-4 border-green-500 rounded-lg hover:bg-green-100 transition">
                     <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -133,10 +138,12 @@
                     <div class="ml-3 flex-1">
                         <div class="flex items-center justify-between">
                             <p class="text-sm font-semibold text-gray-900">1:1 Session: {{
-                                booking.student?.user?.firstName }} {{ booking.student?.user?.lastName }}</p>
+                                booking.student.user.firstName }} {{ booking.student.user.lastName }}</p>
                             <span class="text-xs bg-green-500 text-white px-2 py-1 rounded">{{ booking.status }}</span>
                         </div>
-                        <p class="text-xs text-gray-600 mt-1">{{ booking.teacherSubject?.subject?.name }}</p>
+                        @if(booking.teacherSubject && booking.teacherSubject.subject) {
+                            <p class="text-xs text-gray-600 mt-1">{{ booking.teacherSubject.subject.name }}</p>
+                        }
                         <div class="flex items-center mt-2 text-xs text-gray-600">
                             <i class="fas fa-calendar mr-2"></i>
                             <span>{{ booking.bookingDate | date }}</span>
@@ -148,7 +155,7 @@
                 @if (!classes().length && !bookings().length) {
                 <div class="text-center py-8">
                     <p class="text-gray-500">No classes or bookings scheduled for today.</p>
-                    <a href="teacher-schedule.html"
+                    <a routerLink="/teacher/schedule"
                         class="text-primary hover:underline font-medium mt-2 inline-block">Manage Schedule</a>
                 </div>
                 }
@@ -159,19 +166,19 @@
         <div class="bg-white rounded-lg shadow-md p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
             <div class="space-y-3">
-                <a href="teacher-assignments.html"
+                <a routerLink="/teacher/assignments/create"
                     class="block w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-center font-medium">
                     <i class="fas fa-tasks mr-2"></i>Create Assignment
                 </a>
-                <a href="teacher-assignments.html"
+                <a routerLink="/teacher/assignments"
                     class="block w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-center font-medium">
                     <i class="fas fa-check-circle mr-2"></i>Grade Submissions
                 </a>
-                <a href="teacher-classes.html"
+                <a routerLink="/teacher/classes"
                     class="block w-full px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-center font-medium">
                     <i class="fas fa-users mr-2"></i>Manage Classes
                 </a>
-                <a href="teacher-schedule.html"
+                <a routerLink="/teacher/schedule"
                     class="block w-full px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-center font-medium">
                     <i class="fas fa-calendar-alt mr-2"></i>View Schedule
                 </a>
