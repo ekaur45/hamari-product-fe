@@ -1,25 +1,87 @@
-import { Component, OnInit, signal } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Component, effect, OnInit, signal } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { ProfileService } from "../../../shared/services/profile.service";
-import { CommonModule } from "@angular/common";
 import { User, UserRole } from "../../../shared";
 import { environment } from "../../../../environments/environment";
 import { CurrencyPipe } from "../../../shared/pipes/currency.pipe";
-
+import { MessageService } from "primeng/api";
+import { DialogModule } from "primeng/dialog";
+import { ToastModule } from "primeng/toast";
+import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
+import { ApiHelper } from "../../../utils";
 @Component({
-    imports: [CommonModule, RouterLink, CurrencyPipe],
+    imports: [CommonModule, RouterLink, CurrencyPipe, DialogModule, ToastModule, ReactiveFormsModule],
     standalone: true,
     selector: 'app-profile-view',
     templateUrl: './profile-view.html',
-    providers: [ProfileService, CurrencyPipe]
+    providers: [ProfileService, CurrencyPipe, MessageService]
 })
 export class ProfileView implements OnInit {
     assetsUrl = environment.assetsUrl;
     profile = signal<User | null>(null);
     readonly UserRole = UserRole;
 
+    isPlayingVideo = signal(false);
+
     isLoading = signal(false);
-    constructor(private profileService: ProfileService) {
+    showUploadVideoDialog = signal(false);
+
+    // Dialog state (copied behavior from professional-info)
+    isThumbnailUploading = signal(false);
+    isVideoUploading = signal(false);
+    youtubeVideoId = signal<string | null>(null);
+
+    introductionVideoForm = new FormGroup({
+        youtubeLink: new FormControl('', []),
+        introductionVideoTitle: new FormControl('', []),
+        introductionVideoDescription: new FormControl('', []),
+        introductionVideoThumbnailUrl: new FormControl('', []),
+        introductionVideo: new FormControl('', []),
+    }, {
+        validators: (control) => {
+            const youtubeLink = control.get('youtubeLink')?.value;
+            const introductionVideo = control.get('introductionVideo')?.value;
+            if (youtubeLink && introductionVideo) {
+                return { youtubeLinkAndIntroductionVideo: true };
+            }
+            return null;
+        }
+    });
+
+    constructor(
+        private profileService: ProfileService,
+        private messageService: MessageService,
+        private sanitizer: DomSanitizer
+    ) {
+        this.messageService = messageService;
+
+        effect(() => {
+            const p = this.profile();
+            const teacher = p?.teacher as any;
+            if (!teacher) return;
+
+            this.introductionVideoForm.patchValue({
+                youtubeLink: ApiHelper.isYouTubeUrl(teacher?.introductionVideoUrl || '') ? teacher?.introductionVideoUrl : '',
+                introductionVideoTitle: teacher?.introductionVideoTitle || '',
+                introductionVideoDescription: teacher?.introductionVideoDescription || '',
+                introductionVideoThumbnailUrl: teacher?.introductionVideoThumbnailUrl || '',
+                introductionVideo: !ApiHelper.isYouTubeUrl(teacher?.introductionVideoUrl || '') ? (teacher?.introductionVideoUrl || '') : '',
+            }, { emitEvent: false });
+
+            if (teacher?.introductionVideoUrl) {
+                this.extractYouTubeId(teacher.introductionVideoUrl);
+            }
+        });
+
+        this.introductionVideoForm.get('youtubeLink')?.valueChanges.subscribe(url => {
+            if (url) {
+                this.extractYouTubeId(url);
+            } else {
+                this.youtubeVideoId.set(null);
+            }
+        });
     }
     ngOnInit(): void {
         this.getProfile();
@@ -113,6 +175,136 @@ export class ProfileView implements OnInit {
                 day: day.charAt(0).toUpperCase() + day.slice(1),
                 slots: grouped[day]
             }));
+    }
+
+    onUploadVideo(): void {       
+        //this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Upload video feature is not available yet' });
+        this.showUploadVideoDialog.set(true);
+    }
+
+    onThumbnailSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            this.messageService.add({ severity: 'error', summary: 'Invalid File', detail: 'Please select an image file' });
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            this.messageService.add({ severity: 'error', summary: 'File Too Large', detail: 'Image size must be less than 10MB' });
+            return;
+        }
+
+        this.isThumbnailUploading.set(true);
+        this.profileService.uploadThumbnail(this.profile()?.id as string, file).subscribe({
+            next: (response) => {
+                this.isThumbnailUploading.set(false);
+                this.introductionVideoForm.patchValue({ introductionVideoThumbnailUrl: response.url });
+                this.introductionVideoForm.markAsDirty();
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Thumbnail uploaded successfully' });
+            },
+            error: (error) => {
+                this.isThumbnailUploading.set(false);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: error?.message || 'Failed to upload thumbnail' });
+            }
+        });
+    }
+
+    removeThumbnail(): void {
+        this.introductionVideoForm.patchValue({ introductionVideoThumbnailUrl: '' });
+        this.introductionVideoForm.markAsDirty();
+        const input = document.getElementById('profileIntroThumbnailUpload') as HTMLInputElement;
+        if (input) input.value = '';
+    }
+
+    onVideoSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('video/')) {
+            this.messageService.add({ severity: 'error', summary: 'Invalid File', detail: 'Please select a video file' });
+            return;
+        }
+        if (file.size > 100 * 1024 * 1024) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'File Too Large',
+                detail: 'Video size must be less than 100MB, Your file size is ' + (file.size / 1024 / 1024).toFixed(2) + 'MB'
+            });
+            return;
+        }
+
+        this.isVideoUploading.set(true);
+        this.profileService.uploadVideo(this.profile()?.id as string, file).subscribe({
+            next: (response) => {
+                this.isVideoUploading.set(false);
+                this.introductionVideoForm.patchValue({ introductionVideo: response.url });
+                this.introductionVideoForm.markAsDirty();
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Video uploaded successfully' });
+            },
+            error: (error) => {
+                this.isVideoUploading.set(false);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: error?.message || 'Failed to upload video' });
+            }
+        });
+    }
+
+    removeVideo(): void {
+        this.introductionVideoForm.patchValue({ introductionVideo: '' });
+        this.introductionVideoForm.markAsDirty();
+        const input = document.getElementById('profileIntroVideoFileUpload') as HTMLInputElement;
+        if (input) input.value = '';
+    }
+
+    extractYouTubeId(url: string): void {
+        if (!url) {
+            this.youtubeVideoId.set(null);
+            return;
+        }
+
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        const videoId = (match && match[2].length === 11) ? match[2] : null;
+        this.youtubeVideoId.set(videoId);
+    }
+
+    getYouTubeEmbedUrl(): SafeResourceUrl {
+        const videoId = this.youtubeVideoId();
+        const url = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+        return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    }
+
+    removeYouTubeLink(): void {
+        this.introductionVideoForm.patchValue({ youtubeLink: '' });
+        this.youtubeVideoId.set(null);
+        this.introductionVideoForm.markAsDirty();
+    }
+
+    saveIntroductionVideo(): void {
+        const userId = this.profile()?.id as string;
+        const payload = {
+            introductionVideoUrl: this.introductionVideoForm.get('youtubeLink')?.value
+                || this.introductionVideoForm.get('introductionVideo')?.value
+                || null,
+            introductionVideoThumbnailUrl: this.introductionVideoForm.get('introductionVideoThumbnailUrl')?.value || null,
+            introductionVideoTitle: this.introductionVideoForm.get('introductionVideoTitle')?.value || null,
+            introductionVideoDescription: this.introductionVideoForm.get('introductionVideoDescription')?.value || null,
+        };
+
+        this.profileService.updateIntroductionVideo(userId, payload).subscribe({
+            next: (profile) => {
+                this.getProfile();
+                //this.profile.set(profile);
+                this.introductionVideoForm.markAsPristine();
+                this.showUploadVideoDialog.set(false);
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Introduction video updated successfully' });
+            },
+            error: (error) => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: error?.message || 'Failed to update introduction video' });
+            }
+        });
     }
 
 }

@@ -1,3 +1,4 @@
+<p-toast />
 @if(profile() && !isLoading()) {
 <div class="w-full min-h-screen bg-gray-50 pb-8">
     <!-- Profile Header with Cover -->
@@ -78,7 +79,7 @@
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-address-card text-blue-600"></i>
                             </div>
-                            <span>Contact Information</span>
+                            <span>Basic Information</span>
                         </h3>
                     </div>
                     <div class="p-6 space-y-4">
@@ -331,17 +332,33 @@
                 <!-- Introduction Video (Teacher Only) -->
                 @if(profile()?.role === UserRole.TEACHER && (profile()?.teacher?.introductionVideoUrl || profile()?.teacher?.introductionVideoThumbnailUrl)) {
                     <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200 w-full hover:shadow-md transition-shadow duration-300">
-                        <div class="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-5 border-b border-gray-200">
+                        <div class="bg-gradient-to-r from-red-50 to-pink-50 px-6 py-5 border-b border-gray-200 flex items-center justify-between">
                             <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                                 <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                                     <i class="fas fa-video text-red-600"></i>
                                 </div>
                                 <span>Introduction Video</span>
                             </h3>
+                            <span>
+                                <button type="button" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-full hover:bg-red-600 transition-all duration-300" (click)="onUploadVideo()">
+                                    <span>Upload Video</span>
+                                    <i class="fas fa-upload text-white ml-2"></i>
+                                </button>
+                            </span>
                         </div>
                         <div class="p-6">
                             @if(profile()?.teacher?.introductionVideoThumbnailUrl) {
-                                <div class="relative rounded-xl overflow-hidden border-2 border-gray-200 mb-4 group cursor-pointer hover:border-red-300 transition-all duration-300">
+                                @if(isPlayingVideo()) {
+                                    <div class="relative rounded-xl overflow-hidden border-2 border-gray-200 mb-4 group cursor-pointer hover:border-red-300 transition-all duration-300">
+                                        <div class="absolute top-2 right-2">
+                                            <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-2xl " (click)="isPlayingVideo.set(false)">
+                                                <i class="fas fa-times text-white text-2xl"></i>
+                                            </div>
+                                        </div>
+                                        <video [src]="assetsUrl + profile()?.teacher?.introductionVideoUrl" autoPlay loop controls class="w-full h-72 object-cover"></video>
+                                    </div>
+                                } @else {
+                                <div class="relative rounded-xl overflow-hidden border-2 border-gray-200 mb-4 group cursor-pointer hover:border-red-300 transition-all duration-300" (click)="isPlayingVideo.set(true)">
                                     <img [src]="assetsUrl + profile()?.teacher?.introductionVideoThumbnailUrl" 
                                          alt="Video Thumbnail"
                                          class="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500">
@@ -351,8 +368,9 @@
                                                 <i class="fas fa-play text-white text-3xl ml-1"></i>
                                             </div>
                                         </div>
-                                    }
-                                </div>
+                                        }
+                                    </div>
+                                }
                             }
                             @if(profile()?.teacher?.introductionVideoTitle) {
                                 <h4 class="text-2xl font-bold text-gray-900 mb-3">{{profile()?.teacher?.introductionVideoTitle}}</h4>
@@ -693,3 +711,217 @@
     </div>
 </div>
 }
+
+<p-dialog [visible]="showUploadVideoDialog()" [modal]="true" [closable]="false" [draggable]="false" [resizable]="false"
+    [style]="{width: 'min(900px, 95vw)'}">
+    <ng-template pTemplate="header">
+        <div class="flex items-center justify-between w-full">
+            <h3 class="text-lg font-bold text-gray-900">Introduction Video</h3>
+            <button type="button"
+                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors duration-200 p-1 rounded-full hover:bg-gray-100"
+                (click)="showUploadVideoDialog.set(false)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </ng-template>
+
+    <form class="p-6 space-y-6" [formGroup]="introductionVideoForm">
+        <div class="space-y-6 bg-gray-50/50 rounded-lg p-6 border border-gray-200">
+            <div class="mb-4">
+                <h5 class="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                    <i class="fas fa-video text-primary"></i>
+                    <span>Upload a video or provide a YouTube link</span>
+                </h5>
+                <p class="text-xs text-gray-600">Choose one option (file upload OR YouTube link)</p>
+            </div>
+
+            <div class="flex flex-col lg:flex-row items-start gap-6">
+                <!-- Thumbnail Upload -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-image mr-2 text-primary"></i>
+                        Video Thumbnail
+                    </label>
+
+                    @if(introductionVideoForm.get('introductionVideoThumbnailUrl')?.value) {
+                        <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-white w-64 h-48">
+                            <img [src]="assetsUrl + introductionVideoForm.get('introductionVideoThumbnailUrl')?.value!"
+                                alt="Thumbnail preview" class="w-full h-48 object-cover">
+                            <button type="button" (click)="removeThumbnail()"
+                                class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
+                            <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2">
+                                <i class="fas fa-image mr-1"></i>
+                                Thumbnail selected
+                            </div>
+                        </div>
+                    } @else {
+                        <div
+                            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer group w-64 h-48">
+                            <input type="file" id="profileIntroThumbnailUpload" accept="image/*" class="hidden"
+                                (change)="onThumbnailSelected($event)" />
+                            @if(isThumbnailUploading()) {
+                                <div class="flex items-center justify-center h-full">
+                                    <i class="fas fa-spinner fa-spin text-primary text-2xl"></i>
+                                </div>
+                            } @else {
+                                <label for="profileIntroThumbnailUpload" class="cursor-pointer block">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div
+                                            class="w-14 h-14 bg-primary/10 group-hover:bg-primary/20 rounded-full flex items-center justify-center transition-colors">
+                                            <i class="fas fa-cloud-upload-alt text-primary text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-700">
+                                                <span class="text-primary group-hover:underline">Click to upload</span>
+                                                or drag and drop
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">JPEG, PNG, GIF (Max 10MB)</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Video File Upload -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-file-video mr-2 text-primary"></i>
+                        Video File
+                    </label>
+
+                    @if(introductionVideoForm.get('introductionVideo')?.value) {
+                        <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-black w-64 h-48">
+                            <video [src]="assetsUrl + introductionVideoForm.get('introductionVideo')?.value!" controls
+                                class="w-full h-64 object-contain"></video>
+                            <button type="button" (click)="removeVideo()"
+                                class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg z-10 w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
+                            <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2">
+                                <i class="fas fa-video mr-1"></i>
+                                Video selected
+                            </div>
+                        </div>
+                    } @else {
+                        <div
+                            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer group w-64 h-48">
+                            @if(isVideoUploading()) {
+                                <div class="flex items-center justify-center h-full">
+                                    <i class="fas fa-spinner fa-spin text-primary text-2xl"></i>
+                                </div>
+                            } @else {
+                                <input type="file" id="profileIntroVideoFileUpload" accept="video/*" class="hidden"
+                                    [disabled]="youtubeVideoId()"
+                                    (change)="!youtubeVideoId() && onVideoSelected($event)" />
+                                <label for="profileIntroVideoFileUpload" class="cursor-pointer block">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div
+                                            class="w-14 h-14 bg-primary/10 group-hover:bg-primary/20 rounded-full flex items-center justify-center transition-colors">
+                                            <i class="fas fa-cloud-upload-alt text-primary text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-700">
+                                                <span class="text-primary group-hover:underline">Click to upload</span>
+                                                or drag and drop
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">MP4, MOV, AVI (Max 100MB)</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Divider -->
+                <div class="flex flex-col items-center gap-4 my-4 px-2 hidden">
+                    <div class="flex-1 h-full bg-gray-300 w-[2px]"></div>
+                    <span
+                        class="text-xs text-gray-500 font-semibold uppercase tracking-wider bg-gray-50 px-3 py-1 rounded-full">OR</span>
+                    <div class="flex-1 h-full bg-gray-300 w-[2px]"></div>
+                </div>
+
+                <!-- YouTube Link -->
+                <div class="space-y-2 flex-1 w-full hidden">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fab fa-youtube mr-2 text-red-500"></i>
+                        YouTube Video Link
+                    </label>
+
+                    @if(youtubeVideoId()) {
+                        <div class="space-y-3">
+                            <div class="relative border border-gray-300 rounded-lg overflow-hidden bg-white">
+                                <div class="aspect-video bg-black">
+                                    <iframe [src]="getYouTubeEmbedUrl()" frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen class="w-full h-full">
+                                    </iframe>
+                                </div>
+                                <button type="button" (click)="removeYouTubeLink()"
+                                    class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg z-10 w-8 h-8 flex items-center justify-center">
+                                    <i class="fas fa-times text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    } @else {
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fab fa-youtube text-gray-400 text-lg"></i>
+                            </div>
+                            <input type="url" name="youtubeLink" formControlName="youtubeLink"
+                                placeholder="https://www.youtube.com/watch?v=..."
+                                class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white"
+                                [ngClass]="{'disabled:opacity-50 cursor-not-allowed': introductionVideoForm.get('introductionVideo')?.value }"
+                                [readonly]="introductionVideoForm.get('introductionVideo')?.value">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                            <i class="fas fa-info-circle"></i>
+                            Paste your YouTube video URL here
+                        </p>
+                    }
+                </div>
+            </div>
+
+            <!-- Video Title and Description -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-heading mr-2 text-primary"></i>
+                        Video Title
+                    </label>
+                    <input type="text" name="introductionVideoTitle" formControlName="introductionVideoTitle"
+                        placeholder="Enter video title"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition bg-white">
+                </div>
+                <div class="space-y-2 md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-align-left mr-2 text-primary"></i>
+                        Video Description
+                    </label>
+                    <textarea rows="3" name="introductionVideoDescription" formControlName="introductionVideoDescription"
+                        placeholder="Enter video description"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition resize-none bg-white"></textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex items-center justify-end gap-3 w-full">
+            <button type="button"
+                class="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
+                (click)="showUploadVideoDialog.set(false)">
+                Cancel
+            </button>
+            <button type="button"
+                class="px-5 py-2.5 rounded-lg bg-primary text-white font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                [disabled]="isThumbnailUploading() || isVideoUploading()" (click)="saveIntroductionVideo()">
+                Save
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>

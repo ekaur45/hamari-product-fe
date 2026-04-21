@@ -181,4 +181,26 @@ export class ProfileService {
       })
     );
   }
+
+  updateIntroductionVideo(
+    userId: string,
+    payload: {
+      introductionVideoUrl?: string | null;
+      introductionVideoThumbnailUrl?: string | null;
+      introductionVideoTitle?: string | null;
+      introductionVideoDescription?: string | null;
+    }
+  ): Observable<User> {
+    return this.apiService.patch<User>(`${API_ENDPOINTS.PROFILE.BASE}/${userId}/introduction-video`, payload).pipe(
+      map(response => {
+        if (response.statusCode === 200) {
+          return response.data;
+        }
+        throw new Error('Failed to update introduction video');
+      }),
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
 }
