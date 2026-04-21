@@ -11,13 +11,26 @@
                 <div class="relative">
                     <i
                         class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text" [(ngModel)]="searchQuery" placeholder="Search conversations..."
+                    <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Search conversations..."
                         class="w-full pl-9 md:pl-10 pr-4 py-2 text-sm md:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
                 </div>
             </div>
 
             <!-- Conversations List -->
             <div class="flex-1 overflow-y-auto">
+                @if(isLoadingConversations()) {
+                    <div class="p-4 space-y-3">
+                        @for(_ of [1,2,3,4,5,6]; track $index) {
+                            <div class="flex items-center gap-3 animate-pulse">
+                                <div class="w-12 h-12 rounded-full bg-gray-200"></div>
+                                <div class="flex-1 space-y-2">
+                                    <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+                                    <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                } @else {
                 @if(getFilteredConversations().length > 0) {
                 @for(conversation of getFilteredConversations(); track `${conversation.createdAt}-${conversation.id}`) {
                 <button (click)="selectConversation(conversation)" [ngClass]="{
@@ -51,6 +64,11 @@
                             <p class="text-xs md:text-sm text-gray-600 truncate">
                                 {{conversation.lastMessageChat.message || 'No message yet'}}
                             </p>
+                            @if((conversation.unreadCount || 0) > 0) {
+                                <span class="ml-2 min-w-5 h-5 px-1.5 inline-flex items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold">
+                                    {{conversation.unreadCount}}
+                                </span>
+                            }
                         </div>
                     </div>
                 </button>
@@ -60,6 +78,7 @@
                     <i class="fas fa-comments text-gray-300 text-3xl md:text-4xl mb-3"></i>
                     <p class="text-sm md:text-base text-gray-500">No conversations found</p>
                 </div>
+                }
                 }
             </div>
         </div>
@@ -103,14 +122,51 @@
 
                     </div>
                 </div>
-                <button class="p-2 hover:bg-gray-100 rounded-lg transition flex-shrink-0">
-                    <i class="fas fa-ellipsis-v text-gray-600"></i>
-                </button>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    @if(!isThreadSearchMode()) {
+                        <div class="hidden md:flex items-center gap-2">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                                <input type="text" [ngModel]="threadSearchQuery()" (ngModelChange)="threadSearchQuery.set($event)"
+                                    (keyup.enter)="searchInThread()"
+                                    placeholder="Search in chat..."
+                                    class="w-56 pl-8 pr-10 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/30 bg-gray-50">
+                                <button type="button" (click)="searchInThread()"
+                                    [disabled]="isSearchingThread() || !threadSearchQuery().trim()"
+                                    class="absolute right-1 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200/60 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                    @if(isSearchingThread()) {
+                                        <i class="fas fa-spinner fa-spin text-gray-500 text-xs"></i>
+                                    } @else {
+                                        <i class="fas fa-arrow-right text-gray-500 text-xs"></i>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    } @else {
+                        <button type="button" (click)="clearThreadSearch()"
+                            class="px-3 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50 transition flex items-center gap-2">
+                            <i class="fas fa-times text-gray-500"></i>
+                            <span>Clear search</span>
+                        </button>
+                    }
+                </div>
             </div>
 
             <!-- Messages Area -->
             <div class="flex-1 overflow-y-auto p-2 md:p-4 space-y-3 md:space-y-4 bg-gray-50 relative"
-                id="chat-messages-container" #chatContainer>
+                id="chat-messages-container" #chatContainer (scroll)="onMessagesScroll($event)">
+                @if(isLoadingMessages()) {
+                    <div class="space-y-3 animate-pulse">
+                        @for(_ of [1,2,3,4,5,6]; track $index) {
+                            <div class="h-10 bg-gray-200 rounded-2xl w-2/3"></div>
+                        }
+                    </div>
+                }
+                @if(isLoadingMoreMessages()) {
+                    <div class="flex justify-center py-2">
+                        <i class="fas fa-spinner fa-spin text-gray-400"></i>
+                    </div>
+                }
                 @if(selectedConversationId() && selectedConversation()){
                 @for(message of chatMessages(); track
                 `${message.createdAt}-${message.id}-${message.senderId}-${message.receiverId}`) {
@@ -141,9 +197,41 @@
                                     </div>
                                 } -->
 
-                    <div class="flex flex-col max-w-[85%] sm:max-w-[75%] md:max-w-[60%]"
-                        [class.items-end]="message.senderId === authService.getCurrentUser()?.id!"
-                        [class.items-start]="message.senderId !== authService.getCurrentUser()?.id!">
+                    <div class="relative max-w-[85%] sm:max-w-[75%] md:max-w-[60%]">
+                        <!-- Hover Actions (overlay, does NOT affect layout) -->
+                        @if(hoveredMessageId() === message.id) {
+                            <div class="absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity mr-10"
+                                [class.-left-12]="message.senderId === authService.getCurrentUser()?.id!"
+                                [class.-right-12]="message.senderId !== authService.getCurrentUser()?.id!">
+                                <div class="flex items-center justify-center gap-1 mr-10">
+                                    @if(message.senderId === authService.getCurrentUser()?.id! && !message.isUnsent && !message.isDeleted) {
+                                        <button type="button" (click)="unsendMessage(message.id)"
+                                            class="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white border border-gray-200 shadow hover:bg-gray-50 transition"
+                                            title="Unsend">
+                                            <i class="fas fa-undo text-gray-700 text-xs"></i>
+                                        </button>
+                                    }
+
+                                    @if(!message.isDeleted) {
+                                        <button type="button" (click)="deleteMessage(message.id)"
+                                            class="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white border border-gray-200 shadow hover:bg-red-50 transition"
+                                            title="Delete">
+                                            <i class="fas fa-trash text-red-600 text-xs"></i>
+                                        </button>
+                                    } @else {
+                                        <button type="button" (click)="undeleteMessage(message.id)"
+                                            class="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white border border-gray-200 shadow hover:bg-gray-50 transition"
+                                            title="Restore">
+                                            <i class="fas fa-undo text-gray-700 text-xs"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="flex flex-col"
+                            [class.items-end]="message.senderId === authService.getCurrentUser()?.id!"
+                            [class.items-start]="message.senderId !== authService.getCurrentUser()?.id!">
                         @if(message.senderId !== authService.getCurrentUser()?.id!) {
                         <span
                             class="text-[10px] md:text-xs text-gray-500 mb-0.5 md:mb-1 px-1 md:px-2">{{message.sender!.firstName}}
@@ -160,48 +248,37 @@
                             @if(message.resources && message.resources.length > 0) {
                             <div class="mb-2 space-y-2">
                                 @for(file of message.resources; track file.id) {
-                                <div class="flex items-center gap-2 p-2 bg-white/10 rounded-lg">
-                                    <i [class]="'fas ' + getFileIcon(file.mimeType) + ' text-lg'"></i>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium truncate">{{file.fileName}}</p>
-                                        <p class="text-xs opacity-75">{{formatFileSize(file.fileSize)}}</p>
-                                    </div>
-                                    <a [href]="file.filePath" [download]="file.fileName" target="_blank"
-                                        class="p-1 hover:bg-white/20 rounded transition">
-                                        <i class="fas fa-download"></i>
+                                @if(file.mimeType.startsWith('image/')) {
+                                    <a [href]="getResourceUrl(file.filePath)" target="_blank"
+                                        class="block overflow-hidden rounded-lg border border-white/10 hover:opacity-95 transition">
+                                        <img [src]="getResourceUrl(file.filePath)" [alt]="file.fileName"
+                                            class="max-h-56 w-auto object-contain bg-black/20">
                                     </a>
-                                </div>
+                                } @else {
+                                    <div class="flex items-center gap-2 p-2 bg-white/10 rounded-lg">
+                                        <i [class]="'fas ' + getFileIcon(file.mimeType) + ' text-lg'"></i>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium truncate">{{file.fileName}}</p>
+                                            <p class="text-xs opacity-75">{{formatFileSize(file.fileSize)}}</p>
+                                        </div>
+                                        <a [href]="getResourceUrl(file.filePath)" [download]="file.fileName" target="_blank"
+                                            class="p-1 hover:bg-white/20 rounded transition">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </div>
+                                }
                                 }
                             </div>
                             }
 
-                            @if(message.message) {
-                            <p class="text-xs md:text-sm whitespace-pre-wrap break-words">{{message.message}}</p>
+                            @if(message.isDeleted) {
+                                <p class="text-xs md:text-sm italic opacity-80">Message deleted</p>
+                            } @else if(message.isUnsent) {
+                                <p class="text-xs md:text-sm italic opacity-80">Message unsent</p>
+                            } @else if(message.message) {
+                                <p class="text-xs md:text-sm whitespace-pre-wrap break-words">{{message.message}}</p>
                             }
 
-                            @if(hoveredMessageId() === message.id) {
-                            <div class="absolute top-0 right-0 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                [class.left-0]="message.senderId !== authService.getCurrentUser()?.id!"
-                                [class.right-0]="message.senderId === authService.getCurrentUser()?.id!"
-                                [class.-translate-x-full]="message.senderId === authService.getCurrentUser()?.id!"
-                                [class.translate-x-full]="message.senderId !== authService.getCurrentUser()?.id!">
-                                @if(message.senderId === authService.getCurrentUser()?.id!) {
-                                <button (click)="unsendMessage(message.id)"
-                                    class="p-1.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition text-xs"
-                                    title="Unsend">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                } @else if(message.senderId === authService.getCurrentUser()?.id!) {
-                                <button (click)="undeleteMessage(message.id)"
-                                    class="p-1.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition text-xs"
-                                    title="Mark as read">
-                                    <i class="fas fa-envelope-open"></i>
-                                </button>
-                                }
-
-
-                            </div>
-                            }
                         </div>
 
                         <div class="flex items-center gap-1 md:gap-2 mt-0.5 md:mt-1 px-1 md:px-2">
@@ -221,6 +298,7 @@
                             @if(message.senderId !== authService.getCurrentUser()?.id! && !message.isRead) {
                             <span class="w-1.5 h-1.5 md:w-2 md:h-2 bg-primary rounded-full"></span>
                             }
+                        </div>
                         </div>
                     </div>
 
@@ -255,7 +333,10 @@
                             @if(chatFile.isUploading) {
                             <div
                                 class="animate-pulse absolute top-0 left-0 w-full h-full flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-primary/30 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-spinner fa-spin text-gray-400 text-sm md:text-lg"></i>
+                                <div class="flex flex-col items-center justify-center gap-1">
+                                    <i class="fas fa-spinner fa-spin text-gray-400 text-sm md:text-lg"></i>
+                                    <span class="text-[10px] text-gray-700 font-semibold">{{chatFile.uploadProgress}}%</span>
+                                </div>
                             </div>
                             }
                             <div
@@ -267,9 +348,19 @@
                                 <p class="text-[10px] md:text-xs font-semibold text-gray-900 truncate mb-0.5">
                                     {{chatFile.file.name}}
                                 </p>
-                                <p class="text-[10px] md:text-xs text-gray-500">{{formatFileSize(chatFile.file.size)}}
-                                </p>
+                                @if(chatFile.error) {
+                                    <p class="text-[10px] md:text-xs text-red-600 truncate">{{chatFile.error}}</p>
+                                } @else {
+                                    <p class="text-[10px] md:text-xs text-gray-500">{{formatFileSize(chatFile.file.size)}}</p>
+                                }
                             </div>
+                            @if(chatFile.error) {
+                                <button type="button" (click)="retryUpload(chatFile)"
+                                    class="flex-shrink-0 p-1 md:p-1.5 hover:bg-primary/10 rounded-full transition w-6 h-6 md:w-7 md:h-7 flex items-center justify-center"
+                                    title="Retry upload">
+                                    <i class="fas fa-redo text-primary text-[10px] md:text-xs"></i>
+                                </button>
+                            }
                             <button (click)="removeFile($index)"
                                 class="flex-shrink-0 p-1 md:p-1.5 hover:bg-red-50 rounded-full transition group-hover:bg-red-50 w-5 h-5 md:w-6 md:h-6 flex items-center justify-center"
                                 title="Remove file">

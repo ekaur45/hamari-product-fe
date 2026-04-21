@@ -16,6 +16,7 @@ export interface Conversation {
     updatedAt: Date;
     lastMessageChat: Chat;
     isOnline: boolean;
+    unreadCount?: number;
 }
 
 export interface Chat {
@@ -24,9 +25,11 @@ export interface Chat {
     sender: User;
     receiverId: string;
     receiver: User;
+    conversationId?: string;
     message?: string | null;
     isRead: boolean;
     isDeleted: boolean;
+    isUnsent?: boolean;
     resources?: ChatResource[];
     createdAt: Date;
     updatedAt: Date;

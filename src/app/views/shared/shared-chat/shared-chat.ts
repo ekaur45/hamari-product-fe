@@ -14,6 +14,8 @@ interface ChatFile {
     file: File;
     isUploaded: boolean;
     isUploading: boolean;
+    uploadProgress: number;
+    error?: string | null;
     filePath: string;
     fileSize: number;
     mimeType: string;
@@ -39,8 +41,17 @@ export class SharedChat implements OnInit {
     showFileInput = signal(false);
     hoveredMessageId = signal<string | null>(null);
     conversations = signal<Conversation[]>([]);
+    isLoadingConversations = signal<boolean>(false);
+    isLoadingMessages = signal<boolean>(false);
+    isLoadingMoreMessages = signal<boolean>(false);
+    messagesPage = signal<number>(1);
+    messagesLimit = signal<number>(20);
+    hasMoreMessages = signal<boolean>(false);
     readonly assetsUrl = environment.assetsUrl;
     typing = signal<boolean>(false);
+    threadSearchQuery = signal<string>('');
+    isThreadSearchMode = signal<boolean>(false);
+    isSearchingThread = signal<boolean>(false);
     @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
     timeoutRef: any;
 
@@ -54,10 +65,15 @@ export class SharedChat implements OnInit {
             const conversationId = params['selectedConversationId'];
             this.selectedConversationId.set(conversationId);
             if (conversationId) {
-                this.joinChat();
-                this.selectedConversation.set(this.conversations().find(conversation => conversation.id === conversationId)!);
-                this.getChatMessages();
+                // conversations may not be loaded yet; defer work until selection exists
+                const conv = this.conversations().find(conversation => conversation.id === conversationId) || null;
+                this.selectedConversation.set(conv);
+                if (conv) {
+                    this.joinChat();
+                    this.getChatMessages(true);
+                }
             } else {
+                this.selectedConversation.set(null);
             }
         });
      }
@@ -98,18 +114,77 @@ export class SharedChat implements OnInit {
         });
     }
     joinChat(): void {
+        if (!this.selectedConversationId() || !this.selectedConversation()) return;
+        this.listenTyping();
+        this.listenRead();
+        this.listenMessageUpdates();
         this.chatService.joinChat(this.selectedConversationId()!).subscribe({
-            next: (res: any) => {
-                this.getChatMessages();
-                this.listenTyping();
+            next: (res: Chat) => {
+                // append incoming message instead of refetching whole thread
+                if (!res || res.conversationId !== this.selectedConversationId()) return;
+
+                const existing = this.chatMessages().some(m => m.id === res.id);
+                if (!existing) {
+                    this.chatMessages.set([...this.chatMessages(), res]);
+                    this.scrollToBottom();
+                }
+
+                if (res.receiverId === this.authService.getCurrentUser()?.id) {
+                    this.markConversationRead();
+                }
+
+                // update conversation preview + ordering
+                this.conversations.update((conversations) => {
+                    const idx = conversations.findIndex(c => c.id === res.conversationId);
+                    if (idx === -1) return conversations;
+                    const updated = [...conversations];
+                    const conv = updated[idx];
+                    updated[idx] = { ...conv, lastMessageChat: res as any };
+                    // move to top
+                    const [moved] = updated.splice(idx, 1);
+                    return [moved, ...updated];
+                });
             },
             error: (err) => {
                 console.error(err);
             }
         });
     }
+
+    listenMessageUpdates(): void {
+        if (!this.selectedConversationId()) return;
+        this.chatService.listenMessageUpdate(this.selectedConversationId()!).subscribe({
+            next: (updated) => {
+                if (!updated || updated.conversationId !== this.selectedConversationId()) return;
+                this.chatMessages.set(this.chatMessages().map(m => m.id === updated.id ? ({ ...m, ...updated }) : m));
+                this.conversations.update(conversations => conversations.map(c => c.id === updated.conversationId ? ({ ...c, lastMessageChat: updated as any }) : c));
+            },
+            error: (err) => console.error(err),
+        });
+    }
+
+    listenRead(): void {
+        if (!this.selectedConversationId() || !this.selectedConversation()) return;
+        const other = this.getOtherParticipant(this.selectedConversation()!);
+        if (!other) return;
+        this.chatService.listenRead(this.selectedConversationId()!, other.id).subscribe({
+            next: () => {
+                const otherId = other.id;
+                this.chatMessages.set(this.chatMessages().map(m => {
+                    if (m.senderId === this.authService.getCurrentUser()?.id && m.receiverId === otherId) {
+                        return { ...m, isRead: true };
+                    }
+                    return m;
+                }));
+            },
+            error: (err) => console.error(err),
+        });
+    }
     listenTyping(): void {
-        this.chatService.listenTyping(this.selectedConversationId()!,this.getOtherParticipant(this.selectedConversation()!).id).subscribe({
+        if (!this.selectedConversationId() || !this.selectedConversation()) return;
+        const other = this.getOtherParticipant(this.selectedConversation()!);
+        if (!other) return;
+        this.chatService.listenTyping(this.selectedConversationId()!, other.id).subscribe({
             next: (res: any) => {
                 this.typing.set(true);
                 clearTimeout(this.timeoutRef);
@@ -123,18 +198,28 @@ export class SharedChat implements OnInit {
         });
     }
     getChaUsers(): void {
+        this.isLoadingConversations.set(true);
         this.chatService.getChatUsers().subscribe({
             next: (res) => {
                 if (res.statusCode === 200 && res.data) {
                     this.conversations.set(res.data || []);
-                    this.selectedConversation.set(this.conversations().find(conversation => conversation.id === this.selectedConversationId()) || this.conversations()[0]);
-                    if(this.selectedConversationId()) {
-                        this.listenTyping();
+                    const selectedId = this.selectedConversationId();
+                    const selected = (selectedId
+                        ? (this.conversations().find(conversation => conversation.id === selectedId) || null)
+                        : (this.conversations()[0] || null));
+                    this.selectedConversation.set(selected);
+
+                    // If we navigated directly to /chat/:id, complete setup now.
+                    if (selectedId && selected) {
+                        this.joinChat();
+                        this.getChatMessages(true);
                     }
                 }
+                this.isLoadingConversations.set(false);
             },
             error: (err) => {
                 console.error(err);
+                this.isLoadingConversations.set(false);
             }
         });
     }
@@ -164,23 +249,110 @@ export class SharedChat implements OnInit {
             this.router.navigate(['/teacher/chat']);
         }
     }
-    getChatMessages(){
-        this.chatService.getChatMessages(this.selectedConversationId()!).subscribe({
+    getChatMessages(reset: boolean = true){
+        if (!this.selectedConversationId()) return;
+        if (reset) {
+            this.isLoadingMessages.set(true);
+            this.messagesPage.set(1);
+        } else {
+            this.isLoadingMoreMessages.set(true);
+        }
+
+        const page = this.messagesPage();
+        const limit = this.messagesLimit();
+
+        this.chatService.getChatMessages(this.selectedConversationId()!, page, limit).subscribe({
             next: (res: ApiResponse<PaginatedApiResponse<Chat>>) => {
                 if (res.statusCode === 200 && res.data) {
-                    this.chatMessages.set(res.data.data || []);
+                    const batch = [...(res.data.data || [])].reverse(); // oldest-first
+
+                    if (reset) {
+                        this.chatMessages.set(batch);
+                    } else {
+                        // prepend older messages
+                        this.chatMessages.set([...batch, ...this.chatMessages()]);
+                    }
+
+                    const p: any = res.data.pagination as any;
+                    this.hasMoreMessages.set(!!p?.hasNext);
+
+                    if (reset) {
+                        this.markConversationRead();
+                    }
                     // scroll to bottom
-                    setTimeout(() => {
-                        const chatMessagesContainer = document.getElementById('chat-messages-container');
-                        if (chatMessagesContainer) {
-                            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
-                        }
-                    }, 100);
+                    if (reset) {
+                        setTimeout(() => {
+                            const chatMessagesContainer = document.getElementById('chat-messages-container');
+                            if (chatMessagesContainer) {
+                                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+                            }
+                        }, 100);
+                    }
                 }
+                this.isLoadingMessages.set(false);
+                this.isLoadingMoreMessages.set(false);
             },
             error: (err) => {
                 console.error(err);
+                this.isLoadingMessages.set(false);
+                this.isLoadingMoreMessages.set(false);
             }
+        });
+    }
+
+    onMessagesScroll(event: Event): void {
+        const el = event.target as HTMLElement;
+        if (!el) return;
+        if (el.scrollTop > 5) return;
+        if (this.isLoadingMoreMessages() || this.isLoadingMessages()) return;
+        if (!this.hasMoreMessages()) return;
+
+        const prevHeight = el.scrollHeight;
+        this.messagesPage.set(this.messagesPage() + 1);
+        this.getChatMessages(false);
+
+        // keep scroll anchored after DOM update
+        setTimeout(() => {
+            const newHeight = el.scrollHeight;
+            el.scrollTop = newHeight - prevHeight;
+        }, 120);
+    }
+
+    searchInThread(): void {
+        const q = (this.threadSearchQuery() || '').trim();
+        if (!this.selectedConversationId() || !q) return;
+
+        this.isSearchingThread.set(true);
+        this.chatService.searchMessages(this.selectedConversationId()!, q, 1, 50).subscribe({
+            next: (res) => {
+                if (res.statusCode === 200 && res.data) {
+                    this.isThreadSearchMode.set(true);
+                    this.chatMessages.set([...(res.data.data || [])].reverse());
+                }
+                this.isSearchingThread.set(false);
+            },
+            error: (err) => {
+                console.error(err);
+                this.isSearchingThread.set(false);
+            }
+        });
+    }
+
+    clearThreadSearch(): void {
+        this.threadSearchQuery.set('');
+        this.isThreadSearchMode.set(false);
+        this.getChatMessages();
+    }
+
+    markConversationRead(): void {
+        if (!this.selectedConversationId()) return;
+        this.chatService.markConversationRead(this.selectedConversationId()!).subscribe({
+            next: () => {
+                const me = this.authService.getCurrentUser()?.id;
+                this.chatMessages.set(this.chatMessages().map(m => m.receiverId === me ? ({ ...m, isRead: true }) : m));
+                this.conversations.update(convs => convs.map(c => c.id === this.selectedConversationId() ? ({ ...c, unreadCount: 0 }) : c));
+            },
+            error: (err) => console.error(err),
         });
     }
 
@@ -224,9 +396,23 @@ export class SharedChat implements OnInit {
         if (input.files && input.files.length > 0) {
             const files = Array.from(input.files);
             for(const file of files) {
-                const chatFile: ChatFile = {id: Date.now().toString(), file: file, isUploaded: false, isUploading: true, filePath: '', fileSize: file.size, mimeType: file.type, fileName: file.name};
+                const validationError = this.validateAttachment(file);
+                const chatFile: ChatFile = {
+                    id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                    file: file,
+                    isUploaded: false,
+                    isUploading: false,
+                    uploadProgress: 0,
+                    error: validationError,
+                    filePath: '',
+                    fileSize: file.size,
+                    mimeType: file.type,
+                    fileName: file.name
+                };
                 this.selectedFiles.set( [...this.selectedFiles(), chatFile]);
-                this.uploadFile(chatFile);
+                if (!validationError) {
+                    this.uploadFile(chatFile);
+                }
             }
         }
         // Reset input
@@ -235,14 +421,26 @@ export class SharedChat implements OnInit {
         }
     }
     uploadFile(file: ChatFile): void {
-        this.chatService.uploadFile(file.file).subscribe({
-            next: (res: ApiResponse<{url: string}>) => {
-                file.isUploaded = true;
-                file.isUploading = false;                
-                file.filePath = res.data.url;
+        file.isUploading = true;
+        file.error = null;
+        file.uploadProgress = 0;
+
+        this.chatService.uploadFileWithProgress(file.file).subscribe({
+            next: (evt) => {
+                if (typeof evt.progress === 'number') {
+                    file.uploadProgress = evt.progress;
+                }
+                if (evt.url) {
+                    file.isUploaded = true;
+                    file.isUploading = false;
+                    file.filePath = evt.url;
+                }
             },
             error: (err) => {
                 console.error(err);
+                file.isUploading = false;
+                file.isUploaded = false;
+                file.error = err?.message || 'Upload failed';
             }
         });
     }
@@ -251,6 +449,30 @@ export class SharedChat implements OnInit {
         const files = this.selectedFiles();
         files.splice(index, 1);
         this.selectedFiles.set([...files]);
+    }
+
+    retryUpload(file: ChatFile): void {
+        if (!file) return;
+        this.uploadFile(file);
+    }
+
+    validateAttachment(file: File): string | null {
+        const max = 25 * 1024 * 1024; // 25MB
+        if (file.size > max) {
+            return `File is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max 25MB.`;
+        }
+        // allow common types; block unknown empty mime types
+        if (!file.type) {
+            return 'Unsupported file type';
+        }
+        return null;
+    }
+
+    getResourceUrl(path: string): string {
+        if (!path) return '';
+        if (path.startsWith('http://') || path.startsWith('https://')) return path;
+        // files/upload commonly returns paths like /uploads/...
+        return `${this.assetsUrl}${path.startsWith('/') ? '' : '/'}${path}`;
     }
 
     formatFileSize(bytes: number): string {
@@ -280,14 +502,41 @@ export class SharedChat implements OnInit {
     }
 
     unsendMessage(messageId: string): void {
-    
+        this.chatService.unsendMessage(messageId).subscribe({
+            next: (res) => {
+                if (res.statusCode === 200 && res.data) {
+                    this.chatMessages.set(this.chatMessages().map(m => m.id === messageId ? ({ ...m, ...res.data }) : m));
+                }
+            },
+            error: (err) => console.error(err),
+        });
+    }
+
+    deleteMessage(messageId: string): void {
+        this.chatService.deleteMessage(messageId).subscribe({
+            next: (res) => {
+                if (res.statusCode === 200 && res.data) {
+                    this.chatMessages.set(this.chatMessages().map(m => m.id === messageId ? ({ ...m, ...res.data }) : m));
+                }
+            },
+            error: (err) => console.error(err),
+        });
     }
 
     markAsRead(messageId: string): void {
        
     }
     getFilteredConversations(): Conversation[] {
-        return this.conversations();
+        const q = (this.searchQuery() || '').trim().toLowerCase();
+        if (!q) return this.conversations();
+
+        return this.conversations().filter(c => {
+            const other = this.getOtherParticipant(c);
+            const name = `${other.firstName ?? ''} ${other.lastName ?? ''}`.toLowerCase();
+            const email = (other.email ?? '').toLowerCase();
+            const last = (c.lastMessageChat?.message ?? '').toLowerCase();
+            return name.includes(q) || email.includes(q) || last.includes(q);
+        });
     }
 
     formatTime(date: Date): string {
@@ -359,9 +608,19 @@ export class SharedChat implements OnInit {
     }
 
     undeleteMessage(messageId: string): void {
+        // restore (undelete)
+        this.chatService.restoreMessage(messageId).subscribe({
+            next: (res) => {
+                if (res.statusCode === 200 && res.data) {
+                    this.chatMessages.set(this.chatMessages().map(m => m.id === messageId ? ({ ...m, ...res.data }) : m));
+                }
+            },
+            error: (err) => console.error(err),
+        });
     }
     getOtherParticipant(conversation: Conversation): User {
-        return conversation.participants.find(participant => participant.id !== this.authService.getCurrentUser()?.id)!;
+        if (!conversation || !conversation.participants) return null as any;
+        return conversation.participants.find(participant => participant.id !== this.authService.getCurrentUser()?.id) ?? null as any;
     }
     scrollToBottom(): void {
         setTimeout(() => {
