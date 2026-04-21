@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, OnDestroy } from "@angular/core";
+import { Component, signal, OnInit, OnDestroy, ElementRef, ViewChild } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
@@ -9,15 +9,17 @@ import { ButtonModule } from "primeng/button";
 import { MessageService } from "primeng/api";
 import { ToastModule } from "primeng/toast";
 import { interval, Subject, takeUntil } from "rxjs";
-import { CountryISO, NgxIntlTelInputModule, PhoneNumberFormat, SearchCountryField } from "ngx-intl-tel-input";
+// import { CountryISO, NgxIntlTelInputModule, PhoneNumberFormat, SearchCountryField } from "ngx-intl-tel-input";
 import { Nationality } from "../../../../shared/models/nationality.interface";
 import { NationalityService } from "../../../../shared/services/nationality.service";
 import { SelectModule } from "primeng/select";
 import { DatePickerModule } from "primeng/datepicker";
-
+import intlTelInput from 'intl-tel-input';
+import 'intl-tel-input/styles';
 @Component({
     selector: 'app-personal-info-step',
     templateUrl: './personal-info-step.html',
+    styleUrls: ['./personal-info-step.css'],
     standalone: true,
     imports: [
         CommonModule,
@@ -28,12 +30,12 @@ import { DatePickerModule } from "primeng/datepicker";
         ToastModule,
         SelectModule,
         DatePickerModule,
-        NgxIntlTelInputModule,
         ReactiveFormsModule
     ],
     providers: [MessageService]
 })
 export class PersonalInfoStep implements OnInit, OnDestroy {
+    @ViewChild('phoneInput') phoneInput!: ElementRef;
     isOtpScreen = signal<boolean>(false);
     isLoading = signal<boolean>(false);
     isVerifying = signal<boolean>(false);
@@ -45,9 +47,9 @@ export class PersonalInfoStep implements OnInit, OnDestroy {
 
     user = signal<User | null>(null);    
     isSaving = signal(false);
-    CountryISO: typeof CountryISO = CountryISO;
-    SearchCountryField: typeof SearchCountryField = SearchCountryField;
-    PhoneNumberFormat: typeof PhoneNumberFormat = PhoneNumberFormat;
+    // CountryISO: typeof CountryISO = CountryISO;
+    // SearchCountryField: typeof SearchCountryField = SearchCountryField;
+    // PhoneNumberFormat: typeof PhoneNumberFormat = PhoneNumberFormat;
     nationalities = signal<Nationality[]>([]);
     userForm = new FormGroup({
         firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
@@ -66,7 +68,7 @@ export class PersonalInfoStep implements OnInit, OnDestroy {
     // Mock OTP - in real app, this would come from backend
     private mockOtp = '123456';
     private destroy$ = new Subject<void>();
-
+    private iti: any;
     constructor(
         private profileService: ProfileService,
         private router: Router,
@@ -77,6 +79,8 @@ export class PersonalInfoStep implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        
+
         this.profileService.getProfile().subscribe((profile) => {
             this.currentUser.set(profile);
             this.user.set(profile);
@@ -95,6 +99,9 @@ export class PersonalInfoStep implements OnInit, OnDestroy {
             });
             
         });
+        setTimeout(() => {
+            this.iti = intlTelInput(this.phoneInput.nativeElement);
+        }, 1);
     }
 
     ngOnDestroy(): void {

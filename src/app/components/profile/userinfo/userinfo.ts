@@ -5,7 +5,7 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { map, startWith } from "rxjs";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { ProfileService } from "../../../shared/services/profile.service";
-import { CountryISO, NgxIntlTelInputModule, PhoneNumberFormat, SearchCountryField } from "ngx-intl-tel-input";
+// import { CountryISO, NgxIntlTelInputModule, PhoneNumberFormat, SearchCountryField } from "ngx-intl-tel-input";
 import { Select } from "primeng/select";
 import { DatePicker } from "primeng/datepicker";
 import { NationalityService } from "../../../shared/services/nationality.service";
@@ -15,7 +15,7 @@ import { MessageService } from "primeng/api";
 
 @Component({
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, NgxIntlTelInputModule, Select, DatePicker],
+    imports: [CommonModule, ReactiveFormsModule, Select, DatePicker],
     selector: 'app-userinfo',
     templateUrl: './userinfo.html',
     providers: [ProfileService, NationalityService],
@@ -27,9 +27,7 @@ export class UserInfo implements OnInit {
     reloadProfile = output<void>();
     nextStep = output<void>();
     isSaving = signal(false);
-    CountryISO: typeof CountryISO = CountryISO;
-    SearchCountryField: typeof SearchCountryField = SearchCountryField;
-    PhoneNumberFormat: typeof PhoneNumberFormat = PhoneNumberFormat;
+ 
     nationalities = signal<Nationality[]>([]);
     userForm = new FormGroup({
         firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
