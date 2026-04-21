@@ -4,18 +4,18 @@ import { PaginationDto, User, UserRole, UserService } from "../../../../shared";
 import { DialogModule } from "primeng/dialog";
 import { AddUser } from "../add-user/add-user";
 import { ConfirmDialogModule } from "primeng/confirmdialog";
-import { ConfirmDialog } from "primeng/confirmdialog";
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { FormsModule } from "@angular/forms";
 import { SelectModule } from "primeng/select";
 import { PaginatorModule } from "primeng/paginator";
 import { API_ENDPOINTS } from "../../../../shared/constants";
+import { ProfilePhoto } from "../../../../components/misc/profile-photo/profile-photo";
 
 @Component({
     selector: 'app-user-list',
     standalone: true,
     templateUrl: './user-list.html',
-    imports: [CommonModule, DialogModule, AddUser, FormsModule, SelectModule, PaginatorModule],
+    imports: [CommonModule, DialogModule, AddUser, FormsModule, PaginatorModule, ProfilePhoto, ConfirmDialogModule],
     providers: [],
 })
 export class UserList implements OnInit {
@@ -35,7 +35,7 @@ export class UserList implements OnInit {
     totalAcademyOwners = signal(0);
     pagination = signal<PaginationDto>({
         page: 1,
-        limit: 5,
+        limit: 10,
         total: 0,
         totalPages: 0,
         hasNext: false,
@@ -89,38 +89,68 @@ export class UserList implements OnInit {
         }
         return 'bg-gray-200 text-gray-700';
     }
+
+    isUserDeleted(user: User): boolean {
+        return (user as any)?.isDeleted === true;
+    }
     onPageChange(event: any): void {
         this.first.set(event.first ?? 0);
         this.rows.set(event.rows ?? 10);
-        this.pagination.set({ ...this.pagination(), page: (event?.page ?? 0) + 1 });
+        this.pagination.set({
+            ...this.pagination(),
+            page: (event?.page ?? 0) + 1,
+            limit: event?.rows ?? this.pagination().limit ?? 10,
+        });
         this.getAdminUsers();
     }
     onSearch(): void {
+        this.first.set(0);
         this.pagination.set({ ...this.pagination(), page: 1 });
         this.getAdminUsers();
     }
     onRoleFilterChange(value: string): void {
         this.roleFilter.set(value);
+        this.first.set(0);
         this.pagination.set({ ...this.pagination(), page: 1 });
         this.getAdminUsers();
     }
     onStatusFilterChange(value: string): void {
         this.isActiveFilter.set(value);
+        this.first.set(0);
         this.pagination.set({ ...this.pagination(), page: 1 });
         this.getAdminUsers();
     }
 
     toggleActive(user: User, next: boolean): void {
-        const ok = window.confirm(`Are you sure you want to ${next ? 'activate' : 'deactivate'} this user?`);
-        if (!ok) return;
-        this.isLoading.set(true);
-        this.userService.updateAdminUserStatus(user.id, next).subscribe({
-            next: () => this.getAdminUsers(),
-            error: (err) => {
-                console.error(err);
-                this.isLoading.set(false);
+        this.confirmDialog.confirm({
+            header: next ? 'Activate User' : 'Deactivate User',
+            message: `Are you sure you want to ${next ? 'activate' : 'deactivate'} this user?`,
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: next ? 'Activate' : 'Deactivate',
+            rejectLabel: 'Cancel',
+            acceptButtonStyleClass: 'p-button-success',
+            rejectButtonStyleClass: 'p-button-text',
+            accept: () => {
+                this.isLoading.set(true);
+                this.userService.updateAdminUserStatus(user.id, next).subscribe({
+                    next: () => this.getAdminUsers(),
+                    error: (err) => {
+                        console.error(err);
+                        this.isLoading.set(false);
+                    }
+                });
             }
         });
+        // const ok = window.confirm(`Are you sure you want to ${next ? 'activate' : 'deactivate'} this user?`);
+        // if (!ok) return;
+        // this.isLoading.set(true);
+        // this.userService.updateAdminUserStatus(user.id, next).subscribe({
+        //     next: () => this.getAdminUsers(),
+        //     error: (err) => {
+        //         console.error(err);
+        //         this.isLoading.set(false);
+        //     }
+        // });
     }
 
     changeRole(user: User, role: UserRole): void {
@@ -141,14 +171,35 @@ export class UserList implements OnInit {
     }
 
     toggleDeletion(user: User, next: boolean): void {
-        const ok = window.confirm(`Are you sure you want to ${next ? 'delete' : 'restore'} this user?`);
-        if (!ok) return;
-        this.isLoading.set(true);
-        this.userService.updateAdminUserDeletion(user.id, next).subscribe({
-            next: () => this.getAdminUsers(),
-            error: (err) => {
-                console.error(err);
-                this.isLoading.set(false);
+        this.confirmDialog.confirm({
+            header: next ? 'Delete User' : 'Restore User',
+            message: `Are you sure you want to ${next ? 'delete' : 'restore'} ${user.firstName} ${user.lastName}?`,
+            icon: next ? 'pi pi-exclamation-triangle' : 'pi pi-info-circle',
+            acceptLabel: next ? 'Delete' : 'Restore',
+            rejectLabel: 'Cancel',
+            acceptButtonStyleClass: next ? 'p-button-danger' : 'p-button-primary',
+            rejectButtonStyleClass: 'p-button-text',
+            accept: () => {
+                this.isLoading.set(true);
+                this.userService.updateAdminUserDeletion(user.id, next).subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Success',
+                            detail: `User ${next ? 'deleted' : 'restored'} successfully`
+                        });
+                        this.getAdminUsers();
+                    },
+                    error: (err) => {
+                        console.error(err);
+                        this.isLoading.set(false);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: err?.message || `Failed to ${next ? 'delete' : 'restore'} user`
+                        });
+                    }
+                });
             }
         });
     }

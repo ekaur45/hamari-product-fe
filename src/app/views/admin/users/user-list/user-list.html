@@ -1,4 +1,5 @@
 @if(!isMobile()) {
+<!-- <p-confirmDialog></p-confirmDialog> -->
 <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
     <div class="bg-white rounded-lg shadow-md p-5">
         <div class="flex items-center justify-between mb-2">
@@ -119,9 +120,7 @@
                     </td> -->
                     <td class="py-3 px-4">
                         <div class="flex items-center">
-                            <div
-                                class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold uppercase">
-                                {{user.firstName.charAt(0)}}{{user.lastName.charAt(0)}}</div>
+                            <profile-photo [user]="user"></profile-photo>
                             <div class="ml-3">
                                 <p class="text-sm font-medium text-gray-900">{{user.firstName}} {{user.lastName}}</p>
                                 <p class="text-xs text-gray-500">ID: {{user.id}}</p>
@@ -136,21 +135,46 @@
                     </td>
                     <td class="py-3 px-4 text-sm text-gray-700">{{user.email}}</td>
                     <td class="py-3 px-4">
-                        <span class="px-2 py-1 rounded-lg text-xs font-medium" [ngClass]="user.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'">{{user.isActive ? 'Active' : 'Inactive'}}</span>
+                        @if(isUserDeleted(user)) {
+                            <span class="px-2 py-1 rounded-lg text-xs font-medium bg-red-100 text-red-700">Deleted</span>
+                        } @else {
+                            <span class="px-2 py-1 rounded-lg text-xs font-medium"
+                                [ngClass]="user.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'">
+                                {{user.isActive ? 'Active' : 'Inactive'}}
+                            </span>
+                        }
                     </td>
                     <td class="py-3 px-4 text-sm text-gray-700">{{user.createdAt | date:'dd/MM/yyyy'}}</td>
                     <td class="py-3 px-4 text-sm text-gray-700">2 hours ago</td>
                     <td class="py-3 px-4">
-                        <div class="flex items-center space-x-2">
-                            <select class="text-sm border rounded px-2 py-1" [ngModel]="user.role" (ngModelChange)="changeRole(user, $event)">
-                                @for (r of roles; track r) {
-                                    <option [value]="r">{{r}}</option>
-                                }
-                            </select>
-                            <button class="text-green-600 hover:text-green-700 transition text-sm" (click)="toggleActive(user, true)" [disabled]="user.isActive">Activate</button>
-                            <button class="text-orange-600 hover:text-orange-700 transition text-sm" (click)="toggleActive(user, false)" [disabled]="!user.isActive">Deactivate</button>
-                            <button class="text-red-600 hover:text-red-700 transition text-sm" (click)="toggleDeletion(user, true)">Delete</button>
-                            <button class="text-gray-600 hover:text-gray-700 transition text-sm" (click)="toggleDeletion(user, false)">Restore</button>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button"
+                                class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                title="Activate" (click)="toggleActive(user, true)"
+                                [disabled]="isUserDeleted(user) || user.isActive">
+                                <i class="fas fa-check"></i>
+                            </button>
+
+                            <button type="button"
+                                class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 text-orange-700 hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                title="Deactivate" (click)="toggleActive(user, false)"
+                                [disabled]="isUserDeleted(user) || !user.isActive">
+                                <i class="fas fa-ban"></i>
+                            </button>
+
+                            @if(!isUserDeleted(user)) {
+                                <button type="button"
+                                    class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                    title="Delete" (click)="toggleDeletion(user, true)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            } @else {
+                                <button type="button"
+                                    class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                    title="Restore" (click)="toggleDeletion(user, false)">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                            }
                         </div>
                     </td>
                 </tr>
@@ -162,11 +186,15 @@
     </div>
 
     <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
-        <p-paginator [totalRecords]="totalUsers()" [rows]="rows()" [first]="first()" 
-        [rows]="pagination().limit"
-        [showCurrentPageReport]="true"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
-        [rowsPerPageOptions]="[5,10, 20, 50]" (onPageChange)="onPageChange($event)"></p-paginator>
+        <p-paginator
+            [totalRecords]="pagination().total"
+            [first]="first()"
+            [rows]="pagination().limit"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+            [rowsPerPageOptions]="[10, 20, 50, 100]"
+            (onPageChange)="onPageChange($event)">
+        </p-paginator>
     </div>    
     <!-- <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
         <div class="text-sm text-gray-700">
@@ -212,8 +240,8 @@
             <!-- Card Header with Avatar -->
             <div class="bg-gradient-to-r from-primary to-primary/80 p-4">
                 <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-semibold text-lg uppercase border-2 border-white/30">
-                        {{user.firstName.charAt(0)}}{{user.lastName.charAt(0)}}
+                    <div class="rounded-full border-2 border-white/30">
+                        <profile-photo [user]="user"></profile-photo>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-white font-semibold text-sm truncate">{{user.firstName}} {{user.lastName}}</p>
@@ -235,9 +263,13 @@
                 <!-- Status -->
                 <div class="flex items-center justify-between">
                     <span class="text-xs text-gray-500 font-medium">Status</span>
-                    <span class="px-2 py-1 {{user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}} rounded-lg text-xs font-medium">
-                        {{user.isActive ? 'Active' : 'Inactive'}}
-                    </span>
+                    @if(isUserDeleted(user)) {
+                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-medium">Deleted</span>
+                    } @else {
+                        <span class="px-2 py-1 {{user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}} rounded-lg text-xs font-medium">
+                            {{user.isActive ? 'Active' : 'Inactive'}}
+                        </span>
+                    }
                 </div>
                 
                 <!-- Phone Number (if available) -->
@@ -262,17 +294,35 @@
             
             <!-- Card Footer with Actions -->
             <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition" title="View">
-                        <i class="fas fa-eye text-sm"></i>
+                <div class="flex items-center gap-1.5">
+                    <button type="button"
+                        class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 text-green-700 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        title="Activate" (click)="toggleActive(user, true)"
+                        [disabled]="isUserDeleted(user) || user.isActive">
+                        <i class="fas fa-check"></i>
                     </button>
-                    <button class="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition" title="Edit">
-                        <i class="fas fa-edit text-sm"></i>
+
+                    <button type="button"
+                        class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 text-orange-700 hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        title="Deactivate" (click)="toggleActive(user, false)"
+                        [disabled]="isUserDeleted(user) || !user.isActive">
+                        <i class="fas fa-ban"></i>
                     </button>
+
+                    @if(!isUserDeleted(user)) {
+                        <button type="button"
+                            class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 text-red-700 hover:bg-red-50 transition"
+                            title="Delete" (click)="toggleDeletion(user, true)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    } @else {
+                        <button type="button"
+                            class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
+                            title="Restore" (click)="toggleDeletion(user, false)">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    }
                 </div>
-                <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Suspend" (click)="onUserDeleted(user)">
-                    <i class="fas fa-ban text-sm"></i>
-                </button>
             </div>
         </div>
         }
