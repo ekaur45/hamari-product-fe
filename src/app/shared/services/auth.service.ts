@@ -63,6 +63,7 @@ export class AuthService {
         map(response => {
           if (response.data && response.statusCode === 200) {
             const user = response.data;
+            debugger
             this.setCurrentUser(user);
             this.isAuthenticatedSubject.next(true);
             return user;

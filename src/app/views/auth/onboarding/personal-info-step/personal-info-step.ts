@@ -222,7 +222,7 @@ export class PersonalInfoStep implements OnInit, OnDestroy {
         this.isSaving.set(true);
         const userDetails: UpdateUserDetailsDto = {
             ...(this.userForm.value as UpdateUserDetailsDto),
-            phone: this.userForm.value.phone?.e164Number ?? '',
+            phone: this.userForm.value.phone ?? '',
             dateOfBirth: this.userForm.value.dateOfBirth ?? null as Date | null,
             gender: this.userForm.value.gender ?? '',
         }
