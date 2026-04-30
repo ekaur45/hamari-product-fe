@@ -23,6 +23,11 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/chats/${id}`,
     SEARCH: '/chats/search'
   },
+  AI: {
+    CHATS: '/ai/chats',
+    CHAT_MESSAGES: (chatId: string) => `/ai/chats/${chatId}/messages`,
+    USAGE: '/ai/usage',
+  },
   FILES: {
     UPLOAD: '/files/upload'
   },
@@ -48,6 +53,10 @@ export const API_ENDPOINTS = {
     LOGS: '/admin/logs',
     REVIEWS: '/admin/reviews',
     SUPPORT: '/admin/support',
+    AI: {
+      SETTINGS: '/admin/ai/settings',
+      USER_QUOTA: (userId: string) => `/admin/ai/users/${userId}/quota`,
+    },
     FINANCIAL: {
       PAYOUTS: '/admin/financial/payouts',
       REFUNDS: '/admin/financial/refunds'

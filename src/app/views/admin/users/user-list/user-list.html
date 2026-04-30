@@ -41,6 +41,19 @@
 
 <!-- Filters and Actions -->
 <div class="bg-white rounded-lg shadow-md p-3 sm:p-5 mb-6">
+    <div class="flex items-center justify-between gap-3 mb-3">
+        <div class="text-xs sm:text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+            <span class="font-semibold">Default AI daily quota:</span> {{ defaultAiQuota() }}
+        </div>
+        <button
+            type="button"
+            class="px-3 py-2 text-xs sm:text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition flex items-center gap-2"
+            (click)="openDefaultQuotaDialog()"
+        >
+            <i class="fas fa-robot"></i>
+            <span>Edit AI quota</span>
+        </button>
+    </div>
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
         <!-- Filters Section -->
         <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-3 flex-1 w-full lg:w-auto">
@@ -163,6 +176,13 @@
                             </button>
 
                             @if(!isUserDeleted(user)) {
+                                @if(user.role === UserRole.STUDENT) {
+                                    <button type="button"
+                                        class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 text-primary hover:bg-blue-50 transition"
+                                        title="AI quota" (click)="openUserQuotaDialog(user)">
+                                        <i class="fas fa-robot"></i>
+                                    </button>
+                                }
                                 <button type="button"
                                     class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-gray-200 text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                                     title="Delete" (click)="toggleDeletion(user, true)">
@@ -337,5 +357,79 @@
             </div>
         </ng-template>
         <app-add-user (onUserAdded)="onUserAdded($event)" (onCancel)="showAddUserDialog.set(false)"></app-add-user>
+    </p-dialog>
+}
+
+@if(showDefaultQuotaDialog()) {
+    <p-dialog [(visible)]="showDefaultQuotaDialog" [modal]="true" styleClass="w-[95vw] sm:w-[520px]">
+        <ng-template pTemplate="header">
+            <div class="flex items-center justify-between w-full">
+                <h1 class="text-lg font-bold">Default AI daily quota</h1>
+                <button type="button" pButton icon="pi pi-times" (click)="showDefaultQuotaDialog.set(false)"></button>
+            </div>
+        </ng-template>
+        <div class="space-y-3">
+            <p class="text-sm text-gray-600">This is the default daily message limit for students without an override.</p>
+            <div>
+                <label class="text-sm font-medium text-gray-700">Daily message limit</label>
+                <input
+                    type="number"
+                    min="1"
+                    class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    [ngModel]="defaultQuotaDraft()"
+                    (ngModelChange)="defaultQuotaDraft.set($event)"
+                />
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg" (click)="showDefaultQuotaDialog.set(false)">Cancel</button>
+                <button type="button" class="px-4 py-2 bg-primary text-white rounded-lg" (click)="saveDefaultQuota()">Save</button>
+            </div>
+        </div>
+    </p-dialog>
+}
+
+@if(showUserQuotaDialog()) {
+    <p-dialog [(visible)]="showUserQuotaDialog" [modal]="true" styleClass="w-[95vw] sm:w-[560px]">
+        <ng-template pTemplate="header">
+            <div class="flex items-center justify-between w-full">
+                <h1 class="text-lg font-bold">Student AI quota</h1>
+                <button type="button" pButton icon="pi pi-times" (click)="showUserQuotaDialog.set(false)"></button>
+            </div>
+        </ng-template>
+        <div class="space-y-3">
+            <p class="text-sm text-gray-600">
+                <span class="font-semibold">Student:</span>
+                {{ quotaUser()?.firstName }} {{ quotaUser()?.lastName }} ({{ quotaUser()?.email }})
+            </p>
+
+            @if(quotaLoading()) {
+                <div class="p-4 text-sm text-gray-500">Loading…</div>
+            } @else {
+                <div class="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                    <div><span class="font-semibold">Default:</span> {{ quotaDefault() }}</div>
+                    <div><span class="font-semibold">Override:</span> {{ quotaOverride() ?? '—' }}</div>
+                </div>
+
+                <div>
+                    <label class="text-sm font-medium text-gray-700">Override daily message limit</label>
+                    <input
+                        type="number"
+                        min="1"
+                        class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        [ngModel]="quotaDraft()"
+                        (ngModelChange)="quotaDraft.set($event)"
+                    />
+                    <p class="mt-1 text-xs text-gray-500">Set a number to override for this student. Use “Clear override” to revert to default.</p>
+                </div>
+
+                <div class="flex justify-between gap-2 pt-2">
+                    <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg" (click)="showUserQuotaDialog.set(false)">Cancel</button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg" (click)="clearUserQuotaOverride()" [disabled]="quotaOverride() == null">Clear override</button>
+                        <button type="button" class="px-4 py-2 bg-primary text-white rounded-lg" (click)="saveUserQuotaOverride()">Save</button>
+                    </div>
+                </div>
+            }
+        </div>
     </p-dialog>
 }

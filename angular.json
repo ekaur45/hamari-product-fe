@@ -28,7 +28,10 @@
               "src/styles.css"
             ],
             "scripts": [
-            ]
+            ],
+            "loader": {
+              ".webp": "file"
+            }
           },
           "configurations": {
             "production": {
@@ -97,7 +100,10 @@
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+            "loader": {
+              ".webp": "file"
+            }
           }
         }
       }

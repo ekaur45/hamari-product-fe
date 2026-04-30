@@ -11,6 +11,17 @@ export const studentRoutes: Routes = [
         loadComponent: () => import('./student-dashboard/student-dashboard').then(m => m.StudentDashboard)
     },
     {
+        path: 'homework-helper',
+        loadComponent: () => import('./student-homework-helper/student-homework-helper').then(m => m.StudentHomeworkHelper),
+        children: [
+            {
+                path: 'chat/:chatId',
+                outlet: 'ai',
+                loadComponent: () => import('./student-homework-helper/ai-chat-outlet').then(m => m.AiChatOutlet),
+            }
+        ]
+    },
+    {
         path: 'schedule',
         loadComponent: () => import('./student-schedule/student-schedule').then(m => m.StudentSchedule)
     },

@@ -11,10 +11,11 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { Notification } from '../../../shared/models/notification.interface';
 import { MainSocketService } from '../../../shared/services/main-socket.service';
+import { AiChatFab } from '../../misc/ai-chat-fab/ai-chat-fab';
 
 @Component({
   selector: 'main-layout',
-  imports: [CommonModule, RouterOutlet, SideNav, TopBar, ToastModule, ConfirmDialogModule],
+  imports: [CommonModule, RouterOutlet, SideNav, TopBar, ToastModule, ConfirmDialogModule, AiChatFab],
   templateUrl: './main.layout.html',
   styleUrls: ['./main.layout.css'],
   providers: [MessageService, ConfirmationService]

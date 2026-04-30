@@ -46,9 +46,124 @@ export class UserList implements OnInit {
     roleFilter = signal<string>('');
     isActiveFilter = signal<string>('');
     readonly roles = Object.values(UserRole);
+    readonly UserRole = UserRole;
+
+    // Admin AI quota
+    defaultAiQuota = signal<number>(20);
+    showDefaultQuotaDialog = signal(false);
+    defaultQuotaDraft = signal<number>(20);
+
+    showUserQuotaDialog = signal(false);
+    quotaUser = signal<User | null>(null);
+    quotaDefault = signal<number>(20);
+    quotaOverride = signal<number | null>(null);
+    quotaDraft = signal<number>(20);
+    quotaLoading = signal(false);
+
     constructor(private userService: UserService, private confirmDialog: ConfirmationService, private messageService: MessageService) { }
     ngOnInit(): void {
         this.getAdminUsers();
+        this.loadDefaultAiQuota();
+    }
+
+    loadDefaultAiQuota(): void {
+        this.userService.getAdminAiSettings().subscribe({
+            next: (s) => {
+                this.defaultAiQuota.set(s?.defaultDailyMessageLimit ?? 20);
+                this.defaultQuotaDraft.set(this.defaultAiQuota());
+            },
+            error: (e) => {
+                console.error(e);
+            }
+        });
+    }
+
+    openDefaultQuotaDialog(): void {
+        this.defaultQuotaDraft.set(this.defaultAiQuota());
+        this.showDefaultQuotaDialog.set(true);
+    }
+
+    saveDefaultQuota(): void {
+        const next = Number(this.defaultQuotaDraft());
+        if (!Number.isFinite(next) || next < 1) return;
+        this.userService.updateAdminAiDefaultQuota(next).subscribe({
+            next: (s) => {
+                this.defaultAiQuota.set(s?.defaultDailyMessageLimit ?? next);
+                this.showDefaultQuotaDialog.set(false);
+                this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Default AI quota updated' });
+            },
+            error: (e) => {
+                console.error(e);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: e?.message || 'Failed to update default AI quota' });
+            }
+        });
+    }
+
+    openUserQuotaDialog(user: User): void {
+        this.quotaUser.set(user);
+        this.showUserQuotaDialog.set(true);
+        this.quotaLoading.set(true);
+
+        this.userService.getAdminUserAiQuota(user.id).subscribe({
+            next: (q) => {
+                this.quotaDefault.set(q?.defaultDailyMessageLimit ?? this.defaultAiQuota());
+                this.quotaOverride.set(q?.overrideDailyMessageLimit ?? null);
+                this.quotaDraft.set(q?.overrideDailyMessageLimit ?? (q?.defaultDailyMessageLimit ?? this.defaultAiQuota()));
+                this.quotaLoading.set(false);
+            },
+            error: (e) => {
+                console.error(e);
+                this.quotaLoading.set(false);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: e?.message || 'Failed to load user AI quota' });
+            }
+        });
+    }
+
+    saveUserQuotaOverride(): void {
+        const user = this.quotaUser();
+        if (!user) return;
+        const next = Number(this.quotaDraft());
+        if (!Number.isFinite(next) || next < 1) return;
+
+        this.userService.setAdminUserAiQuotaOverride(user.id, next).subscribe({
+            next: () => {
+                this.quotaOverride.set(next);
+                this.showUserQuotaDialog.set(false);
+                this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Student AI quota override updated' });
+            },
+            error: (e) => {
+                console.error(e);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: e?.message || 'Failed to update student AI quota' });
+            }
+        });
+    }
+
+    clearUserQuotaOverride(): void {
+        const user = this.quotaUser();
+        if (!user) return;
+
+        this.confirmDialog.confirm({
+            header: 'Clear AI quota override',
+            message: `Remove override and use default quota (${this.quotaDefault()}) for this student?`,
+            icon: 'pi pi-info-circle',
+            acceptLabel: 'Clear override',
+            rejectLabel: 'Cancel',
+            acceptButtonStyleClass: 'p-button-primary',
+            rejectButtonStyleClass: 'p-button-text',
+            accept: () => {
+                this.userService.clearAdminUserAiQuotaOverride(user.id).subscribe({
+                    next: () => {
+                        this.quotaOverride.set(null);
+                        this.showUserQuotaDialog.set(false);
+                        this.messageService.add({ severity: 'success', summary: 'Cleared', detail: 'Student AI quota override cleared' });
+                    },
+                    error: (e) => {
+                        console.error(e);
+                        this.messageService.add({ severity: 'error', summary: 'Error', detail: e?.message || 'Failed to clear override' });
+                    }
+                });
+            }
+        });
     }
 
     getAdminUsers(): void {

@@ -25,3 +25,5 @@ export * from './assignment.interface';
 export * from './teacher-students.interface';
 export * from './student-performance.interface';
 export * from './teacher-reviews.interface';
+export * from './ai-chat.interface';
+export * from './admin-ai-quota.interface';

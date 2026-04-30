@@ -53,6 +53,7 @@ export const sidenavData: Record<UserRole, SidenavItem[]> = {
         // { label: 'My Courses', icon: 'fa-book', link: '/student/courses' },
         { label: 'Browse & Book', icon: 'fa-search', link: '/booking' },
         { label: 'Assignments', icon: 'fa-tasks', link: '/student/assignments' },
+        { label: 'Homework Helper', icon: 'fa-robot', link: '/student/homework-helper' },
         { label: 'Grades', icon: 'fa-chart-bar', link: '/student/grades' },
         { label: 'Resources', icon: 'fa-file-alt', link: '/student/resources' },
         { label: 'Chat', icon: 'fa-comments', link: '/student/chat' },

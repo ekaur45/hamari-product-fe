@@ -34,5 +34,8 @@
     <main class="flex-1 overflow-y-auto md:p-6">
       <router-outlet></router-outlet>
     </main>
+
+    <!-- Student floating AI chat button -->
+    <app-ai-chat-fab *ngIf="currentUser()?.role === UserRole.STUDENT"></app-ai-chat-fab>
   </div>
 </div>

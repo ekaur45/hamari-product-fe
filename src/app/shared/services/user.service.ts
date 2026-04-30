@@ -3,7 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from '../../utils/api.service';
 import { API_ENDPOINTS } from '../constants';
-import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse, EducationItem, UpsertEducationDto, UpdateAvailabilityDto, UpdateUserDetailsDto, TeacherSubject, AdminUsersListDto, ApiResponse } from '../models';
+import { User, CreateUserDto, UpdateUserDto, PaginatedApiResponse, EducationItem, UpsertEducationDto, UpdateAvailabilityDto, UpdateUserDetailsDto, TeacherSubject, AdminUsersListDto, ApiResponse, AdminAiSettings, AdminUserAiQuota } from '../models';
 
 /**
  * User Service
@@ -113,6 +113,42 @@ export class UserService {
     return this.apiService.patch<User>(`${API_ENDPOINTS.ADMIN.USERS}/${id}/deletion`, { isDeleted }).pipe(
       map(r => r.data),
       catchError(e => throwError(() => e))
+    );
+  }
+
+  // Admin AI quota management
+  getAdminAiSettings(): Observable<AdminAiSettings> {
+    return this.apiService.get<AdminAiSettings>(API_ENDPOINTS.ADMIN.AI.SETTINGS).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e)),
+    );
+  }
+
+  updateAdminAiDefaultQuota(defaultDailyMessageLimit: number): Observable<AdminAiSettings> {
+    return this.apiService.patch<AdminAiSettings>(API_ENDPOINTS.ADMIN.AI.SETTINGS, { defaultDailyMessageLimit }).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e)),
+    );
+  }
+
+  getAdminUserAiQuota(userId: string): Observable<AdminUserAiQuota> {
+    return this.apiService.get<AdminUserAiQuota>(API_ENDPOINTS.ADMIN.AI.USER_QUOTA(userId)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e)),
+    );
+  }
+
+  setAdminUserAiQuotaOverride(userId: string, dailyMessageLimit: number): Observable<any> {
+    return this.apiService.patch<any>(API_ENDPOINTS.ADMIN.AI.USER_QUOTA(userId), { dailyMessageLimit }).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e)),
+    );
+  }
+
+  clearAdminUserAiQuotaOverride(userId: string): Observable<boolean> {
+    return this.apiService.delete<boolean>(API_ENDPOINTS.ADMIN.AI.USER_QUOTA(userId)).pipe(
+      map(r => r.data),
+      catchError(e => throwError(() => e)),
     );
   }
 
