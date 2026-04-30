@@ -70,6 +70,8 @@ export const API_ENDPOINTS = {
     PROFILE: '/auth/profile',
     PING: '/auth/ping',
     LOGOUT: '/auth/logout',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
    
   },
 

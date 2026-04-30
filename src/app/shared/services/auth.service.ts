@@ -99,6 +99,14 @@ export class AuthService {
       );
   }
 
+  requestPasswordReset(email: string): Observable<ApiResponse<boolean>> {
+    return this.apiService.post<boolean>(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+  }
+
+  resetPassword(email: string, otp: string, newPassword: string): Observable<ApiResponse<boolean>> {
+    return this.apiService.post<boolean>(API_ENDPOINTS.AUTH.RESET_PASSWORD, { email, otp, newPassword });
+  }
+
   /**
    * Get current user profile
    */

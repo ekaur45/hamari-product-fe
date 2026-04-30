@@ -90,6 +90,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./views/auth/otp/otp').then(m => m.Otp)
             },
             {
+                path: 'forgot-password',
+                loadComponent: () => import('./views/auth/forgot-password/forgot-password').then(m => m.ForgotPassword)
+            },
+            {
+                path: 'reset-password',
+                loadComponent: () => import('./views/auth/reset-password/reset-password').then(m => m.ResetPassword)
+            },
+            {
                 path: 'onboarding',
                 canActivate: [AuthGuard],
                 loadChildren: () => import('./views/auth/onboarding/onboarding.routes').then(m => m.onboardingRoutes)
