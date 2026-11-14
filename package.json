@@ -56,6 +56,7 @@
     "@types/fabric": "^5.3.11",
     "@types/jasmine": "~5.1.0",
     "@types/mathjax": "^0.0.40",
+    "baseline-browser-mapping": "^2.11.35",
     "jasmine-core": "~5.8.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
