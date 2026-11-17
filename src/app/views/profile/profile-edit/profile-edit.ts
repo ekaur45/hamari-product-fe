@@ -28,6 +28,7 @@ export class ProfileEdit implements OnInit {
         [UserRole.TEACHER]: [1, 2, 3, 4, 5],
         [UserRole.STUDENT]: [1, 2, 3],
         [UserRole.PARENT]: [1],
+        [UserRole.OTHER]: [1],
     };
     bioForm = new FormGroup({
         bio: new FormControl('', [Validators.required]),

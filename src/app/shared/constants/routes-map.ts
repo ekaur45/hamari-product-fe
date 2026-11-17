@@ -47,6 +47,10 @@ export const ROUTES_MAP: Record<UserRole, Record<string, string>> = {
         TEACHERS: '/academy-owner/teachers',
         PARENTS: '/academy-owner/parents',
         LOGS: '/academy-owner/logs',
+    },
+    // 'Other' is a legacy role with no pages of its own.
+    [UserRole.OTHER]: {
+        DASHBOARD: '/',
     }
 }
 

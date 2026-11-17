@@ -79,9 +79,10 @@ export class RoleGuard implements CanActivate {
       take(1),
       map(response => {
         if (response.statusCode === 200 && response.data) {
-          const hasRequiredRole = requiredRoles.includes(response.data.role);
+          // Admins can do whatever other roles can do.
+          const hasRequiredRole = response.data.role === UserRole.ADMIN || requiredRoles.includes(response.data.role);
           if (!hasRequiredRole) {
-            this.router.navigate(['/dashboard']); // Redirect to dashboard if no permission
+            this.router.navigate(['/']); // Redirect to the dashboard if no permission
             return false;
           }
           return true;

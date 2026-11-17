@@ -67,5 +67,9 @@ export const sidenavData: Record<UserRole, SidenavItem[]> = {
         { label: 'Classes', icon: 'fa-chalkboard-teacher', link: '/parent/classes' },
         { label: 'Logs', icon: 'fa-history', link: '/parent/logs' },
         { label: 'Profile', icon: 'fa-user', link: '/profile' },
-    ]
+    ],
+    // 'Other' is a legacy role with no pages of its own.
+    [UserRole.OTHER]: [
+        { label: 'Profile', icon: 'fa-user', link: '/profile' },
+    ],
 }

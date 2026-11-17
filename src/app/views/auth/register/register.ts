@@ -40,12 +40,11 @@ export class Register implements OnInit {
   // Expose UserRole for template
   UserRole = UserRole;
 
-  // Available roles for registration
+  // Available roles for registration (must match SELF_REGISTER_ROLES in the backend)
   roles = [
     { value: UserRole.STUDENT, label: 'Student' },
     { value: UserRole.PARENT, label: 'Parent' },
     { value: UserRole.TEACHER, label: 'Teacher' },
-    { value: UserRole.ACADEMY_OWNER, label: 'Academy Owner' }
   ];
 
   constructor(
@@ -56,7 +55,7 @@ export class Register implements OnInit {
   ) {
     this.activeRoute.params.subscribe(params => {
       const role = params['role'];
-      if (role) {
+      if (role && this.roles.some(r => r.value === role)) {
         this.selectRole(role as UserRole);
         this.step.set(2);
       }

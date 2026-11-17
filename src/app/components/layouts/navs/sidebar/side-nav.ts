@@ -27,7 +27,8 @@ export class SideNav implements OnInit {
 	}
 
 ngOnInit(): void {
-	this.userNavigation.set(sidenavData[this.getCurrentUser()?.role || UserRole.ADMIN] || []);
+	const role = this.getCurrentUser()?.role;
+	this.userNavigation.set((role && sidenavData[role]) || []);
 }
 
 	getCurrentUser() {

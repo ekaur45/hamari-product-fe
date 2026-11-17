@@ -102,7 +102,8 @@ export enum UserRole {
   ACADEMY_OWNER = 'Academy Owner',
   TEACHER = 'Teacher',
   STUDENT = 'Student',
-  PARENT = 'Parent'
+  PARENT = 'Parent',
+  OTHER = 'Other'
 }
 
 /**
