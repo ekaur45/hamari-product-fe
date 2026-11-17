@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../shared/services/auth.service';
-import { LoginDto, User } from '../../../shared/models';
+import { LoginDto, User, UserRole } from '../../../shared/models';
 import { ApiHelper } from '../../../utils/api.helper';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
@@ -58,7 +58,7 @@ export class Login implements OnInit {
 
       this.authService.login(loginData).subscribe({
         next: (user:User) => {
-          if(user.isEmailVerified===false) {
+          if(user.isEmailVerified===false && user.role !== UserRole.ADMIN) {
             this.router.navigate(['/auth/otp', btoa(user.email)],{queryParams:{returnUrl:this.returnUrl},state:{user:user}});
             return;
           }

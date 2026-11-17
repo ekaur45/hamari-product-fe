@@ -224,7 +224,7 @@ export class Otp implements OnInit, OnDestroy {
 
     // Verify email with OTP
     private verifyEmail(email: string, otp: string): Observable<any> {
-        return this.apiService.post('/auth/verify-otp', { otp }).pipe(
+        return this.authService.verifyEmailOtp(otp).pipe(
             map(response => response),
             catchError(error => throwError(() => error))
         );
@@ -232,7 +232,8 @@ export class Otp implements OnInit, OnDestroy {
 
     // Resend OTP
     private resendOtp(email: string): Observable<any> {
-        return this.apiService.post('/auth/resend-otp', { email }).pipe(
+        // The backend identifies the user from the session cookie.
+        return this.authService.resendEmailOtp().pipe(
             map(response => response),
             catchError(error => throwError(() => error))
         );

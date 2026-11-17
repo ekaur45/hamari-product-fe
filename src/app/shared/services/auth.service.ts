@@ -32,10 +32,11 @@ export class AuthService {
    * Initialize authentication state from stored data
    */
   private initializeAuth(): void {
-    const token = this.getToken();
+    // The session lives in the httpOnly cookie; drop any token left by older versions of the app.
+    this.clearToken();
     const user = this.getStoredUser();
 
-    if (token && user) {
+    if (user) {
       this.currentUserSubject.next(user);
       this.isAuthenticatedSubject.next(true);
     }
@@ -46,9 +47,8 @@ export class AuthService {
    * Useful for guards/components on app refresh
    */
   restoreFromStorage(): void {
-    const token = this.getToken();
     const user = this.getStoredUser();
-    if (token && user) {
+    if (user) {
       this.currentUserSubject.next(user);
       this.isAuthenticatedSubject.next(true);
     }
@@ -62,11 +62,10 @@ export class AuthService {
       .pipe(
         map(response => {
           if (response.data && response.statusCode === 200) {
-            const user = response.data;
-            debugger
-            this.setCurrentUser(user);
+            const { access_token: _token, ...user } = response.data as User & { access_token?: string };
+            this.setCurrentUser(user as User);
             this.isAuthenticatedSubject.next(true);
-            return user;
+            return user as User;
           }
           throw new Error(response.message);
         }),
@@ -84,8 +83,8 @@ export class AuthService {
       .pipe(
         map(response => {
           if ((response.statusCode === 200 || response.statusCode === 201) && response.data) {
-            const { access_token , ...user } = response.data;
-            this.setToken(access_token);
+            // The auth cookie is set by the server; the token in the body is not stored.
+            const { access_token: _token, ...user } = response.data;
             this.setCurrentUser(user as User);
             this.isAuthenticatedSubject.next(true);
             return user as User;
@@ -97,6 +96,14 @@ export class AuthService {
           return throwError(() => error);
         })
       );
+  }
+
+  verifyEmailOtp(otp: string): Observable<ApiResponse<User>> {
+    return this.apiService.post<User>(API_ENDPOINTS.AUTH.VERIFY_OTP, { otp });
+  }
+
+  resendEmailOtp(): Observable<ApiResponse<boolean>> {
+    return this.apiService.post<boolean>(API_ENDPOINTS.AUTH.RESEND_OTP, {});
   }
 
   requestPasswordReset(email: string): Observable<ApiResponse<boolean>> {
@@ -134,6 +141,15 @@ export class AuthService {
     // this.clearCurrentUser();
     // this.isAuthenticatedSubject.next(false);
     return this.handleLogout();
+  }
+
+  /**
+   * Clear the locally stored session (user + legacy token) without calling the API
+   */
+  clearSession(): void {
+    this.clearToken();
+    this.clearCurrentUser();
+    this.isAuthenticatedSubject.next(false);
   }
 
   /**
